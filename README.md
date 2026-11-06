@@ -1,0 +1,62 @@
+# Aqua Thanh Xuân Actions — WordPress-controlled deployment and read-only tests
+
+Repository: `ngocnhanvo/aquathanhxuan-actions` (branch `main`).
+
+## Source of truth and branches
+
+- Astro source/production: `ngocnhanvo/aquathanhxuan-astro` → `master`.
+- WordPress/PHP: `ngocnhanvo/aquathanhxuan-php` → `master`.
+- Shared Chromium testing: `ngocnhanvo/knowledge-actions` (reusable workflow, no copying tests).
+- See `ngocnhanvo/knowledge` → `main` for the shared engineering rules.
+
+## Build Website
+
+Only the WordPress admin **Build Website** control dispatches `wp_trigger_build` to
+`.github/workflows/aquathanhxuan-production-deploy.yml`. The workflow checks out Astro
+`master`, validates `WC_URL` and `WC_URL_CLIENT` from `ENV_FILE`, builds the
+production source, packages the public Astro assets, and activates the archive
+through the signed `aquathanhxuan-unzip.php` endpoint. No site domain, FTP target,
+WordPress database name, or Google OAuth credential is hardcoded.
+
+WordPress must configure `VCS_GH_OWNER` and `VCS_GH_REPO` in its own
+`wp-config.php`. The MU plugin must not silently override the destination.
+The unzip endpoint retains HMAC authentication, timestamp validation, ZIP SHA-256
+verification and destination path checks.
+
+## Incremental FTPS transport
+
+The workflow reads the signed PHP inventory before packaging. Unchanged public
+images and eligible client HTML/CSS/JS/JSON are omitted only when both their size
+and SHA-256 match. The PHP activator restores and verifies them in staging before
+the existing activation/rollback. Server output, the new client index and SEO
+metadata retain their existing release rules.
+
+Older PHP without inventory support falls back to the full ZIP. Authentication,
+destination and checksum errors still fail closed. Deploy `aquathanhxuan-image-delta.php`
+before `aquathanhxuan-unzip.php` using the manual PHP release before expecting delta
+savings. The resumable FTPS client uses a 4 MiB socket buffer; lftp preparation
+overlaps Astro build and must succeed before upload.
+
+`aquathanhxuan-deploy-contract-ci.yml` runs offline Python/PHP contracts and a real ZIP
+reconstruction test. It never uploads FTP files or builds Astro.
+
+## Separate operations
+
+- `aquathanhxuan-shared-playwright.yml`: manual, read-only `smoke`,
+  `wordpress-site-health` or `wordpress-build-trigger-audit`. It derives both
+  origins from `ENV_FILE`; WordPress checks require `WP_ADMIN_USERNAME` and
+  `WP_ADMIN_PASSWORD`. To compare DB identities without baking in old tenant
+  values, configure optional GitHub Actions repository **Variables**
+  `AQUATHANHXUAN_EXPECTED_DB_SHA256` and `AQUATHANHXUAN_DISALLOWED_DB_SHA256`.
+- `aquathanhxuan-php-release.yml`: manual PHP-only FTPS deployment, requires
+  `confirm=DEPLOY_PHP`. It does **not** build Astro.
+
+Expected repo secrets for supported operations: `ENV_FILE`, `SOURCE_REPO_PAT`,
+`FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, and optionally the
+WordPress admin credentials used only by browser tests. Configure these for
+each cloned project; do not reuse a previous customer's endpoints or data.
+
+In code mode **normal**, source changes and source-only tests are allowed.
+Do not dispatch the production build or upload WordPress files over FTP without
+explicit approval. Never assume a sanitized source tree implies a sanitized
+live WordPress database.

@@ -1,0 +1,51 @@
+name: Aqua Thanh Xuân deploy transport contracts (NO BUILD OR FTP)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-production-deploy.yml'
+      - '.github/workflows/aquathanhxuan-php-release.yml'
+      - '.github/workflows/aquathanhxuan-deploy-contract-ci.yml'
+      - 'scripts/aquathanhxuan-*-delta-package.py'
+      - 'scripts/aquathanhxuan-remote-unzip.py'
+      - 'scripts/aquathanhxuan-resumable-ftp.sh'
+      - 'scripts/aquathanhxuan-php-live-release.py'
+      - 'tests/aquathanhxuan-*.test.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout Aqua Thanh Xuân PHP contract source (no deployment)
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source-php
+          persist-credentials: false
+      - name: PHP syntax and signed staging reconstruction contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l source-php/aquathanhxuan-unzip.php
+          php -l source-php/aquathanhxuan-image-delta.php
+          php source-php/tests/aquathanhxuan-image-delta.php
+          php source-php/tests/aquathanhxuan-static-delta.php
+      - name: Python packaging, compatibility and ZIP roundtrip contracts
+        shell: bash
+        env:
+          AQUATHANHXUAN_PHP_SOURCE: source-php
+        run: |
+          set -euo pipefail
+          command -v php
+          bash -n scripts/aquathanhxuan-resumable-ftp.sh
+          for test in tests/aquathanhxuan-*.test.py; do
+            python3 "$test" -v
+          done
