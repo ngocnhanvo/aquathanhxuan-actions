@@ -67,7 +67,7 @@ def inventory_request(*, response=None, error=None):
             os.chdir(original)
 
 
-class Aqua Thanh XuânSignedStaticJsonManifestTests(unittest.TestCase):
+class AquaThanhXuanSignedStaticJsonManifestTests(unittest.TestCase):
     def test_combined_inventory_within_file_limits_is_not_truncated(self):
         response = {
             "ok": True, "protocol": 2, "host": "example.test",
