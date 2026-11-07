@@ -1,6 +1,9 @@
 name: Aqua Thanh Xuân shared Playwright (manual, read-only)
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       suite:
@@ -103,3 +106,83 @@ jobs:
     secrets:
       WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
       WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+
+  wordpress-sitemap-save-regression:
+    needs: configured-origins
+    name: Verify AQUATHANHXUAN sitemap settings save on production WordPress
+    if: >-
+      github.event_name == 'push' &&
+      github.event.head_commit.message == 'test: verify Aqua Thanh Xuan sitemap save'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    timeout-minutes: 8
+    env:
+      SITE_URL: ${{ needs.configured-origins.outputs.wordpress_url }}
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Submit current sitemap settings without changing values
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const origin = String(process.env.SITE_URL || '').replace(/\/+$/, '');
+            const user = process.env.WP_ADMIN_USERNAME || '';
+            const pass = process.env.WP_ADMIN_PASSWORD || '';
+            assert(origin.startsWith('https://'), 'Missing validated WordPress origin');
+            assert(user && pass, 'Missing WordPress admin credentials');
+
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
+            try {
+              await page.goto(origin + '/wp-login.php', { waitUntil: 'domcontentloaded', timeout: 30000 });
+              await page.locator('#user_login').fill(user);
+              await page.locator('#user_pass').fill(pass);
+              await Promise.all([
+                page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
+                page.locator('#wp-submit').click(),
+              ]);
+              assert(!page.url().includes('wp-login.php'), 'WordPress login did not complete');
+
+              await page.goto(origin + '/wp-admin/options-general.php?page=esc-seo-files&tab=sitemap', {
+                waitUntil: 'domcontentloaded', timeout: 30000,
+              });
+              const action = page.locator('input[name="action"][value="esc_seo_files_save"]');
+              assert.equal(await action.count(), 1, 'SEO Files sitemap form not found');
+              const form = action.locator('xpath=ancestor::form[1]');
+              const submit = form.locator('#submit');
+              assert.equal(await submit.count(), 1, 'SEO Files save button not found');
+
+              await Promise.all([
+                page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
+                submit.click(),
+              ]);
+
+              const current = new URL(page.url());
+              const body = await page.locator('body').innerText();
+              assert(!body.includes('Đã xảy ra lỗi nghiêm trọng'), 'WordPress critical error after sitemap save');
+              assert.equal(current.pathname, '/wp-admin/options-general.php', 'Save did not redirect back to SEO Files');
+              assert.equal(current.searchParams.get('page'), 'esc-seo-files', 'Save returned to wrong admin page');
+              assert.equal(current.searchParams.get('tab'), 'sitemap', 'Save returned to wrong tab');
+              assert.equal(current.searchParams.get('updated'), '1', 'Save did not report updated=1');
+              assert(body.includes('Đã lưu cấu hình'), 'Success notice missing after sitemap save');
+              console.log('AQUATHANHXUAN_SITEMAP_SAVE_REGRESSION=PASS');
+            } finally {
+              await browser.close();
+            }
+          })().catch((error) => {
+            console.error('AQUATHANHXUAN_SITEMAP_SAVE_REGRESSION=FAIL:', error.message);
+            process.exit(1);
+          });
+          NODE
