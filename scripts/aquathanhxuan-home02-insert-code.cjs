@@ -21,7 +21,7 @@ assert.equal(env.WC_URL,'https://admin.aquathanhxuan.io.vn');
   console.log('PAGE_PRECHECK='+JSON.stringify({length:before.length,has00:before.includes('home_00'),has01:before.includes('home_01'),has02:before.includes('home_02'),tail:before.slice(-250)}));
   assert(before.includes('home_00')&&before.includes('home_01'),'existing homepage sections absent');
   assert(!before.includes('home_02'),'home_02 already inserted; refuse duplicate');
-  assert(typeof await page.evaluate(()=>window.tablepress_open_shortcode_thickbox)==='function','native Insert Code unavailable');
+  assert(await page.evaluate(()=>typeof window.tablepress_open_shortcode_thickbox==='function'),'native Insert Code unavailable');
   await page.evaluate(()=>{const el=document.getElementById('content');el.focus();el.setSelectionRange(el.value.length,el.value.length);window.tablepress_open_shortcode_thickbox();});
   const frame=page.frameLocator('#TB_iframeContent');
   const insert=frame.locator('input.insert-shortcode[title="[table id=home_02 /]"]');
