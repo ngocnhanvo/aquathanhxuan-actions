@@ -6,6 +6,9 @@ on:
         description: 'Type DEPLOY_PHP to allow WordPress PHP upload (no Astro build)'
         required: true
         type: string
+  push:
+    branches: [main]
+    paths: ['php-release-requests/home02-20261108.json']
 permissions:
   contents: read
 concurrency:
@@ -13,7 +16,10 @@ concurrency:
   cancel-in-progress: false
 jobs:
   wordpress-php:
-    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions' && inputs.confirm == 'DEPLOY_PHP'
+    if: >-
+      github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+      && ((github.event_name == 'workflow_dispatch' && inputs.confirm == 'DEPLOY_PHP')
+          || (github.event_name == 'push' && github.event.head_commit.message == 'Phát hành PHP Home 02'))
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -29,6 +35,10 @@ jobs:
           token: ${{ secrets.SOURCE_REPO_PAT }}
           path: source-php
           persist-credentials: false
+      - name: Pin PHP source for the one-time Home 02 release
+        if: github.event_name == 'push'
+        shell: bash
+        run: test "$(git -C source-php rev-parse HEAD)" = '647ce3b3c0b976e9dda4d62d2366467d768274d3'
       - name: PHP syntax and project identity
         shell: bash
         run: |
