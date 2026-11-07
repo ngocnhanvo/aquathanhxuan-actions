@@ -1,0 +1,32 @@
+name: Aqua Home 02 production and Builder read-only QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/home02-20261108.json'
+permissions:
+  contents: read
+jobs:
+  homepage-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Check production SHA, Home 02 five viewports and read-only Builder selection
+        run: node scripts/aquathanhxuan-home02-production-qa.cjs
+      - name: Upload Home 02 QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-home02-production-qa
+          path: artifacts/home02
+          if-no-files-found: ignore
+          retention-days: 7
