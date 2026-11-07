@@ -1,0 +1,98 @@
+name: Aqua Sale homepage resave one-shot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-sale-page-resave.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  resave:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - name: Re-save existing homepage content and prove incremental log
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import http.cookiejar, json, os, re, time, urllib.parse, urllib.request, urllib.error
+
+          WP='https://admin.aquathanhxuan.io.vn'
+          USER=os.environ.get('WP_ADMIN_USERNAME','')
+          PASSWORD=os.environ.get('WP_ADMIN_PASSWORD','')
+          if not USER or not PASSWORD:
+              raise SystemExit('Missing WordPress credentials')
+
+          jar=http.cookiejar.CookieJar()
+          opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+          opener.addheaders=[('User-Agent','AquaSalePageResave/1.0')]
+
+          def open_url(url,data=None,headers=None,method=None,timeout=60):
+              req=urllib.request.Request(url,data=data,headers=headers or {},method=method)
+              try:
+                  return opener.open(req,timeout=timeout)
+              except urllib.error.HTTPError as exc:
+                  body=exc.read().decode('utf-8','replace')
+                  raise RuntimeError(f'HTTP {exc.code} {url}: {body[:800]}') from exc
+
+          open_url(WP+'/wp-login.php').read()
+          login=urllib.parse.urlencode({
+              'log':USER,'pwd':PASSWORD,'wp-submit':'Log In',
+              'redirect_to':WP+'/wp-admin/','testcookie':'1'
+          }).encode()
+          dash=open_url(WP+'/wp-login.php',data=login,headers={'Content-Type':'application/x-www-form-urlencoded'},method='POST').read().decode('utf-8','replace')
+          if 'wp-admin-bar-my-account' not in dash:
+              raise RuntimeError('WordPress login failed')
+
+          m=re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;',dash,re.S)
+          nonce=''
+          if m:
+              try: nonce=json.loads(m.group(1)).get('nonce','')
+              except Exception: pass
+          if not nonce:
+              m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',dash)
+              nonce=m.group(1) if m else ''
+          if not nonce:
+              raise RuntimeError('Missing REST nonce')
+
+          def rest(path,method='GET',payload=None):
+              headers={'X-WP-Nonce':nonce,'Accept':'application/json','Cache-Control':'no-cache'}
+              data=None
+              if payload is not None:
+                  data=json.dumps(payload,ensure_ascii=False).encode('utf-8')
+                  headers['Content-Type']='application/json; charset=utf-8'
+              raw=open_url(WP+path,data=data,headers=headers,method=method).read()
+              return json.loads(raw.decode('utf-8')) if raw else None
+
+          page=rest('/wp-json/wp/v2/pages/82454?context=edit&_fields=id,content,modified_gmt')
+          raw=str((page.get('content') or {}).get('raw') or '')
+          if '[table id=home_00 /]' not in raw or '[table id=home_01 /]' not in raw:
+              raise RuntimeError('Homepage content does not contain both required shortcodes')
+
+          # Preserve semantic content exactly; only normalize one trailing newline so
+          # WordPress executes a real core Page save and the normal save_post hook.
+          new_content=raw.rstrip()+'\n'
+          rest('/wp-json/wp/v2/pages/82454',method='POST',payload={'content':new_content})
+          print('HOME_PAGE_RESAVE=PASS')
+
+          time.sleep(1)
+          logs=rest('/wp-json/astro/v1/get-page-logs?_qa='+str(time.time_ns()))
+          matches=[x for x in logs if str(x.get('id'))=='82454' and x.get('type')=='page']
+          if not matches:
+              raise RuntimeError('PAGE_INCREMENTAL_LOG_MISSING_AFTER_CORE_SAVE')
+          latest=matches[-1]
+          if latest.get('action')!='modify':
+              raise RuntimeError('Unexpected page log action: '+str(latest.get('action')))
+          rendered=str(((latest.get('page') or {}).get('content') or {}).get('rendered') or '')
+          if 'home_01' not in rendered:
+              raise RuntimeError('Page log payload does not contain home_01')
+          print('PAGE_INCREMENTAL_LOG=PASS action=modify has_home_01=true')
+          print('PAGE_LOG_DATE='+str(latest.get('date') or ''))
+          PY
