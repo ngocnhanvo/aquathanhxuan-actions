@@ -172,8 +172,13 @@ const shortcode = '[table id=home_03 /]';
     await admin.waitForFunction(()=>(
       document.querySelector('#esc-vb-section-summary')?.textContent||'').includes('home_04'),
       null,{timeout:18000});
-    await admin.locator('#esc-vb-edit-row option[value="0:title"]')
-      .waitFor({state:'attached',timeout:18000});
+    // The item/section summary changes before the async text editor read completes.
+    // A row-0 option may still belong to the previously selected Home 03.
+    // Wait for Home 04's distinct second native row to avoid stale UI state.
+    await admin.waitForFunction(() => (
+      (document.querySelector('#esc-vb-edit-caption')?.textContent || '').includes('home_04')
+      && Boolean(document.querySelector('#esc-vb-edit-row option[value="1:title"]'))
+    ), null, {timeout:30000});
     const equipmentFields=await admin.locator('#esc-vb-edit-row option').evaluateAll(els=>els.map(el=>el.value));
     console.log('HOME04_BUILDER_OPTIONS='+JSON.stringify(equipmentFields));
     for(const field of ['title','description','button_label','button_href'])
