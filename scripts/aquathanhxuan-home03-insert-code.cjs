@@ -39,7 +39,7 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
     await page.waitForURL(url => url.pathname.startsWith('/wp-admin/'));
     const editUrl = env.WC_URL + '/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1';
     await page.goto(editUrl, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => !!window.tinymce?.get('content')?.getBody?.(), null, { timeout: 20000 });
+    await page.locator('#content').waitFor({ state: 'attached', timeout: 25000 });
     const before = await page.locator('#content').inputValue();
     console.log('HOME03_PRECHECK=' + JSON.stringify({
       length: before.length, has00: before.includes('home_00'),
@@ -56,7 +56,7 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
     // the TinyMCE toolbar variant. Invoke the installed Quicktags button in
     // Text mode, allowing the theme's asynchronous preview image to finish.
     await page.locator('#content-html').click();
-    await page.waitForFunction(() => window.tinymce?.get('content')?.isHidden() === true);
+    await page.locator('#content').waitFor({ state: 'visible', timeout: 15000 });
     const toolbar = page.locator('#qt_content_tablepress_quicktags_button');
     await toolbar.waitFor({ state: 'visible', timeout: 10000 });
     await page.evaluate(() => {
