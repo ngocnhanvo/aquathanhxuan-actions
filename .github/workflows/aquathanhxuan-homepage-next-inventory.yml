@@ -56,3 +56,38 @@ jobs:
               else:
                   print('TABLE_UNAVAILABLE',endpoint)
           PY
+
+      - name: Discover genuine filter and lighting product/category media for Home 04
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, re, json, urllib.request, urllib.parse, urllib.error
+          config = {}
+          for line in os.environ.get('ENV_FILE','').splitlines():
+              match = re.match(r'^\\s*(?:export\\s+)?(\\w+)\\s*=\\s*(.*?)\\s*$',line)
+              if match:
+                  config[match.group(1)] = match.group(2).strip().strip('"\\'')
+          base=config.get('WC_URL','').rstrip('/')
+          assert base=='https://admin.aquathanhxuan.io.vn', 'Invalid CMS origin'
+          def read(path):
+              url=base+path
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'AquaHome04ReadOnly/1.0','Accept':'application/json'}),timeout=25) as response:
+                      return json.load(response)
+              except Exception as error:
+                  print('HOME04_FETCH_ERROR',path,type(error).__name__)
+                  return None
+          categories=read('/wp-json/wc/store/v1/products/categories?per_page=100')
+          if isinstance(categories,list):
+              matches=[{'id':c.get('id'),'name':c.get('name'),'slug':c.get('slug'),'parent':c.get('parent'),'count':c.get('count'),'image':c.get('image',{}).get('src') if isinstance(c.get('image'),dict) else None} for c in categories if any(x in str(c.get('name','')).lower()+' '+str(c.get('slug','')).lower() for x in ['lọc','loc','filter','đèn','den','light'])]
+              print('HOME04_CATEGORY_CANDIDATES='+json.dumps(matches[:30],ensure_ascii=False))
+          for term in ['lọc','đèn','filter','led']:
+              products=read('/wp-json/wc/store/v1/products?per_page=40&search='+urllib.parse.quote(term))
+              if isinstance(products,list):
+                  selected=[{'id':p.get('id'),'name':p.get('name'),'slug':p.get('slug'),'permalink':urllib.parse.urlparse(str(p.get('permalink',''))).path,'images':[{'id':im.get('id'),'src':urllib.parse.urlparse(str(im.get('src',''))).path,'alt':im.get('alt')} for im in p.get('images',[])[:2]],'categories':p.get('categories')} for p in products[:8]]
+                  print('HOME04_PRODUCTS_'+term+'='+json.dumps(selected,ensure_ascii=False))
+          for term in ['lọc','đèn','LED']:
+              media=read('/wp-json/wp/v2/media?per_page=30&search='+urllib.parse.quote(term)+'&_fields=id,slug,title,alt_text,source_url')
+              if isinstance(media,list):
+                  print('HOME04_MEDIA_'+term+'='+json.dumps([{'id':m.get('id'),'title':m.get('title',{}).get('rendered'),'path':urllib.parse.urlparse(str(m.get('source_url',''))).path,'alt':m.get('alt_text')} for m in media[:10]],ensure_ascii=False))
+          PY
