@@ -16,7 +16,7 @@ const browserFlow=async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({acceptDownloads:false});
  page.setDefaultTimeout(18000);
- page.on('dialog', async dialog=>{ if(dialog.type()==='beforeunload') await dialog.accept(); else await dialog.dismiss(); });
+ page.on('dialog', async dialog=>{ if(dialog.type()==='beforeunload') await dialog.accept(); else if(dialog.type()==='confirm' && /table\s*id/i.test(dialog.message())) await dialog.accept(); else await dialog.dismiss(); });
  try {
   await page.goto(BASE+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:30000});
   if(await page.locator('#user_login').count()){
@@ -52,6 +52,8 @@ const browserFlow=async()=>{
   console.log('CREATED_TEMP_TABLE='+createdId);
   await page.waitForFunction(()=>Boolean(window.tp?.editor?.setData),null,{timeout:20000});
   await page.locator('#table-id').fill('home_03');
+  // Native TablePress validates its ID on blur and asks for confirmation.
+  await page.locator('#table-id').press('Tab');
   const records=[EXPECTED,['Tiêu đề','Mô tả','Ảnh nền','Nhãn nút','Liên kết nút'],['Combo bể cubic 40 siêu trong','','','Xem combo','/san-pham/combo-be-cubic-40-sieu-trong/']];
   await page.evaluate(value=>{window.tp.editor.setData(value);window.tp.helpers.unsaved_changes.set()},records);
   let data=await page.evaluate(()=>window.tp.editor.getData());
