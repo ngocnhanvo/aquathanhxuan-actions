@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ngocnhanvo/aquathanhxuan-astro
-          ref: d9b42a6dbc68bc4fd68be442afe3f5645f834dc6
+          ref: 90184423a8f6a938d6a05fb932550033ddac8d9a
           token: ${{ secrets.SOURCE_REPO_PAT }}
           persist-credentials: false
       - uses: pnpm/action-setup@v4
@@ -30,6 +30,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Run targeted homepage tests
-        run: pnpm exec vitest run src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/tablepress/home03.test.ts src/lib/wordpress/tablepress/home04.test.ts
+        run: pnpm exec vitest run src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/tablepress/home03.test.ts src/lib/wordpress/tablepress/home04.test.ts src/lib/wordpress/tablepress/home05.test.ts
       - name: Confirm source revision
-        run: test "$(git rev-parse HEAD)" = "d9b42a6dbc68bc4fd68be442afe3f5645f834dc6"
+        run: test "$(git rev-parse HEAD)" = "90184423a8f6a938d6a05fb932550033ddac8d9a"
