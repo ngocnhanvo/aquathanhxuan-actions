@@ -163,6 +163,14 @@ const shortcode = '[table id=home_03 /]';
     assert(equipmentCoords.rows.every(row=>row.editRow===row.row && row.titleField==='title'
       && row.linkField==='button_href' && row.imageField==='image'),'Home04 Builder: cell identities');
     console.log('HOME04_BUILDER_COORDS=PASS '+JSON.stringify(equipmentCoords));
+    await equipmentBuilder.locator('article h2').first().click();
+    await admin.waitForFunction(()=>(
+      document.querySelector('#esc-vb-section-summary')?.textContent||'').includes('home_04'),
+      null,{timeout:18000});
+    const equipmentFields=await admin.locator('#esc-vb-edit-row option').evaluateAll(els=>els.map(el=>el.value));
+    for(const field of ['title','description','button_label','button_href'])
+      assert(equipmentFields.includes(field),'Home04 Builder: missing editable field '+field);
+    console.log('HOME04_BUILDER_SELECTION=PASS '+equipmentFields.join(','));
     await admin.screenshot({path:'artifacts/home03/builder-readonly.png'});
     console.log('HOME03_BUILDER_SELECTION=PASS '+options.join(','));
     await admin.close();
