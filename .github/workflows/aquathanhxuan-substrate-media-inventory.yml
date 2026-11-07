@@ -80,3 +80,25 @@ jobs:
             console.log('RECENT_MEDIA_INVENTORY '+JSON.stringify({sampled:candidates.length,items:candidates.slice(0,100)}));
           })().catch(e=>{console.error('SUBSTRATE_INVENTORY_FAILED='+e.message);process.exitCode=1});
           NODE
+
+      - name: Inspect real Hot Combo media and products (READ ONLY)
+        shell: bash
+        run: |
+          node <<'NODE'
+          const e=Object.fromEntries((process.env.ENV_FILE||'').split(/\r?\n/).map(s=>s.match(/^\s*(WC_URL|WC_URL_CLIENT)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m=>[m[1],m[2].replace(/^['"]|['"]$/g,'')]));
+          if(e.WC_URL!=='https://admin.aquathanhxuan.io.vn'||e.WC_URL_CLIENT!=='https://aquathanhxuan.io.vn')throw Error('INVALID_SITE_ORIGIN');
+          (async()=>{
+            for(const term of ['combo','hot combo','bộ bể','trọn bộ','aquarium set']){
+              for(const [kind,endpoint] of [
+                ['media','/wp-json/wp/v2/media?per_page=50&_fields=id,title,source_url,alt_text&search='],
+                ['products','/wp-json/wc/store/v1/products?per_page=50&search=']
+              ]){
+                const resp=await fetch(e.WC_URL+endpoint+encodeURIComponent(term),{headers:{accept:'application/json'},signal:AbortSignal.timeout(16000)});
+                const body=await resp.json().catch(()=>null);
+                const list=Array.isArray(body)?body:[];
+                console.log('HOT_COMBO_INVENTORY='+JSON.stringify({kind,term,status:resp.status,total:resp.headers.get('x-wp-total'),
+                  items:list.slice(0,25).map(x=>({id:x.id,name:x.name||x.title?.rendered||'',src:kind==='media'?x.source_url:x.images?.[0]?.src||'',alt:kind==='media'?x.alt_text:x.images?.[0]?.alt||'',permalink:kind==='products'?x.permalink:null}))}));
+              }
+            }
+          })().catch(e=>{console.error('HOT_COMBO_DISCOVERY_FAILED='+e.message);process.exitCode=1});
+          NODE
