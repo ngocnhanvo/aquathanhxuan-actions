@@ -106,10 +106,36 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
     assert(after.includes('home_00') && after.includes('home_01') && after.includes('home_02'), 'existing homepage sections changed');
     assert(after.indexOf('home_03') > after.lastIndexOf('home_02'), 'home_03 not after home_01');
 
-    await page.locator('#publish').click();
-    await page.waitForLoadState('domcontentloaded', { timeout: 20000 });
-    await page.goto(editUrl, { waitUntil: 'domcontentloaded' });
-    const readback = await page.locator('#content').inputValue();
+    // Publish submits a full WordPress form. The old script navigated away
+    // immediately after click, aborting the in-flight save/redirect.
+    const saving = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 })
+      .then(() => 'redirected')
+      .catch(error => 'navigation_unconfirmed: ' + error.message.split('\\n')[0]);
+    await page.locator('#publish').click({ noWaitAfter: true });
+    console.log('HOME03_SAVE_NAVIGATION=' + await saving);
+
+    // Read back in a separate tab sharing the authenticated browser context.
+    // Never click Publish again on a retry: only retry the read-only verification.
+    const verify = await page.context().newPage();
+    verify.setDefaultNavigationTimeout(45000);
+    let readback = '';
+    try {
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          await verify.goto(editUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+          await verify.locator('#content').waitFor({ state: 'attached', timeout: 16000 });
+          readback = await verify.locator('#content').inputValue();
+          if (readback.includes(shortcode)) break;
+          console.log('HOME03_READBACK_RETRY=' + attempt + ' shortcode_missing');
+        } catch (error) {
+          if (attempt === 3 || !/Timeout|net::ERR_|ECONNRESET/i.test(error.message)) throw error;
+          console.log('HOME03_READBACK_RETRY=' + attempt + ' transient_navigation');
+        }
+        await page.waitForTimeout(1400);
+      }
+    } finally {
+      await verify.close();
+    }
     assert.equal(readback.split(shortcode).length - 1, 1, 'saved native shortcode missing or duplicate');
     assert(readback.includes('home_00') && readback.includes('home_01') && readback.includes('home_02'), 'existing sections lost after save');
     console.log('HOME03_PAGE_INSERT_CODE=PASS ' + JSON.stringify({
