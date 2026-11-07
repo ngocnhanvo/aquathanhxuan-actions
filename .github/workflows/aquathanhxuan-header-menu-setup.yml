@@ -1,0 +1,40 @@
+name: Aqua header menu setup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-header-menu-setup.yml'
+      - 'scripts/aquathanhxuan-header-menu-setup.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aquathanhxuan-header-menu-setup
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      WP_URL: https://admin-aquathanhxuan.io.vn
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aquathanhxuan-header-menu-setup.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-header-menu-setup
+          path: artifacts/header-menu
+          if-no-files-found: ignore
+          retention-days: 7
