@@ -1,4 +1,5 @@
 name: Aqua Thanh Xuân PHP deployment (manual opt-in)
+# One-shot release retry after Aqua Thanh Xuan regression gate repair.
 on:
   push:
     branches:
