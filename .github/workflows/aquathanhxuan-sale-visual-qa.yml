@@ -124,8 +124,15 @@ jobs:
                 assert(imageStates.every(img=>!(img.currentSrc||img.src).includes('aquathanhxuan.com/wp-content/')),
                   'Production must not hotlink legacy product images');
 
-                await sale.locator('[data-sale-track]').evaluate(el=>{el.scrollLeft=0;});
-                await page.waitForTimeout(150);
+                const trackLocator=sale.locator('[data-sale-track]');
+                await trackLocator.evaluate(el=>{
+                  el.style.scrollBehavior='auto';
+                  el.scrollLeft=0;
+                });
+                const trackHandle=await trackLocator.elementHandle();
+                assert(trackHandle,'Sale track handle');
+                await page.waitForFunction(el=>Math.abs(el.scrollLeft)<=1,trackHandle,{timeout:2000});
+                await trackLocator.evaluate(el=>{el.style.removeProperty('scroll-behavior');});
 
                 const discounts=await sale.locator('.aqua-sale__discount').allTextContents();
                 assert(discounts.every(value=>/^\s*-\d+%\s*$/.test(value)),'Discount labels');
@@ -153,10 +160,11 @@ jobs:
 
                 if(width>=768){
                   const next=sale.locator('[data-sale-next]');
-                  const before=await sale.locator('[data-sale-track]').evaluate(el=>el.scrollLeft);
+                  const before=await trackLocator.evaluate(el=>el.scrollLeft);
+                  assert(before<=1,'Carousel reset before Next test');
                   await next.click();
-                  await page.waitForTimeout(450);
-                  const after=await sale.locator('[data-sale-track]').evaluate(el=>el.scrollLeft);
+                  await page.waitForFunction(el=>el.scrollLeft>1,trackHandle,{timeout:2500});
+                  const after=await trackLocator.evaluate(el=>el.scrollLeft);
                   assert(after>before,'Next arrow advances carousel');
                 }
 
