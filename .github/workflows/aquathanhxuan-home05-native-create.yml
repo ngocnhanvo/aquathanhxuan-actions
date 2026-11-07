@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aquathanhxuan-home05-native-create.yml'
+      - 'scripts/aquathanhxuan-home05-native-create.cjs'
   workflow_dispatch:
 permissions:
   contents: read
