@@ -97,7 +97,7 @@ console.log('READ_BEFORE_WRITE=' + JSON.stringify({
 
 let browser;
 try {
-  browser = await chromium.launch({ channel: 'chrome', headless: true });
+  browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   page.setDefaultTimeout(25000);
