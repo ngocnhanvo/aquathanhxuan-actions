@@ -59,13 +59,9 @@ jobs:
                 const detail=await page.evaluate(()=>({url:location.href,inputs:[...document.querySelectorAll('input,textarea,button')].map(e=>({tag:e.tagName,id:e.id,name:e.name,type:e.type,text:(e.textContent||'').trim().slice(0,65),value:e.type==='hidden'?'[hidden]':String(e.value||'').slice(0,65)})).filter(x=>x.id||x.name||x.text).slice(0,130),tables:[...document.querySelectorAll('table')].map(t=>({id:t.id,cls:t.className})).slice(0,15),scripts:[...document.scripts].filter(e=>(e.src||'').includes('tablepress')).map(e=>e.src).slice(0,15)}));
                 console.log('TABLE_EDIT_LAYOUT='+JSON.stringify(detail));
               }
-              await page.goto(env.WC_URL+'/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1',{waitUntil:'domcontentloaded'});
-              await page.locator('#content-html').click();
-              const quicktag=page.locator('#qt_content_tablepress_quicktags_button');
-              if(await quicktag.count()){
-                await quicktag.click();
-                const modal=await page.evaluate(()=>({dialogs:[...document.querySelectorAll('[role="dialog"],.ui-dialog,.media-modal,.thickbox,.tb-modal')].map(x=>({id:x.id,cls:x.className,text:(x.innerText||'').slice(0,1200)})).slice(0,8),visibleInputs:[...document.querySelectorAll('input,select,button')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0}).map(e=>({id:e.id,name:e.name,text:(e.innerText||'').slice(0,65)})).slice(-65)}));
-                console.log('INSERT_CODE_UI='+JSON.stringify(modal));
+              if(target){
+                const editor=await page.evaluate(()=>({tpLoaded:Boolean(window.tp?.editor),data:window.tp?.editor?.options?.data?.slice(0,3),methodNames:window.tp?.editor?Object.keys(window.tp.editor).filter(x=>/set|save|get/i.test(x)).slice(0,35):[],tableId:document.getElementById('table-id')?.value}));
+                console.log('TABLE_EDITOR_API='+JSON.stringify(editor));
               }
               console.log('READ_ONLY_EDITOR_DISCOVERY=PASS');
             }finally{await browser.close();}
