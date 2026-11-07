@@ -21,3 +21,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - run: node scripts/aquathanhxuan-home02-insert-code.cjs
+
+# Retry with corrected Insert Code preflight.
