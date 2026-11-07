@@ -1,0 +1,64 @@
+name: Aqua homepage inventory one-shot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-homepage-inventory-one-shot.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - name: Inventory homepage WordPress data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+          from urllib.parse import urlsplit
+
+          vals={}
+          for line in os.environ.get('ENV_FILE','').splitlines():
+              line=line.strip()
+              if line.startswith('export '): line=line[7:].strip()
+              m=re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$', line)
+              if m: vals[m.group(1)]=m.group(2).strip().strip('"').strip("'")
+          wp=vals.get('WC_URL','').rstrip('/')
+          if urlsplit(wp).hostname != 'admin.aquathanhxuan.io.vn':
+              raise SystemExit('Unexpected WordPress origin')
+
+          def get(path):
+              req=urllib.request.Request(wp+path, headers={'User-Agent':'AquaHomepageInventory/1.0'})
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  return json.load(r)
+
+          pages=get('/wp-json/wp/v2/pages?per_page=100&status=publish')
+          for p in pages:
+              acf=p.get('acf') or {}
+              content=((p.get('content') or {}).get('rendered') or '')
+              if p.get('slug') in ('home','trang-chu','') or acf.get('key')=='home' or '[table id=home_' in content.lower():
+                  shortcodes=re.findall(r'\[table\s+id=([^\s/]+)', content, flags=re.I)
+                  print('PAGE', json.dumps({
+                      'id':p.get('id'),'slug':p.get('slug'),'title':(p.get('title') or {}).get('rendered'),
+                      'acf':{k:acf.get(k) for k in ('action','key','product_lang')},
+                      'shortcodes':shortcodes
+                  }, ensure_ascii=False))
+
+          tables=get('/wp-json/tablepress/v1/tables/prefix/all?per_page=100&page=1')
+          for t in tables:
+              tid=str(t.get('id') or '')
+              if not tid.lower().startswith('home_'): continue
+              print('TABLE', json.dumps({
+                  'id':tid,
+                  'meta':t.get('meta'),
+                  'item_count':len(t.get('items') or []),
+                  'items':t.get('items')
+              }, ensure_ascii=False))
+          PY
