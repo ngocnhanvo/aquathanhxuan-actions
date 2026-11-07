@@ -163,15 +163,23 @@ jobs:
               const form = action.locator('xpath=ancestor::form[1]');
               const submit = form.locator('#submit');
               assert.equal(await submit.count(), 1, 'SEO Files save button not found');
+              const mode = await form.locator('input[name="sitemap_mode"]:checked').inputValue();
+              const manualXml = await form.locator('#esc-seo-xml').inputValue();
+              const manualLocCount = (manualXml.match(/<loc(?:\s[^>]*)?>/g) || []).length;
+              console.log(`SITEMAP_SAVE_INPUT mode=${mode} manual_loc_count=${manualLocCount}`);
 
-              await Promise.all([
+              const [saveResponse] = await Promise.all([
                 page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
                 submit.click(),
               ]);
 
               const current = new URL(page.url());
               const body = await page.locator('body').innerText();
-              assert(!body.includes('Đã xảy ra lỗi nghiêm trọng'), 'WordPress critical error after sitemap save');
+              const dieMessage = await page.locator('.wp-die-message').first().innerText().catch(() => '');
+              console.log(`SITEMAP_SAVE_HTTP=${saveResponse ? saveResponse.status() : 'none'}`);
+              console.log(`SITEMAP_SAVE_FINAL=${current.pathname}?${current.searchParams.toString()}`);
+              if (dieMessage) console.log('SITEMAP_SAVE_SERVER_MESSAGE=' + dieMessage.replace(/\s+/g, ' ').slice(0, 600));
+              assert(!body.includes('Đã xảy ra lỗi nghiêm trọng') && !body.includes('There has been a critical error'), 'WordPress critical error after sitemap save');
               assert.equal(current.pathname, '/wp-admin/options-general.php', 'Save did not redirect back to SEO Files');
               assert.equal(current.searchParams.get('page'), 'esc-seo-files', 'Save returned to wrong admin page');
               assert.equal(current.searchParams.get('tab'), 'sitemap', 'Save returned to wrong tab');
