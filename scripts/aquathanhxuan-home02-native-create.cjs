@@ -60,6 +60,11 @@ const browserFlow=async()=>{
   await insert.click();
   await page.waitForFunction(()=>typeof window.tp?.editor?.getData()?.[2]?.[2]==='string' && /<img\b/i.test(window.tp.editor.getData()[2][2]),null,{timeout:15000});
   data=await page.evaluate(()=>window.tp.editor.getData());
+  // Keep the native Insert Image markup; normalize only the same-origin src to a WordPress-relative path.
+  if(data[2][2].includes(BASE+imagePath)){
+   await page.evaluate(({absolute,relative})=>{const old=window.tp.editor.getData()[2][2];window.tp.editor.setValueFromCoords(2,2,old.replace(absolute,relative));},{absolute:BASE+imagePath,relative:imagePath});
+   data=await page.evaluate(()=>window.tp.editor.getData());
+  }
   const imageHtml=data[2][2];
   assert.equal((imageHtml.match(/<img\b/gi)||[]).length,1,'must insert exactly one image tag');
   assert(imageHtml.includes(imagePath),'native image source mismatch');
