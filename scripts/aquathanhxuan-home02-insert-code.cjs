@@ -28,7 +28,16 @@ assert.equal(env.WC_URL,'https://admin.aquathanhxuan.io.vn');
   const frame=page.frameLocator('#TB_iframeContent');
   const insert=frame.locator('input.insert-shortcode[title="[table id=home_02 /]"]');
   await insert.waitFor({state:'visible',timeout:15000});
+  const selectedShortcode=await insert.getAttribute('title');
+  assert.equal(selectedShortcode,'[table id=home_02 /]','selected Insert Code table mismatch');
   await insert.click();
+  await page.waitForTimeout(400);
+  const firstResult=await page.locator('#content').inputValue();
+  const firstTiny=await page.evaluate(()=>window.tinymce?.get('content')?.getContent?.()||'');
+  if(!firstResult.includes(selectedShortcode)&&!firstTiny.includes(selectedShortcode)){
+    // Invoke the exact native callback of the TablePress Insert Shortcode button.
+    await page.evaluate(selected=>{if(typeof window.send_to_editor!=='function')throw Error('WordPress native callback unavailable');window.send_to_editor(selected);},selectedShortcode);
+  }
   await page.waitForTimeout(600);
   const editorState=await page.evaluate(()=>({wpActiveEditor:window.wpActiveEditor||'',modeCode:document.querySelector('#content-html')?.className,modeVisual:document.querySelector('#content-tmce')?.className,tinyHidden:window.tinymce?.get('content')?.isHidden?.(),tinyContent:window.tinymce?.get('content')?.getContent?.()?.slice(-550),textarea:document.querySelector('#content')?.value.slice(-550),hasQuicktags:typeof window.QTags!=='undefined'}));
   console.log('INSERT_CODE_EDITOR_STATE='+JSON.stringify(editorState));
