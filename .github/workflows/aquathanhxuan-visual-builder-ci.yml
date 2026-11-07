@@ -51,6 +51,15 @@ jobs:
         env:
           ASTRO_SOURCE: source-astro
           PHP_SOURCE: source-php
+      - name: Validate native Hero and Sale cell contracts (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/site-config.php
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor.php
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
+          php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
+          php source-php/wp-content/plugins/esc-visual-builder/tests/text-image-cells.test.php
       - name: Upload synthetic preview evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,3 +67,30 @@ jobs:
           name: aquathanhxuan-visual-builder-preview-contract
           path: artifacts/visual-builder
           if-no-files-found: ignore
+
+  homepage-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout current Astro master (no deployment)
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Test Hero and Sale ESC Table mapping
+        run: pnpm exec vitest run src/lib/wordpress/tablepress/home00.test.ts src/lib/wordpress/tablepress/home01.test.ts
+      - name: Identify source revision
+        run: git rev-parse HEAD
