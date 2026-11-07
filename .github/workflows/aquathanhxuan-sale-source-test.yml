@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ngocnhanvo/aquathanhxuan-astro
-          ref: c51a6c91570142d5e7e6e62e93de08ed4c4b39c3
+          ref: 197a54fcddb77c02d5d986f71cdc92b14c403341
           token: ${{ secrets.SOURCE_REPO_PAT }}
           persist-credentials: false
       - name: Set up pnpm
@@ -38,5 +38,5 @@ jobs:
         run: pnpm exec vitest run src/lib/wordpress/tablepress/home01.test.ts src/lib/wordpress/pages/homepageContentAudit.test.ts
       - name: Record source provenance
         run: |
-          test "$(git rev-parse HEAD)" = "c51a6c91570142d5e7e6e62e93de08ed4c4b39c3"
-          echo "SALE_SOURCE_TEST_PASS=c51a6c91570142d5e7e6e62e93de08ed4c4b39c3"
+          test "$(git rev-parse HEAD)" = "197a54fcddb77c02d5d986f71cdc92b14c403341"
+          echo "SALE_SOURCE_TEST_PASS=197a54fcddb77c02d5d986f71cdc92b14c403341"
