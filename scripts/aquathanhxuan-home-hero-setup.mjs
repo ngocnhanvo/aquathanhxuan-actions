@@ -213,7 +213,8 @@ try {
       window.tp.helpers.selection = { rows: [row], columns: [0] };
     }, { row });
 
-    await page.getByRole('button', { name: /Insert Image/i }).first().click();
+    await page.waitForFunction(() => typeof window.tp?.callbacks?.insert_image?.open_dialog === 'function', null, { timeout: 15000 });
+    await page.evaluate(() => window.tp.callbacks.insert_image.open_dialog());
     await page.locator('.media-modal').waitFor({ state: 'visible', timeout: 25000 });
 
     const libraryTab = page.locator('.media-menu-item').filter({ hasText: /Media Library|Thư viện/i }).first();
