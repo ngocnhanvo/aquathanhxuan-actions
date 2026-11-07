@@ -37,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           after='${{ github.sha }}'
-          mapfile -t files < <(git show --name-only --format= "$after" -- 'build-requests/*.json')
+          mapfile -t files < <(git diff-tree --root --no-commit-id --name-only -r "$after" | grep -E '^build-requests/[^/]+\.json$' || true)
           if [[ "${#files[@]}" -ne 1 ]]; then
             echo "::error::Expected exactly one Aqua build request, found ${#files[@]}"
             exit 1
