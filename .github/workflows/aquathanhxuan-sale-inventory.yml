@@ -1,0 +1,75 @@
+name: Aqua sale data inventory one-shot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-sale-inventory.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect current product sale fields
+        shell: bash
+        run: |
+          node <<'NODE'
+          const clean = (v) => String(v ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          const get = async (url) => {
+            const r = await fetch(url, { headers: { 'cache-control': 'no-cache', 'user-agent': 'AquaSaleInventory/1.0' } });
+            if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
+            return r.json();
+          };
+
+          const processed = await get('https://aquathanhxuan.io.vn/data/cms-products.json?qa=' + Date.now());
+          console.log('PROCESSED_COUNT=' + (Array.isArray(processed) ? processed.length : -1));
+          const normalized = (Array.isArray(processed) ? processed : []).map((p) => ({
+            id: p?._id,
+            name: p?.itemName?.vi,
+            slug: p?.slug?.vi,
+            slugP: p?.slugP?.vi,
+            price: p?.itemPrice?.vi,
+            priceRegister: p?.itemPriceRegister?.vi,
+            priceRegisterSale: p?.itemPriceRegisterSale?.vi,
+            priceRenew: p?.itemPriceRenew?.vi,
+            priceRenewSale: p?.itemPriceRenewSale?.vi,
+            currency: p?.itemCurrency?.vi,
+            image: p?.itemImage?.vi?.src || p?.itemImage?.vi?.srcSet || '',
+            featured: p?.isFeatured?.vi,
+          }));
+          console.log('PROCESSED_PRODUCTS=' + JSON.stringify(normalized.slice(0, 40)));
+
+          const raw = await get('https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/product?status=publish&per_page=50&page=1&_fields=id,slug,title,price,regular_price,sale_price,on_sale,prices,featured_media_url,acf,class_list&qa=' + Date.now());
+          console.log('RAW_COUNT=' + (Array.isArray(raw) ? raw.length : -1));
+          const rawSummary = (Array.isArray(raw) ? raw : []).map((p) => ({
+            id: p?.id,
+            slug: p?.slug,
+            title: clean(p?.title?.rendered),
+            price: p?.price,
+            regular_price: p?.regular_price,
+            sale_price: p?.sale_price,
+            on_sale: p?.on_sale,
+            prices: p?.prices,
+            lang: p?.acf?.product_lang?.value || p?.acf?.product_lang || '',
+            featured: Array.isArray(p?.class_list) && p.class_list.includes('featured'),
+          }));
+          console.log('RAW_PRODUCTS=' + JSON.stringify(rawSummary.slice(0, 50)));
+
+          const rawSale = rawSummary.filter((p) => {
+            const values = [p.sale_price, p?.prices?.sale_price, p?.prices?.price_register_sale, p?.prices?.price_renew_sale];
+            return p.on_sale === true || values.some((v) => Number(v) > 0);
+          });
+          console.log('RAW_SALE_CANDIDATES=' + JSON.stringify(rawSale));
+
+          const processedSale = normalized.filter((p) => {
+            const current = Number(p.price);
+            const regular = Number(p.priceRegister);
+            const explicitSale = Number(p.priceRegisterSale);
+            return explicitSale > 0 || (regular > 0 && current > 0 && current < regular);
+          });
+          console.log('PROCESSED_SALE_CANDIDATES=' + JSON.stringify(processedSale));
+          NODE
