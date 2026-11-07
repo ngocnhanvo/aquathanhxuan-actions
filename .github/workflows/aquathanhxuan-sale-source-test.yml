@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ngocnhanvo/aquathanhxuan-astro
-          ref: f9736ca7d253f7048733c37816b4113952144aa6
+          ref: c51a6c91570142d5e7e6e62e93de08ed4c4b39c3
           token: ${{ secrets.SOURCE_REPO_PAT }}
           persist-credentials: false
       - name: Set up pnpm
@@ -34,9 +34,9 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install exact dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Run Sale data unit test
-        run: pnpm exec vitest run src/lib/wordpress/tablepress/home01.test.ts
+      - name: Run Sale and homepage cache unit tests
+        run: pnpm exec vitest run src/lib/wordpress/tablepress/home01.test.ts src/lib/wordpress/pages/homepageContentAudit.test.ts
       - name: Record source provenance
         run: |
-          test "$(git rev-parse HEAD)" = "f9736ca7d253f7048733c37816b4113952144aa6"
-          echo "SALE_SOURCE_TEST_PASS=f9736ca7d253f7048733c37816b4113952144aa6"
+          test "$(git rev-parse HEAD)" = "c51a6c91570142d5e7e6e62e93de08ed4c4b39c3"
+          echo "SALE_SOURCE_TEST_PASS=c51a6c91570142d5e7e6e62e93de08ed4c4b39c3"
