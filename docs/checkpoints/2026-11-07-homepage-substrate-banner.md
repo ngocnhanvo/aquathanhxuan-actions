@@ -1,29 +1,36 @@
 # Checkpoint — Homepage substrate banner
-Date: 2026-11-07
+Date: 2026-11-07 (Asia/Ho_Chi_Minh)
 Project: Aqua Thanh Xuân
-Astro HEAD master: 197a54fcddb77c02d5d986f71cdc92b14c403341
-PHP HEAD master: e3dda1b6242aa5a4b95a3f8f84726dd85c5c5b7b
-Actions inventory commit: 92fb59ca3778fc0f6623921b06749737da3b71a0
+Knowledge main: cd7d1e3999e1328bb33ce99dd9a6a7a14e4d4223
+Astro master: 197a54fcddb77c02d5d986f71cdc92b14c403341
+PHP master: e3dda1b6242aa5a4b95a3f8f84726dd85c5c5b7b
+Actions native inventory: 6c28c26cb497e70f0ccc07f0b83dd50f5224770d
 
 ## Verified
-- Header, Hero, Hero text toggle and Sale: PASS. Do not redo.
-- Sale build 42388459540, deploy 42388529828, QA 42388970820: SUCCESS.
-- Read-only inventory 42392563861: SUCCESS.
-- WordPress Page 82454 published; rendered shortcodes: home_00 and home_01; no home_02.
-- Public TablePress /tables and /tables/home_02|home_03|home_04 returned HTTP 404. This does not prove native tables absent.
-- Astro currently has Home_00.astro and Home_01.astro only.
-- Design contract: docs/design/aquathanhxuan-homepage/HANDOFF.md, section 3.5.
+- Header, WordPress Menu, Hero text toggle and Sale already PASS. Do not redo.
+- Sale build #42388459540, deploy #42388529828, QA #42388970820 SUCCESS.
+- Public inventory #42392563861 SUCCESS.
+- Authenticated WordPress Admin native ESC Table inventory #42392841497 SUCCESS.
+- WordPress Admin login PASS. Native table list contains ONLY home_00 (Trang chủ - Hero) and home_01 (Trang chủ - Sale). home_02, home_03 and home_04 are absent.
+- Published WordPress Page 82454 includes home_00 and home_01 only.
+- Astro has Home_00.astro and Home_01.astro only. No Home_02 component.
+- Design reference: docs/design/aquathanhxuan-homepage/HANDOFF.md section 3.5.
 
 ## Status
-- NEXT_SECTION_INVENTORY: PARTIAL PASS
-- NATIVE_TABLE_EXISTS: NOT TESTED
-- CODE_READY: NOT STARTED
-- BUILD_SUCCESS: NOT STARTED
-- DEPLOY_READY: NOT STARTED
-- VISUAL_QA: NOT STARTED
+- NATIVE_TABLE_EXISTS: FAIL (home_02 does not exist)
+- AUTHENTICATED_INVENTORY: PASS
+- HOME_02_CONTENT_SOURCE: NOT STARTED
+- CMS_CREATE_HOME_02: NOT STARTED
+- ASTRO_HOME_02: NOT STARTED
+- VISUAL_BUILDER_MAPPING: NOT STARTED
+- BUILD_DEPLOY_VISUAL_QA: NOT STARTED
 
-## Next
-1. Inventory native ESC Table from authenticated WP Admin, determine actual table IDs and content/media.
-2. If needed, create structured home_02 with real images/copy and insert into Page 82454 via native Insert Code; preserve home_00 and home_01.
-3. Implement Home_02 Astro component and data mapping from ESC Table, with editable text/image/CTA and Visual Builder coordinates.
-4. Test, build/deploy only through existing production pipeline, QA five reference viewports, record all run IDs.
+## Concrete next actions
+1. Inventory approved native WordPress media and existing real category/page content for substrate and substrate materials. Do not use mockup text/images as production content or invent products.
+2. Create home_02 native ESC Table with appropriate schema and verified content/media; preserve existing home_00/home_01 and Page 82454. CMS writes must be minimal and validated, with rollback and read-after-write.
+3. Implement Home_02 Astro mapping from native data, preserving full Visual Builder source coordinates (table_id + row + field + version), with no text matching heuristic or fallback.
+4. Run source tests, only trigger production build through existing WordPress Build Website workflow after CMS + mapping are ready; QA 5 viewports.
+5. Record resulting commits, test and deploy run IDs.
+
+Cổng ghi source: bypass
+Chế độ code: auto-build
