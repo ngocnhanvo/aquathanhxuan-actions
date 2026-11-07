@@ -1,0 +1,64 @@
+name: Aqua Sale page-chain diagnostic one-shot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-sale-page-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare WordPress page log with production page JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const strip = (v) => String(v ?? '').replace(/\s+/g,' ').trim();
+          const get = async (url) => {
+            const r = await fetch(url, {
+              headers: {'cache-control':'no-cache','user-agent':'AquaSalePageDiagnostic/1.0'}
+            });
+            console.log('HTTP', r.status, url);
+            if (!r.ok) throw new Error('HTTP '+r.status+' '+url);
+            return r.json();
+          };
+
+          const wpPage = await get('https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/pages/82454?_fields=id,slug,status,modified_gmt,content,acf&qa='+Date.now());
+          const wpContent = String(wpPage?.content?.rendered || '');
+          console.log('WP_PAGE_ID='+wpPage.id);
+          console.log('WP_PAGE_MODIFIED_GMT='+wpPage.modified_gmt);
+          console.log('WP_PAGE_HAS_HOME_00='+/\[table id=home_00 \/\]/i.test(wpContent));
+          console.log('WP_PAGE_HAS_HOME_01='+/\[table id=home_01 \/\]/i.test(wpContent));
+          console.log('WP_PAGE_CONTENT='+strip(wpContent).slice(0,1200));
+
+          const logs = await get('https://admin.aquathanhxuan.io.vn/wp-json/astro/v1/get-page-logs?qa='+Date.now());
+          const pageLogs = Array.isArray(logs) ? logs.filter(x=>String(x?.id)==='82454') : [];
+          console.log('WP_PAGE_LOG_COUNT='+pageLogs.length);
+          for (const item of pageLogs) {
+            const c=String(item?.page?.content?.rendered || '');
+            console.log('WP_PAGE_LOG action='+item?.action+' type='+item?.type+' date='+item?.date+' has_home_01='+/\[table id=home_01 \/\]/i.test(c));
+          }
+
+          const table = await get('https://admin.aquathanhxuan.io.vn/wp-json/tablepress/v1/table/home_01?qa='+Date.now());
+          const tableData = table?.data ?? table?.table?.data ?? [];
+          console.log('WP_HOME_01_ROWS='+(Array.isArray(tableData)?tableData.length:-1));
+          console.log('WP_HOME_01_META_API='+(table?.meta?.api ?? table?.table?.meta?.api ?? ''));
+
+          const prod = await get('https://aquathanhxuan.io.vn/data/page-default.json?qa='+Date.now());
+          const prodContent = String(prod?.content || '');
+          const prodContents = Array.isArray(prod?.contents) ? prod.contents : [];
+          console.log('PROD_PAGE_ID='+(prod?.id ?? ''));
+          console.log('PROD_PAGE_HAS_HOME_00='+/\[table id=home_00 \/\]/i.test(prodContent));
+          console.log('PROD_PAGE_HAS_HOME_01='+/\[table id=home_01 \/\]/i.test(prodContent));
+          console.log('PROD_CONTENTS='+JSON.stringify(prodContents.map(x=>({type:x?.type,shortcode:x?.shortcode,hasData:Boolean(x?.data),dataId:x?.data?.id,items:Array.isArray(x?.data?.items)?x.data.items.length:null}))));
+          console.log('PROD_PAGE_CONTENT='+strip(prodContent).slice(0,1200));
+
+          const marker = await get('https://aquathanhxuan.io.vn/aquathanhxuan-staging-build.json?qa='+Date.now());
+          console.log('PROD_MARKER_COMMIT='+(marker?.commit ?? ''));
+          NODE
