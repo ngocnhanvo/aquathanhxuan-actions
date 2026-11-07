@@ -11,5 +11,5 @@
     "builder_version_and_cell_coordinates",
     "editable_link_fields"
   ],
-  "run": "verify-home03-home04-native-row-field-coordinates"
+  "run": "verify-home03-home04-after-async-builder-update"
 }
