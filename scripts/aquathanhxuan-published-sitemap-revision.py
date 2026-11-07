@@ -9,6 +9,7 @@ import io
 import json
 import os
 import re
+from pathlib import Path
 from urllib.parse import urlparse
 
 TARGET = "aquathanhxuan-staging-build.json"
@@ -61,6 +62,34 @@ def main():
             if previous != "missing" and previous != "legacy" and \
                     re.fullmatch(r"[a-f0-9-]{36}", str(previous)) is None:
                 raise RuntimeError("Invalid existing sitemap token")
+
+        # Keep an authenticated copy of the currently published sitemap only
+        # as a deployment fallback. It is never exposed as an artifact and is
+        # used only when WordPress SEO validation fails later in the Astro hook.
+        snapshot_path = Path("source/.aquathanhxuan-live-sitemap.xml")
+        snapshot_path.unlink(missing_ok=True)
+        live_sitemap = io.BytesIO()
+
+        def append_live_sitemap(chunk):
+            if live_sitemap.tell() + len(chunk) > 2097152:
+                raise OverflowError("Published sitemap exceeds 2 MiB fallback limit")
+            live_sitemap.write(chunk)
+
+        try:
+            ftp.retrbinary("RETR sitemap.xml", append_live_sitemap)
+            raw_sitemap = live_sitemap.getvalue()
+            if not raw_sitemap.strip():
+                raise ValueError("Published sitemap is empty")
+            snapshot_path.write_bytes(raw_sitemap)
+            print("AQUATHANHXUAN_LIVE_SITEMAP_SNAPSHOT=READY")
+        except ftplib.error_perm as error:
+            if str(error).startswith("550"):
+                print("AQUATHANHXUAN_LIVE_SITEMAP_SNAPSHOT=MISSING")
+            else:
+                print("AQUATHANHXUAN_LIVE_SITEMAP_SNAPSHOT=UNAVAILABLE " + type(error).__name__)
+        except (ftplib.Error, OSError, EOFError, OverflowError, ValueError) as error:
+            print("AQUATHANHXUAN_LIVE_SITEMAP_SNAPSHOT=UNAVAILABLE " + type(error).__name__)
+
         # UUID contains no credentials; never export file contents or XML.
         with open(os.environ["GITHUB_ENV"], "a", encoding="utf8") as output:
             output.write("AQUATHANHXUAN_PUBLISHED_SITEMAP_REVISION=" + str(previous) + "\n")
