@@ -1,4 +1,4 @@
-name: Aqua sale data inventory one-shot
+name: Aqua sale CMS setup one-shot
 
 on:
   push:
@@ -10,170 +10,371 @@ permissions:
   contents: read
 
 jobs:
-  inventory:
+  setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    env:
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
     steps:
-      - name: Inspect current CMS and legacy sale product fields
-        shell: bash
-        run: |
-          node <<'NODE'
-          const clean = (v) => String(v ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          const get = async (url) => {
-            const r = await fetch(url, { headers: { 'cache-control': 'no-cache', 'user-agent': 'AquaSaleInventory/1.2' } });
-            if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
-            return r.json();
-          };
-          const probe = async (label, url) => {
-            const r = await fetch(url, { headers: { 'cache-control': 'no-cache', 'user-agent': 'AquaSaleInventory/1.2' } });
-            console.log(label + '_HTTP=' + r.status);
-            if (!r.ok) return null;
-            const json = await r.json();
-            const keys = json && typeof json === 'object' ? Object.keys(json).slice(0, 30) : [];
-            console.log(label + '_KEYS=' + JSON.stringify(keys));
-            return json;
-          };
-
-          const processed = await get('https://aquathanhxuan.io.vn/data/cms-products.json?qa=' + Date.now());
-          console.log('PROCESSED_COUNT=' + (Array.isArray(processed) ? processed.length : -1));
-
-          const raw = await get('https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/product?status=publish&per_page=50&page=1&_fields=id,slug,title,price,regular_price,sale_price,on_sale,prices,featured_media_url,acf,class_list&qa=' + Date.now());
-          console.log('RAW_COUNT=' + (Array.isArray(raw) ? raw.length : -1));
-
-          const page = await probe(
-            'HOME_PAGE',
-            'https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/pages/82454?_fields=id,slug,status,content,acf&qa=' + Date.now(),
-          );
-          if (page) {
-            const rendered = String(page?.content?.rendered || '');
-            console.log('HOME_PAGE_ID=' + (page?.id ?? ''));
-            console.log('HOME_PAGE_SLUG=' + (page?.slug ?? ''));
-            console.log('HOME_PAGE_STATUS=' + (page?.status ?? ''));
-            console.log('HOME_PAGE_HAS_HOME_00=' + /home_00/i.test(rendered));
-            console.log('HOME_PAGE_HAS_HOME_01=' + /home_01/i.test(rendered));
-            console.log('HOME_PAGE_RENDERED_TEXT=' + clean(rendered).slice(0, 1000));
-          }
-
-          for (const tableId of ['home_00', 'home_01']) {
-            const table = await probe(
-              'TABLE_' + tableId.toUpperCase(),
-              'https://admin.aquathanhxuan.io.vn/wp-json/tablepress/v1/table/' + tableId + '?qa=' + Date.now(),
-            );
-            if (table) {
-              const data = table?.data ?? table?.table?.data ?? null;
-              const rows = Array.isArray(data) ? data.length : -1;
-              const firstRow = Array.isArray(data) && data.length ? data[0] : null;
-              console.log('TABLE_' + tableId.toUpperCase() + '_ROWS=' + rows);
-              console.log('TABLE_' + tableId.toUpperCase() + '_FIRST_ROW=' + JSON.stringify(firstRow).slice(0, 2000));
-            }
-          }
-
-          const legacySale = await get('https://aquathanhxuan.com/wp-json/wc/store/v1/products?on_sale=true&per_page=100&_qa=' + Date.now());
-          const legacySummary = (Array.isArray(legacySale) ? legacySale : []).map((p) => ({
-            id: p?.id,
-            name: clean(p?.name),
-            slug: p?.slug,
-            permalink: p?.permalink,
-            prices: p?.prices,
-            images: Array.isArray(p?.images) ? p.images.map((img) => ({
-              id: img?.id,
-              src: img?.src,
-              thumbnail: img?.thumbnail,
-              name: img?.name,
-              alt: img?.alt,
-            })) : [],
-            categories: Array.isArray(p?.categories) ? p.categories.map((cat) => ({
-              id: cat?.id,
-              name: cat?.name,
-              slug: cat?.slug,
-            })) : [],
-            is_purchasable: p?.is_purchasable,
-            is_in_stock: p?.is_in_stock,
-          }));
-          console.log('LEGACY_SALE_COUNT=' + legacySummary.length);
-          console.log('LEGACY_SALE_PRODUCTS=' + JSON.stringify(legacySummary));
-          NODE
-
-
-      - name: Probe authenticated WooCommerce REST contract without writes
-        env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-          WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
-          WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      - name: Import real Sale products and configure home_01
         shell: bash
         run: |
           set -euo pipefail
-          WP_URL="$(python3 - <<'PY'
+          python3 <<'PY'
+          import hashlib
+          import html
+          import http.cookiejar
+          import json
+          import mimetypes
           import os
-          for raw in os.environ.get('ENV_FILE','').splitlines():
-              line=raw.strip()
-              if line.startswith('export '): line=line[7:].strip()
-              if line.startswith('WC_URL='):
-                  print(line.split('=',1)[1].strip().strip('"').strip("'").rstrip('/'))
-                  break
-          PY
-          )"
-          test "$WP_URL" = "https://admin.aquathanhxuan.io.vn"
-          test -n "$WP_ADMIN_USERNAME"
-          test -n "$WP_ADMIN_PASSWORD"
+          import re
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
 
-          COOKIE_JAR="$RUNNER_TEMP/wp-cookies.txt"
-          DASHBOARD="$RUNNER_TEMP/wp-admin.html"
-          curl -fsS -c "$COOKIE_JAR" "$WP_URL/wp-login.php" >/dev/null
-          curl -fsS -L -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
-            --data-urlencode "log=$WP_ADMIN_USERNAME" \
-            --data-urlencode "pwd=$WP_ADMIN_PASSWORD" \
-            --data-urlencode "wp-submit=Log In" \
-            --data-urlencode "redirect_to=$WP_URL/wp-admin/" \
-            --data-urlencode "testcookie=1" \
-            "$WP_URL/wp-login.php" -o "$DASHBOARD"
+          def env_value(name):
+              for raw in os.environ.get('ENV_FILE', '').splitlines():
+                  line = raw.strip()
+                  if line.startswith('export '):
+                      line = line[7:].strip()
+                  if line.startswith(name + '='):
+                      return line.split('=', 1)[1].strip().strip('"').strip("'")
+              return ''
 
-          grep -q "wp-admin-bar-my-account" "$DASHBOARD"
-          NONCE="$(python3 - "$DASHBOARD" <<'PY'
-          import json,re,sys
-          html=open(sys.argv[1],encoding='utf-8',errors='ignore').read()
-          m=re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;',html,re.S)
-          if m:
+          WP_URL = env_value('WC_URL').rstrip('/')
+          USER = os.environ.get('WP_ADMIN_USERNAME', '')
+          PASSWORD = os.environ.get('WP_ADMIN_PASSWORD', '')
+          if WP_URL != 'https://admin.aquathanhxuan.io.vn':
+              raise SystemExit('Wrong WC_URL: ' + WP_URL)
+          if not USER or not PASSWORD:
+              raise SystemExit('Missing WordPress admin credentials')
+
+          jar = http.cookiejar.CookieJar()
+          opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+          opener.addheaders = [('User-Agent', 'AquaSaleSetup/1.0')]
+
+          def read_text(response):
+              return response.read().decode('utf-8', 'replace')
+
+          def open_url(url, data=None, headers=None, method=None, timeout=90):
+              req = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
               try:
-                  print(json.loads(m.group(1)).get('nonce',''))
-                  raise SystemExit
+                  return opener.open(req, timeout=timeout)
+              except urllib.error.HTTPError as exc:
+                  body = exc.read().decode('utf-8', 'replace')
+                  raise RuntimeError(f'HTTP {exc.code} {url}: {body[:1000]}') from exc
+
+          open_url(WP_URL + '/wp-login.php').read()
+          login_data = urllib.parse.urlencode({
+              'log': USER,
+              'pwd': PASSWORD,
+              'wp-submit': 'Log In',
+              'redirect_to': WP_URL + '/wp-admin/',
+              'testcookie': '1',
+          }).encode()
+          dashboard = read_text(open_url(
+              WP_URL + '/wp-login.php',
+              data=login_data,
+              headers={'Content-Type': 'application/x-www-form-urlencoded'},
+              method='POST',
+          ))
+          if 'wp-admin-bar-my-account' not in dashboard:
+              raise SystemExit('WordPress login failed')
+
+          nonce_match = re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;', dashboard, re.S)
+          rest_nonce = ''
+          if nonce_match:
+              try:
+                  rest_nonce = json.loads(nonce_match.group(1)).get('nonce', '')
               except json.JSONDecodeError:
                   pass
-          m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',html)
-          print(m.group(1) if m else '')
-          PY
-          )"
-          test -n "$NONCE"
+          if not rest_nonce:
+              nonce_match = re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"', dashboard)
+              rest_nonce = nonce_match.group(1) if nonce_match else ''
+          if not rest_nonce:
+              raise SystemExit('Could not find WP REST nonce')
 
-          WC_STATUS="$(curl -sS -o "$RUNNER_TEMP/wc-products.json" -w '%{http_code}' \
-            -b "$COOKIE_JAR" -H "X-WP-Nonce: $NONCE" \
-            "$WP_URL/wp-json/wc/v3/products?per_page=1&context=edit")"
-          WP_STATUS="$(curl -sS -o "$RUNNER_TEMP/wp-products.json" -w '%{http_code}' \
-            -b "$COOKIE_JAR" -H "X-WP-Nonce: $NONCE" \
-            "$WP_URL/wp-json/wp/v2/product?per_page=1&context=edit")"
+          def rest_json(path, method='GET', payload=None, raw=None, headers=None):
+              request_headers = {'X-WP-Nonce': rest_nonce, 'Accept': 'application/json'}
+              if headers:
+                  request_headers.update(headers)
+              data = raw
+              if payload is not None:
+                  data = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+                  request_headers['Content-Type'] = 'application/json; charset=utf-8'
+              response = open_url(WP_URL + path, data=data, headers=request_headers, method=method)
+              body = response.read()
+              if not body:
+                  return None
+              return json.loads(body.decode('utf-8'))
 
-          python3 - "$RUNNER_TEMP/wc-products.json" "$RUNNER_TEMP/wp-products.json" "$WC_STATUS" "$WP_STATUS" <<'PY'
-          import json,sys
-          wc_path,wp_path,wc_status,wp_status=sys.argv[1:]
-          def load(path):
-              try:
-                  return json.load(open(path,encoding='utf-8'))
-              except Exception as exc:
-                  return {'_parse_error':str(exc)}
-          wc,wp=load(wc_path),load(wp_path)
-          print('AUTH_LOGIN=PASS')
-          print('WC_V3_STATUS='+wc_status)
-          print('WP_V2_PRODUCT_STATUS='+wp_status)
-          print('WC_V3_SHAPE=' + ('array' if isinstance(wc,list) else 'object'))
-          if isinstance(wc,list) and wc:
-              print('WC_V3_KEYS='+','.join(sorted(wc[0].keys())))
-          elif isinstance(wc,dict):
-              print('WC_V3_ERROR_CODE='+str(wc.get('code','')))
-              print('WC_V3_ERROR_MESSAGE='+str(wc.get('message',''))[:200])
-          print('WP_V2_SHAPE=' + ('array' if isinstance(wp,list) else 'object'))
-          if isinstance(wp,dict):
-              print('WP_V2_ERROR_CODE='+str(wp.get('code','')))
-              print('WP_V2_ERROR_MESSAGE='+str(wp.get('message',''))[:200])
-          if wc_status != '200' or wp_status != '200':
-              raise SystemExit('Authenticated product REST probe failed')
+          def public_json(url):
+              req = urllib.request.Request(url, headers={'User-Agent': 'AquaSaleSetup/1.0', 'Cache-Control': 'no-cache'})
+              with urllib.request.urlopen(req, timeout=90) as response:
+                  return json.loads(response.read().decode('utf-8'))
+
+          legacy = public_json('https://aquathanhxuan.com/wp-json/wc/store/v1/products?on_sale=true&per_page=100&_qa=' + str(time.time_ns()))
+          if not isinstance(legacy, list) or len(legacy) != 12:
+              raise SystemExit(f'Expected 12 legacy Sale products, got {len(legacy) if isinstance(legacy, list) else "invalid"}')
+          print('LEGACY_SALE_COUNT=12')
+
+          def fetch_bytes(url, attempts=3):
+              last = None
+              for attempt in range(1, attempts + 1):
+                  try:
+                      req = urllib.request.Request(url, headers={'User-Agent': 'AquaSaleSetup/1.0'})
+                      with urllib.request.urlopen(req, timeout=60) as response:
+                          data = response.read()
+                      if not data:
+                          raise RuntimeError('empty response')
+                      return data
+                  except Exception as exc:
+                      last = exc
+                      print(f'IMAGE_FETCH_RETRY={attempt} URL={url} ERROR={exc}')
+                      if attempt < attempts:
+                          time.sleep(attempt)
+              raise RuntimeError(f'Image failed after {attempts} attempts: {url}: {last}')
+
+          def exact_media_by_filename(filename):
+              stem = os.path.splitext(filename)[0]
+              rows = rest_json('/wp-json/wp/v2/media?context=edit&per_page=100&search=' + urllib.parse.quote(stem))
+              for row in rows if isinstance(rows, list) else []:
+                  src = str(row.get('source_url') or '')
+                  current = os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(src).path))
+                  if current == filename:
+                      return row
+              return None
+
+          def ensure_media(src, alt):
+              filename = os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(src).path))
+              if not filename:
+                  raise RuntimeError('Image has no filename: ' + src)
+              source_bytes = fetch_bytes(src, 3)
+              source_hash = hashlib.sha256(source_bytes).hexdigest()
+
+              existing = exact_media_by_filename(filename)
+              if existing:
+                  existing_url = str(existing.get('source_url') or '')
+                  existing_bytes = fetch_bytes(existing_url, 3)
+                  if hashlib.sha256(existing_bytes).hexdigest() != source_hash:
+                      raise RuntimeError('Filename collision with different content: ' + filename)
+                  media_id = int(existing['id'])
+                  rest_json('/wp-json/wp/v2/media/' + str(media_id), method='POST', payload={'alt_text': alt})
+                  print(f'MEDIA_REUSED={media_id} FILE={filename}')
+                  return media_id
+
+              content_type = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+              media = rest_json(
+                  '/wp-json/wp/v2/media',
+                  method='POST',
+                  raw=source_bytes,
+                  headers={
+                      'Content-Type': content_type,
+                      'Content-Disposition': 'attachment; filename="' + filename.replace('"', '') + '"',
+                  },
+              )
+              media_id = int(media['id'])
+              result_url = str(media.get('source_url') or '')
+              result_filename = os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(result_url).path))
+              if result_filename != filename:
+                  try:
+                      rest_json('/wp-json/wp/v2/media/' + str(media_id) + '?force=true', method='DELETE')
+                  finally:
+                      raise RuntimeError(f'WordPress changed filename {filename} -> {result_filename}')
+              rest_json('/wp-json/wp/v2/media/' + str(media_id), method='POST', payload={'alt_text': alt})
+              print(f'MEDIA_UPLOADED={media_id} FILE={filename}')
+              return media_id
+
+          mappings = []
+          expected_slugs = []
+          for source in legacy:
+              source_id = int(source['id'])
+              slug = str(source.get('slug') or '').strip()
+              name = html.unescape(re.sub(r'<[^>]+>', ' ', str(source.get('name') or ''))).strip()
+              prices = source.get('prices') or {}
+              regular = str(prices.get('regular_price') or '').strip()
+              sale = str(prices.get('sale_price') or prices.get('price') or '').strip()
+              if not slug or not name or not regular or not sale or int(sale) >= int(regular):
+                  raise RuntimeError(f'Invalid Sale source product {source_id}')
+              expected_slugs.append(slug)
+
+              images = source.get('images') if isinstance(source.get('images'), list) else []
+              primary = next((img for img in images if img and img.get('src')), None)
+              media_id = None
+              if primary:
+                  alt = html.unescape(str(primary.get('alt') or '')).strip() or name
+                  media_id = ensure_media(str(primary['src']), alt)
+
+              matches = rest_json('/wp-json/wc/v3/products?status=any&per_page=100&slug=' + urllib.parse.quote(slug))
+              existing = matches[0] if isinstance(matches, list) and matches else None
+              payload = {
+                  'name': name,
+                  'slug': slug,
+                  'type': 'simple',
+                  'status': 'publish',
+                  'catalog_visibility': 'visible',
+                  'regular_price': regular,
+                  'sale_price': sale,
+                  'manage_stock': False,
+                  'stock_status': 'instock',
+                  'description': str(source.get('description') or ''),
+                  'short_description': str(source.get('short_description') or ''),
+                  'meta_data': [
+                      {'key': '_esc_origin_product_id', 'value': str(source_id)},
+                  ],
+              }
+              if media_id:
+                  payload['images'] = [{'id': media_id, 'alt': name}]
+
+              if existing:
+                  target = rest_json('/wp-json/wc/v3/products/' + str(existing['id']), method='PUT', payload=payload)
+                  action = 'UPDATED'
+              else:
+                  target = rest_json('/wp-json/wc/v3/products', method='POST', payload=payload)
+                  action = 'CREATED'
+
+              target_id = int(target['id'])
+              target_images = target.get('images') if isinstance(target.get('images'), list) else []
+              if media_id:
+                  if not target_images:
+                      raise RuntimeError(f'Target product {target_id} lost featured image')
+                  first_src = str(target_images[0].get('src') or '')
+                  if urllib.parse.urlparse(first_src).netloc != 'admin.aquathanhxuan.io.vn':
+                      raise RuntimeError(f'Product {target_id} still hotlinks image: {first_src}')
+              if str(target.get('regular_price') or '') != regular or str(target.get('sale_price') or '') != sale:
+                  raise RuntimeError(f'Price verification failed for {slug}')
+
+              mappings.append({'source_id': source_id, 'target_id': target_id, 'slug': slug})
+              print(f'PRODUCT_{action} SOURCE={source_id} TARGET={target_id} SLUG={slug}')
+
+          if len(mappings) != 12:
+              raise RuntimeError('Product mapping count is not 12')
+
+          # Configure ESC Table home_01. Header rows + one config row + 12 product references.
+          keys = ['key', 'section_title', 'all_label', 'all_link']
+          labels = ['Sản phẩm', 'Tiêu đề khu vực', 'Nhãn xem tất cả', 'Liên kết xem tất cả']
+          rows = [
+              keys,
+              labels,
+              ['', 'Sale bùng nổ', 'Xem tất cả ưu đãi', '/san-pham'],
+          ]
+          rows.extend([[str(item['target_id']), '', '', ''] for item in mappings])
+          row_count = len(rows)
+          col_count = len(keys)
+
+          try:
+              public_json(WP_URL + '/wp-json/tablepress/v1/table/home_01?qa=' + str(time.time_ns()))
+              table_id = 'home_01'
+              print('TABLE_HOME_01_EXISTS=true')
+          except Exception:
+              add_html = read_text(open_url(WP_URL + '/wp-admin/admin.php?page=tablepress_add'))
+              add_nonce_match = re.search(r'name=["\']_wpnonce["\'][^>]*value=["\']([^"\']+)["\']', add_html, re.I)
+              if not add_nonce_match:
+                  add_nonce_match = re.search(r'value=["\']([^"\']+)["\'][^>]*name=["\']_wpnonce["\']', add_html, re.I)
+              if not add_nonce_match:
+                  raise RuntimeError('Could not find ESC Table add nonce')
+              add_form = urllib.parse.urlencode({
+                  'action': 'tablepress_add',
+                  '_wpnonce': add_nonce_match.group(1),
+                  'table[name]': 'Trang chủ - Sale',
+                  'table[description]': 'Danh sách sản phẩm đang giảm giá trên trang chủ.',
+                  'table[rows]': str(row_count),
+                  'table[columns]': str(col_count),
+              }).encode()
+              response = open_url(
+                  WP_URL + '/wp-admin/admin-post.php',
+                  data=add_form,
+                  headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                  method='POST',
+              )
+              edit_html = read_text(response)
+              table_match = re.search(r"tp\.table\s*=\s*\{.*?\bid:\s*'([^']+)'", edit_html, re.S)
+              if not table_match:
+                  table_match = re.search(r'[?&]table_id=([^&"\']+)', response.geturl())
+              if not table_match:
+                  raise RuntimeError('ESC Table was created but its ID could not be determined')
+              table_id = urllib.parse.unquote(table_match.group(1))
+              print('TABLE_CREATED_TEMP_ID=' + table_id)
+
+          edit_html = read_text(open_url(
+              WP_URL + '/wp-admin/admin.php?page=tablepress&action=edit&table_id=' + urllib.parse.quote(table_id)
+          ))
+          edit_nonce_match = re.search(r"edit_table:\s*'([^']+)'", edit_html)
+          if not edit_nonce_match:
+              raise RuntimeError('Could not find ESC Table edit nonce')
+
+          visibility = {
+              'rows': [1] * row_count,
+              'columns': [1] * col_count,
+          }
+          save_pairs = [
+              ('action', 'tablepress_save_table'),
+              ('_ajax_nonce', edit_nonce_match.group(1)),
+              ('tablepress[id]', table_id),
+              ('tablepress[new_id]', 'home_01'),
+              ('tablepress[name]', 'Trang chủ - Sale'),
+              ('tablepress[description]', 'Danh sách sản phẩm đang giảm giá trên trang chủ.'),
+              ('tablepress[data]', json.dumps(rows, ensure_ascii=False)),
+              ('tablepress[options]', '{}'),
+              ('tablepress[visibility]', json.dumps(visibility)),
+              ('tablepress[number][rows]', str(row_count)),
+              ('tablepress[number][columns]', str(col_count)),
+              ('custom_api', 'Product'),
+              ('custom_image', ''),
+              ('custom_cols', ''),
+              ('custom_rows', ''),
+          ]
+          save_body = urllib.parse.urlencode(save_pairs).encode('utf-8')
+          save_response = json.loads(read_text(open_url(
+              WP_URL + '/wp-admin/admin-ajax.php',
+              data=save_body,
+              headers={'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'},
+              method='POST',
+          )))
+          if not save_response.get('success') or save_response.get('table_id') != 'home_01':
+              raise RuntimeError('ESC Table save failed: ' + json.dumps(save_response, ensure_ascii=False))
+          print('TABLE_HOME_01_SAVE=PASS')
+
+          # Attach the new ESC Table to the real homepage, preserving existing content.
+          page = rest_json('/wp-json/wp/v2/pages/82454?context=edit')
+          raw_content = str((page.get('content') or {}).get('raw') or '')
+          if '[table id=home_00 /]' not in raw_content:
+              raise RuntimeError('Homepage no longer contains home_00; refusing to overwrite')
+          if '[table id=home_01 /]' not in raw_content:
+              new_content = raw_content.rstrip() + '\n\n[table id=home_01 /]'
+              rest_json('/wp-json/wp/v2/pages/82454', method='POST', payload={'content': new_content})
+              print('HOME_PAGE_SHORTCODE_ADDED=true')
+          else:
+              print('HOME_PAGE_SHORTCODE_ADDED=false')
+
+          # Public readback proves CMS state before build.
+          table = public_json(WP_URL + '/wp-json/tablepress/v1/table/home_01?qa=' + str(time.time_ns()))
+          if (table.get('meta') or {}).get('api') != 'Product':
+              raise RuntimeError('home_01 meta.api is not Product')
+          items = table.get('items') if isinstance(table.get('items'), list) else []
+          if len(items) != 13:
+              raise RuntimeError(f'home_01 expected 13 items, got {len(items)}')
+          table_keys = {str(item.get('key') or '') for item in items}
+          expected_target_ids = {str(item['target_id']) for item in mappings}
+          if not expected_target_ids.issubset(table_keys):
+              raise RuntimeError('home_01 product keys do not match imported products')
+
+          page_public = public_json(WP_URL + '/wp-json/wp/v2/pages/82454?_fields=id,content&qa=' + str(time.time_ns()))
+          rendered = str((page_public.get('content') or {}).get('rendered') or '')
+          if 'home_01' not in rendered:
+              raise RuntimeError('Homepage public content does not expose home_01')
+
+          target_products = rest_json('/wp-json/wc/v3/products?status=publish&per_page=100')
+          target_by_slug = {str(p.get('slug') or ''): p for p in target_products if isinstance(p, dict)}
+          missing = [slug for slug in expected_slugs if slug not in target_by_slug]
+          if missing:
+              raise RuntimeError('Missing target products: ' + ','.join(missing))
+
+          print('CMS_WRITE_PASS=true')
+          print('TARGET_SALE_PRODUCT_COUNT=12')
+          print('HOME_01_ITEMS=13')
+          print('PRODUCT_MAPPING=' + json.dumps(mappings, ensure_ascii=False))
           PY
