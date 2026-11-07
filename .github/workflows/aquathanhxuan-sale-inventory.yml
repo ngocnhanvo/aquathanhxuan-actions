@@ -93,3 +93,87 @@ jobs:
           console.log('LEGACY_SALE_COUNT=' + legacySummary.length);
           console.log('LEGACY_SALE_PRODUCTS=' + JSON.stringify(legacySummary));
           NODE
+
+
+      - name: Probe authenticated WooCommerce REST contract without writes
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+          WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          WP_URL="$(python3 - <<'PY'
+          import os
+          for raw in os.environ.get('ENV_FILE','').splitlines():
+              line=raw.strip()
+              if line.startswith('export '): line=line[7:].strip()
+              if line.startswith('WC_URL='):
+                  print(line.split('=',1)[1].strip().strip('"').strip("'").rstrip('/'))
+                  break
+          PY
+          )"
+          test "$WP_URL" = "https://admin.aquathanhxuan.io.vn"
+          test -n "$WP_ADMIN_USERNAME"
+          test -n "$WP_ADMIN_PASSWORD"
+
+          COOKIE_JAR="$RUNNER_TEMP/wp-cookies.txt"
+          DASHBOARD="$RUNNER_TEMP/wp-admin.html"
+          curl -fsS -c "$COOKIE_JAR" "$WP_URL/wp-login.php" >/dev/null
+          curl -fsS -L -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+            --data-urlencode "log=$WP_ADMIN_USERNAME" \
+            --data-urlencode "pwd=$WP_ADMIN_PASSWORD" \
+            --data-urlencode "wp-submit=Log In" \
+            --data-urlencode "redirect_to=$WP_URL/wp-admin/" \
+            --data-urlencode "testcookie=1" \
+            "$WP_URL/wp-login.php" -o "$DASHBOARD"
+
+          grep -q "wp-admin-bar-my-account" "$DASHBOARD"
+          NONCE="$(python3 - "$DASHBOARD" <<'PY'
+          import json,re,sys
+          html=open(sys.argv[1],encoding='utf-8',errors='ignore').read()
+          m=re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;',html,re.S)
+          if m:
+              try:
+                  print(json.loads(m.group(1)).get('nonce',''))
+                  raise SystemExit
+              except json.JSONDecodeError:
+                  pass
+          m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',html)
+          print(m.group(1) if m else '')
+          PY
+          )"
+          test -n "$NONCE"
+
+          WC_STATUS="$(curl -sS -o "$RUNNER_TEMP/wc-products.json" -w '%{http_code}' \
+            -b "$COOKIE_JAR" -H "X-WP-Nonce: $NONCE" \
+            "$WP_URL/wp-json/wc/v3/products?per_page=1&context=edit")"
+          WP_STATUS="$(curl -sS -o "$RUNNER_TEMP/wp-products.json" -w '%{http_code}' \
+            -b "$COOKIE_JAR" -H "X-WP-Nonce: $NONCE" \
+            "$WP_URL/wp-json/wp/v2/product?per_page=1&context=edit")"
+
+          python3 - "$RUNNER_TEMP/wc-products.json" "$RUNNER_TEMP/wp-products.json" "$WC_STATUS" "$WP_STATUS" <<'PY'
+          import json,sys
+          wc_path,wp_path,wc_status,wp_status=sys.argv[1:]
+          def load(path):
+              try:
+                  return json.load(open(path,encoding='utf-8'))
+              except Exception as exc:
+                  return {'_parse_error':str(exc)}
+          wc,wp=load(wc_path),load(wp_path)
+          print('AUTH_LOGIN=PASS')
+          print('WC_V3_STATUS='+wc_status)
+          print('WP_V2_PRODUCT_STATUS='+wp_status)
+          print('WC_V3_SHAPE=' + ('array' if isinstance(wc,list) else 'object'))
+          if isinstance(wc,list) and wc:
+              print('WC_V3_KEYS='+','.join(sorted(wc[0].keys())))
+          elif isinstance(wc,dict):
+              print('WC_V3_ERROR_CODE='+str(wc.get('code','')))
+              print('WC_V3_ERROR_MESSAGE='+str(wc.get('message',''))[:200])
+          print('WP_V2_SHAPE=' + ('array' if isinstance(wp,list) else 'object'))
+          if isinstance(wp,dict):
+              print('WP_V2_ERROR_CODE='+str(wp.get('code','')))
+              print('WP_V2_ERROR_MESSAGE='+str(wp.get('message',''))[:200])
+          if wc_status != '200' or wp_status != '200':
+              raise SystemExit('Authenticated product REST probe failed')
+          PY
