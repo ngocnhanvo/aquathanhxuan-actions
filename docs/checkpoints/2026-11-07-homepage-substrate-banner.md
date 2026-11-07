@@ -51,3 +51,10 @@ Cổng ghi source: bypass
   - 82480 — Dennerle Scaper’s Soil 4L — /wp-content/uploads/2026/11/Thiet-ke-chua-co-ten-86.png
 - Existing Astro Home_02.astro and home02.ts still render one section image/title; no new CMS/Builder/deploy modifications in this continuation.
 - Next action: select genuine relevant existing media and approved banner copy for one Home_02 row, create the native ESC Table and page shortcode via authenticated CMS writer, then implement versioned cell mapping and test. Do not invent product links or claim new section deployed.
+
+## Continuation 2026-11-07 23:59 +07:00
+- Read current Knowledge AGENTS and project checkpoint; confirmed Home_02 remains next unfinished section, Hero text toggle already PASS. Latest-response was read first.
+- Astro master commit `ab5ff3d6e7754b28655677d0e306d0aaabcffb97` adds source identity attributes to the existing Home_02 section: table `home_02`, original zero-based row, optional rendered version, and field identity for title/description/image/CTA. It does NOT enable Visual Builder writing or claim backend version validation.
+- Actions main commit `4f3470a2e530b4ac2e050c0384cc8a38ff5c59e5` updates existing targeted source-test workflow to exact Astro SHA; push workflow run result NOT VERIFIED (commit-run lookup returned none; fetch list endpoint denied). Do not mark test PASS.
+- WordPress home_02 native table and Insert Code shortcode still NOT STARTED; PHP Builder source/version validation NOT STARTED. No CMS write, PHP deploy, Astro production build or visual QA in this continuation.
+- Next: inspect Actions source-test run by run ID when available; create verified native `home_02` via authenticated CMS UI, Insert Code on Page 82454, read-after-write; implement strict versioned Builder backend validation; source test and deploy/QA after data is verified. Do not fake WooCommerce category 1775 products or CTA.
