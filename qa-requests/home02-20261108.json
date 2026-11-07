@@ -1,6 +1,6 @@
 {
   "task": "home02-production-readonly-check",
-  "astro_sha": "72bf8f8f35478055274f9944845d9b7e8227ea96",
+  "astro_sha": "2cde30aef43a0d82ed20df78ae6716ac85fa1012",
   "mode": "read-only",
   "checks": [
     "five_viewports",
@@ -9,5 +9,5 @@
     "section_selection",
     "editable_fields"
   ],
-  "run": "builder-selection-72bf8f8"
+  "run": "builder-selection-single-wrapper-2cde30a"
 }
