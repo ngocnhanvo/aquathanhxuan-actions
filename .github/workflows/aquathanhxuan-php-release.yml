@@ -1,5 +1,9 @@
 name: Aqua Thanh Xuân PHP deployment (manual opt-in)
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'php-release-requests/*.json'
   workflow_dispatch:
     inputs:
       confirm:
@@ -13,13 +17,17 @@ concurrency:
   cancel-in-progress: false
 jobs:
   wordpress-php:
-    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions' && inputs.confirm == 'DEPLOY_PHP'
+    if: >-
+      github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+      && (github.event_name == 'push'
+          || (github.event_name == 'workflow_dispatch' && inputs.confirm == 'DEPLOY_PHP'))
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - name: Checkout AQUATHANHXUAN Actions deploy script
         uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           persist-credentials: false
       - name: Checkout only AQUATHANHXUAN WordPress PHP master
         uses: actions/checkout@v4
@@ -29,6 +37,39 @@ jobs:
           token: ${{ secrets.SOURCE_REPO_PAT }}
           path: source-php
           persist-credentials: false
+      - name: Verify one explicit PHP release request and source SHA (push only)
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, re, subprocess
+          event=json.loads(pathlib.Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          before,after=str(event.get('before','')),str(event.get('after',''))
+          if event.get('ref') != 'refs/heads/main' or not all(re.fullmatch('[a-f0-9]{40}',v) for v in (before,after)):
+              raise SystemExit('Unverified push ref or before/after SHA')
+          current=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          if current != after or os.environ['GITHUB_SHA'] != after:
+              raise SystemExit('Actions checkout differs from push SHA')
+          raw=subprocess.check_output(['git','diff','--no-renames','--name-status',before,after,'--','php-release-requests/'],text=True)
+          lines=[line.split('\\t') for line in raw.strip().splitlines() if line]
+          if len(lines)!=1 or lines[0][0] not in ('A','M') or not re.fullmatch(r'php-release-requests/[a-zA-Z0-9._-]+\\.json',lines[0][1]):
+              raise SystemExit('Exactly one new/updated PHP release request required')
+          payload=json.loads(pathlib.Path(lines[0][1]).read_text())
+          expected={
+              'project':'aquathanhxuan.com','environment':'production',
+              'php_source_repo':'ngocnhanvo/aquathanhxuan-php','source_branch':'master',
+          }
+          if any(payload.get(k)!=v for k,v in expected.items()):
+              raise SystemExit('PHP release request targets unexpected project/host/branch')
+          requested=payload.get('source_sha','')
+          if not isinstance(requested,str) or not re.fullmatch('[a-f0-9]{40}',requested):
+              raise SystemExit('Missing exact PHP source SHA')
+          source=subprocess.check_output(['git','-C','source-php','rev-parse','HEAD'],text=True).strip()
+          if source != requested:
+              raise SystemExit('PHP master moved; refusing to deploy unintended SHA')
+          print('AQUATHANHXUAN_PHP_RELEASE_REQUEST=PASS source_sha='+source)
+          PY
       - name: PHP syntax and project identity
         shell: bash
         run: |
@@ -39,6 +80,10 @@ jobs:
           php source-php/tests/aquathanhxuan-static-delta.php
           php -l source-php/wp-content/plugins/github-trigger/vcs-build-trigger.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/site-config.php
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor.php
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
+          php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
+          php source-php/wp-content/plugins/esc-visual-builder/tests/text-image-cells.test.php
           php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.test.php
           php -l source-php/wp-content/mu-plugins/esc-github-trigger-config.php
           php -l source-php/wp-content/mu-plugins/esc-seo-files.php
