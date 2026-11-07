@@ -166,7 +166,9 @@ jobs:
               const mode = await form.locator('input[name="sitemap_mode"]:checked').inputValue();
               const manualXml = await form.locator('#esc-seo-xml').inputValue();
               const manualLocCount = (manualXml.match(/<loc(?:\s[^>]*)?>/g) || []).length;
+              const formAction = await form.getAttribute('action');
               console.log(`SITEMAP_SAVE_INPUT mode=${mode} manual_loc_count=${manualLocCount}`);
+              console.log('SITEMAP_SAVE_FORM_ACTION=' + (() => { const u = new URL(formAction, origin); return u.pathname + u.search; })());
 
               const [saveResponse] = await Promise.all([
                 page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
@@ -177,6 +179,21 @@ jobs:
               const body = await page.locator('body').innerText();
               const dieMessage = await page.locator('.wp-die-message').first().innerText().catch(() => '');
               console.log(`SITEMAP_SAVE_HTTP=${saveResponse ? saveResponse.status() : 'none'}`);
+              if (saveResponse) {
+                const chain = [];
+                let request = saveResponse.request();
+                while (request) {
+                  const response = await request.response();
+                  const requestUrl = new URL(request.url());
+                  let location = response ? (response.headers()['location'] || '') : '';
+                  if (location) {
+                    try { const u = new URL(location, origin); location = u.pathname + u.search; } catch { location = '<invalid>'; }
+                  }
+                  chain.push(`${request.method()} ${requestUrl.pathname}${requestUrl.search} -> ${response ? response.status() : 'none'}${location ? ' Location=' + location : ''}`);
+                  request = request.redirectedFrom();
+                }
+                console.log('SITEMAP_SAVE_CHAIN=' + chain.reverse().join(' | '));
+              }
               console.log(`SITEMAP_SAVE_FINAL=${current.pathname}?${current.searchParams.toString()}`);
               if (dieMessage) console.log('SITEMAP_SAVE_SERVER_MESSAGE=' + dieMessage.replace(/\s+/g, ' ').slice(0, 600));
               assert(!body.includes('Đã xảy ra lỗi nghiêm trọng') && !body.includes('There has been a critical error'), 'WordPress critical error after sitemap save');
