@@ -98,7 +98,7 @@ try{
   console.log('MENU_CREATE_FORM='+JSON.stringify(formInfo));
   await Promise.all([
     page.waitForLoadState('domcontentloaded'),
-    page.locator('#menu-name').evaluate(el=>{if(!el.form)throw Error('MENU_FORM_MISSING');el.form.submit();})
+    page.locator('#menu-name').evaluate(el=>{if(!el.form)throw Error('MENU_FORM_MISSING');el.form.action='/wp-admin/nav-menus.php';el.form.submit();})
   ]);
   console.log('MENU_CREATE_RESPONSE='+JSON.stringify({url:page.url(),name:await page.locator('#menu-name').inputValue().catch(()=>''),notices:await page.locator('.notice,#message,.error,.updated').allTextContents()}));
 
