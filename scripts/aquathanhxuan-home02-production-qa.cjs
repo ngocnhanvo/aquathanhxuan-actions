@@ -78,6 +78,11 @@ const sizes=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
     console.log('HOME02_BUILDER_CELL_COORDS=PASS versionPresent=true');
     const title=section.locator('h2');
     await title.click();
+    // postMessage from the cross-origin iframe is asynchronous. Wait for the
+    // canonical table selection before asserting, instead of racing the event.
+    await admin.waitForFunction(() =>
+      (document.querySelector('#esc-vb-section-summary')?.textContent || '').includes('home_02'),
+      null, {timeout:15000});
     const summary=await admin.locator('#esc-vb-section-summary').innerText({timeout:15000});
     console.log('HOME02_BUILDER_SECTION='+JSON.stringify(summary.slice(0,300)));
     const inspector=await admin.locator('#esc-vb-inspector').innerText();
