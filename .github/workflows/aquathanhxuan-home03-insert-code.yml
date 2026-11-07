@@ -32,3 +32,4 @@ jobs:
         run: node scripts/aquathanhxuan-home03-insert-code.cjs
 
 # Retry one bounded WordPress navigation timeout; no CMS change on failed preflight.
+# Readback uses a separate authenticated tab after the native WordPress Publish redirect.
