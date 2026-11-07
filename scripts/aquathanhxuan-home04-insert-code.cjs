@@ -8,7 +8,9 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
 
 (async () => {
   const browser = await chromium.launch({ args: ['--no-sandbox'] });
-  const page = await browser.newPage();
+  // Explicit context permits a second authenticated tab for read-after-write.
+  const context = await browser.newContext();
+  const page = await context.newPage();
   page.setDefaultTimeout(20000);
   page.setDefaultNavigationTimeout(45000);
   page.on('dialog', async dialog => {
@@ -48,6 +50,7 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
     assert(before.includes('home_00') && before.includes('home_01') && before.includes('home_02') && before.includes('home_03'), 'existing sections missing');
     if (before.includes(shortcode)) {
       assert.equal(before.split(shortcode).length - 1, 1, 'pre-existing duplicate home_04');
+      assert(before.indexOf('home_04') > before.lastIndexOf('home_03'), 'pre-existing home_04 section order is invalid');
       console.log('HOME04_INSERT_CODE=PASS_ALREADY_PRESENT');
       return;
     }
