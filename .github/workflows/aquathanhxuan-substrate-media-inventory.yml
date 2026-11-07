@@ -1,0 +1,38 @@
+name: Aqua homepage substrate media discovery (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-substrate-media-inventory.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - name: Find existing WordPress media and categories
+        shell: bash
+        run: |
+          node <<'NODE'
+          const env = Object.fromEntries((process.env.ENV_FILE||'').split(/\r?\n/).map(s=>s.match(/^\s*(WC_URL|WC_URL_CLIENT)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m=>[m[1],m[2].replace(/^['"]|['"]$/g,'')]));
+          if(env.WC_URL!=='https://admin.aquathanhxuan.io.vn'||env.WC_URL_CLIENT!=='https://aquathanhxuan.io.vn')throw Error('INVALID_SITE_ORIGIN');
+          const origin=env.WC_URL;
+          (async()=>{
+            for(const term of ['nền','cốt nền','soil','substrate','phân nền','ada','aquasoil']){
+              const u=origin+'/wp-json/wp/v2/media?search='+encodeURIComponent(term)+'&per_page=50&_fields=id,title,alt_text,source_url,media_type';
+              const r=await fetch(u,{headers:{accept:'application/json'}});
+              const body=await r.json().catch(()=>null);
+              console.log('MEDIA_SEARCH '+JSON.stringify({term,status:r.status,total:r.headers.get('x-wp-total'),items:Array.isArray(body)?body.slice(0,25).map(x=>({id:x.id,title:x.title?.rendered,alt:x.alt_text,src:x.source_url,media_type:x.media_type})):[]}));
+            }
+            const u=origin+'/wp-json/api/products/categories';
+            const r=await fetch(u);
+            const cats=await r.json().catch(()=>null);
+            const flat=[];
+            function walk(a){if(!Array.isArray(a))return;for(const o of a){if(!o||typeof o!=='object')continue;const name=String(o.name||o.title||'');if(/nền|đá|soil|substrate|cốt/i.test(name))flat.push({id:o.id,name,slug:o.slug,image:o.image?.url||o.image||null});walk(o.children);}}
+            walk(cats);
+            console.log('REAL_CATEGORIES '+JSON.stringify({status:r.status,matches:flat.slice(0,35)}));
+          })().catch(e=>{console.error('MEDIA_DISCOVERY_FAILED='+e.message);process.exitCode=1});
+          NODE
