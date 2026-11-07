@@ -53,3 +53,30 @@ jobs:
             console.log('REAL_CATEGORIES '+JSON.stringify({status:r.status,matches:flat.slice(0,35)}));
           })().catch(e=>{console.error('MEDIA_DISCOVERY_FAILED='+e.message);process.exitCode=1});
           NODE
+
+      - name: Inspect WooCommerce substrate products and recent WordPress media
+        shell: bash
+        run: |
+          node <<'NODE'
+          const env = Object.fromEntries((process.env.ENV_FILE||'').split(/\r?\n/).map(s=>s.match(/^\s*(WC_URL|WC_URL_CLIENT)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(m=>[m[1],m[2].replace(/^['"]|['"]$/g,'')]));
+          if(env.WC_URL!=='https://admin.aquathanhxuan.io.vn'||env.WC_URL_CLIENT!=='https://aquathanhxuan.io.vn')throw Error('INVALID_SITE_ORIGIN');
+          const root=env.WC_URL;
+          async function inspect(name,path,limit=100){
+            const response=await fetch(root+path,{headers:{accept:'application/json'}});
+            const json=await response.json().catch(()=>null);
+            if(!response.ok)throw Error(name+'_HTTP_'+response.status);
+            const list=Array.isArray(json)?json:Array.isArray(json?.products)?json.products:[];
+            return {status:response.status,total:response.headers.get('x-wp-total'),items:list.slice(0,limit)};
+          }
+          (async()=>{
+            const p=await inspect('PRODUCTS','/wp-json/wc/store/v1/products?category=1775&per_page=50',50);
+            console.log('SUBSTRATE_PRODUCTS '+JSON.stringify({status:p.status,total:p.total,items:p.items.map(x=>({id:x.id,name:x.name,permalink:x.permalink,images:(x.images||[]).slice(0,2).map(i=>({id:i.id,src:i.src,alt:i.alt}))}))}));
+            const candidates=[];
+            for(let page=1;page<=3;page++){
+              const m=await inspect('MEDIA','/wp-json/wp/v2/media?per_page=100&page='+page+'&_fields=id,date,title,alt_text,source_url,media_type',100);
+              candidates.push(...m.items.filter(x=>x.media_type==='image').map(x=>({id:x.id,date:x.date,title:x.title?.rendered,alt:x.alt_text,src:x.source_url})));
+              if(m.items.length<100)break;
+            }
+            console.log('RECENT_MEDIA_INVENTORY '+JSON.stringify({sampled:candidates.length,items:candidates.slice(0,100)}));
+          })().catch(e=>{console.error('SUBSTRATE_INVENTORY_FAILED='+e.message);process.exitCode=1});
+          NODE
