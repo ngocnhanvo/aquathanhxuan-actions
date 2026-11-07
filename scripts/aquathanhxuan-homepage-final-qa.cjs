@@ -140,6 +140,23 @@ async function assertHealthyImage(locator, caption) {
       assert.equal(layout.benefits, 4, 'Benefits row count');
       assert(layout.footerCategories >= 3, 'Real WordPress Footer categories missing');
 
+      // Capture genuine in-viewport pixels for each lazy-painted section.
+      // Full-page Chromium screenshots alone can skip content-visibility sections.
+      for (const [label, selector, expectedCards] of [
+        ['equipment', '[data-aqua-home-equipment]', 2],
+        ['benefits', '[data-aqua-home-benefits]', 4],
+      ]) {
+        const region = page.locator(selector);
+        await region.scrollIntoViewIfNeeded();
+        assert.equal(await region.locator('article').count(), expectedCards, label + ' card count');
+        await region.screenshot({path: artifacts + '/' + label + '-' + width + 'x' + height + '.png'});
+        console.log('HOMEPAGE_SECTION_CAPTURE=PASS ' + label + ' ' + width + 'x' + height);
+      }
+      await page.locator('[data-aqua-home-hero]').screenshot({path: artifacts + '/hero-' + width + 'x' + height + '.png'});
+      await page.locator('#footer-contact').screenshot({path: artifacts + '/footer-' + width + 'x' + height + '.png'});
+      // Capture a supplemental full-page overview before carousel/menu transitions.
+      await page.screenshot({path: artifacts + '/full-' + width + 'x' + height + '.png', fullPage: true});
+
       const heroNext = page.locator('[data-aqua-home-hero] [data-hero-next]');
       if (await heroNext.isVisible()) {
         const initial = await page.locator('[data-aqua-home-hero] [data-hero-slide][data-active="true"]').first()
@@ -188,9 +205,6 @@ async function assertHealthyImage(locator, caption) {
         console.log('HOMEPAGE_DESKTOP_CONTROLS=PASS ' + width + 'x' + height);
       }
 
-      await page.screenshot({path: artifacts + '/full-' + width + 'x' + height + '.png', fullPage: true});
-      await page.locator('[data-aqua-home-hero]').screenshot({path: artifacts + '/hero-' + width + 'x' + height + '.png'});
-      await page.locator('#footer-contact').screenshot({path: artifacts + '/footer-' + width + 'x' + height + '.png'});
       console.log('HOMEPAGE_VIEWPORT=PASS ' + width + 'x' + height + ' ' + JSON.stringify(layout));
       await context.close();
     }
