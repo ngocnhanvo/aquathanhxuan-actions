@@ -46,6 +46,19 @@ const getJson = async url => {
   return response.json();
 };
 
+const findTableByTitle = async (title) => {
+  for (let page = 1; page <= 20; page += 1) {
+    const response = await fetchRetry(`${wpUrl}/wp-json/tablepress/v1/tables/prefix/all?page=${page}&per_page=30&_qa=${Date.now()}`);
+    if (!response.ok) return null;
+    const tables = await response.json();
+    if (!Array.isArray(tables) || !tables.length) return null;
+    const match = tables.find(item => String(item?.title || '').trim() === title);
+    if (match?.id) return match;
+    if (tables.length < 30) return null;
+  }
+  return null;
+};
+
 const findMedia = async slug => {
   const response = await fetchRetry(`${wpUrl}/wp-json/wp/v2/media?slug=${encodeURIComponent(slug)}&per_page=10&_fields=id,slug,source_url,media_details,title,alt_text`);
   if (!response.ok) return null;
@@ -141,25 +154,40 @@ try {
   let tableEditUrl = `${wpUrl}/wp-admin/admin.php?page=tablepress&action=edit&table_id=home_00`;
 
   if (!tableResponse.ok) {
-    await page.goto(`${wpUrl}/wp-admin/admin.php?page=tablepress_add`, { waitUntil: 'domcontentloaded', timeout: 45000 });
-    await page.locator('input[name="table[name]"]').fill('Trang chủ - Hero');
-    await page.locator('textarea[name="table[description]"]').fill('Hero trang chủ AQua Thanh Xuân');
-    await page.locator('input[name="table[rows]"]').fill('4');
-    await page.locator('input[name="table[columns]"]').fill('13');
-    await Promise.all([
-      page.waitForURL(/page=tablepress.*action=edit.*table_id=/, { timeout: 45000 }),
-      page.getByRole('button', { name: /Add Table|Thêm bảng/i }).click(),
-    ]);
+    const pending = await findTableByTitle('Trang chủ - Hero');
+    let numericId = pending?.id ? String(pending.id) : '';
 
-    const numericId = new URL(page.url()).searchParams.get('table_id');
-    if (!numericId) throw new Error('TABLE_CREATE_NO_ID');
-    await page.locator('#table-id').waitFor();
-    page.once('dialog', dialog => dialog.accept());
-    await page.locator('#table-id').fill('home_00');
-    await page.locator('#table-id').press('Tab');
-    await page.waitForFunction(() => document.querySelector('#table-information-shortcode')?.value?.includes('home_00'));
-    tableEditUrl = page.url();
-    console.log(`TABLE_CREATE=PASS initial_id=${numericId}`);
+    if (numericId) {
+      tableEditUrl = `${wpUrl}/wp-admin/admin.php?page=tablepress&action=edit&table_id=${encodeURIComponent(numericId)}`;
+      await page.goto(tableEditUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      console.log(`TABLE_RECOVER=PASS pending_id=${numericId}`);
+    } else {
+      await page.goto(`${wpUrl}/wp-admin/admin.php?page=tablepress_add`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      await page.locator('input[name="table[name]"]').fill('Trang chủ - Hero');
+      await page.locator('textarea[name="table[description]"]').fill('Hero trang chủ AQua Thanh Xuân');
+      await page.locator('input[name="table[rows]"]').fill('4');
+      await page.locator('input[name="table[columns]"]').fill('13');
+      await Promise.all([
+        page.waitForURL(/page=tablepress.*action=edit.*table_id=/, { timeout: 45000 }),
+        page.getByRole('button', { name: /Add Table|Thêm bảng/i }).click(),
+      ]);
+      numericId = new URL(page.url()).searchParams.get('table_id') || '';
+      if (!numericId) throw new Error('TABLE_CREATE_NO_ID');
+      console.log(`TABLE_CREATE=PASS initial_id=${numericId}`);
+    }
+
+    const tableIdInput = page.locator('#table-id');
+    await tableIdInput.waitFor({ state: 'visible', timeout: 30000 });
+    if ((await tableIdInput.inputValue()) !== 'home_00') {
+      page.once('dialog', dialog => dialog.accept());
+      await tableIdInput.fill('home_00');
+      await page.locator('#table-information-shortcode').click();
+      await page.waitForFunction(() => {
+        const shortcode = document.querySelector('#table-information-shortcode');
+        return shortcode instanceof HTMLInputElement && shortcode.value.includes('home_00');
+      }, null, { timeout: 10000 });
+      console.log(`TABLE_ID_READY=PASS from=${numericId} to=home_00`);
+    }
   } else {
     await page.goto(tableEditUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
   }
