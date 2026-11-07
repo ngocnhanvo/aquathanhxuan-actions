@@ -64,9 +64,10 @@ jobs:
           import os, re, json, urllib.request, urllib.parse, urllib.error
           config = {}
           for line in os.environ.get('ENV_FILE','').splitlines():
-              match = re.match(r'^\\s*(?:export\\s+)?(\\w+)\\s*=\\s*(.*?)\\s*$',line)
-              if match:
-                  config[match.group(1)] = match.group(2).strip().strip('"\\'')
+              key, separator, value = line.partition('=')
+              key = key.strip().removeprefix('export ').strip()
+              if separator and key == 'WC_URL':
+                  config[key] = value.strip().strip(chr(34)).strip(chr(39))
           base=config.get('WC_URL','').rstrip('/')
           assert base=='https://admin.aquathanhxuan.io.vn', 'Invalid CMS origin'
           def read(path):
