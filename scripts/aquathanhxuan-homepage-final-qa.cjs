@@ -99,14 +99,31 @@ async function assertHealthyImage(locator, caption) {
         // the authenticated Visual Builder, which carries the edit contract.
       }
 
-      for (const selector of [
-        '[data-aqua-home-substrate] a[data-esc-link-field="button_href"]',
-        '[data-aqua-home-combo] a[data-esc-link-field="button_href"]',
-        '[data-aqua-home-equipment] a[data-esc-link-field="button_href"]',
+      // A CTA exists only when native ESC Table supplies BOTH label and href.
+      // Never synthesize a destination just to make the acceptance test pass.
+      for (const [selector, tableId] of [
+        ['[data-aqua-home-substrate] a[data-esc-link-field="button_href"]', 'home_02'],
+        ['[data-aqua-home-combo] a[data-esc-link-field="button_href"]', 'home_03'],
+        ['[data-aqua-home-equipment] a[data-esc-link-field="button_href"]', 'home_04'],
       ]) {
+        const tableData = (data.contents || []).find(x => x.shortcode === tableId)?.data;
+        const rows = (Array.isArray(tableData?.items) ? tableData.items : [])
+          .filter(row => row?.title && row?.image?.src);
+        const renderedRows = tableId === 'home_02' ? rows.slice(0, 1) : rows;
+        const expected = renderedRows.filter(row => String(row.button_label || '').trim() &&
+          String(row.button_href || '').trim());
         const ctas = page.locator(selector);
-        assert((await ctas.count()) > 0, 'CTA missing: ' + selector);
-        for (const item of await ctas.all()) assert(validUrl(await item.getAttribute('href')), 'CTA invalid: ' + selector);
+        assert.equal(await ctas.count(), expected.length, 'CTA count differs from native table: ' + tableId);
+        for (const [index, item] of (await ctas.all()).entries()) {
+          const actual = await item.getAttribute('href');
+          assert(validUrl(actual), 'CTA invalid: ' + tableId);
+          const expectedTarget = String(expected[index].button_href).trim();
+          // Internal links may be rewritten by the site's basename/locale router.
+          const actualPath = new URL(actual, frontend).pathname;
+          const expectedPath = new URL(expectedTarget, frontend).pathname;
+          assert(actualPath.endsWith(expectedPath) || expectedPath === '/',
+            'CTA destination differs from WordPress data: ' + tableId);
+        }
       }
 
       const layout = await page.evaluate(() => ({
@@ -171,6 +188,7 @@ async function assertHealthyImage(locator, caption) {
         console.log('HOMEPAGE_DESKTOP_CONTROLS=PASS ' + width + 'x' + height);
       }
 
+      await page.screenshot({path: artifacts + '/full-' + width + 'x' + height + '.png', fullPage: true});
       await page.locator('[data-aqua-home-hero]').screenshot({path: artifacts + '/hero-' + width + 'x' + height + '.png'});
       await page.locator('#footer-contact').screenshot({path: artifacts + '/footer-' + width + 'x' + height + '.png'});
       console.log('HOMEPAGE_VIEWPORT=PASS ' + width + 'x' + height + ' ' + JSON.stringify(layout));
