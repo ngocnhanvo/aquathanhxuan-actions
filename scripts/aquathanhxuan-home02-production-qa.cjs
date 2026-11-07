@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const base='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expected='ab5ff3d6e7754b28655677d0e306d0aaabcffb97';
+const expected='d56711c354f01d3d09ecd931fafb6124eeb4f79a';
 const sizes=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 (async()=>{
   const marker=await fetch(base+'/aquathanhxuan-staging-build.json?home02qa='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
@@ -55,12 +55,42 @@ const sizes=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
     const section=frame.locator('[data-aqua-home-substrate]');
     await section.waitFor({state:'visible',timeout:35000});
     console.log('HOME02_BUILDER_PREVIEW=PASS page=82454');
+    // Builder-only live preview must bind the original ESC row and the
+    // WordPress-issued 64-hex page/table revision before editing is offered.
+    const heading=section.locator('h2[data-esc-builder-cell-field="title"]');
+    await heading.waitFor({state:'visible',timeout:25000});
+    const coords=await section.evaluate(el=>({
+      table:el.dataset.escSourceTable,
+      row:el.dataset.escSourceRow,
+      editRow:el.dataset.escBuilderRow,
+      version:el.dataset.escRenderedVersion,
+      sourceType:el.dataset.escSourceType,
+      titleRow:el.querySelector('h2')?.dataset.escBuilderCellRow,
+      titleField:el.querySelector('h2')?.dataset.escBuilderCellField,
+    }));
+    assert.equal(coords.table,'home_02','Builder source table');
+    assert.equal(coords.sourceType,'esc_table','Builder source type');
+    assert.equal(coords.row,'0','Builder original zero-based row');
+    assert.equal(coords.editRow,coords.row,'Builder editable row drift');
+    assert.match(coords.version||'',/^[a-f0-9]{64}$/,'Builder source version missing');
+    assert.equal(coords.titleRow,coords.row,'Builder title cell row drift');
+    assert.equal(coords.titleField,'title','Builder title source field');
+    console.log('HOME02_BUILDER_CELL_COORDS=PASS versionPresent=true');
     const title=section.locator('h2');
     await title.click();
     const summary=await admin.locator('#esc-vb-section-summary').innerText({timeout:15000});
     console.log('HOME02_BUILDER_SECTION='+JSON.stringify(summary.slice(0,300)));
     const inspector=await admin.locator('#esc-vb-inspector').innerText();
     assert(/home_02/.test(inspector+' '+summary),'Builder selection lost table ID');
+    // The editable-text endpoint and inspector must expose exact source
+    // columns, including the link target, without fuzzy text matching.
+    await admin.locator('#esc-vb-edit-row option').first().waitFor({state:'attached',timeout:15000});
+    const options=await admin.locator('#esc-vb-edit-row option').evaluateAll(items=>items.map(el=>el.value));
+    for(const field of ['title','description','button_label','button_href']){
+      assert(options.includes(field),'Builder missing ESC source field '+field);
+    }
+    assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,'Builder title cell not editable');
+    console.log('HOME02_BUILDER_TEXT_FIELDS=PASS '+options.join(','));
     await admin.screenshot({path:'artifacts/home02/builder-readonly.png'});
     console.log('HOME02_BUILDER_SELECTION=PASS read_only=true');
     await admin.close();
