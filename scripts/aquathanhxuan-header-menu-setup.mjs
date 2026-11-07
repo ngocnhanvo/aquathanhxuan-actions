@@ -48,6 +48,7 @@ const categoryResponse = await fetchRetry(`${wpUrl}/wp-json/astro/v1/get-product
 const categories = await categoryResponse.json();
 if (!Array.isArray(categories) || !categories.length) throw new Error('No product categories returned');
 
+console.log("WORDPRESS_CATEGORY_INVENTORY="+JSON.stringify(categories.map((item)=>({id:item.id,name:item.name,slug:item.slug,parent:item.parent}))));
 const byName = new Map(categories.map((item) => [normalize(item.name), item]));
 const matched = desired.map(([key, label, names]) => {
   const category = names.map((name) => byName.get(normalize(name))).find(Boolean);
