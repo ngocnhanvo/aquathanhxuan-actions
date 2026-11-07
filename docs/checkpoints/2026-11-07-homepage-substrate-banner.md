@@ -33,3 +33,10 @@ Actions main: 2eecf10881132c0c0df8c7ad8f14d136b9a87465 (before checkpoint write)
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
+
+## Continuation 2026-11-07 23:52 +07:00
+- Revalidated current repository commits and chatgpt/latest-response.md; prior PASS remains unchanged.
+- Expanded existing read-only workflow `.github/workflows/aquathanhxuan-substrate-media-inventory.yml` in Actions main commit `562fdf42cec268525db1f402a775149763cfe626`.
+- It now enumerates up to 300 newest WordPress media records and queries product category 1775 across the store/product endpoints, with bounded output. Existing origin checks retained; no CMS write.
+- The workflow uses push on its own file, so this commit is eligible to trigger the existing inventory workflow. NEW_RUN_STATUS: UNVERIFIED; this session's GitHub connector lacks workflow-run listing/dispatch and external HTTP was unavailable. Do not mark a new inventory PASS or infer identified images/products without logs.
+- Next: inspect run logs for the 562fdf4 workflow; select verified genuine media/products; only then create native home_02 and continue the steps above. No production build/deploy, no WordPress mutation in this continuation.
