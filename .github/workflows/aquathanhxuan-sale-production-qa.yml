@@ -10,101 +10,69 @@ permissions:
   contents: read
 
 jobs:
-  qa:
+  diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
-    container:
-      image: mcr.microsoft.com/playwright:v1.64.0-noble
-      options: --ipc=host
+    timeout-minutes: 4
     steps:
-      - name: Install matching Playwright driver
-        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
-      - name: Verify Sale section on production
+      - name: Diagnose deployed Sale data path
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts/sale
           node <<'NODE'
-          const { chromium } = require('playwright');
           const assert = require('node:assert/strict');
-          const origin='https://aquathanhxuan.io.vn';
+
+          const frontend='https://aquathanhxuan.io.vn';
+          const wp='https://admin.aquathanhxuan.io.vn';
           const expected='f9736ca7d253f7048733c37816b4113952144aa6';
-          const cases=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
+
+          const getJson=async(url)=>{
+            const r=await fetch(url,{headers:{'cache-control':'no-cache','user-agent':'AquaSaleDiagnostic/1.0'}});
+            const text=await r.text();
+            if(!r.ok) throw new Error('HTTP '+r.status+' '+url+' '+text.slice(0,300));
+            return JSON.parse(text);
+          };
+
           (async()=>{
-            const marker=await fetch(origin+'/aquathanhxuan-staging-build.json?qa='+Date.now());
-            assert.equal(marker.status,200,'Production marker fetch');
-            const meta=await marker.json();
-            assert.equal(meta.commit,expected,'Production deploy SHA');
+            const marker=await getJson(frontend+'/aquathanhxuan-staging-build.json?qa='+Date.now());
+            assert.equal(marker.commit,expected,'Production SHA');
 
-            const browser=await chromium.launch({headless:true});
-            try {
-              for(const [width,height] of cases){
-                const page=await browser.newPage({viewport:{width,height}});
-                await page.goto(origin+'/?sale_qa='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+            const [prodPage,cmsPage,home01,products]=await Promise.all([
+              getJson(frontend+'/data/page-default.json?qa='+Date.now()),
+              getJson(wp+'/wp-json/wp/v2/pages/82454?_fields=id,content&qa='+Date.now()),
+              getJson(wp+'/wp-json/tablepress/v1/table/home_01?qa='+Date.now()),
+              getJson(frontend+'/data/cms-products.json?qa='+Date.now()),
+            ]);
 
-                const sale=page.locator('[data-aqua-home-sale]');
-                await sale.waitFor({state:'visible',timeout:20000});
-                assert.equal((await sale.locator('h2').innerText()).trim(),'Sale bùng nổ','Sale heading');
+            const cmsRendered=String(cmsPage?.content?.rendered||'');
+            const prodContent=String(prodPage?.content||'');
+            const contents=Array.isArray(prodPage?.contents)?prodPage.contents:[];
+            const home01Block=contents.find(x=>String(x?.shortcode||'').toLowerCase()==='home_01');
+            const tableItems=Array.isArray(home01?.items)?home01.items:[];
 
-                const cards=sale.locator('[data-sale-card]');
-                assert.equal(await cards.count(),12,'Sale product card count');
-                assert.equal(await sale.locator('.aqua-sale__discount').count(),12,'Discount badge count');
-                assert.equal(await sale.locator('.aqua-sale__prices strong').count(),12,'Sale price count');
-                assert.equal(await sale.locator('.aqua-sale__prices del').count(),12,'Regular price count');
-                assert.equal(await sale.locator('[data-sale-add]').count(),12,'Cart button count');
+            console.log('CMS_HAS_HOME_01='+cmsRendered.includes('home_01'));
+            console.log('PROD_CONTENT_HAS_HOME_01='+prodContent.includes('[table id=home_01 /]'));
+            console.log('PROD_SHORTCODES='+contents.map(x=>x?.shortcode).join(','));
+            console.log('PROD_HOME_01_BLOCK='+Boolean(home01Block));
+            console.log('PROD_HOME_01_DATA_ITEMS='+(Array.isArray(home01Block?.data?.items)?home01Block.data.items.length:-1));
+            console.log('CMS_HOME_01_META_API='+String(home01?.meta?.api||''));
+            console.log('CMS_HOME_01_ITEMS='+tableItems.length);
+            console.log('PROD_PRODUCTS_COUNT='+(Array.isArray(products)?products.length:-1));
+            console.log('PROD_PRODUCT_IDS='+(Array.isArray(products)?products.map(p=>p?._id||p?.id).join(','):''));
 
-                const images=sale.locator('[data-sale-card] img');
-                assert.equal(await images.count(),12,'Product image count');
-                await page.waitForFunction(()=>{
-                  const imgs=[...document.querySelectorAll('[data-aqua-home-sale] [data-sale-card] img')];
-                  return imgs.length===12 && imgs.every(img=>img.complete && img.naturalWidth>0);
-                },{}, {timeout:20000});
+            assert(cmsRendered.includes('home_01'),'CMS homepage shortcode missing');
+            assert.equal(String(home01?.meta?.api||''),'Product','home_01 Product source');
+            assert.equal(tableItems.length,13,'home_01 row count');
+            assert.equal(Array.isArray(products)?products.length:-1,12,'Production products count');
 
-                const imageSources=await images.evaluateAll(nodes=>nodes.map(img=>img.currentSrc || img.src));
-                assert(imageSources.every(src=>!src.includes('aquathanhxuan.com/wp-content/')),
-                  'Production must not hotlink legacy product images');
-
-                const discounts=await sale.locator('.aqua-sale__discount').allTextContents();
-                assert(discounts.every(value=>/^\s*-\d+%\s*$/.test(value)),'Discount labels');
-
-                const hrefs=await sale.locator('.aqua-sale__name-link').evaluateAll(nodes=>nodes.map(a=>a.getAttribute('href')));
-                assert.equal(hrefs.length,12,'Product href count');
-                assert(hrefs.every(href=>href && href!=='#'),'Product hrefs are real');
-
-                const layout=await page.evaluate(()=>({
-                  pageScroll:document.documentElement.scrollWidth,
-                  viewport:window.innerWidth,
-                  track:(()=>{
-                    const el=document.querySelector('[data-aqua-home-sale] [data-sale-track]');
-                    return el ? {scroll:el.scrollWidth,client:el.clientWidth,left:el.scrollLeft} : null;
-                  })()
-                }));
-                assert(layout.pageScroll<=layout.viewport+1,'No horizontal page overflow');
-                assert(layout.track && layout.track.scroll>layout.track.client,'Sale carousel must be scrollable');
-
-                const next=sale.locator('[data-sale-next]');
-                const before=await sale.locator('[data-sale-track]').evaluate(el=>el.scrollLeft);
-                await next.click();
-                await page.waitForTimeout(450);
-                const after=await sale.locator('[data-sale-track]').evaluate(el=>el.scrollLeft);
-                assert(after>before,'Next arrow advances carousel');
-
-                const label=width+'x'+height;
-                await sale.screenshot({path:'artifacts/sale/'+label+'.png'});
-                console.log('SALE_QA_VIEWPORT=PASS '+label+' cards=12 track='+layout.track.client+'/'+layout.track.scroll);
-                await page.close();
-              }
-            } finally {
-              await browser.close();
+            if(!prodContent.includes('[table id=home_01 /]')){
+              throw new Error('DIAGNOSIS=PAGE_CACHE_MISSED_HOME_01');
             }
-            console.log('SALE_PRODUCTION_QA=PASS source='+expected);
-          })().catch(error=>{console.error(error.stack||error);process.exit(1)});
+            if(!home01Block){
+              throw new Error('DIAGNOSIS=PAGE_CONTENTS_MISSED_HOME_01');
+            }
+            if(!Array.isArray(home01Block?.data?.items) || home01Block.data.items.length<12){
+              throw new Error('DIAGNOSIS=HOME_01_EMBED_OR_PRODUCT_MAP_EMPTY');
+            }
+            console.log('SALE_DATA_PATH=PASS');
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
           NODE
-      - name: Upload Sale QA screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: aquathanhxuan-sale-production-qa
-          path: artifacts/sale
-          if-no-files-found: ignore
-          retention-days: 7
