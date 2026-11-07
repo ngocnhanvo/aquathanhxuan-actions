@@ -78,6 +78,7 @@ const shortcode = '[table id=home_03 /]';
       const equipment=page.locator('[data-aqua-home-equipment]');
       await equipment.waitFor({state:'visible',timeout:12000});
       await equipment.scrollIntoViewIfNeeded();
+      await equipment.locator('img').evaluateAll(images=>Promise.all(images.map(img=>img.decode())));
       const cards=await equipment.locator('article').evaluateAll(els=>els.map(el=>{
         const link=el.querySelector('a[data-esc-link-field="button_href"]');
         const img=el.querySelector('img[data-esc-source-field="image"]');
