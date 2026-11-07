@@ -38,30 +38,19 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
       return;
     }
 
-    // Native TablePress TinyMCE toolbar button must be clicked in an ACTIVE Visual editor.
-    // A direct call to tablepress_open_shortcode_thickbox from Text mode leaves
-    // WordPress send_to_editor without a usable TinyMCE selection (prior run).
-    const visualTab = page.locator('#content-tmce');
-    if (!(await visualTab.getAttribute('class') || '').includes('switch-tmce')) {
-      throw new Error('WordPress Visual editor tab missing');
-    }
-    await visualTab.click();
-    await page.waitForFunction(() => {
-      const editor = window.tinymce?.get('content');
-      return !!editor && !editor.isHidden() && !!editor.getBody();
-    }, null, { timeout: 15000 });
+    // The live editor exposes the native ESC Table Quicktags button, but not
+    // the TinyMCE toolbar variant. Invoke the installed Quicktags button in
+    // Text mode, allowing the theme's asynchronous preview image to finish.
+    await page.locator('#content-html').click();
+    await page.waitForFunction(() => window.tinymce?.get('content')?.isHidden() === true);
+    const toolbar = page.locator('#qt_content_tablepress_quicktags_button');
+    await toolbar.waitFor({ state: 'visible', timeout: 10000 });
     await page.evaluate(() => {
-      const ed = window.tinymce.get('content');
-      ed.focus();
-      ed.selection.select(ed.getBody(), true);
-      ed.selection.collapse(false);
+      const textarea = document.getElementById('content');
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
       window.wpActiveEditor = 'content';
     });
-    const toolbar = page.locator('#content_tablepress_insert_table, [id$="_tablepress_insert_table"]').first();
-    if (!await toolbar.count()) {
-      const ids = await page.locator('[id*="tablepress"]').evaluateAll(nodes => nodes.slice(0, 20).map(el => el.id));
-      throw new Error('Native TinyMCE Insert Code button not found: ' + JSON.stringify(ids));
-    }
     await toolbar.click();
     const frame = page.frameLocator('#TB_iframeContent');
     const picker = frame.locator('input.insert-shortcode[title="[table id=home_02 /]"]');
@@ -69,23 +58,34 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
     assert.equal(await picker.getAttribute('title'), shortcode);
     await picker.click();
 
-    await page.waitForTimeout(650);
-    const editorState = await page.evaluate(() => {
-      const ed = window.tinymce.get('content');
-      return {
-        active: window.wpActiveEditor, hidden: ed.isHidden(),
-        rich: ed.getContent(), textarea: document.getElementById('content').value
-      };
-    });
+    // Theme html.php overrides send_to_editor and loads a preview image
+    // before calling WordPress's native insertion. 650ms was insufficient.
+    // Never save without seeing the inserted shortcode.
+    let nativeWaitError = null;
+    try {
+      await page.waitForFunction(
+        needle => document.getElementById('content').value.includes(needle)
+          || (window.tinymce?.get('content')?.getContent?.() || '').includes(needle),
+        shortcode, { timeout: 25000 }
+      );
+    } catch (error) { nativeWaitError = error.message; }
+    const editorState = await page.evaluate(() => ({
+      active: window.wpActiveEditor, hidden: window.tinymce?.get('content')?.isHidden?.(),
+      rich: window.tinymce?.get('content')?.getContent?.() || '',
+      textarea: document.getElementById('content').value,
+      thickbox: !!document.getElementById('TB_window')
+    }));
     console.log('HOME02_NATIVE_INSERT=' + JSON.stringify({
       active: editorState.active, hidden: editorState.hidden,
       richHas02: editorState.rich.includes(shortcode),
       textHas02: editorState.textarea.includes(shortcode),
-      richTail: editorState.rich.slice(-220)
+      textLength: editorState.textarea.length,
+      thickbox: editorState.thickbox, timeout: nativeWaitError
     }));
     assert(editorState.rich.includes(shortcode) || editorState.textarea.includes(shortcode),
       'Native Insert Code did not update active editor; page intentionally NOT SAVED');
-    await page.evaluate(() => window.tinymce.get('content').save());
+    // Text mode already stores content in the textarea: calling TinyMCE.save()
+    // while hidden would overwrite it with the stale Visual editor snapshot.
     const after = await page.locator('#content').inputValue();
     assert.equal(after.split(shortcode).length - 1, 1, 'home_02 shortcode must occur exactly once');
     assert(after.includes('home_00') && after.includes('home_01'), 'existing homepage sections changed');
