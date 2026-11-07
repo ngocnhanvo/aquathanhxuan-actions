@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aquathanhxuan-home02-insert-code.yml'
+      - 'scripts/aquathanhxuan-home02-insert-code.cjs'
 permissions:
   contents: read
 jobs:
