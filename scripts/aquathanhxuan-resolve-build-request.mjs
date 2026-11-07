@@ -20,13 +20,16 @@ if (!/^[0-9a-f]{40}$/.test(before) || !/^[0-9a-f]{40}$/.test(after)) {
   fail('Missing push before/after SHAs');
 }
 let checkoutSha, delta;
+// Playwright container may have a different UID than actions/checkout.
+// Trust only this exact checkout directory, never all Git repositories.
+const gitOptions = ['-c', `safe.directory=${process.cwd()}`];
 try {
-  checkoutSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  checkoutSha = execFileSync('git', [...gitOptions, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   if (checkoutSha !== after || (process.env.GITHUB_SHA && process.env.GITHUB_SHA !== after)) {
     fail('Checked-out Actions SHA differs from authenticated push');
   }
   delta = execFileSync('git', [
-    'diff', '--no-ext-diff', '--no-renames', '--name-status', before, after,
+    ...gitOptions, 'diff', '--no-ext-diff', '--no-renames', '--name-status', before, after,
     '--', 'build-requests/'
   ], { encoding: 'utf8' });
 } catch {
