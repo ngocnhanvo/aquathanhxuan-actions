@@ -14,15 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Inspect current and legacy sale product fields
+      - name: Inspect current CMS and legacy sale product fields
         shell: bash
         run: |
           node <<'NODE'
           const clean = (v) => String(v ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
           const get = async (url) => {
-            const r = await fetch(url, { headers: { 'cache-control': 'no-cache', 'user-agent': 'AquaSaleInventory/1.1' } });
+            const r = await fetch(url, { headers: { 'cache-control': 'no-cache', 'user-agent': 'AquaSaleInventory/1.2' } });
             if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
             return r.json();
+          };
+          const probe = async (label, url) => {
+            const r = await fetch(url, { headers: { 'cache-control': 'no-cache', 'user-agent': 'AquaSaleInventory/1.2' } });
+            console.log(label + '_HTTP=' + r.status);
+            if (!r.ok) return null;
+            const json = await r.json();
+            const keys = json && typeof json === 'object' ? Object.keys(json).slice(0, 30) : [];
+            console.log(label + '_KEYS=' + JSON.stringify(keys));
+            return json;
           };
 
           const processed = await get('https://aquathanhxuan.io.vn/data/cms-products.json?qa=' + Date.now());
@@ -30,6 +39,34 @@ jobs:
 
           const raw = await get('https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/product?status=publish&per_page=50&page=1&_fields=id,slug,title,price,regular_price,sale_price,on_sale,prices,featured_media_url,acf,class_list&qa=' + Date.now());
           console.log('RAW_COUNT=' + (Array.isArray(raw) ? raw.length : -1));
+
+          const page = await probe(
+            'HOME_PAGE',
+            'https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/pages/82454?_fields=id,slug,status,content,acf&qa=' + Date.now(),
+          );
+          if (page) {
+            const rendered = String(page?.content?.rendered || '');
+            console.log('HOME_PAGE_ID=' + (page?.id ?? ''));
+            console.log('HOME_PAGE_SLUG=' + (page?.slug ?? ''));
+            console.log('HOME_PAGE_STATUS=' + (page?.status ?? ''));
+            console.log('HOME_PAGE_HAS_HOME_00=' + /home_00/i.test(rendered));
+            console.log('HOME_PAGE_HAS_HOME_01=' + /home_01/i.test(rendered));
+            console.log('HOME_PAGE_RENDERED_TEXT=' + clean(rendered).slice(0, 1000));
+          }
+
+          for (const tableId of ['home_00', 'home_01']) {
+            const table = await probe(
+              'TABLE_' + tableId.toUpperCase(),
+              'https://admin.aquathanhxuan.io.vn/wp-json/tablepress/v1/table/' + tableId + '?qa=' + Date.now(),
+            );
+            if (table) {
+              const data = table?.data ?? table?.table?.data ?? null;
+              const rows = Array.isArray(data) ? data.length : -1;
+              const firstRow = Array.isArray(data) && data.length ? data[0] : null;
+              console.log('TABLE_' + tableId.toUpperCase() + '_ROWS=' + rows);
+              console.log('TABLE_' + tableId.toUpperCase() + '_FIRST_ROW=' + JSON.stringify(firstRow).slice(0, 2000));
+            }
+          }
 
           const legacySale = await get('https://aquathanhxuan.com/wp-json/wc/store/v1/products?on_sale=true&per_page=100&_qa=' + Date.now());
           const legacySummary = (Array.isArray(legacySale) ? legacySale : []).map((p) => ({
