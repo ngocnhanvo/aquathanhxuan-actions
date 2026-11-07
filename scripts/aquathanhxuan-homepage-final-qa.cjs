@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expectedSha = 'a88d3981e01911a958fc904a29f49b67df15f2f3';
+const expectedSha = '6effb8e2af07edf87aaecdb9891b818f3529db16';
 const viewports = [[1440, 900], [1024, 768], [768, 1024], [844, 390], [390, 844]];
 const sections = [
   ['Hero', '[data-aqua-home-hero]'],
@@ -69,6 +69,11 @@ async function assertHealthyImage(locator, caption) {
       }
       assert.equal(await page.locator('#header-contacts').isVisible(), false, 'Legacy header contacts visible');
       assert.equal(await page.locator('#header-company-caption').isVisible(), false, 'Legacy header wordmark visible');
+      assert.equal(await page.locator('#bottom-contact-bar').count(), 0,
+        'Removed sticky bottom contact bar is still rendered');
+      const bottomPadding = await page.locator('body > div.flex.min-h-screen.flex-col').first()
+        .evaluate(element => getComputedStyle(element).paddingBottom);
+      assert.equal(bottomPadding, '0px', 'Layout still reserves space for bottom contact bar');
       assert.equal(await page.locator('#header-navrow').isVisible(), width >= 900, 'Wrong responsive category nav');
       assert.equal(await page.locator('#hamburger-btn').isVisible(), width < 900, 'Wrong responsive hamburger');
 
@@ -154,6 +159,9 @@ async function assertHealthyImage(locator, caption) {
       }
       await page.locator('[data-aqua-home-hero]').screenshot({path: artifacts + '/hero-' + width + 'x' + height + '.png'});
       await page.locator('#footer-contact').screenshot({path: artifacts + '/footer-' + width + 'x' + height + '.png'});
+      // Footer scroll activates sticky header; the retired bar must stay absent.
+      assert.equal(await page.locator('#bottom-contact-bar').count(), 0,
+        'Sticky bottom contact bar reappeared after scrolling');
       // Capture a supplemental full-page overview before carousel/menu transitions.
       await page.screenshot({path: artifacts + '/full-' + width + 'x' + height + '.png', fullPage: true});
 
