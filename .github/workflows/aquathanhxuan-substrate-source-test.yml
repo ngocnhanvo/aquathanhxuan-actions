@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ngocnhanvo/aquathanhxuan-astro
-          ref: 95e82adf17bdeb07214e05a5283079c67fa710c8
+          ref: a88d3981e01911a958fc904a29f49b67df15f2f3
           token: ${{ secrets.SOURCE_REPO_PAT }}
           persist-credentials: false
       - uses: pnpm/action-setup@v4
@@ -32,4 +32,4 @@ jobs:
       - name: Run targeted homepage tests
         run: pnpm exec vitest run src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/tablepress/home03.test.ts src/lib/wordpress/tablepress/home04.test.ts src/lib/wordpress/tablepress/home05.test.ts src/lib/wordpress/footerCmsContract.test.ts
       - name: Confirm source revision
-        run: test "$(git rev-parse HEAD)" = "95e82adf17bdeb07214e05a5283079c67fa710c8"
+        run: test "$(git rev-parse HEAD)" = "a88d3981e01911a958fc904a29f49b67df15f2f3"
