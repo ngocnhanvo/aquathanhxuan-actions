@@ -55,12 +55,12 @@ const readData = page => page.evaluate(() => window.tp.editor.getData());
       assert.equal(productResponse.status(),200,'product missing '+promo.productId);
       const product = await productResponse.json();
       assert.equal(product.name,promo.description,'real product mismatch');
-      assert.equal(new URL(product.permalink).pathname,promo.href,'real product URL mismatch');
+      assert.equal(new URL(product.permalink,base).pathname,promo.href,'real product URL mismatch');
       assert((product.images||[]).some(image=>Number(image.id)===promo.mediaId),'product media ownership mismatch');
       const mediaResponse = await page.request.get(base+'/wp-json/wp/v2/media/'+promo.mediaId);
       assert.equal(mediaResponse.status(),200,'WordPress Media ID missing');
       const media = await mediaResponse.json();
-      assert.equal(new URL(media.source_url).pathname,promo.imagePath,'WordPress image path mismatch');
+      assert.equal(new URL(media.source_url,base).pathname,promo.imagePath,'WordPress image path mismatch');
       console.log('HOME04_REAL_MEDIA_PASS='+JSON.stringify({productId:promo.productId,mediaId:promo.mediaId,path:promo.imagePath}));
     }
 
