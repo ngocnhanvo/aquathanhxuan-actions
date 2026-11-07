@@ -60,3 +60,18 @@ Lần xác minh mới nhất:
 - Có hai build-request cùng Astro SHA `50113cc` chạy nối tiếp do request tương đương đã tồn tại trong queue. Run lặp [#42373219015](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42373219015) + wrapper [#42372967202](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42372967202) cũng SUCCESS/QA_PASS, không đổi source. **Không kích lại bất kỳ run nào cho SHA này.**
 - **Next:** chỉ nhận yêu cầu thay đổi mới hoặc QA bổ sung nếu người dùng chỉ ra sai lệch cụ thể. Không sửa PHP/unzip hay kích build khác khi trạng thái hiện tại đã PASS.
 
+
+
+## Checkpoint Header responsive — 2026-11-07 19:50 +07
+
+**Trạng thái: PASS / DEPLOYED_PRODUCTION / RESPONSIVE_QA_PASS.** Đây là checkpoint mới hơn phần “Checkpoint cuối” phía trên cho phạm vi Header; không chạy lại build/menu writer nếu không có thay đổi mới.
+
+- Astro production `ngocnhanvo/aquathanhxuan-astro@master`: [`c50946d5ee64d170e0537b2a30ebd83c3c2fb961`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/c50946d5ee64d170e0537b2a30ebd83c3c2fb961).
+- Mobile Header đã bám handoff: hamburger bên trái, logo WordPress ở giữa, search/account/cart bên phải; không còn hotline ở mobile. Search mở panel riêng; drawer trượt cạnh nền tím, có overlay, logo, nút đóng, nhóm tài khoản/giỏ hàng và menu lấy nguyên từ WordPress.
+- Hành vi drawer: click/tap submenu, khóa scroll, click overlay/ESC để đóng, focus trap và trả focus về nút mở. Không thay đổi nguồn `Header/vi`, không thêm fallback/hard-code menu.
+- Build request [#42373673019](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42373673019) **SUCCESS**: `SOURCE_SHA_VERIFIED=c50946d...`, `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS commit=c50946d...`, desktop smoke `QA_PASS`.
+- Production deploy [#42373753992](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42373753992) **SUCCESS**: compile, package, FTPS và signed activation đều PASS.
+- Responsive browser QA [#42374157670](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42374157670) **SUCCESS** với 5 viewport: `1440x900`, `1024x768`, `768x1024`, `844x390`, `390x844`. PASS: không horizontal overflow, đúng desktop/mobile breakpoint, 11 top-level items, logo/icon không đè nhau, drawer tím/overlay/scroll lock/submenu/ESC/focus, search panel + focus restore. Artifact: `aquathanhxuan-header-responsive-qa`.
+- Run [#42374049854](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42374049854) là false-negative của QA tạm vì assertion focus chạy trước `requestAnimationFrame`; chỉ sửa test wait, **không sửa source và không rebuild production**. Run sau đã PASS.
+- Workflow QA tạm đã bị xóa sau nghiệm thu; không để file test không tham gia thành phẩm trong repo.
+- **Next:** Header đã xong. Chỉ sửa lại Header nếu người dùng chỉ ra sai lệch mới; công việc UI kế tiếp có thể chuyển sang section homepage tiếp theo theo `docs/design/aquathanhxuan-homepage/HANDOFF.md`.
