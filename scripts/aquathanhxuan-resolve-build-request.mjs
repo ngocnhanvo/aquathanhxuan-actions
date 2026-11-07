@@ -5,22 +5,22 @@ function fail(message) {
   process.exit(1);
 }
 
-// A push represents ONE newly committed request. Never infer intent from a
-// lexicographic filename sort of historical requests (stale SHA hazard).
-// fetch-depth: 2 in the caller guarantees HEAD^ is available.
-const { execFileSync } = await import("node:child_process");
-let changed;
-try {
-  changed = execFileSync("git", [
-    "diff", "--name-only", "--diff-filter=AM", "HEAD^", "HEAD", "--", "build-requests/",
-  ], { encoding: "utf8" }).trim().split(/\r?\n/).filter(Boolean);
-} catch {
-  fail("Cannot inspect pushed request delta; refusing ambiguous production build");
+// Select the request changed by THIS GitHub push event, not the last
+// lexicographically sorted file or whichever historical request is newest.
+const eventPath = process.env.GITHUB_EVENT_PATH;
+if (!eventPath || !fs.existsSync(eventPath)) fail("Missing authenticated GitHub push event");
+let event;
+try { event = JSON.parse(fs.readFileSync(eventPath,"utf8")); }
+catch { fail("Invalid GitHub push event"); }
+if (event.ref !== "refs/heads/main" || !Array.isArray(event.commits)) {
+  fail("Unexpected GitHub event or branch");
 }
-if (changed.length !== 1 || !/^build-requests\/[a-zA-Z0-9._-]+\.json$/.test(changed[0])) {
-  fail("Expected exactly one new or modified production build request in this push");
-}
+const changed = [...new Set(event.commits.flatMap(commit =>
+  [...(commit.added || []), ...(commit.modified || [])]
+))].filter(path => /^build-requests\/[a-zA-Z0-9._-]+\.json$/.test(path));
+if (changed.length !== 1) fail("Expected exactly one changed production build request in push");
 const requestFile = changed[0];
+
 if (!fs.existsSync(requestFile)) {
   fail(`Aqua build request does not exist in checkout: ${requestFile}`);
 }
