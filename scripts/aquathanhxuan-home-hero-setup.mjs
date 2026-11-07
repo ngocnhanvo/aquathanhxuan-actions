@@ -116,19 +116,19 @@ try {
   for (const asset of assets) {
     if (!asset.media) {
       await page.goto(`${wpUrl}/wp-admin/media-new.php?browser-uploader`, { waitUntil: 'domcontentloaded', timeout: 45000 });
-      const fileInput = page.locator('input[type="file"]').first();
+      const fileInput = page.locator('#async-upload');
       await fileInput.waitFor({ state: 'attached' });
       await fileInput.setInputFiles(asset.local);
-      const submit = page.locator('#html-upload, input[type="submit"]').filter({ hasText: /Upload|Tải/i }).first();
-      if (await page.locator('#html-upload').count()) {
-        await Promise.all([
-          page.waitForLoadState('domcontentloaded').catch(() => {}),
-          page.locator('#html-upload').click(),
-        ]);
-      } else {
-        await page.locator('input[type="submit"]').first().click();
-        await page.waitForLoadState('domcontentloaded').catch(() => {});
-      }
+      const htmlUpload = page.locator('#html-upload');
+      await htmlUpload.waitFor({ state: 'visible' });
+      await page.waitForFunction(() => {
+        const button = document.querySelector('#html-upload');
+        return button && !button.disabled;
+      }, null, { timeout: 10000 });
+      await Promise.all([
+        page.waitForLoadState('domcontentloaded').catch(() => {}),
+        htmlUpload.click(),
+      ]);
 
       for (let poll = 0; poll < 20; poll += 1) {
         asset.media = await findMedia(asset.slug);
