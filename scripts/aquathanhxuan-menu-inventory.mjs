@@ -1,14 +1,16 @@
-const base = 'https://admin.aquathanhxuan.io.vn';
-const endpoints = {
- categories: '/wp-json/astro/v1/get-product-categories',
- menus: '/wp-json/esc-api/v1/menus',
- pages: '/wp-json/wp/v2/pages?status=publish&per_page=100&_fields=id,slug,acf,title,link'
-};
-for (const [key,path] of Object.entries(endpoints)) {
-  const response = await fetch(base+path,{headers:{accept:'application/json'},signal:AbortSignal.timeout(15000)});
-  const payload = await response.json();
-  if(!response.ok)throw Error(key+' HTTP '+response.status);
-  const result=key==='pages' ? (Array.isArray(payload)?payload.map(({id,slug,acf,title,link})=>({id,slug,action:acf?.action,key:acf?.key,product_lang:acf?.product_lang,title:title?.rendered,link})):payload) :
-  key==='menus' ? {success:payload.success, Header:payload?.menus?.Header} : payload;
-  console.log('AQUA_INVENTORY_'+key.toUpperCase()+'='+JSON.stringify(result));
-}
+import {chromium} from 'playwright';
+const base='https://admin.aquathanhxuan.io.vn';
+let browser;
+try {
+ browser=await chromium.launch({headless:true});
+ const page=await browser.newPage();
+ await page.goto(base+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:30000});
+ await page.locator('#user_login').fill(process.env.WP_ADMIN_USERNAME);
+ await page.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
+ await Promise.all([page.waitForURL(/wp-admin/, {timeout:30000}),page.locator('#wp-submit').click()]);
+ for(const [name,path] of Object.entries({pages:'/wp-admin/post-new.php?post_type=page',categories:'/wp-admin/edit-tags.php?taxonomy=product_cat&post_type=product',menus:'/wp-admin/nav-menus.php'})){
+  await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:30000});
+  const fields=await page.locator('input,select,textarea,button').evaluateAll(els=>els.filter(e=>!['hidden','password'].includes(e.type)).slice(0,120).map(e=>({tag:e.tagName,id:e.id,name:e.name,type:e.type,text:(e.textContent||'').trim().slice(0,70)})));
+  console.log('AQUA_ADMIN_FORM_'+name.toUpperCase()+'='+JSON.stringify({url:page.url(),fields}));
+ }
+}finally{await browser?.close();}
