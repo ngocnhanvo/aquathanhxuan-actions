@@ -1,4 +1,5 @@
 name: Aqua homepage native ESC Table inventory (read-only)
+# Current pass verifies Home 03 is not already owned by the CMS.
 on:
   push:
     branches: [main]
