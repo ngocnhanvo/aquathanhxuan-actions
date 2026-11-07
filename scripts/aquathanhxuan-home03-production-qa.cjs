@@ -20,12 +20,32 @@ const shortcode = '[table id=home_03 /]';
   assert.equal(ids.filter(id=>id==='home_03').length, 1, 'CMS_CHAIN: home_03 not processed exactly once');
   assert(ids.indexOf('home_03')>ids.indexOf('home_02'), 'CMS_CHAIN: home_03 before home_02');
   console.log('HOME03_CMS_CHAIN=PASS '+ids.join(','));
+  const entry=(Array.isArray(pageData.contents)?pageData.contents:[]).find(x=>String(x?.shortcode||'')==='home_03');
+  const table=entry?.data;
+  console.log('HOME03_DATA_DIAGNOSTIC='+JSON.stringify({
+    tableId:table?.id, name:table?.name, type:typeof table,
+    keys:table&&typeof table==='object'?Object.keys(table).slice(0,15):[],
+    itemsLength:Array.isArray(table?.items)?table.items.length:null,
+    first:table?.items?.[0]?{
+      keys:Object.keys(table.items[0]),
+      title:table.items[0].title, imageType:typeof table.items[0].image,
+      imageKeys:table.items[0].image&&typeof table.items[0].image==='object'?Object.keys(table.items[0].image):[],
+      imageSrc:table.items[0].image?.src, link:table.items[0].button_href
+    }:null
+  }));
   const browser = await chromium.launch({headless:true,args:['--no-sandbox']});
   fs.mkdirSync('artifacts/home03',{recursive:true});
   try {
     for (const [width,height] of sizes) {
       const page = await browser.newPage({viewport:{width,height}});
       await page.goto(base+'/?home03qa='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+      const diagnostic=await page.evaluate(()=>({
+        wrappers:[...document.querySelectorAll('[data-tablepress-preview]')].map(el=>({id:el.getAttribute('data-tablepress-preview'),childCount:el.children.length,htmlLength:el.innerHTML.length})),
+        comboCount:document.querySelectorAll('[data-aqua-home-combo]').length,
+        commentSnippet:document.body.innerText.includes('Combo bể cubic 40 siêu trong'),
+        title:document.title
+      }));
+      console.log('HOME03_DOM_DIAGNOSTIC='+JSON.stringify(diagnostic));
       const section=page.locator('[data-aqua-home-combo]');
       await section.waitFor({state:'visible',timeout:30000});
       await section.scrollIntoViewIfNeeded();
