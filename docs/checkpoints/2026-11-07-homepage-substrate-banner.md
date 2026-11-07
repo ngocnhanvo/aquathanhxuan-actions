@@ -67,3 +67,10 @@ Cổng ghi source: bypass
 - DO NOT create a second table. Recover only table 140 by renaming to home_02 in native editor, accept confirmation on blur, save and read back. Then insert shortcode using Insert Code, validate Builder, build and visual QA.
 - Script creation for recovery was blocked by tooling; recovery/deployment NOT DONE.
 - Code mode auto-build, source gateway bypass.
+
+## Continuation 2026-11-08 — verified Home_02 and Insert Code blocker
+- Native TablePress ID home_02 recovery completed SUCCESS in Actions run #42396124364; verified schema fields title, description, image, button_label, button_href and media ID 82490. Do not recreate or rename.
+- PHP source config and PHP test commits 1b4b066 and 647ce3b; release allowlist extended using existing FTPS script commit 2383b6d, release workflow test commit 030d568. PHP production release NOT TRIGGERED and NOT VERIFIED.
+- Tried native WordPress TablePress Insert Code picker in Page 82454. Source script: scripts/aquathanhxuan-home02-insert-code.cjs. All runs through #42397510671 FAILED BEFORE PAGE SAVE. The native UI picker successfully selects home_02, but official send_to_editor callback inserts no content into textarea/TinyMCE. Last diagnostic: wpActiveEditor=content, QTags instances [content,acf_content,acf-editor-52], tinyHidden=true, content unchanged after callback. Page 82454 remains home_00 and home_01 only; home_02 shortcode NOT inserted.
+- No build/deploy production or Visual Builder live QA. Do not mark complete. Next fix native Insert Code editor callback behavior without manual shortcode paste, insert shortcode with readback; release PHP via existing pipeline, then production build and visual QA.
+- Code mode auto-build; source gateway bypass.
