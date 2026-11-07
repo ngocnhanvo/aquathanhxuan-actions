@@ -16,6 +16,7 @@ assert.equal(env.WC_URL,'https://admin.aquathanhxuan.io.vn');
   }
   await page.waitForURL(u=>u.pathname.startsWith('/wp-admin/'));
   await page.goto(env.WC_URL+'/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1',{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>Boolean(window.tinymce?.get('content')?.getWin?.() && window.tinymce?.get('content')?.getBody?.()),null,{timeout:20000});
   await page.evaluate(()=>{window.switchEditors.go('content','html');window.wpActiveEditor='content';});
   await page.waitForFunction(()=>window.tinymce?.get('content')?.isHidden()===true,null,{timeout:10000});
   const before=await page.locator('#content').inputValue();
