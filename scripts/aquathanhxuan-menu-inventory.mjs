@@ -28,7 +28,7 @@ try{
  const missing=desired.filter(([label,slug])=>!cats.some(c=>c.slug===slug));
  console.log('PREFLIGHT='+JSON.stringify({categories:cats.map(c=>({id:c.id,name:c.name,slug:c.slug})),missing:missing.length,product_page:target.page?.id||null,header_items:existingMenu?.items?.length||0}));
  if(missing.length===0&&target.page&&existingMenu?.items?.length===desired.length){
-  const correct=existingMenu.items.every((item,i)=>item.label===desired[i][0]&&String(item.slug).replace(/^\\/+/,'')==='san-pham/'+desired[i][1]);
+  const correct=existingMenu.items.every((item,i)=>item.label===desired[i][0]&&String(item.slug).replace(/^[/]+/,'')==='san-pham/'+desired[i][1]);
   if(correct){console.log('AQUA_MENU_SETUP=PASS SKIP_UNCHANGED');process.exit(0);}
  }
  browser=await chromium.launch({headless:true});
@@ -113,6 +113,6 @@ try{
  menus=await getMenus();
  const actual=menus?.menus?.Header?.vi?.items;
  if(!Array.isArray(actual)||actual.length!==11)throw Error('MENU_VERIFY_COUNT '+actual?.length);
- for(let i=0;i<11;i++)if(actual[i]?.label!==desired[i][0]||String(actual[i]?.slug||'').replace(/^\\/+/,'')!=='san-pham/'+desired[i][1])throw Error('MENU_VERIFY_ITEM '+i+' '+JSON.stringify(actual[i]));
+ for(let i=0;i<11;i++)if(actual[i]?.label!==desired[i][0]||String(actual[i]?.slug||'').replace(/^[/]+/,'')!=='san-pham/'+desired[i][1])throw Error('MENU_VERIFY_ITEM '+i+' '+JSON.stringify(actual[i]));
  console.log('AQUA_MENU_SETUP=PASS menu_id='+menuId+' items=11 page_id='+target.page.id);
 }finally{await browser?.close().catch(()=>{});}
