@@ -36,7 +36,10 @@ assert.equal(env.WC_URL,'https://admin.aquathanhxuan.io.vn');
   const firstTiny=await page.evaluate(()=>window.tinymce?.get('content')?.getContent?.()||'');
   if(!firstResult.includes(selectedShortcode)&&!firstTiny.includes(selectedShortcode)){
     // Invoke the exact native callback of the TablePress Insert Shortcode button.
-    await page.evaluate(selected=>{if(typeof window.send_to_editor!=='function')throw Error('WordPress native callback unavailable');window.send_to_editor(selected);},selectedShortcode);
+    const beforeNative=await page.evaluate(()=>({id:window.wpActiveEditor,hasTextarea:!!document.getElementById(window.wpActiveEditor),quicktags:window.QTags?Object.keys(window.QTags.instances):[],isHidden:window.tinymce?.get('content')?.isHidden?.()}));
+    console.log('NATIVE_INSERT_PRESTATE='+JSON.stringify(beforeNative));
+    const callback=await page.evaluate(selected=>{if(typeof window.send_to_editor!=='function')throw Error('WordPress native callback unavailable');const ret=window.send_to_editor(selected);return {returnValue:ret,after:document.getElementById('content').value.slice(-130)};},selectedShortcode);
+    console.log('NATIVE_CALLBACK_RESULT='+JSON.stringify(callback));
   }
   await page.waitForTimeout(600);
   const editorState=await page.evaluate(()=>({wpActiveEditor:window.wpActiveEditor||'',modeCode:document.querySelector('#content-html')?.className,modeVisual:document.querySelector('#content-tmce')?.className,tinyHidden:window.tinymce?.get('content')?.isHidden?.(),tinyContent:window.tinymce?.get('content')?.getContent?.()?.slice(-550),textarea:document.querySelector('#content')?.value.slice(-550),hasQuicktags:typeof window.QTags!=='undefined'}));
