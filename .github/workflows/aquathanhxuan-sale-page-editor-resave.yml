@@ -1,0 +1,116 @@
+name: Aqua Sale homepage editor resave one-shot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-sale-page-editor-resave.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  resave:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Save homepage through native WordPress editor and prove log
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const assert = require('node:assert/strict');
+
+          const wp='https://admin.aquathanhxuan.io.vn';
+          const username=process.env.WP_ADMIN_USERNAME;
+          const password=process.env.WP_ADMIN_PASSWORD;
+          if(!username || !password) throw new Error('Missing WordPress credentials');
+
+          const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            try{
+              const context=await browser.newContext({viewport:{width:1440,height:1000}});
+              const page=await context.newPage();
+
+              await page.goto(wp+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:45000});
+              if(await page.locator('#user_login').count()){
+                await page.locator('#user_login').fill(username);
+                await page.locator('#user_pass').fill(password);
+                await Promise.all([
+                  page.waitForURL(url=>url.pathname.startsWith('/wp-admin/'),{timeout:45000}),
+                  page.locator('#wp-submit').click(),
+                ]);
+              }
+              assert(page.url().startsWith(wp+'/wp-admin/'),'WordPress login');
+
+              await page.goto(wp+'/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1',{
+                waitUntil:'domcontentloaded',
+                timeout:45000
+              });
+              await page.locator('#post').waitFor({state:'attached',timeout:20000});
+
+              const textTab=page.locator('#content-html');
+              if(await textTab.count()) await textTab.click();
+              const content=page.locator('#content');
+              await content.waitFor({state:'attached',timeout:10000});
+
+              const raw=await content.inputValue();
+              assert(raw.includes('[table id=home_00 /]'),'home_00 preserved before save');
+              assert(raw.includes('[table id=home_01 /]'),'home_01 preserved before save');
+
+              // Native editor POST is required here because REST page writes intentionally
+              // run without github-trigger in the MU performance profile.
+              const next=raw.replace(/\s+$/,'')+'\n\n';
+              await content.fill(next);
+
+              const update=page.locator('#publish');
+              await update.waitFor({state:'visible',timeout:10000});
+              await Promise.all([
+                page.waitForLoadState('domcontentloaded',{timeout:45000}),
+                update.click(),
+              ]);
+              await page.locator('#message.updated, .notice-success').first().waitFor({state:'visible',timeout:15000}).catch(()=>{});
+              console.log('HOME_PAGE_NATIVE_EDITOR_SAVE=PASS');
+
+              let matched=null;
+              for(let attempt=1; attempt<=8; attempt++){
+                const response=await context.request.get(wp+'/wp-json/astro/v1/get-page-logs?qa='+Date.now(),{
+                  headers:{'cache-control':'no-cache'}
+                });
+                assert.equal(response.status(),200,'page logs HTTP');
+                const logs=await response.json();
+                matched=Array.isArray(logs)
+                  ? logs.find(x=>String(x?.id)==='82454' && x?.type==='page' && x?.action==='modify')
+                  : null;
+                if(matched) break;
+                await sleep(500);
+              }
+              assert(matched,'Page 82454 incremental modify log');
+              const rendered=String(matched?.page?.content?.rendered||'');
+              assert(rendered.includes('home_01'),'Logged page contains home_01');
+              console.log('PAGE_INCREMENTAL_LOG=PASS action=modify has_home_01=true date='+(matched?.date||''));
+
+              const readback=await context.request.get(wp+'/wp-json/wp/v2/pages/82454?_fields=id,content,modified_gmt&qa='+Date.now(),{
+                headers:{'cache-control':'no-cache'}
+              });
+              assert.equal(readback.status(),200,'homepage readback HTTP');
+              const json=await readback.json();
+              const html=String(json?.content?.rendered||'');
+              assert(html.includes('home_00') && html.includes('home_01'),'Homepage readback preserves both shortcodes');
+              console.log('HOME_PAGE_READBACK=PASS modified_gmt='+(json?.modified_gmt||''));
+            } finally {
+              await browser.close();
+            }
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          NODE
