@@ -58,3 +58,12 @@ Cổng ghi source: bypass
 - Actions main commit `4f3470a2e530b4ac2e050c0384cc8a38ff5c59e5` updates existing targeted source-test workflow to exact Astro SHA; push workflow run result NOT VERIFIED (commit-run lookup returned none; fetch list endpoint denied). Do not mark test PASS.
 - WordPress home_02 native table and Insert Code shortcode still NOT STARTED; PHP Builder source/version validation NOT STARTED. No CMS write, PHP deploy, Astro production build or visual QA in this continuation.
 - Next: inspect Actions source-test run by run ID when available; create verified native `home_02` via authenticated CMS UI, Insert Code on Page 82454, read-after-write; implement strict versioned Builder backend validation; source test and deploy/QA after data is verified. Do not fake WooCommerce category 1775 products or CTA.
+
+## Continuation 2026-11-08 — native Home_02
+- Source test #42394018367 SUCCESS; editor controls #42395386552 SUCCESS.
+- PHP Home_02 schema aligned with Astro: title, description, button_label, button_href, image; commits 1b4b066 and 647ce3b. PHP deploy not verified.
+- Native writer run #42395688429 FAILED when table ID rename confirmation was dismissed. It created temporary ESC Table 140 with valid media ID 82490 inserted using native Insert Image.
+- Read-only recovery #42395870396 confirmed ESC Table 140 exists with columns title, description, image, button_label, button_href and a row titled Nen thuy sinh, with exactly one IMG tag, WordPress relative path and alt. ESC Table home_02 does NOT exist. WordPress Page 82454 unchanged.
+- DO NOT create a second table. Recover only table 140 by renaming to home_02 in native editor, accept confirmation on blur, save and read back. Then insert shortcode using Insert Code, validate Builder, build and visual QA.
+- Script creation for recovery was blocked by tooling; recovery/deployment NOT DONE.
+- Code mode auto-build, source gateway bypass.
