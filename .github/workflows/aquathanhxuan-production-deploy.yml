@@ -26,6 +26,8 @@ jobs:
       AQUATHANHXUAN_PRODUCTION_SOURCE: master
       AQUATHANHXUAN_DEPLOY_SOURCE_BRANCH: master
       AQUATHANHXUAN_DEPLOY_REQUEST_DOMAIN: ${{ github.event.client_payload.site_domain }}
+      AQUATHANHXUAN_CANONICAL_WP_ORIGIN: https://admin-aquathanhxuan.io.vn
+      AQUATHANHXUAN_CANONICAL_CLIENT_ORIGIN: https://aquathanhxuan.io.vn
     steps:
       - name: Checkout immutable AQUATHANHXUAN deploy scripts
         uses: actions/checkout@v4
@@ -56,22 +58,20 @@ jobs:
           for line in os.environ['ENV_FILE'].splitlines():
               m=re.match(r'^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$',line)
               if m:vals[m[1]]=m[2].strip().strip('"\'')
-          def origin(key):
-              url=urlsplit(vals.get(key,''))
+          def canonical_origin(key):
+              url=urlsplit(os.environ.get(key,''))
               if (url.scheme!='https' or not url.hostname or url.username or url.password
                   or url.port not in (None,443) or url.path not in ('','/')
                   or url.query or url.fragment):
-                  raise RuntimeError('Invalid HTTPS origin: '+key)
+                  raise RuntimeError('Invalid canonical HTTPS origin: '+key)
               return url.hostname, 'https://'+url.hostname
-          wp_host,wp_origin=origin('WC_URL')
-          client_host,client_origin=origin('WC_URL_CLIENT')
-          if wp_host==client_host:
-              raise RuntimeError('WordPress and frontend origins cannot be identical')
-          # Same as inherited NCKH workflow, but migrate-safe: target is
-          # derived exclusively from the validated WC_URL_CLIENT, not a new var.
+          wp_host,wp_origin=canonical_origin('AQUATHANHXUAN_CANONICAL_WP_ORIGIN')
+          client_host,client_origin=canonical_origin('AQUATHANHXUAN_CANONICAL_CLIENT_ORIGIN')
+          if wp_host!='admin-aquathanhxuan.io.vn' or client_host!='aquathanhxuan.io.vn':
+              raise RuntimeError('Aqua canonical origins changed unexpectedly')
           target='/domains/'+client_host+'/public_html/'
           if os.environ.get('AQUATHANHXUAN_DEPLOY_REQUEST_DOMAIN')!=client_host:
-              raise RuntimeError('Build trigger domain disagrees with WordPress frontend')
+              raise RuntimeError('Build trigger domain disagrees with Aqua canonical frontend')
           if any(x in vals for x in ('NCKH_GOOGLE_OAUTH_JSON','NCKH_SESSION_KEY',
                                      'AQUATHANHXUAN_GOOGLE_OAUTH_JSON','AQUATHANHXUAN_SESSION_KEY',
                                      'GOOGLE_OAUTH_STAGING_JSON')):
@@ -82,7 +82,7 @@ jobs:
               out.write('AQUATHANHXUAN_WP_ORIGIN='+wp_origin+'\n')
               out.write('ASTRO_FTP_TARGET='+target+'\n')
               out.write('FTP_ASTRO_DIR='+target+'\n')
-          print('PASS: AQUATHANHXUAN master and deployment target derived from WC_URL_CLIENT')
+          print('PASS: AQUATHANHXUAN master pinned to canonical WordPress/frontend origins')
           PY
       - name: Refuse application-specific private runtime in reusable Aqua Thanh Xuân
         shell: bash
@@ -146,8 +146,20 @@ jobs:
           # Restore verified pnpm store where available; recreate dependencies
           # from the exact lockfile on every run. Cache miss is still safe.
           pnpm install --frozen-lockfile --prefer-offline
-          printf '%s\n' "$ENV_FILE" > .env
-          # Keep original Astro build settings from ENV_FILE and WordPress.
+          python3 - <<'PY'
+          import os,re
+          kept=[]
+          for line in os.environ['ENV_FILE'].splitlines():
+              m=re.match(r'^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=',line)
+              if m and m.group(1) in ('WC_URL','WC_URL_CLIENT'):
+                  continue
+              kept.append(line)
+          kept.append('WC_URL='+os.environ['AQUATHANHXUAN_CANONICAL_WP_ORIGIN'])
+          kept.append('WC_URL_CLIENT='+os.environ['AQUATHANHXUAN_CANONICAL_CLIENT_ORIGIN'])
+          with open('.env','w',encoding='utf8') as out:
+              out.write('\n'.join(kept).rstrip()+'\n')
+          PY
+          # Keep original Astro build settings, but pin project identity URLs.
           # Unit tests run separately in non-deploy CI, not in every build.
           pnpm run build-git
           node --check dist/server/entry.mjs

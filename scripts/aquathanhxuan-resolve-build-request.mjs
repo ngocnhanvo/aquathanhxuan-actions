@@ -37,48 +37,8 @@ if (request.frontend_host !== "aquathanhxuan.io.vn") {
   fail("Unexpected frontend host in request");
 }
 
-const values = {};
-for (const raw of String(process.env.ENV_FILE || "").split(/\r?\n/)) {
-  const match = raw.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
-  if (!match) continue;
-  let value = match[2].trim();
-  if (
-    value.length >= 2
-    && ((value.startsWith('"') && value.endsWith('"'))
-      || (value.startsWith("'") && value.endsWith("'")))
-  ) {
-    value = value.slice(1, -1);
-  }
-  values[match[1]] = value;
-}
-
-function origin(key) {
-  let url;
-  try {
-    url = new URL(values[key] || "");
-  } catch {
-    fail(`Invalid HTTPS origin: ${key}`);
-  }
-  if (
-    url.protocol !== "https:"
-    || !url.hostname
-    || url.username
-    || url.password
-    || (url.port && url.port !== "443")
-    || !["", "/"].includes(url.pathname)
-    || url.search
-    || url.hash
-  ) {
-    fail(`Invalid HTTPS origin: ${key}`);
-  }
-  return [`https://${url.hostname}`, url.hostname];
-}
-
-const [wpUrl, wpHost] = origin("WC_URL");
-const [frontendUrl, frontendHost] = origin("WC_URL_CLIENT");
-if (wpHost !== "admin-aquathanhxuan.io.vn" || frontendHost !== "aquathanhxuan.io.vn") {
-  fail("ENV_FILE does not point to Aqua production");
-}
+const wpUrl = "https://admin-aquathanhxuan.io.vn";
+const frontendUrl = "https://aquathanhxuan.io.vn";
 
 process.stdout.write([
   `request_file=${requestFile}`,
