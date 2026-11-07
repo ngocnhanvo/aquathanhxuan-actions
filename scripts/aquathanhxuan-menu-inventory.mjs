@@ -94,9 +94,13 @@ try{
  if(!menuId){
   await page.goto(menuUrl+'?action=edit&menu=0',{waitUntil:'domcontentloaded',timeout:30000});
   await page.locator('#menu-name').fill('Header VI');
-  await page.locator('input[name="save_menu"]:visible').first().click();
-  await page.waitForLoadState('domcontentloaded');
-  console.log('MENU_CREATE_RESPONSE='+JSON.stringify({url:page.url(),name:await page.locator('#menu-name').inputValue().catch(()=>''),notices:await page.locator('.notice,#message,.error,.updated').allTextContents(),button:await page.locator('input[name="save_menu"]:visible').first().getAttribute('value')}));
+  const formInfo=await page.locator('#menu-name').evaluate(el=>({formId:el.form?.id,action:el.form?.getAttribute('action'),fields:[...(el.form?.querySelectorAll('input[type="hidden"]')||[])].map(input=>({name:input.name,value:input.name.includes('nonce')?'REDACTED':String(input.value||'').slice(0,80)}))}));
+  console.log('MENU_CREATE_FORM='+JSON.stringify(formInfo));
+  await Promise.all([
+    page.waitForLoadState('domcontentloaded'),
+    page.locator('#menu-name').evaluate(el=>{if(!el.form)throw Error('MENU_FORM_MISSING');el.form.submit();})
+  ]);
+  console.log('MENU_CREATE_RESPONSE='+JSON.stringify({url:page.url(),name:await page.locator('#menu-name').inputValue().catch(()=>''),notices:await page.locator('.notice,#message,.error,.updated').allTextContents()}));
 
   menuId=Number(new URL(page.url()).searchParams.get('menu'));
   if(!menuId)throw Error('MENU_CREATE_FAILED');
