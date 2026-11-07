@@ -63,6 +63,15 @@ jobs:
                 const editor=await page.evaluate(()=>({tpLoaded:Boolean(window.tp?.editor),data:window.tp?.editor?.options?.data?.slice(0,3),methodNames:window.tp?.editor?Object.keys(window.tp.editor).filter(x=>/set|save|get/i.test(x)).slice(0,35):[],tableId:document.getElementById('table-id')?.value}));
                 console.log('TABLE_EDITOR_API='+JSON.stringify(editor));
               }
+              // Recovery inspection: no write to tables or WordPress pages.
+              await page.goto(env.WC_URL+'/wp-admin/admin.php?page=tablepress',{waitUntil:'domcontentloaded'});
+              const recoveryList=await page.evaluate(()=>[...document.querySelectorAll('input[name="table[]"]')].map(e=>({id:e.value,href:e.closest('tr')?.querySelector('a[href*="action=edit"]')?.href,title:e.closest('tr')?.innerText.slice(0,120)})));
+              console.log('RECOVERY_TABLE_LIST='+JSON.stringify(recoveryList));
+              for(const id of ['140','home_02']){
+                await page.goto(env.WC_URL+'/wp-admin/admin.php?page=tablepress&action=edit&table_id='+id,{waitUntil:'domcontentloaded'});
+                const snapshot=await page.evaluate(()=>({url:location.href,title:document.title,tableId:document.getElementById('table-id')?.value||null,grid:window.tp?.editor?.getData?.()?.slice(0,3)||null,errors:[...document.querySelectorAll('.notice-error,.error')].map(e=>e.innerText.slice(0,200))}));
+                console.log('RECOVERY_TABLE_'+id+'='+JSON.stringify(snapshot));
+              }
               console.log('READ_ONLY_EDITOR_DISCOVERY=PASS');
             }finally{await browser.close();}
           };
