@@ -1,13 +1,15 @@
 {
-  "task": "home03-production-readonly-check",
-  "astro_sha": "d3b37fe4c148c6dd71b6f4c93351c5b8eb321be7",
+  "task": "homepage-home03-home04-production-readonly-check",
+  "astro_sha": "d9b42a6dbc68bc4fd68be442afe3f5645f834dc6",
   "mode": "read-only",
   "checks": [
     "five_viewports",
-    "real_media_and_cta",
+    "home03_hot_combo_real_data",
+    "home04_equipment_real_data",
+    "images_and_cta_links",
     "cms_chain",
     "builder_version_and_cell_coordinates",
-    "editable_fields"
+    "editable_link_fields"
   ],
-  "run": "diagnose-home03-missing-section"
+  "run": "verify-home03-home04-after-source-title-fix"
 }
