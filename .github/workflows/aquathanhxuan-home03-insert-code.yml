@@ -33,3 +33,4 @@ jobs:
 
 # Retry one bounded WordPress navigation timeout; no CMS change on failed preflight.
 # Readback uses a separate authenticated tab after the native WordPress Publish redirect.
+# Native Quicktags preflight must not wait for TinyMCE Visual iframe.
