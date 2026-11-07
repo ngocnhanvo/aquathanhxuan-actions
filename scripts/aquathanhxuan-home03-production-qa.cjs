@@ -142,9 +142,14 @@ const shortcode = '[table id=home_03 /]';
     await section.locator('h3').first().click();
     await admin.waitForFunction(()=>(
       document.querySelector('#esc-vb-section-summary')?.textContent||'').includes('home_03'),null,{timeout:18000});
+    // Columns editor encodes the immutable native row and field as "0:title".
+    // Do not compare against bare field names (that format belongs to intro mode).
+    await admin.locator('#esc-vb-edit-row option[value="0:title"]')
+      .waitFor({state:'attached',timeout:18000});
     const options=await admin.locator('#esc-vb-edit-row option').evaluateAll(els=>els.map(el=>el.value));
+    console.log('HOME03_BUILDER_OPTIONS='+JSON.stringify(options));
     for(const field of ['title','description','button_label','button_href'])
-      assert(options.includes(field),'Builder: missing field '+field);
+      assert(options.includes('0:'+field),'Builder: missing row 0 field '+field);
     assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,'Builder: title editor disabled');
     const equipmentBuilder=admin.frameLocator('#esc-vb-frame').locator('[data-aqua-home-equipment]');
     await equipmentBuilder.waitFor({state:'visible',timeout:30000});
@@ -167,9 +172,14 @@ const shortcode = '[table id=home_03 /]';
     await admin.waitForFunction(()=>(
       document.querySelector('#esc-vb-section-summary')?.textContent||'').includes('home_04'),
       null,{timeout:18000});
+    await admin.locator('#esc-vb-edit-row option[value="0:title"]')
+      .waitFor({state:'attached',timeout:18000});
     const equipmentFields=await admin.locator('#esc-vb-edit-row option').evaluateAll(els=>els.map(el=>el.value));
+    console.log('HOME04_BUILDER_OPTIONS='+JSON.stringify(equipmentFields));
     for(const field of ['title','description','button_label','button_href'])
-      assert(equipmentFields.includes(field),'Home04 Builder: missing editable field '+field);
+      assert(equipmentFields.includes('0:'+field),'Home04 Builder: missing row 0 field '+field);
+    assert(equipmentFields.includes('1:title') && equipmentFields.includes('1:button_href'),
+      'Home04 Builder: missing native row 1 editing coordinates');
     console.log('HOME04_BUILDER_SELECTION=PASS '+equipmentFields.join(','));
     await admin.screenshot({path:'artifacts/home03/builder-readonly.png'});
     console.log('HOME03_BUILDER_SELECTION=PASS '+options.join(','));
