@@ -1,0 +1,32 @@
+name: Aqua Home 05 native ESC Table create
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home05-native-create.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-home05-native-create
+  cancel-in-progress: false
+jobs:
+  create-home05:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Home 05 native writer syntax
+        run: node --check scripts/aquathanhxuan-home05-native-create.cjs
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Create real benefits labels and editable icons in native ESC Table
+        run: node scripts/aquathanhxuan-home05-native-create.cjs
