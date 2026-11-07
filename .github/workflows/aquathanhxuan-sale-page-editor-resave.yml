@@ -72,7 +72,15 @@ jobs:
               // Native editor POST is required here because REST page writes intentionally
               // run without github-trigger in the MU performance profile.
               const next=raw.replace(/\s+$/,'')+'\n\n';
-              await content.fill(next);
+              await page.evaluate((value)=>{
+                const textarea=document.querySelector('#content');
+                if(!(textarea instanceof HTMLTextAreaElement)) throw new Error('content textarea missing');
+                textarea.value=value;
+                textarea.dispatchEvent(new Event('input',{bubbles:true}));
+                textarea.dispatchEvent(new Event('change',{bubbles:true}));
+                const editor=window.tinymce?.get?.('content');
+                if(editor) editor.setContent(value);
+              },next);
 
               const update=page.locator('#publish');
               await update.waitFor({state:'visible',timeout:10000});
