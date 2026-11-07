@@ -97,27 +97,14 @@ jobs:
           set -euo pipefail
           python3 -m py_compile actions-hub/scripts/aquathanhxuan-remote-unzip.py
           python3 actions-hub/scripts/aquathanhxuan-remote-unzip.py verify
-      - name: Read saved sitemap revision and signed image inventory concurrently (READ ONLY)
+      - name: Read signed reusable-asset inventory (READ ONLY)
         shell: bash
         run: |
           set -euo pipefail
           set +x
-          python3 -m py_compile actions-hub/scripts/aquathanhxuan-published-sitemap-revision.py
-          # These two reads are independent. BOTH results must succeed before
-          # dependencies, build or deployment proceed. Signed preflight above
-          # has already validated the PHP server and deploy destination.
-          python3 actions-hub/scripts/aquathanhxuan-published-sitemap-revision.py &
-          sitemap_pid=$!
-          python3 actions-hub/scripts/aquathanhxuan-remote-unzip.py manifest &
-          image_pid=$!
-          sitemap_status=0
-          image_status=0
-          wait "$sitemap_pid" || sitemap_status=$?
-          wait "$image_pid" || image_status=$?
-          if (( sitemap_status != 0 || image_status != 0 )); then
-            echo "::error::AQUATHANHXUAN signed read-only preflight failed"
-            exit 1
-          fi
+          # Sitemap is generated from WordPress source during the Astro build.
+          # Never read the currently deployed sitemap or its revision here.
+          python3 actions-hub/scripts/aquathanhxuan-remote-unzip.py manifest
       # GitHub-hosted runners are ephemeral: reuse downloaded packages
       # keyed by the Astro production lockfile. Never cache node_modules or .env.
       - name: Set up pnpm 9 (without installing project dependencies)
