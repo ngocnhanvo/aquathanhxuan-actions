@@ -222,7 +222,13 @@ async function assertHealthyImage(locator, caption) {
       assert(fields.every(x => x.field && x.row !== null), 'Builder incomplete cell mapping ' + id);
       console.log('HOMEPAGE_BUILDER_COORDS=PASS ' + id + ' count=' + fields.length);
     }
-    const footerFields = await frame.locator('#footer-contact [data-esc-vb-footer-field]').count();
+    // Footer is streamed after the page sections. Wait for the same marker used
+    // by the independently passing Footer Builder QA, not an immediate count.
+    const builderFooter = frame.locator('#footer-contact');
+    await builderFooter.waitFor({state:'visible', timeout:45000});
+    const firstFooterField = builderFooter.locator('[data-esc-vb-footer-field]').first();
+    await firstFooterField.waitFor({state:'attached', timeout:20000});
+    const footerFields = await builderFooter.locator('[data-esc-vb-footer-field]').count();
     assert(footerFields > 0, 'Builder Footer CMS field mapping missing');
     await admin.screenshot({path: artifacts + '/builder-readonly.png'});
     console.log('HOMEPAGE_BUILDER=PASS footerFields=' + footerFields);
