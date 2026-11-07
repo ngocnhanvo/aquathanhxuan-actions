@@ -239,13 +239,19 @@ try {
       await sleep(500);
     }
 
-    await page.locator('.media-button-insert').waitFor({ state: 'visible', timeout: 15000 });
-    await page.locator('.media-button-insert').click();
+    await page.evaluate(() => {
+      const frame = window.wp?.media?.frame;
+      const state = frame?.state?.();
+      const selection = state?.get?.('selection');
+      if (!state || !selection) throw new Error('MEDIA_INSERT_STATE_MISSING');
+      state.trigger('insert', selection);
+    });
 
     await page.waitForFunction(({ row }) => {
       const value = String(window.tp?.editor?.options?.data?.[row]?.[0] || '');
       return /<img\b/i.test(value);
     }, { row }, { timeout: 20000 });
+    await page.evaluate(() => window.wp?.media?.frame?.close?.());
 
     await page.evaluate(({ row, origin, alt }) => {
       let value = String(window.tp.editor.options.data[row][0] || '');
