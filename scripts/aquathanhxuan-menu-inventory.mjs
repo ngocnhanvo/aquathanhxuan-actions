@@ -116,10 +116,15 @@ try{
  await page.locator('#esc-menu-code').fill('Header');
  await page.locator('#esc-menu-lang').selectOption('vi');
  await page.locator('#esc-menu-type').selectOption('dropdown');
- await page.locator('input[name="save_menu"]:visible').first().click();
+ await page.locator('#esc-menu-code').evaluate(el=>{const form=el.closest('form');if(!form)throw Error('MENU_FORM_MISSING');form.action='/wp-admin/nav-menus.php';form.submit();});
+ await page.waitForURL(url=>url.pathname.endsWith('/nav-menus.php')&&Number(url.searchParams.get('menu'))===menuId&&!url.searchParams.has('action'),{timeout:30000});
+ const stored=await getMenus();
+ if(!stored?.menus?.Header?.vi)throw Error('MENU_IDENTITY_VERIFY_FAILED');
+ await page.goto(menuUrl+'?action=edit&menu='+menuId,{waitUntil:'domcontentloaded',timeout:30000});
  const tree=desired.map(([label,slug])=>({key:'menu-'+slug,lang:'vi',label,slug:'/san-pham/'+slug,linkMode:'custom'}));
  await page.locator('#esc-pse-menu-json-input').fill(JSON.stringify(tree));
  await page.locator('#esc-pse-menu-json-preview').click();
+ await page.waitForFunction(()=>Boolean(document.querySelector('#esc-pse-menu-json-result')?.textContent?.trim()),null,{timeout:20000});
  const preview=String(await page.locator('#esc-pse-menu-json-result').textContent());
  if(!preview.includes('11 items hợp lệ'))throw Error('MENU_PREVIEW_FAILED '+preview.slice(0,280));
  page.once('dialog',d=>d.accept());
