@@ -51,15 +51,6 @@ jobs:
         env:
           ASTRO_SOURCE: source-astro
           PHP_SOURCE: source-php
-      - name: Validate native Hero and Sale cell contracts (read-only)
-        shell: bash
-        run: |
-          set -euo pipefail
-          php -l source-php/wp-content/plugins/esc-visual-builder/includes/site-config.php
-          php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor.php
-          php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
-          php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
-          php source-php/wp-content/plugins/esc-visual-builder/tests/text-image-cells.test.php
       - name: Upload synthetic preview evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -67,6 +58,30 @@ jobs:
           name: aquathanhxuan-visual-builder-preview-contract
           path: artifacts/visual-builder
           if-no-files-found: ignore
+
+  native-cells:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current WordPress source (no deployment)
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - name: Validate native Hero and Sale cell contracts (in-memory tests)
+        shell: bash
+        run: |
+          set -euo pipefail
+          php --version
+          php -l wp-content/plugins/esc-visual-builder/includes/site-config.php
+          php -l wp-content/plugins/esc-visual-builder/includes/text-editor.php
+          php -l wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
+          php wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
+          php wp-content/plugins/esc-visual-builder/tests/text-image-cells.test.php
+      - name: Identify PHP source revision
+        run: git rev-parse HEAD
 
   homepage-data:
     runs-on: ubuntu-latest
