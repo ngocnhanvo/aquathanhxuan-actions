@@ -16,7 +16,8 @@ assert.equal(env.WC_URL,'https://admin.aquathanhxuan.io.vn');
   }
   await page.waitForURL(u=>u.pathname.startsWith('/wp-admin/'));
   await page.goto(env.WC_URL+'/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1',{waitUntil:'domcontentloaded'});
-  await page.locator('#content-html').click();
+  await page.evaluate(()=>{window.switchEditors.go('content','html');window.wpActiveEditor='content';});
+  await page.waitForFunction(()=>window.tinymce?.get('content')?.isHidden()===true,null,{timeout:10000});
   const before=await page.locator('#content').inputValue();
   console.log('PAGE_PRECHECK='+JSON.stringify({length:before.length,has00:before.includes('home_00'),has01:before.includes('home_01'),has02:before.includes('home_02'),tail:before.slice(-250)}));
   assert(before.includes('home_00')&&before.includes('home_01'),'existing homepage sections absent');
