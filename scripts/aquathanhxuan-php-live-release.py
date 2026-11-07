@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install only AQUATHANHXUAN's GitHub Trigger + signed unzip PHP via verified FTPS.
+"""Install AQUATHANHXUAN's signed PHP release file allowlist via verified FTPS.
 
 One-shot release: input is checked-out aquathanhxuan-php/master, target is the validated
 AQUATHANHXUAN WordPress docroot. STOR temporary + verified readback; old files are renamed
@@ -25,6 +25,7 @@ FILES = (
     "wp-content/mu-plugins/esc-seo-files.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.js",
+    "wp-content/plugins/esc-visual-builder/includes/site-config.php",
 )
 raw = os.environ.get("FTP_SERVER", "").strip()
 if "://" not in raw:
