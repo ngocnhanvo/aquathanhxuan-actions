@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const { chromium } = require('playwright');
 const base = 'https://aquathanhxuan.io.vn';
 const wp = 'https://admin.aquathanhxuan.io.vn';
-const expected = 'd3b37fe4c148c6dd71b6f4c93351c5b8eb321be7';
+const expected = 'd9b42a6dbc68bc4fd68be442afe3f5645f834dc6';
 const sizes = [[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const shortcode = '[table id=home_03 /]';
 (async () => {
@@ -74,6 +74,32 @@ const shortcode = '[table id=home_03 /]';
       assert.equal(new URL(state.href,base).pathname,'/san-pham/combo-be-cubic-40-sieu-trong/','QA: CTA URL');
       assert(state.loaded && state.imageAlt,'QA: image broken or alt absent');
       assert(!state.overflow,'QA: horizontal overflow at '+width);
+      // Home 04 is a separate native ESC Table with two verified equipment cards.
+      const equipment=page.locator('[data-aqua-home-equipment]');
+      await equipment.waitFor({state:'visible',timeout:12000});
+      await equipment.scrollIntoViewIfNeeded();
+      const cards=await equipment.locator('article').evaluateAll(els=>els.map(el=>{
+        const link=el.querySelector('a[data-esc-link-field="button_href"]');
+        const img=el.querySelector('img[data-esc-source-field="image"]');
+        return {row:el.dataset.escSourceRow,title:el.querySelector('h2')?.textContent?.trim(),
+          href:link?.getAttribute('href'),label:link?.textContent?.trim(),
+          src:img?.getAttribute('src'),alt:img?.getAttribute('alt'),
+          loaded:Boolean(img?.complete&&img?.naturalWidth>0)};
+      }));
+      assert.equal(await equipment.getAttribute('data-esc-source-table'),'home_04','Home04: source table');
+      assert.equal(cards.length,2,'Home04: two real equipment cards expected');
+      assert.deepEqual(cards.map(c=>c.title),['Máy lọc','Đèn'],'Home04: product categories/order');
+      assert.deepEqual(cards.map(c=>c.row),['0','1'],'Home04: original row indices');
+      assert(cards.every(c=>c.label==='Xem sản phẩm'),'Home04: CTA labels');
+      assert.deepEqual(cards.map(c=>new URL(c.href,base).pathname),[
+        '/san-pham/sunsun-hw-704a-may-loc-ngoai-cho-ho-ca-canh/',
+        '/san-pham/den-week-t90-pro/'
+      ],'Home04: WooCommerce product links');
+      assert(cards.every(c=>c.loaded&&c.alt),'Home04: images loaded with SEO alt');
+      assert(!await equipment.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1),
+        'Home04: horizontal overflow at '+width);
+      await equipment.screenshot({path:'artifacts/home03/equipment-'+width+'x'+height+'.png'});
+      console.log('HOME04_QA_VIEWPORT=PASS '+width+'x'+height);
       await section.screenshot({path:'artifacts/home03/'+width+'x'+height+'.png'});
       console.log('HOME03_QA_VIEWPORT=PASS '+width+'x'+height);
       await page.close();
@@ -119,6 +145,23 @@ const shortcode = '[table id=home_03 /]';
     for(const field of ['title','description','button_label','button_href'])
       assert(options.includes(field),'Builder: missing field '+field);
     assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,'Builder: title editor disabled');
+    const equipmentBuilder=admin.frameLocator('#esc-vb-frame').locator('[data-aqua-home-equipment]');
+    await equipmentBuilder.waitFor({state:'visible',timeout:30000});
+    const equipmentCoords=await equipmentBuilder.evaluate(el=>({
+      table:el.dataset.escSourceTable,version:el.dataset.escRenderedVersion,
+      rows:[...el.querySelectorAll('article')].map(article=>({
+        row:article.dataset.escSourceRow,editRow:article.dataset.escBuilderRow,
+        titleField:article.querySelector('h2')?.dataset.escBuilderCellField,
+        linkField:article.querySelector('a')?.dataset.escLinkField,
+        imageField:article.querySelector('img')?.dataset.escBuilderImageField
+      }))
+    }));
+    assert.equal(equipmentCoords.table,'home_04','Home04 Builder: table identity');
+    assert.match(equipmentCoords.version||'',/^[a-f0-9]{64}$/,'Home04 Builder: version missing');
+    assert.deepEqual(equipmentCoords.rows.map(row=>row.row),['0','1'],'Home04 Builder: source rows');
+    assert(equipmentCoords.rows.every(row=>row.editRow===row.row && row.titleField==='title'
+      && row.linkField==='button_href' && row.imageField==='image'),'Home04 Builder: cell identities');
+    console.log('HOME04_BUILDER_COORDS=PASS '+JSON.stringify(equipmentCoords));
     await admin.screenshot({path:'artifacts/home03/builder-readonly.png'});
     console.log('HOME03_BUILDER_SELECTION=PASS '+options.join(','));
     await admin.close();
