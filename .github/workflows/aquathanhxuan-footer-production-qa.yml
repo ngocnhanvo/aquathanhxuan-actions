@@ -1,0 +1,37 @@
+name: Aqua Footer CMS production and Builder QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-footer-production-qa.yml'
+      - 'qa-requests/footer-20261108.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  footer-qa:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Footer QA syntax
+        run: node --check scripts/aquathanhxuan-footer-production-qa.cjs
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Verify WordPress official logo, real menu, responsive Footer and Builder fields
+        run: node scripts/aquathanhxuan-footer-production-qa.cjs
+      - name: Upload Footer screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-footer-production-qa
+          path: artifacts/footer
+          if-no-files-found: ignore
+          retention-days: 7
