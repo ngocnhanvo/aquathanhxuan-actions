@@ -36,7 +36,8 @@ jobs:
             assert(page.url().startsWith('https://admin.aquathanhxuan.io.vn/wp-admin/'),'login');
             console.log('LOGIN_PASS');
             await page.goto('https://admin.aquathanhxuan.io.vn/wp-admin/admin.php?page=tablepress&action=edit&table_id=home_00',{waitUntil:'domcontentloaded'});
-            await page.waitForFunction(() => Array.isArray(window.tp?.editor?.options?.data),null,{timeout:30000});
+            await page.locator('#table-id').waitFor({state:'visible',timeout:30000});
+            await page.waitForFunction(() => Boolean(window.tp?.editor?.options?.data),null,{timeout:30000});
             const before=await page.evaluate(()=>window.tp.editor.options.data);
             assert.equal(before.length,4,'Expected header, labels and 2 Hero rows');
             assert.equal(before[0].length,13,'Unexpected existing Hero schema');
