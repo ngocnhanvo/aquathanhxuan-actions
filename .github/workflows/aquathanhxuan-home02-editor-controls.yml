@@ -1,0 +1,56 @@
+name: Aqua Home 02 editor controls discovery (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home02-editor-controls.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Inspect native TablePress create and Insert Code controls without modifying CMS
+        shell: bash
+        run: |
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          const env=Object.fromEntries((process.env.ENV_FILE||'').split(/\r?\n/).map(x=>x.match(/^\s*(WC_URL|WC_URL_CLIENT)\s*=\s*(.*?)\s*$/)).filter(Boolean).map(x=>[x[1],x[2].replace(/^['"]|['"]$/g,'')]));
+          assert.equal(env.WC_URL,'https://admin.aquathanhxuan.io.vn');
+          assert.equal(env.WC_URL_CLIENT,'https://aquathanhxuan.io.vn');
+          assert(process.env.WP_ADMIN_USERNAME&&process.env.WP_ADMIN_PASSWORD,'missing WordPress credentials');
+          const main=async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            try {
+              const page=await browser.newPage();
+              await page.goto(env.WC_URL+'/wp-login.php',{waitUntil:'domcontentloaded'});
+              if(await page.locator('#user_login').count()){
+                await page.locator('#user_login').fill(process.env.WP_ADMIN_USERNAME);
+                await page.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
+                await Promise.all([page.waitForURL(u=>u.pathname.startsWith('/wp-admin/')),page.locator('#wp-submit').click()]);
+              }
+              assert(page.url().startsWith(env.WC_URL+'/wp-admin/'),'login failed');
+              for(const path of ['/wp-admin/admin.php?page=tablepress_add','/wp-admin/admin.php?page=tablepress','/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1']){
+                await page.goto(env.WC_URL+path,{waitUntil:'domcontentloaded',timeout:30000});
+                const snapshot=await page.evaluate(()=>{
+                  const relevant=[...document.querySelectorAll('form')].map(f=>({id:f.id,action:f.getAttribute('action'),method:f.method,fields:[...f.querySelectorAll('input,textarea,button,select')].map(e=>({tag:e.tagName.toLowerCase(),type:e.getAttribute('type'),id:e.id,name:e.getAttribute('name'),text:(e.textContent||'').trim().slice(0,90)})).filter(x=>x.id||x.name||x.text).slice(0,80)})).filter(f=>f.fields.length>0);
+                  const insert=[...document.querySelectorAll('button,a,input')].filter(e=>/insert code|chèn mã|tablepress|esc table/i.test((e.textContent||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('aria-label')||''))).slice(0,25).map(e=>({tag:e.tagName.toLowerCase(),id:e.id,cls:String(e.className||'').slice(0,100),text:(e.textContent||'').trim().slice(0,90)}));
+                  return {title:document.title,forms:relevant.slice(0,8),insert,excerpt:document.body.innerText.slice(0,350)};
+                });
+                console.log('NATIVE_EDITOR_CONTROLS='+JSON.stringify({path,...snapshot}));
+              }
+              console.log('READ_ONLY_EDITOR_DISCOVERY=PASS');
+            }finally{await browser.close();}
+          };
+          main().catch(e=>{console.error('EDITOR_DISCOVERY_FAILED='+e.message);process.exitCode=1;});
+          NODE
