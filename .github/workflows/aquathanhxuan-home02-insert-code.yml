@@ -25,3 +25,5 @@ jobs:
 # Retry with corrected Insert Code preflight.
 
 # Retry editor state probe.
+
+# Retry in confirmed Quicktags editor mode.
