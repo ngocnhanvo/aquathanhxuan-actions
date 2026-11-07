@@ -116,8 +116,13 @@ try{
  await page.locator('#esc-menu-code').fill('Header');
  await page.locator('#esc-menu-lang').selectOption('vi');
  await page.locator('#esc-menu-type').selectOption('dropdown');
- await page.locator('#esc-menu-code').evaluate(el=>{const form=el.closest('form');if(!form)throw Error('MENU_FORM_MISSING');form.action='/wp-admin/nav-menus.php';form.submit();});
- await page.waitForURL(url=>url.pathname.endsWith('/nav-menus.php')&&Number(url.searchParams.get('menu'))===menuId&&!url.searchParams.has('action'),{timeout:30000});
+ page.on('request',request=>{if(request.isNavigationRequest()&&request.method()==='POST'&&request.url().includes('/nav-menus.php'))console.log('MENU_SAVE_POST='+request.url());});
+ page.on('response',response=>{if(response.url().includes('/nav-menus.php')&&response.request().isNavigationRequest())console.log('MENU_SAVE_RESPONSE='+response.status()+' '+response.url());});
+ await Promise.all([
+  page.waitForNavigation({waitUntil:'domcontentloaded',timeout:65000}),
+  page.locator('#esc-menu-code').evaluate(el=>{const form=el.closest('form');if(!form)throw Error('MENU_FORM_MISSING');form.action='/wp-admin/nav-menus.php';HTMLFormElement.prototype.submit.call(form);})
+ ]);
+ console.log('MENU_SAVE_FINAL_URL='+page.url());
  const stored=await getMenus();
  if(!stored?.menus?.Header?.vi)throw Error('MENU_IDENTITY_VERIFY_FAILED');
  await page.goto(menuUrl+'?action=edit&menu='+menuId,{waitUntil:'domcontentloaded',timeout:30000});
