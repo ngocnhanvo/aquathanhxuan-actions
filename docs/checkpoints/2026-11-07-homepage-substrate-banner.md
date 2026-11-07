@@ -40,3 +40,14 @@ Cổng ghi source: bypass
 - It now enumerates up to 300 newest WordPress media records and queries product category 1775 across the store/product endpoints, with bounded output. Existing origin checks retained; no CMS write.
 - The workflow uses push on its own file, so this commit is eligible to trigger the existing inventory workflow. NEW_RUN_STATUS: UNVERIFIED; this session's GitHub connector lacks workflow-run listing/dispatch and external HTTP was unavailable. Do not mark a new inventory PASS or infer identified images/products without logs.
 - Next: inspect run logs for the 562fdf4 workflow; select verified genuine media/products; only then create native home_02 and continue the steps above. No production build/deploy, no WordPress mutation in this continuation.
+
+## Follow-up inventory 2026-11-07 23:54 (Asia/Ho_Chi_Minh)
+- Workflow extension commit bc6712aa069846825197bb17b866b772c97f44a6; run #42393568056 inspection steps SUCCESS, URL https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42393568056
+- WooCommerce /wp-json/wc/store/v1/products?category=1775&per_page=50 => HTTP 200, x-wp-total=0; no products in category 1775, cannot claim product-linked CTA.
+- WordPress native media listing identified actual substrate media with WordPress-origin relative image paths:
+  - 82490 — Shrimp King Active Soil 4L — /wp-content/uploads/2026/11/Thiet-ke-chua-co-ten-2024-05-18T160040.341.png
+  - 82488 — Shrimp King Active Soil 8L — /wp-content/uploads/2026/11/Thiet-ke-chua-co-ten-2024-05-18T160124.275.png
+  - 82482 — Dennerle Scaper’s Soil 8L — /wp-content/uploads/2026/11/Thiet-ke-chua-co-ten-87.png
+  - 82480 — Dennerle Scaper’s Soil 4L — /wp-content/uploads/2026/11/Thiet-ke-chua-co-ten-86.png
+- Existing Astro Home_02.astro and home02.ts still render one section image/title; no new CMS/Builder/deploy modifications in this continuation.
+- Next action: select genuine relevant existing media and approved banner copy for one Home_02 row, create the native ESC Table and page shortcode via authenticated CMS writer, then implement versioned cell mapping and test. Do not invent product links or claim new section deployed.
