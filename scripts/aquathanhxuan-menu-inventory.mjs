@@ -94,7 +94,10 @@ try{
  if(!menuId){
   await page.goto(menuUrl+'?action=edit&menu=0',{waitUntil:'domcontentloaded',timeout:30000});
   await page.locator('#menu-name').fill('Header VI');
-  await Promise.all([page.waitForURL(url=>url.pathname.endsWith('/nav-menus.php')&&Number(url.searchParams.get('menu'))>0,{timeout:30000}),page.locator('input[name="save_menu"]:visible').first().click()]);
+  await page.locator('input[name="save_menu"]:visible').first().click();
+  await page.waitForLoadState('domcontentloaded');
+  console.log('MENU_CREATE_RESPONSE='+JSON.stringify({url:page.url(),name:await page.locator('#menu-name').inputValue().catch(()=>''),notices:await page.locator('.notice,#message,.error,.updated').allTextContents(),button:await page.locator('input[name="save_menu"]:visible').first().getAttribute('value')}));
+
   menuId=Number(new URL(page.url()).searchParams.get('menu'));
   if(!menuId)throw Error('MENU_CREATE_FAILED');
  }
