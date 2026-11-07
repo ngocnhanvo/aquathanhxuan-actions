@@ -29,3 +29,5 @@ jobs:
 # Retry in confirmed Quicktags editor mode.
 
 # Retry after TinyMCE initialization guard.
+
+# Retry native callback from Insert Code picker.
