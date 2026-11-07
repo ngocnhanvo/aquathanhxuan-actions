@@ -92,19 +92,26 @@ try{
   }
  }
  if(!menuId){
-  await page.goto(menuUrl+'?action=edit&menu=0',{waitUntil:'domcontentloaded',timeout:30000});
-  await page.locator('#menu-name').fill('Header VI');
-  const formInfo=await page.locator('#menu-name').evaluate(el=>({formId:el.form?.id,action:el.form?.getAttribute('action'),fields:[...(el.form?.querySelectorAll('input[type="hidden"]')||[])].map(input=>({name:input.name,value:input.name.includes('nonce')?'REDACTED':String(input.value||'').slice(0,80)}))}));
-  console.log('MENU_CREATE_FORM='+JSON.stringify(formInfo));
-  await Promise.all([
-    page.waitForLoadState('domcontentloaded'),
-    page.locator('#menu-name').evaluate(el=>{if(!el.form)throw Error('MENU_FORM_MISSING');el.form.action='/wp-admin/nav-menus.php';el.form.submit();})
-  ]);
-  console.log('MENU_CREATE_RESPONSE='+JSON.stringify({url:page.url(),name:await page.locator('#menu-name').inputValue().catch(()=>''),notices:await page.locator('.notice,#message,.error,.updated').allTextContents()}));
-
-  menuId=Number(new URL(page.url()).searchParams.get('menu'));
-  if(!menuId)throw Error('MENU_CREATE_FAILED');
+  const nonceResponse=await page.request.get(base+'/wp-admin/admin-ajax.php?action=rest-nonce');
+  if(!nonceResponse.ok())throw Error('REST_NONCE_HTTP_'+nonceResponse.status());
+  const nonce=(await nonceResponse.text()).trim();
+  if(!nonce)throw Error('REST_NONCE_MISSING');
+  const headers={'X-WP-Nonce':nonce,'Accept':'application/json'};
+  const listed=await page.request.get(base+'/wp-json/wp/v2/menus?context=edit&per_page=100',{headers});
+  if(!listed.ok())throw Error('REST_MENU_LIST_HTTP_'+listed.status()+' '+(await listed.text()).slice(0,200));
+  const list=await listed.json();
+  const named=Array.isArray(list)?list.find(m=>m.name==='Header VI'):null;
+  if(named){menuId=Number(named.id);console.log('MENU_REUSED_ID='+menuId);}
+  else{
+   const created=await page.request.post(base+'/wp-json/wp/v2/menus',{headers,data:{name:'Header VI'}});
+   if(!created.ok())throw Error('REST_MENU_CREATE_HTTP_'+created.status()+' '+(await created.text()).slice(0,200));
+   const record=await created.json();
+   menuId=Number(record.id);
+   console.log('MENU_CREATED_ID='+menuId);
+  }
+  if(!Number.isSafeInteger(menuId)||menuId<=0)throw Error('MENU_CREATE_FAILED');
  }
+
  await page.goto(menuUrl+'?action=edit&menu='+menuId,{waitUntil:'domcontentloaded',timeout:30000});
  await page.locator('#esc-menu-code').fill('Header');
  await page.locator('#esc-menu-lang').selectOption('vi');
