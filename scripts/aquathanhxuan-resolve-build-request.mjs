@@ -5,32 +5,16 @@ function fail(message) {
   process.exit(1);
 }
 
-const eventPath = process.env.GITHUB_EVENT_PATH || "";
-if (!eventPath || !fs.existsSync(eventPath)) {
-  fail("GitHub push event payload is unavailable");
+const requestNames = fs.readdirSync("build-requests", { withFileTypes: true })
+  .filter((entry) => entry.isFile() && /^[^/]+\.json$/.test(entry.name))
+  .map((entry) => entry.name)
+  .sort();
+
+if (requestNames.length === 0) {
+  fail("No Aqua build request exists in checkout");
 }
 
-let event;
-try {
-  event = JSON.parse(fs.readFileSync(eventPath, "utf8"));
-} catch {
-  fail("GitHub push event payload is invalid JSON");
-}
-
-const requestFiles = [...new Set(
-  (Array.isArray(event.commits) ? event.commits : [])
-    .flatMap((commit) => [
-      ...(Array.isArray(commit?.added) ? commit.added : []),
-      ...(Array.isArray(commit?.modified) ? commit.modified : []),
-    ])
-    .filter((path) => /^build-requests\/[^/]+\.json$/.test(path)),
-)];
-
-if (requestFiles.length !== 1) {
-  fail(`Expected exactly one Aqua build request, found ${requestFiles.length}`);
-}
-
-const requestFile = requestFiles[0];
+const requestFile = `build-requests/${requestNames.at(-1)}`;
 if (!fs.existsSync(requestFile)) {
   fail(`Aqua build request does not exist in checkout: ${requestFile}`);
 }
