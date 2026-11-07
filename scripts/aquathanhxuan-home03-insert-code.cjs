@@ -9,14 +9,28 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'WordPres
 (async () => {
   const browser = await chromium.launch({ args: ['--no-sandbox'] });
   const page = await browser.newPage();
-  page.setDefaultTimeout(16000);
+  page.setDefaultTimeout(20000);
+  page.setDefaultNavigationTimeout(45000);
   page.on('dialog', async dialog => {
     if (dialog.type() === 'beforeunload') await dialog.accept();
     else await dialog.dismiss();
   });
   const shortcode = '[table id=home_03 /]';
   try {
-    await page.goto(env.WC_URL + '/wp-login.php', { waitUntil: 'domcontentloaded' });
+    let loginError = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        await page.goto(env.WC_URL + '/wp-login.php', { waitUntil: 'domcontentloaded', timeout: 45000 });
+        loginError = null;
+        break;
+      } catch (error) {
+        loginError = error;
+        if (!/Timeout|net::ERR_|ECONNRESET/i.test(error.message) || attempt === 2) throw error;
+        console.log('HOME03_WP_LOGIN_NAV_RETRY=' + attempt);
+        await page.waitForTimeout(1500);
+      }
+    }
+    if (loginError) throw loginError;
     if (await page.locator('#user_login').count()) {
       await page.locator('#user_login').fill(process.env.WP_ADMIN_USERNAME);
       await page.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
