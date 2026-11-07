@@ -30,3 +30,5 @@ jobs:
         run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - name: Insert Home 03 only with native ESC Table Insert Code
         run: node scripts/aquathanhxuan-home03-insert-code.cjs
+
+# Retry one bounded WordPress navigation timeout; no CMS change on failed preflight.
