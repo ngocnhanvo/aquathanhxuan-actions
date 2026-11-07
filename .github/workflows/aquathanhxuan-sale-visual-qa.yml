@@ -71,14 +71,61 @@ jobs:
 
                 const images=sale.locator('[data-sale-card] img');
                 assert.equal(await images.count(),12,'Product image count');
-                await page.waitForFunction(()=>{
-                  const imgs=[...document.querySelectorAll('[data-aqua-home-sale] [data-sale-card] img')];
-                  return imgs.length===12 && imgs.every(img=>img.complete && img.naturalWidth>0);
-                },{}, {timeout:20000});
 
-                const imageSources=await images.evaluateAll(nodes=>nodes.map(img=>img.currentSrc || img.src));
-                assert(imageSources.every(src=>!src.includes('aquathanhxuan.com/wp-content/')),
+                const initialImageStates=await images.evaluateAll(nodes=>nodes.map((img,index)=>({
+                  index,
+                  src:img.getAttribute('src')||'',
+                  currentSrc:img.currentSrc||'',
+                  complete:img.complete,
+                  naturalWidth:img.naturalWidth,
+                  naturalHeight:img.naturalHeight,
+                })));
+                console.log('SALE_IMAGE_INITIAL='+JSON.stringify(initialImageStates));
+
+                // Product images are intentionally loading="lazy". Cards outside the
+                // horizontal viewport are not expected to load until the carousel
+                // scrolls near them, so reveal each card before asserting image health.
+                for(let i=0;i<12;i++){
+                  const card=cards.nth(i);
+                  const img=images.nth(i);
+                  await card.evaluate(el=>el.scrollIntoView({behavior:'instant',block:'nearest',inline:'center'}));
+                  const handle=await img.elementHandle();
+                  assert(handle,'Product image handle '+i);
+                  try{
+                    await page.waitForFunction(
+                      el=>Boolean(el && el.complete && el.naturalWidth>0),
+                      handle,
+                      {timeout:10000}
+                    );
+                  }catch(error){
+                    const broken=await img.evaluate(el=>({
+                      src:el.getAttribute('src')||'',
+                      currentSrc:el.currentSrc||'',
+                      complete:el.complete,
+                      naturalWidth:el.naturalWidth,
+                      naturalHeight:el.naturalHeight,
+                    }));
+                    console.log('SALE_IMAGE_BROKEN index='+i+' state='+JSON.stringify(broken));
+                    await sale.screenshot({path:'artifacts/sale/broken-'+width+'x'+height+'-'+i+'.png'});
+                    throw error;
+                  }
+                }
+
+                const imageStates=await images.evaluateAll(nodes=>nodes.map((img,index)=>({
+                  index,
+                  src:img.getAttribute('src')||'',
+                  currentSrc:img.currentSrc||'',
+                  complete:img.complete,
+                  naturalWidth:img.naturalWidth,
+                  naturalHeight:img.naturalHeight,
+                })));
+                console.log('SALE_IMAGE_FINAL='+JSON.stringify(imageStates));
+                assert(imageStates.every(img=>img.complete && img.naturalWidth>0),'All Sale images load after reveal');
+                assert(imageStates.every(img=>!(img.currentSrc||img.src).includes('aquathanhxuan.com/wp-content/')),
                   'Production must not hotlink legacy product images');
+
+                await sale.locator('[data-sale-track]').evaluate(el=>{el.scrollLeft=0;});
+                await page.waitForTimeout(150);
 
                 const discounts=await sale.locator('.aqua-sale__discount').allTextContents();
                 assert(discounts.every(value=>/^\s*-\d+%\s*$/.test(value)),'Discount labels');
