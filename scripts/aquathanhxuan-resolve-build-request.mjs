@@ -37,7 +37,7 @@ if (request.frontend_host !== "aquathanhxuan.io.vn") {
   fail("Unexpected frontend host in request");
 }
 
-const wpUrl = "https://admin-aquathanhxuan.io.vn";
+const wpUrl = "https://admin.aquathanhxuan.io.vn";
 const frontendUrl = "https://aquathanhxuan.io.vn";
 
 process.stdout.write([

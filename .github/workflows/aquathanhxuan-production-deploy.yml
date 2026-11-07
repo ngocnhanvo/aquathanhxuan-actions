@@ -26,7 +26,7 @@ jobs:
       AQUATHANHXUAN_PRODUCTION_SOURCE: master
       AQUATHANHXUAN_DEPLOY_SOURCE_BRANCH: master
       AQUATHANHXUAN_DEPLOY_REQUEST_DOMAIN: ${{ github.event.client_payload.site_domain }}
-      AQUATHANHXUAN_CANONICAL_WP_ORIGIN: https://admin-aquathanhxuan.io.vn
+      AQUATHANHXUAN_CANONICAL_WP_ORIGIN: https://admin.aquathanhxuan.io.vn
       AQUATHANHXUAN_CANONICAL_CLIENT_ORIGIN: https://aquathanhxuan.io.vn
     steps:
       - name: Checkout immutable AQUATHANHXUAN deploy scripts
@@ -67,7 +67,7 @@ jobs:
               return url.hostname, 'https://'+url.hostname
           wp_host,wp_origin=canonical_origin('AQUATHANHXUAN_CANONICAL_WP_ORIGIN')
           client_host,client_origin=canonical_origin('AQUATHANHXUAN_CANONICAL_CLIENT_ORIGIN')
-          if wp_host!='admin-aquathanhxuan.io.vn' or client_host!='aquathanhxuan.io.vn':
+          if wp_host!='admin.aquathanhxuan.io.vn' or client_host!='aquathanhxuan.io.vn':
               raise RuntimeError('Aqua canonical origins changed unexpectedly')
           target='/domains/'+client_host+'/public_html/'
           if os.environ.get('AQUATHANHXUAN_DEPLOY_REQUEST_DOMAIN')!=client_host:
