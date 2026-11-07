@@ -38,6 +38,8 @@ jobs:
           php source-php/tests/aquathanhxuan-image-delta.php
           php source-php/tests/aquathanhxuan-static-delta.php
           php -l source-php/wp-content/plugins/github-trigger/vcs-build-trigger.php
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/site-config.php
+          php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.test.php
           php -l source-php/wp-content/mu-plugins/esc-github-trigger-config.php
           php -l source-php/wp-content/mu-plugins/esc-seo-files.php
           ! grep -Eqi 'nghiencuukhoahoc|EduResearch Hub' source-php/wp-content/mu-plugins/esc-seo-files.php
