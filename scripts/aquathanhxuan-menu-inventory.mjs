@@ -94,7 +94,7 @@ try{
  if(!menuId){
   await page.goto(menuUrl+'?action=edit&menu=0',{waitUntil:'domcontentloaded',timeout:30000});
   await page.locator('#menu-name').fill('Header VI');
-  await Promise.all([page.waitForURL(/nav-menus\.php.*menu=\d+/, {timeout:30000}),page.locator('#save_menu_header').click()]);
+  await Promise.all([page.waitForURL(/nav-menus\.php.*menu=\d+/, {timeout:30000}),page.locator('input[name="save_menu"]:visible').first().click()]);
   menuId=Number(new URL(page.url()).searchParams.get('menu'));
   if(!menuId)throw Error('MENU_CREATE_FAILED');
  }
@@ -102,7 +102,7 @@ try{
  await page.locator('#esc-menu-code').fill('Header');
  await page.locator('#esc-menu-lang').selectOption('vi');
  await page.locator('#esc-menu-type').selectOption('dropdown');
- await page.locator('#save_menu_header').click();
+ await page.locator('input[name="save_menu"]:visible').first().click();
  const tree=desired.map(([label,slug])=>({key:'menu-'+slug,lang:'vi',label,slug:'/san-pham/'+slug,linkMode:'custom'}));
  await page.locator('#esc-pse-menu-json-input').fill(JSON.stringify(tree));
  await page.locator('#esc-pse-menu-json-preview').click();
