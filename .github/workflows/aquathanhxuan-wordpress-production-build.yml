@@ -36,9 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          after='${{ github.sha }}'
-          mapfile -t files < <(git diff-tree --root --no-commit-id --name-only -r "$after" | grep -E '^build-requests/[^/]+\.json$')
+          mapfile -t files < <(jq -r '[.commits[] | (.added[]?, .modified[]?)] | unique[]' "$GITHUB_EVENT_PATH" | grep -E '^build-requests/[^/]+\.json$')
           if [[ "${#files[@]}" -ne 1 ]]; then
             echo "::error::Expected exactly one Aqua build request, found ${#files[@]}"
             exit 1
