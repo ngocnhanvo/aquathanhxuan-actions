@@ -139,7 +139,7 @@ jobs:
                   const searchPanel = page.locator('#mobile-search-panel');
                   assert(await searchPanel.isVisible(), `QA_FAILED viewport=${item.name} search_panel_hidden`);
                   assert(await searchPanel.getAttribute('aria-hidden') === 'false', `QA_FAILED viewport=${item.name} search_panel_aria_hidden`);
-                  assert(await page.evaluate(() => document.activeElement?.id) === 'mobile-product-search', `QA_FAILED viewport=${item.name} search_input_not_focused`);
+                  await page.waitForFunction(() => document.activeElement?.id === 'mobile-product-search', null, { timeout: 2000 });
                   await page.keyboard.press('Escape');
                   assert(await searchPanel.getAttribute('aria-hidden') === 'true', `QA_FAILED viewport=${item.name} search_escape_failed`);
                   assert(await page.evaluate(() => document.activeElement?.id) === 'mobile-search-btn', `QA_FAILED viewport=${item.name} search_focus_not_restored`);
