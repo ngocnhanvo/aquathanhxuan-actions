@@ -9,5 +9,5 @@
     "builder_version_and_cell_coordinates",
     "editable_fields"
   ],
-  "run": "post-deploy-hot-combo"
+  "run": "diagnose-home03-missing-section"
 }
