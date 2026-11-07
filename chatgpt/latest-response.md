@@ -6,35 +6,37 @@ Branch: main
 
 ## Phản hồi dự định gửi
 
-## Trạng thái mới nhất — 08/11/2026
+Mình đã xác định được thanh xanh **Hotline – Zalo – Yêu cầu báo giá** trong ảnh.
 
-Đã đọc `knowledge/main`, `chatgpt/latest-response.md`, các checkpoint và đối chiếu commit mới nhất của ba repository.
+Nó được tạo bởi `BottomContactBar.astro` và gắn vào `Layout.astro`, nên xuất hiện trên toàn website khi cuộn trang.
 
-| Repository | Branch | HEAD |
-|---|---|---|
-| `aquathanhxuan-astro` | `master` | `95e82ad` |
-| `aquathanhxuan-php` | `master` | `647ce3b` |
-| `aquathanhxuan-actions` | `main` | `5befb11` |
+Mình sẽ gỡ thanh này khỏi layout, bỏ khoảng đệm đáy 64–68px dành riêng cho nó, đồng thời giữ nguyên Footer, Header và các chức năng liên hệ khác.
 
-**Các phần đã hoàn thành:** Hero, Sale, banner Phân nền, Hot Combo, Máy lọc/Đèn, dải lợi ích và Footer. Home 02–05 đã có kiểm thử production thành công; không cần tạo lại.
+**Cấu hình triển khai:** `auto-build` · Cổng ghi source: `bypass`.
 
-Workflow Footer mới nhất tại thời điểm bắt đầu: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42411955222 — SUCCESS.
+**Build và deploy production đã thành công.**
 
-Phần cần tiếp tục là **nghiệm thu tổng thể trang chủ**, đặc biệt các tương tác Header, menu mobile, tìm kiếm và tính chỉnh sửa được trong Visual Builder theo tài liệu thiết kế.
+- Astro commit: [`6effb8e`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/6effb8e2af07edf87aaecdb9891b818f3529db16)
+- Workflow triển khai: [#42425210550](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42425210550) — SUCCESS.
+- Không thay đổi dữ liệu WordPress hay ESC Table.
 
-## Kết quả tiếp nối — Nghiệm thu tổng thể PASS
+**Kiểm thử sau deploy: PASS** — [Playwright run #42425346863](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42425346863).
 
-**Đã nghiệm thu thành công production tại Astro SHA `a88d3981`.**
+Đã xác nhận trên desktop, tablet và mobile: không còn thanh sticky bottom, không còn padding đáy dành cho thanh này, trang không tràn ngang, Footer và Visual Builder vẫn hoạt động đúng.
 
-- Run Playwright tích hợp **#42413344960 SUCCESS**, xác nhận WordPress chứa đúng thứ tự `home_00` đến `home_05`, không trùng.
-- Năm màn hình `1440×900`, `1024×768`, `768×1024`, `844×390`, `390×844`: không tràn ngang; Hero/slider, Sale 12 sản phẩm, menu desktop, drawer/tìm kiếm mobile, banner và Footer đều đạt kiểm thử.
-- Visual Builder thật đã đối chiếu tọa độ cell và phiên bản cho Home 02–05; Footer có **9 trường CMS** được nhận diện.
-- Đã lấy và kiểm tra 26 ảnh QA từ GitHub. Ảnh chụp riêng từng vùng cho thấy Máy lọc/Đèn và 4 lợi ích hiển thị; khoảng trắng trên một số ảnh toàn trang là do trình duyệt bỏ qua việc vẽ section ngoài viewport khi chụp, không phải thiếu dữ liệu production.
-- Chứng cứ: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42413344960 và https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42413344960/artifacts/13590646762 .
-- Đã lưu checkpoint tại `docs/checkpoints/2026-11-08-homepage-final-qa-pass.md`, commit `0237928` trên `aquathanhxuan-actions/main`.
-- Không ghi sửa WordPress hoặc khởi chạy build production trùng trong lượt này. Kết quả xác nhận khả năng hoạt động và responsive hiện tại; chưa khẳng định đối chiếu pixel-perfect với từng SVG mockup.
+Mình đang lưu checkpoint và kết quả cuối cùng vào repo Actions để phiên chat tiếp theo có thể tiếp tục từ đúng trạng thái.
+
+**Checkpoint đã lưu:** [2026-11-08-remove-sticky-bottom-contact-bar.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-remove-sticky-bottom-contact-bar.md), commit `aeb454a`.
+
+**Nhật ký phản hồi:** SAVED tại `chatgpt/latest-response.md`.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
 
-Logging: SAVED (ghi đè file theo CORE-09; chỉ xác nhận sau khi GitHub ghi và đọc lại thành công).
+## Trạng thái đối chiếu
+- Astro master HEAD: `6effb8e2af07edf87aaecdb9891b818f3529db16`.
+- WordPress production trigger run `42425150213`: SUCCESS.
+- Canonical production deployment run `42425210550`: SUCCESS.
+- Live Playwright QA run `42425346863`: SUCCESS; source marker matches, five viewports, sticky bar absent and no reserved bottom padding.
+- Checkpoint commit `aeb454a52802e5eaed1780aa1358839dcb75f9ab` in Actions main.
+- Không có phần còn dở thuộc yêu cầu gỡ sticky bottom.
