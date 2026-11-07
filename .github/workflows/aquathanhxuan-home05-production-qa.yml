@@ -1,0 +1,37 @@
+name: Aqua Home 05 production and Builder read-only QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home05-production-qa.yml'
+      - 'qa-requests/home05-20261108.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  homepage-qa:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Home 05 QA syntax
+        run: node --check scripts/aquathanhxuan-home05-production-qa.cjs
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Verify four native benefits across five viewports and Builder
+        run: node scripts/aquathanhxuan-home05-production-qa.cjs
+      - name: Upload Home 05 screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-home05-production-qa
+          path: artifacts/home05
+          if-no-files-found: ignore
+          retention-days: 7
