@@ -66,6 +66,13 @@ def collect_local(root):
 
 def main():
     root = Path("deploy/client")
+    # The deployed PHP static collector still counts all JSON files. Until
+    # the PHP contract is extended to exclude the mandatory public provenance
+    # marker, static delta would fail its staged inventory equality check.
+    # Keep a full static client ZIP rather than weaken signed verification.
+    if (root / "aquathanhxuan-staging-build.json").is_file():
+        print("AQUATHANHXUAN_STATIC_DELTA=FULL_ZIP mandatory-provenance-marker")
+        return
     signed_file = Path(".aquathanhxuan-remote-image-manifest.json")
     if not signed_file.is_file():
         print("AQUATHANHXUAN_STATIC_DELTA=FULL_ZIP no-signed-inventory")

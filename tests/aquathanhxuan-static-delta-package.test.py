@@ -36,6 +36,26 @@ class StaticDeltaContract(unittest.TestCase):
             finally:
                 os.chdir(previous)
 
+    def test_public_provenance_marker_requires_full_static_zip(self):
+        previous = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            os.chdir(tmp)
+            try:
+                root = Path("deploy/client")
+                root.mkdir(parents=True)
+                (root / "index.html").write_bytes(b"index")
+                (root / "aquathanhxuan-staging-build.json").write_bytes(b'{"commit":"new"}')
+                (root / "app.js").write_bytes(b"stable-js")
+                Path(".aquathanhxuan-remote-image-manifest.json").write_text(
+                    json.dumps({"static": {"app.js": meta(b"stable-js")}})
+                )
+                MOD["main"]()
+                self.assertFalse(Path("deploy/aquathanhxuan-static-delta.json").exists())
+                self.assertEqual((root / "app.js").read_bytes(), b"stable-js")
+                self.assertTrue((root / "aquathanhxuan-staging-build.json").is_file())
+            finally:
+                os.chdir(previous)
+
     def test_image_subtree_belongs_only_to_image_delta(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
