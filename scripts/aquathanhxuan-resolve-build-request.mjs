@@ -5,16 +5,22 @@ function fail(message) {
   process.exit(1);
 }
 
-const requestNames = fs.readdirSync("build-requests", { withFileTypes: true })
-  .filter((entry) => entry.isFile() && /^[^/]+\.json$/.test(entry.name))
-  .map((entry) => entry.name)
-  .sort();
-
-if (requestNames.length === 0) {
-  fail("No Aqua build request exists in checkout");
+// A push represents ONE newly committed request. Never infer intent from a
+// lexicographic filename sort of historical requests (stale SHA hazard).
+// fetch-depth: 2 in the caller guarantees HEAD^ is available.
+const { execFileSync } = await import("node:child_process");
+let changed;
+try {
+  changed = execFileSync("git", [
+    "diff", "--name-only", "--diff-filter=AM", "HEAD^", "HEAD", "--", "build-requests/",
+  ], { encoding: "utf8" }).trim().split(/\r?\n/).filter(Boolean);
+} catch {
+  fail("Cannot inspect pushed request delta; refusing ambiguous production build");
 }
-
-const requestFile = `build-requests/${requestNames.at(-1)}`;
+if (changed.length !== 1 || !/^build-requests\/[a-zA-Z0-9._-]+\.json$/.test(changed[0])) {
+  fail("Expected exactly one new or modified production build request in this push");
+}
+const requestFile = changed[0];
 if (!fs.existsSync(requestFile)) {
   fail(`Aqua build request does not exist in checkout: ${requestFile}`);
 }
