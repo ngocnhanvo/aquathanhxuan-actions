@@ -247,6 +247,11 @@ jobs:
                   'branch':'master','commit':sha,'target':os.environ['AQUATHANHXUAN_CLIENT_HOST'],
               },handle)
           PY
+          # PHP uses the root copy for signed activation/rollback provenance.
+          # Astro Node serves public static from client/, so publish the exact
+          # same marker there for DEPLOY_READY verification.
+          cp deploy/aquathanhxuan-staging-build.json deploy/client/aquathanhxuan-staging-build.json
+          cmp -s deploy/aquathanhxuan-staging-build.json deploy/client/aquathanhxuan-staging-build.json
           test ! -e deploy/.env
           test -s deploy/server/entry.mjs
           test -s deploy/client/index.html
@@ -289,16 +294,24 @@ jobs:
                       not isinstance(static_delta.get('files'),dict)):
                       raise RuntimeError('Malformed static delta ZIP marker')
                   for name in static_delta['reuse']:
-                      if (not isinstance(name,str) or name=='index.html' or
-                          'client/'+name in names or name not in static_delta['files']):
+                      if (not isinstance(name,str)
+                          or name in ('index.html','aquathanhxuan-staging-build.json')
+                          or 'client/'+name in names or name not in static_delta['files']):
                           raise RuntimeError('Reused static file was improperly uploaded')
               meta=json.loads(z.read('aquathanhxuan-staging-build.json'))
               if (meta.get('branch')!='master'
                   or meta.get('commit')!=os.environ['AQUATHANHXUAN_DEPLOY_COMMIT']
                   or meta.get('target')!=os.environ['AQUATHANHXUAN_CLIENT_HOST']):
                   raise RuntimeError('Archive provenance marker mismatch')
-              for required in ('server/entry.mjs','client/index.html','aquathanhxuan-staging-build.json'):
+              for required in (
+                  'server/entry.mjs',
+                  'client/index.html',
+                  'aquathanhxuan-staging-build.json',
+                  'client/aquathanhxuan-staging-build.json',
+              ):
                   if required not in names:raise RuntimeError('Missing staged bundle file: '+required)
+              if z.read('aquathanhxuan-staging-build.json') != z.read('client/aquathanhxuan-staging-build.json'):
+                  raise RuntimeError('Root/client provenance markers differ')
           print('PASS: ZIP contains dev server/client and provenance, no private environment file.')
           PY
       - name: Upload compiled staging archive by FTP-TLS

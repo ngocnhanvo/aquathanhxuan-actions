@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Omit only unchanged Astro public HTML/CSS/JS/JSON, verified later by signed PHP.
 
-Never reuse server/ SSR, metadata, or mandatory client/index.html. If this
-server does not advertise static hashes, keep the complete static ZIP.
+Never reuse server/ SSR, metadata, mandatory client/index.html, or the
+release provenance marker. If this server does not advertise static hashes,
+keep the complete static ZIP.
 """
 import hashlib
 import json
@@ -16,11 +17,13 @@ EXTENSION = re.compile(r"\.(?:html|css|js|json)$")
 MAX_FILES = 5000
 MAX_TOTAL = 104857600
 MAX_SINGLE = 26214400
+MANDATORY_STATIC = {"aquathanhxuan-staging-build.json"}
 
 
 def eligible(name):
     return (isinstance(name, str) and 0 < len(name) <= 240
-            and name != "index.html" and not name.startswith("images/")
+            and name != "index.html" and name not in MANDATORY_STATIC
+            and not name.startswith("images/")
             and EXTENSION.search(name) is not None
             and all(part not in (".", "..") and SEGMENT.fullmatch(part)
                     for part in name.split("/")))
@@ -48,7 +51,8 @@ def collect_local(root):
             return None
         rel = path.relative_to(root).as_posix()
         # Every file under images/ belongs to image delta, including JSON metadata.
-        if rel == "index.html" or rel.startswith("images/") or not EXTENSION.search(rel):
+        if (rel == "index.html" or rel in MANDATORY_STATIC
+                or rel.startswith("images/") or not EXTENSION.search(rel)):
             continue
         if not eligible(rel) or len(result) >= MAX_FILES:
             return None
