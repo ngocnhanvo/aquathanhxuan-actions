@@ -37,7 +37,16 @@ jobs:
             console.log('LOGIN_PASS');
             await page.goto('https://admin.aquathanhxuan.io.vn/wp-admin/admin.php?page=tablepress&action=edit&table_id=home_00',{waitUntil:'domcontentloaded'});
             await page.locator('#table-id').waitFor({state:'visible',timeout:30000});
-            await page.waitForFunction(() => Boolean(window.tp?.editor?.options?.data),null,{timeout:30000});
+            await page.waitForTimeout(5000);
+            console.log('EDITOR_DIAGNOSTIC='+JSON.stringify(await page.evaluate(()=>({
+              tpType:typeof window.tp, tpKeys:Object.keys(window.tp||{}).slice(0,25),
+              editorType:typeof window.tp?.editor,
+              editorKeys:Object.keys(window.tp?.editor||{}).slice(0,25),
+              dataType:typeof window.tp?.editor?.options?.data,
+              body:document.querySelector('#tablepress_edit-table-data')?.innerText.slice(0,300),
+              scripts:[...document.querySelectorAll('script[src]')].map(s=>s.src.split('/').pop()).filter(x=>/edit|tablepress/i.test(x)).slice(0,15)
+            }))));
+            await page.waitForFunction(() => Boolean(window.tp?.editor?.options?.data),null,{timeout:10000});
             const before=await page.evaluate(()=>window.tp.editor.options.data);
             assert.equal(before.length,4,'Expected header, labels and 2 Hero rows');
             assert.equal(before[0].length,13,'Unexpected existing Hero schema');
