@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const base='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expected='72bf8f8f35478055274f9944845d9b7e8227ea96';
+const expected='2cde30aef43a0d82ed20df78ae6716ac85fa1012';
 const sizes=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 (async()=>{
   const marker=await fetch(base+'/aquathanhxuan-staging-build.json?home02qa='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
