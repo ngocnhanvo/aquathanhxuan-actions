@@ -181,13 +181,10 @@ jobs:
           test -s deploy/server/entry.mjs
           test ! -e deploy/index.html
           test ! -e deploy/_astro
-          # Apache serves these three public metadata files from document-root.
-          # The Astro SSR runtime serves app assets from client/, while old root
-          # copies remain unchanged unless explicitly included in the archive.
-          # Whitelist ONLY the public, content-checked metadata; never flatten
-          # HTML, _astro assets, application data or private runtime files.
+          # Apache serves these public metadata files from document-root.
+          # Astro has already converted WordPress source data to the frontend
+          # origin during this build, so package the generated files every time.
           python3 - <<'PY'
-          import json
           import os
           from pathlib import Path
           from urllib.parse import urlsplit
@@ -195,104 +192,47 @@ jobs:
 
           root = Path("deploy")
           origin = os.environ['AQUATHANHXUAN_CLIENT_ORIGIN']
-          state_file = root / "client" / ".aquathanhxuan-sitemap-deploy-state.json"
-          if not state_file.is_file():
-              raise RuntimeError("Missing signed-build sitemap deploy decision")
-          state = json.loads(state_file.read_text())
-          mode = state.get("mode", "wordpress")
-          if (state.get("origin") != origin or not isinstance(state.get("changed"), bool)
-                  or mode not in ("wordpress", "preserve-live")):
-              raise RuntimeError("Unexpected sitemap deploy decision")
-          rev = state.get("revision")
-          import re
-          if mode == "wordpress":
-              if not isinstance(rev, str) or re.fullmatch(r"(?:legacy|[a-f0-9-]{36})", rev) is None:
-                  raise RuntimeError("Unexpected sitemap Save revision")
-          elif state["changed"] or rev is not None:
-              raise RuntimeError("Preserve-live SEO decision must not publish a new revision")
-          # Workflow-local metadata (not uploaded publicly except safe revision
-          # token/mode in the existing aquathanhxuan-staging-build.json).
-          Path(".aquathanhxuan-sitemap-package-state.json").write_text(json.dumps(state))
-          state_file.unlink()
+          published = {}
+          for name in ("sitemap.xml", "robots.txt", "llms.txt"):
+              compiled = root / "client" / name
+              if not compiled.is_file():
+                  raise RuntimeError("Missing Astro SEO output: " + name)
+              raw = compiled.read_bytes()
+              if not raw:
+                  raise RuntimeError("Empty Astro SEO output: " + name)
+              published[name] = raw
 
-          if mode == "preserve-live":
-              # SEO validation failed in Astro. Preserve the currently published
-              # root files by excluding all root SEO replacements. The client
-              # tree still needs sitemap.xml because the signed PHP activator
-              # swaps client/ atomically; use the exact authenticated FTPS copy.
-              snapshot = Path(".aquathanhxuan-live-sitemap.xml")
-              if not snapshot.is_file():
-                  raise RuntimeError("SEO fallback requested but authenticated live sitemap snapshot is unavailable")
-              raw = snapshot.read_bytes()
-              if not raw.strip() or len(raw) > 2097152:
-                  raise RuntimeError("Authenticated live sitemap snapshot is invalid")
-              (root / "client" / "sitemap.xml").write_bytes(raw)
-              for name in ("robots.txt", "llms.txt"):
-                  (root / "client" / name).unlink(missing_ok=True)
-              for name in ("sitemap.xml", "robots.txt", "llms.txt"):
-                  (root / name).unlink(missing_ok=True)
-              print("SEO FALLBACK: preserving published root SEO files; client sitemap copied from authenticated FTPS snapshot")
-          else:
-              published = {}
-              for name in ("llms.txt", "robots.txt"):
-                  compiled = root / "client" / name
-                  if not compiled.is_file():
-                      raise RuntimeError("Missing WordPress SEO metadata: " + name)
-                  raw = compiled.read_bytes()
-                  if not raw:
-                      raise RuntimeError("Invalid compiled SEO metadata: " + name)
-                  published[name] = raw
+          try:
+              xmlroot = ET.fromstring(published["sitemap.xml"])
+          except ET.ParseError as e:
+              raise RuntimeError("Invalid generated sitemap XML: " + str(e))
+          ns = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+          if xmlroot.tag != ns + "urlset":
+              raise RuntimeError("Invalid sitemap namespace")
+          urls = []
+          for item in xmlroot.findall(ns + "url"):
+              loc = item.find(ns + "loc")
+              if loc is None or not loc.text:
+                  raise RuntimeError("Missing sitemap loc")
+              value = loc.text.strip()
+              p = urlsplit(value)
+              if p.scheme != "https" or p.netloc != os.environ['AQUATHANHXUAN_CLIENT_HOST'] or p.query or p.fragment:
+                  raise RuntimeError("Sitemap loc uses unsafe origin")
+              urls.append(value)
+          if not urls or origin + "/" not in urls or len(urls) != len(set(urls)):
+              raise RuntimeError("Sitemap homepage missing/duplicate")
 
-              if state["changed"]:
-                  compiled = root / "client" / "sitemap.xml"
-                  if not compiled.is_file():
-                      raise RuntimeError("Saved sitemap XML missing from build")
-                  raw = compiled.read_bytes()
-                  try:
-                      xmlroot = ET.fromstring(raw)
-                  except ET.ParseError as e:
-                      raise RuntimeError("Invalid WordPress XML: " + str(e))
-                  ns = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
-                  if xmlroot.tag != ns + "urlset":
-                      raise RuntimeError("Invalid sitemap namespace")
-                  urls = []
-                  for item in xmlroot.findall(ns + "url"):
-                      loc = item.find(ns + "loc")
-                      if loc is None or not loc.text:
-                          raise RuntimeError("Missing sitemap loc")
-                      value = loc.text.strip()
-                      p = urlsplit(value)
-                      if p.scheme != "https" or p.netloc != os.environ['AQUATHANHXUAN_CLIENT_HOST'] or p.query or p.fragment:
-                          raise RuntimeError("Sitemap loc uses unsafe origin")
-                      urls.append(value)
-                  if not urls or origin + "/" not in urls or len(urls) != len(set(urls)):
-                      raise RuntimeError("Sitemap homepage missing/duplicate")
-                  published["sitemap.xml"] = raw
-                  print("SITEMAP SAVE DETECTED: XML included in deploy")
-              else:
-                  # The signed PHP activator copies the unchanged public file
-                  # locally into the new client directory. Do not send XML.
-                  (root / "client" / "sitemap.xml").unlink(missing_ok=True)
-                  if (root / "sitemap.xml").exists():
-                      raise RuntimeError("Unchanged sitemap must not be at ZIP root")
-                  print("SITEMAP UNCHANGED: XML excluded from deploy; hosting retains prior XML")
-
-              # WordPress already validated and saved robots/llms. Preserve the
-              # administrator's public settings; no staging or one-page policy.
-              for name, data in published.items():
-                  (root / name).write_bytes(data)
-              print("PASS: production SEO root files from WP; update sitemap=" + str(state["changed"]))
+          for name, data in published.items():
+              (root / name).write_bytes(data)
+          print("PASS: Astro SEO files generated from WordPress source and packaged for production")
           PY
           echo "$(date +%s)" > deploy/pm2-reload.txt
           python3 - <<'PY'
           import json,os
           sha=os.environ['AQUATHANHXUAN_DEPLOY_COMMIT']
-          state=json.load(open('.aquathanhxuan-sitemap-package-state.json',encoding='utf8'))
           with open('deploy/aquathanhxuan-staging-build.json','w',encoding='utf8') as handle:
               json.dump({
                   'branch':'master','commit':sha,'target':os.environ['AQUATHANHXUAN_CLIENT_HOST'],
-                  'sitemap_revision':state.get('revision'),
-                  'seo_mode':state.get('mode','wordpress'),
               },handle)
           PY
           test ! -e deploy/.env
@@ -318,29 +258,11 @@ jobs:
               # No flattened client output must reappear at root.
               if any(name in names for name in ('index.html','_astro/')):
                   raise RuntimeError('Duplicate application assets outside client/ are forbidden')
-              state=json.load(open('.aquathanhxuan-sitemap-package-state.json',encoding='utf8'))
-              mode=state.get('mode','wordpress')
-              if mode == 'preserve-live':
-                  if 'sitemap.xml' in names or 'client/sitemap.xml' not in names:
-                      raise RuntimeError('Preserve-live fallback must keep root sitemap untouched and stage client sitemap')
-                  for static in ('llms.txt','robots.txt'):
-                      if static in names or ('client/' + static) in names:
-                          raise RuntimeError('Preserve-live fallback must not replace published metadata: ' + static)
-                  with open('.aquathanhxuan-live-sitemap.xml','rb') as handle:
-                      if z.read('client/sitemap.xml') != handle.read():
-                          raise RuntimeError('Preserve-live client sitemap differs from authenticated FTPS snapshot')
-              else:
-                  for static in ('llms.txt','robots.txt'):
-                      if static not in names or ('client/' + static) not in names:
-                          raise RuntimeError('Missing WordPress metadata: ' + static)
-                      if z.read(static) != z.read('client/' + static):
-                          raise RuntimeError('Metadata copies differ: ' + static)
-                  present='sitemap.xml' in names and 'client/sitemap.xml' in names
-                  absent='sitemap.xml' not in names and 'client/sitemap.xml' not in names
-                  if state['changed'] and (not present or z.read('sitemap.xml')!=z.read('client/sitemap.xml')):
-                      raise RuntimeError('Saved sitemap missing or mismatched in archive')
-                  if not state['changed'] and not absent:
-                      raise RuntimeError('Unchanged sitemap XML must be excluded from archive')
+              for static in ('sitemap.xml','robots.txt','llms.txt'):
+                  if static not in names or ('client/' + static) not in names:
+                      raise RuntimeError('Missing generated SEO file: ' + static)
+                  if z.read(static) != z.read('client/' + static):
+                      raise RuntimeError('SEO root/client copies differ: ' + static)
               if 'aquathanhxuan-image-delta.json' in names:
                   image_delta=json.loads(z.read('aquathanhxuan-image-delta.json'))
                   if image_delta.get('format') != 1 or not isinstance(image_delta.get('reuse'),list) or not isinstance(image_delta.get('files'),dict):
@@ -361,9 +283,8 @@ jobs:
               meta=json.loads(z.read('aquathanhxuan-staging-build.json'))
               if (meta.get('branch')!='master'
                   or meta.get('commit')!=os.environ['AQUATHANHXUAN_DEPLOY_COMMIT']
-                  or meta.get('sitemap_revision')!=state.get('revision')
-                  or meta.get('seo_mode')!=state.get('mode','wordpress')):
-                  raise RuntimeError('Archive revision marker mismatch')
+                  or meta.get('target')!=os.environ['AQUATHANHXUAN_CLIENT_HOST']):
+                  raise RuntimeError('Archive provenance marker mismatch')
               for required in ('server/entry.mjs','client/index.html','aquathanhxuan-staging-build.json'):
                   if required not in names:raise RuntimeError('Missing staged bundle file: '+required)
           print('PASS: ZIP contains dev server/client and provenance, no private environment file.')
