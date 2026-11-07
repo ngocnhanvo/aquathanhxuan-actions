@@ -1,0 +1,42 @@
+name: Aqua Sale source test one-shot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-sale-source-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact Astro Sale source
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: f9736ca7d253f7048733c37816b4113952144aa6
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install exact dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Run Sale data unit test
+        run: pnpm exec vitest run src/lib/wordpress/tablepress/home01.test.ts
+      - name: Record source provenance
+        run: |
+          test "$(git rev-parse HEAD)" = "f9736ca7d253f7048733c37816b4113952144aa6"
+          echo "SALE_SOURCE_TEST_PASS=f9736ca7d253f7048733c37816b4113952144aa6"
