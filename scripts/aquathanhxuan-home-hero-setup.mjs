@@ -207,7 +207,7 @@ try {
     window.tp.helpers.unsaved_changes.set();
   }, data);
 
-  const insertImage = async (row, mediaId, alt) => {
+  const insertImage = async (row, mediaId, alt, filename) => {
     await page.evaluate(({ row }) => {
       window.tp.editor.updateSelectionFromCoords(0, row, 0, row);
       window.tp.helpers.selection = { rows: [row], columns: [0] };
@@ -221,11 +221,12 @@ try {
     if (await libraryTab.count()) await libraryTab.click().catch(() => {});
 
     const attachment = page.locator(`.attachment[data-id="${mediaId}"]`);
-    if (!(await attachment.count())) {
+    if (!(await attachment.isVisible().catch(() => false))) {
       const search = page.locator('.media-search-input, input[type="search"]').last();
       if (await search.count()) {
-        await search.fill(String(mediaId));
-        await sleep(800);
+        const searchTerm = String(filename || '').replace(/\.[^.]+$/, '');
+        await search.fill(searchTerm);
+        await sleep(1200);
       }
     }
     await attachment.waitFor({ state: 'visible', timeout: 25000 });
@@ -257,8 +258,8 @@ try {
     }, { row, origin: wpUrl, alt });
   };
 
-  await insertImage(2, assets[0].media.id, assets[0].alt);
-  await insertImage(3, assets[1].media.id, assets[1].alt);
+  await insertImage(2, assets[0].media.id, assets[0].alt, assets[0].filename);
+  await insertImage(3, assets[1].media.id, assets[1].alt, assets[1].filename);
 
   const saveButton = page.getByRole('button', { name: /Save Changes|Lưu thay đổi/i }).first();
   await saveButton.click();
