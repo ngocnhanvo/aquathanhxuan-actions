@@ -28,7 +28,7 @@ jobs:
           const { chromium } = require('playwright');
           const assert = require('node:assert/strict');
           const origin='https://aquathanhxuan.io.vn';
-          const expected='c51a6c91570142d5e7e6e62e93de08ed4c4b39c3';
+          const expected='197a54fcddb77c02d5d986f71cdc92b14c403341';
           const cases=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 
           (async()=>{
