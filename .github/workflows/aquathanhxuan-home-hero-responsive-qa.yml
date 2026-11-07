@@ -78,17 +78,15 @@ jobs:
                 for (let i = 0; i < 2; i += 1) {
                   await images.nth(i).waitFor({ state: 'attached' });
                   const info = await images.nth(i).evaluate((img) => ({
-                    src: img.currentSrc || img.src,
-                    naturalWidth: img.naturalWidth,
-                    naturalHeight: img.naturalHeight,
+                    src: img.getAttribute('src') || '',
                     alt: img.alt,
                   }));
-                  assert(info.naturalWidth > 0 && info.naturalHeight > 0,
-                    `QA_FAILED viewport=${item.name} image_${i}_not_loaded src=${info.src}`);
                   assert(!/aquathanhxuan\.com\//i.test(info.src),
                     `QA_FAILED viewport=${item.name} legacy_hotlink src=${info.src}`);
                   assert(Boolean(info.alt.trim()), `QA_FAILED viewport=${item.name} image_${i}_alt_empty`);
                 }
+                const firstLoaded = await images.nth(0).evaluate((img) => img.naturalWidth > 0 && img.naturalHeight > 0);
+                assert(firstLoaded, `QA_FAILED viewport=${item.name} active_image_not_loaded`);
 
                 const text = (await hero.textContent()) || '';
                 assert(text.includes('AQua Thanh Xuân'), `QA_FAILED viewport=${item.name} eyebrow_missing`);
@@ -109,6 +107,10 @@ jobs:
                 const currentText = await hero.locator('[data-hero-slide][data-active="true"] h2').textContent();
                 assert(currentText?.includes('Sản phẩm chính hãng'),
                   `QA_FAILED viewport=${item.name} carousel_next_failed current=${currentText}`);
+                await page.waitForFunction(() => {
+                  const image = document.querySelectorAll('[data-aqua-home-hero] [data-hero-slide] img')[1];
+                  return image instanceof HTMLImageElement && image.naturalWidth > 0 && image.naturalHeight > 0;
+                }, null, { timeout: 10000 });
 
                 await page.screenshot({
                   path: `artifacts/aqua-home-hero/${item.name}.png`,
