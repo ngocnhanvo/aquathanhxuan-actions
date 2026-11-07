@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const frontend='https://aquathanhxuan.io.vn';
 const wordpress='https://admin.aquathanhxuan.io.vn';
-const expected='95e82adf17bdeb07214e05a5283079c67fa710c8';
+const expected='a88d3981e01911a958fc904a29f49b67df15f2f3';
 const sizes=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 (async()=>{
   const markerResp=await fetch(frontend+'/aquathanhxuan-staging-build.json?footerqa='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
@@ -29,6 +29,17 @@ const sizes=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
       assert(brandSrc && headerSrc,'Footer/Header official WordPress logo missing');
       assert.equal(new URL(brandSrc,frontend).href,new URL(headerSrc,frontend).href,
         'Footer logo must match Header CMS logo, never use a local mockup');
+      const support=footer.locator('section[aria-labelledby="footer-policy-title"]');
+      await support.waitFor({state:'visible',timeout:10000});
+      const supportLinks=await support.locator('a').evaluateAll(nodes=>nodes.map(a=>({
+        label:a.textContent.trim(),href:a.getAttribute('href')
+      })));
+      assert(supportLinks.length>=2,'Footer support column is empty despite real CMS contact data');
+      assert(supportLinks.some(link=>/^tel:/.test(link.href||'')),
+        'Footer support: canonical WordPress phone link missing');
+      assert(supportLinks.every(link=>link.href&&link.href!=='#'),
+        'Footer support: link without WordPress source');
+      console.log('FOOTER_SUPPORT=PASS '+JSON.stringify(supportLinks));
       const categories=footer.locator('section[aria-labelledby="footer-category-title"] a');
       const links=await categories.evaluateAll(nodes=>nodes.map(a=>({
         text:a.textContent.trim(),href:a.getAttribute('href')
