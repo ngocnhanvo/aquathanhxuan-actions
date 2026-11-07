@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "647ce3b3c0b976e9dda4d62d2366467d768274d3",
+  "intent": "Release existing approved PHP Builder configuration through existing FTPS workflow; no Astro build"
+}
