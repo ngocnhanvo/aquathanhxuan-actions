@@ -158,6 +158,7 @@ jobs:
               existing = exact_media_by_filename(filename)
               if existing:
                   existing_url = str(existing.get('source_url') or '')
+                  existing_url = urllib.parse.urljoin(WP_URL + '/', existing_url)
                   existing_bytes = fetch_bytes(existing_url, 3)
                   if hashlib.sha256(existing_bytes).hexdigest() != source_hash:
                       raise RuntimeError('Filename collision with different content: ' + filename)
@@ -242,8 +243,12 @@ jobs:
                   if not target_images:
                       raise RuntimeError(f'Target product {target_id} lost featured image')
                   first_src = str(target_images[0].get('src') or '')
-                  if urllib.parse.urlparse(first_src).netloc != 'admin.aquathanhxuan.io.vn':
-                      raise RuntimeError(f'Product {target_id} still hotlinks image: {first_src}')
+                  parsed_src = urllib.parse.urlparse(first_src)
+                  if parsed_src.netloc:
+                      if parsed_src.hostname != 'admin.aquathanhxuan.io.vn':
+                          raise RuntimeError(f'Product {target_id} still hotlinks image: {first_src}')
+                  elif not parsed_src.path.startswith('/wp-content/uploads/'):
+                      raise RuntimeError(f'Product {target_id} has unexpected relative image URL: {first_src}')
               if str(target.get('regular_price') or '') != regular or str(target.get('sale_price') or '') != sale:
                   raise RuntimeError(f'Price verification failed for {slug}')
 
