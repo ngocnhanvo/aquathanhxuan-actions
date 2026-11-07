@@ -46,8 +46,8 @@ jobs:
               body:document.querySelector('#tablepress_edit-table-data')?.innerText.slice(0,300),
               scripts:[...document.querySelectorAll('script[src]')].map(s=>s.src.split('/').pop()).filter(x=>/edit|tablepress/i.test(x)).slice(0,15)
             }))));
-            await page.waitForFunction(() => Boolean(window.tp?.editor?.options?.data),null,{timeout:10000});
-            const before=await page.evaluate(()=>window.tp.editor.options.data);
+            await page.waitForFunction(() => Array.isArray(window.tp?.editor?.getData?.()),null,{timeout:10000});
+            const before=await page.evaluate(()=>window.tp.editor.getData());
             assert.equal(before.length,4,'Expected header, labels and 2 Hero rows');
             assert.equal(before[0].length,13,'Unexpected existing Hero schema');
             assert.equal(before[0][0],'image');
@@ -62,7 +62,7 @@ jobs:
               assert(after.every(row=>row.length===14));
               const beforeSnapshot=JSON.stringify(before);
               await page.evaluate(next=>{window.tp.editor.setData(next);window.tp.helpers.unsaved_changes.set();},after);
-              const changed=await page.evaluate(()=>window.tp.editor.options.data);
+              const changed=await page.evaluate(()=>window.tp.editor.getData());
               assert.equal(JSON.stringify(changed),JSON.stringify(after),'Editor mismatch');
               await page.getByRole('button',{name:/Save Changes|Lưu thay đổi/i}).first().click();
               await page.waitForFunction(()=>!window.tp?.made_changes,null,{timeout:30000});
