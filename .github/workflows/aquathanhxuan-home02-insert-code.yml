@@ -27,3 +27,5 @@ jobs:
 # Retry editor state probe.
 
 # Retry in confirmed Quicktags editor mode.
+
+# Retry after TinyMCE initialization guard.
