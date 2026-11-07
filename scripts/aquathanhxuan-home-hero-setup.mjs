@@ -100,9 +100,21 @@ if (!productPage?.slug) throw new Error('Missing VI ssr-products page');
 const productPath = '/' + productPage.slug;
 
 const preTable = await fetchRetry(`${wpUrl}/wp-json/tablepress/v1/table/home_00?_qa=${Date.now()}`);
+const preTableData = preTable.ok ? await preTable.json() : null;
+const tableReady = Boolean(
+  Array.isArray(preTableData?.items) &&
+  preTableData.items.length === 2 &&
+  preTableData.items.every(item =>
+    /<img\b/i.test(String(item?.image || '')) &&
+    !String(item?.image || '').includes(wpUrl) &&
+    /\balt=(["'])[^"']+\1/i.test(String(item?.image || ''))
+  ) &&
+  preTableData.items.every(item => String(item?.primary_link || '') === productPath)
+);
 const prePage = await getJson(`${wpUrl}/wp-json/wp/v2/pages/${pageId}?_fields=id,slug,title,content,acf`);
 console.log('READ_BEFORE_WRITE=' + JSON.stringify({
   table_exists: preTable.ok,
+  table_ready: tableReady,
   page_has_home00: /home_00/i.test(prePage?.content?.rendered || ''),
   product_path: productPath,
   media: assets.map(a => ({ slug: a.slug, exists: Boolean(a.media) })),
@@ -150,6 +162,7 @@ try {
     }
   }
 
+  if (!tableReady) {
   let tableResponse = await fetchRetry(`${wpUrl}/wp-json/tablepress/v1/table/home_00?_qa=${Date.now()}`);
   let tableEditUrl = `${wpUrl}/wp-admin/admin.php?page=tablepress&action=edit&table_id=home_00`;
 
@@ -281,6 +294,9 @@ try {
     if (!/\balt=(["'])[^"']+\1/i.test(String(item.image || ''))) throw new Error(`TABLE_IMAGE_ALT_MISSING_${index}`);
   }
   console.log('TABLE_READBACK=PASS id=home_00 items=2 images=2 relative_src=true alt=true');
+  } else {
+    console.log('TABLE_WRITE=SKIP_ALREADY_VALID id=home_00');
+  }
 
   await page.goto(`${wpUrl}/wp-admin/post.php?post=${pageId}&action=edit`, { waitUntil: 'domcontentloaded', timeout: 45000 });
   const content = page.locator('#content');
@@ -289,26 +305,43 @@ try {
 
   if (!/home_00/i.test(current)) {
     if (await page.locator('#content-html').count()) await page.locator('#content-html').click();
-    await page.locator('#tablepress_quicktags_button').waitFor({ state: 'visible', timeout: 20000 });
-    await page.locator('#tablepress_quicktags_button').click();
+    await content.focus();
+    await page.evaluate(() => {
+      const textarea = document.querySelector('#content');
+      if (textarea instanceof HTMLTextAreaElement) {
+        const end = textarea.value.length;
+        textarea.setSelectionRange(end, end);
+      }
+    });
+
+    await page.waitForFunction(() => typeof window.tablepress_open_shortcode_thickbox === 'function', null, { timeout: 20000 });
+    await page.evaluate(() => window.tablepress_open_shortcode_thickbox());
     await page.locator('#TB_iframeContent').waitFor({ state: 'visible', timeout: 20000 });
     const picker = page.frameLocator('#TB_iframeContent');
     const insert = picker.locator('.insert-shortcode[title*="home_00"]').first();
     await insert.waitFor({ state: 'visible', timeout: 20000 });
     await insert.click();
     await page.waitForFunction(() => /home_00/i.test(document.querySelector('#content')?.value || ''), null, { timeout: 20000 });
+    await page.evaluate(() => {
+      if (typeof window.tb_remove === 'function') window.tb_remove();
+    });
 
     const update = page.locator('#publish');
-    await Promise.all([
-      page.waitForLoadState('domcontentloaded').catch(() => {}),
-      update.click(),
-    ]);
-    console.log('PAGE_INSERT=PASS method=native_tablepress_insert_shortcode');
+    await update.click({ noWaitAfter: true });
+
+    let saved = null;
+    for (let poll = 0; poll < 24; poll += 1) {
+      saved = await getJson(`${wpUrl}/wp-json/wp/v2/pages/${pageId}?_fields=id,slug,content,modified_gmt&_qa=${Date.now()}`);
+      if (/home_00/i.test(saved?.content?.rendered || '')) break;
+      await sleep(750);
+    }
+    if (!/home_00/i.test(saved?.content?.rendered || '')) throw new Error('PAGE_READBACK_HOME00_MISSING_AFTER_SAVE');
+    console.log('PAGE_INSERT=PASS method=native_tablepress_picker');
   } else {
     console.log('PAGE_INSERT=SKIP_ALREADY_PRESENT');
   }
 
-  const verifyPage = await getJson(`${wpUrl}/wp-json/wp/v2/pages/${pageId}?_fields=id,slug,content,modified_gmt`);
+  const verifyPage = await getJson(`${wpUrl}/wp-json/wp/v2/pages/${pageId}?_fields=id,slug,content,modified_gmt&_qa=${Date.now()}`);
   if (!/home_00/i.test(verifyPage?.content?.rendered || '')) throw new Error('PAGE_READBACK_HOME00_MISSING');
 
   await mkdir('artifacts/home-hero', { recursive: true });
