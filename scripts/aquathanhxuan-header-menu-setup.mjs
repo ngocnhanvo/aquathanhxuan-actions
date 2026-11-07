@@ -29,8 +29,22 @@ const desired = [
   ['sinh-vat', 'Sinh vật', ['CÂY VÀ CÁ THỦY SINH', 'CÂY VÀ CÁ THUỶ SINH']],
 ];
 
-const categoryResponse = await fetch(`${wpUrl}/wp-json/astro/v1/get-product-categories`);
-if (!categoryResponse.ok) throw new Error(`Product category API failed: ${categoryResponse.status}`);
+const fetchRetry = async (url, attempts = 8) => {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, { headers: { 'cache-control': 'no-cache' } });
+      if (response.ok) return response;
+      lastError = new Error(`HTTP ${response.status}: ${url}`);
+    } catch (error) {
+      lastError = error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, Math.min(5000, attempt * 750)));
+  }
+  throw lastError || new Error(`Unable to fetch: ${url}`);
+};
+
+const categoryResponse = await fetchRetry(`${wpUrl}/wp-json/astro/v1/get-product-categories`);
 const categories = await categoryResponse.json();
 if (!Array.isArray(categories) || !categories.length) throw new Error('No product categories returned');
 
@@ -41,8 +55,7 @@ const matched = desired.map(([key, label, names]) => {
   return { key, label, category };
 });
 
-const pagesResponse = await fetch(`${wpUrl}/wp-json/wp/v2/pages?status=publish&per_page=100&_fields=id,slug,acf,title`);
-if (!pagesResponse.ok) throw new Error(`Pages API failed: ${pagesResponse.status}`);
+const pagesResponse = await fetchRetry(`${wpUrl}/wp-json/wp/v2/pages?status=publish&per_page=100&_fields=id,slug,acf,title`);
 const pages = await pagesResponse.json();
 const productPage = pages.find((page) => {
   const lang = page?.acf?.product_lang?.value || page?.acf?.product_lang || 'vi';
@@ -60,7 +73,7 @@ const menuTree = matched.map(({ key, label, category }) => ({
 
 let browser;
 try {
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ channel: 'chrome', headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
 
