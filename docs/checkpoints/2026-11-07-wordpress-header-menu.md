@@ -45,3 +45,16 @@ Lần xác minh mới nhất:
 1. Xác định nguồn taxonomy đã duyệt / 11 category thực trong WordPress và tạo/khôi phục taxonomy bằng cơ chế CMS có quyền, sau khi đối chiếu danh mục/slug/parent thật. Không bịa slug hoặc link placeholder chết.
 2. Chạy lại writer `Header/vi` theo nguyên tắc read-before-write, xác minh 11 item từ REST.
 3. Sau khi menu thật PASS: bỏ fallback `src/data/menu.json` / cross-locale trong Astro, vô hiệu cache fallback cũ, commit và deploy bằng production workflow; QA Header desktop/mobile.
+
+## Checkpoint cuối — 2026-11-07
+
+**Trạng thái: PASS / DEPLOYED_PRODUCTION / QA_PASS.** Các mục BLOCKED_DNS và TODO ở các đoạn trên là lịch sử, không còn hiệu lực. Không chạy lại writer/build nếu không có thay đổi mới.
+
+- WordPress backend đúng: `https://admin.aquathanhxuan.io.vn`. Menu `Header/vi` có 11 item thật và taxonomy/page đã đủ. Inventory run [#42370483565](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42370483565): `PREFLIGHT missing=0, header_items=11`, `AQUA_MENU_SETUP=PASS SKIP_UNCHANGED`.
+- Astro production `ngocnhanvo/aquathanhxuan-astro@master`: [`50113cce065627566776d1aaae5f127717a43bac`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/50113cce065627566776d1aaae5f127717a43bac). Đã xóa `src/data/menu.json`, bỏ fallback Header trong build và livePreview; invalidated shared cache legacy `cacheVersion=2`; thiếu menu WordPress sẽ fail rõ.
+- Actions `ngocnhanvo/aquathanhxuan-actions@main`: sửa build marker root + `client/`, bảo vệ signed ZIP, và buộc FULL_ZIP static khi public marker có mặt vì PHP static collector chưa loại trừ marker. Image delta vẫn giữ nguyên. Contract CI [#42372880484](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42372880484) **PASS**.
+- Production deploy [#42373016945](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42373016945) **SUCCESS**: Astro build, package, FTPS, signed activate đều PASS.
+- WordPress trigger + Playwright QA [#42372941621](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42372941621) **SUCCESS**: `SOURCE_SHA_VERIFIED=50113cc...`, `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS commit=50113cc...`, `QA_PASS header_search=visible account=visible cart=visible contacts=hidden nav=purple logo=visible`. Screenshot artifact `aquathanhxuan-header-production-qa` trên run.
+- Lịch sử đã xử lý: run #42371726514 fail vì livePreview import fallback còn sót; #42371833663 deploy thành công nhưng marker public 404; #42372411550 fail signed PHP static inventory mismatch; tất cả đã sửa và **không cần rerun**.
+- **Next:** chỉ nhận yêu cầu thay đổi mới hoặc QA bổ sung nếu người dùng chỉ ra sai lệch cụ thể. Không sửa PHP/unzip hay kích build khác khi trạng thái hiện tại đã PASS.
+
