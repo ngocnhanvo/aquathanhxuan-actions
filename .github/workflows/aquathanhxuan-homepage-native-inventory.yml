@@ -1,0 +1,56 @@
+name: Aqua homepage native ESC Table inventory (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-homepage-native-inventory.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - name: Install Playwright driver only
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Read authenticated ESC Table inventory
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const env = Object.fromEntries((process.env.ENV_FILE || '').split(/\r?\n/).map(s => s.match(/^\s*(WC_URL|WC_URL_CLIENT)\s*=\s*(.*)\s*$/)).filter(Boolean).map(m => [m[1],m[2].trim().replace(/^['"]|['"]$/g,'')]));
+          if (env.WC_URL !== 'https://admin.aquathanhxuan.io.vn' || env.WC_URL_CLIENT !== 'https://aquathanhxuan.io.vn') throw new Error('INVALID_SITE_ORIGIN');
+          if (!process.env.WP_ADMIN_USERNAME || !process.env.WP_ADMIN_PASSWORD) throw new Error('MISSING_WORDPRESS_ADMIN_CREDENTIALS');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            try {
+              const page=await browser.newPage();
+              const base=env.WC_URL;
+              await page.goto(base+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:30000});
+              await page.locator('#user_login').fill(process.env.WP_ADMIN_USERNAME);
+              await page.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
+              await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),page.locator('#wp-submit').click()]);
+              if (!new URL(page.url()).pathname.startsWith('/wp-admin')) throw new Error('ADMIN_LOGIN_NOT_CONFIRMED');
+              console.log('ADMIN_LOGIN=PASS');
+              await page.goto(base+'/wp-admin/admin.php?page=tablepress',{waitUntil:'domcontentloaded',timeout:30000});
+              const snapshot=await page.evaluate(()=>{
+                const text=document.body.innerText||'';
+                const rows=[...document.querySelectorAll('table.wp-list-table tbody tr')].map(row=>({id:row.querySelector('[data-colname="ID"]')?.textContent?.trim() || '',title:row.querySelector('.row-title')?.textContent?.trim()||'',link:row.querySelector('a[href*="action=edit"]')?.getAttribute('href')||''}));
+                const hrefs=[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href')||'').filter(s=>/table_id=home_0[2-9]|table=home_0[2-9]|tablepress.*home_0[2-9]/i.test(s));
+                return {title:document.title,hasTablePress:/tablepress|esc table/i.test(text),rows:rows.filter(x=>x.id||x.title).slice(0,100),relatedLinks:hrefs.slice(0,20),bodyExcerpt:text.slice(0,600)};
+              });
+              console.log('ADMIN_TABLE_LIST='+JSON.stringify(snapshot));
+              for (const id of ['home_02','home_03','home_04']) {
+                const matches=snapshot.rows.filter(r=>(r.id+' '+r.title+' '+r.link).toLowerCase().includes(id));
+                console.log('NATIVE_TABLE_MATCH '+id+' '+JSON.stringify(matches));
+              }
+            } finally {await browser.close();}
+          })().catch(e=>{console.error('INVENTORY_FAILED='+e.message);process.exitCode=1;});
+          NODE
