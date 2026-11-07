@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aquathanhxuan-home04-insert-code.yml'
+      - 'scripts/aquathanhxuan-home04-insert-code.cjs'
   workflow_dispatch:
 permissions:
   contents: read
