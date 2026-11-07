@@ -49,6 +49,24 @@ jobs:
                 });
                 console.log('NATIVE_EDITOR_CONTROLS='+JSON.stringify({path,...snapshot}));
               }
+              // Inspect the actual native table edit layout and the Editor's Insert Code UI without saving.
+              await page.goto(env.WC_URL+'/wp-admin/admin.php?page=tablepress',{waitUntil:'domcontentloaded'});
+              const editLinks=await page.locator('a[href*="tablepress_edit"],a[href*="tablepress&action=edit"]').evaluateAll(nodes=>nodes.map(a=>({text:a.textContent.trim().slice(0,70),href:a.getAttribute('href')})).slice(0,14));
+              console.log('TABLE_EDIT_LINKS='+JSON.stringify(editLinks));
+              const target=editLinks.find(x=>/home_01/.test(x.href||''))?.href;
+              if(target){
+                await page.goto(new URL(target,env.WC_URL).href,{waitUntil:'domcontentloaded'});
+                const detail=await page.evaluate(()=>({url:location.href,inputs:[...document.querySelectorAll('input,textarea,button')].map(e=>({tag:e.tagName,id:e.id,name:e.name,type:e.type,text:(e.textContent||'').trim().slice(0,65),value:e.type==='hidden'?'[hidden]':String(e.value||'').slice(0,65)})).filter(x=>x.id||x.name||x.text).slice(0,130),tables:[...document.querySelectorAll('table')].map(t=>({id:t.id,cls:t.className})).slice(0,15),scripts:[...document.scripts].filter(e=>(e.src||'').includes('tablepress')).map(e=>e.src).slice(0,15)}));
+                console.log('TABLE_EDIT_LAYOUT='+JSON.stringify(detail));
+              }
+              await page.goto(env.WC_URL+'/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1',{waitUntil:'domcontentloaded'});
+              await page.locator('#content-html').click();
+              const quicktag=page.locator('#qt_content_tablepress_quicktags_button');
+              if(await quicktag.count()){
+                await quicktag.click();
+                const modal=await page.evaluate(()=>({dialogs:[...document.querySelectorAll('[role="dialog"],.ui-dialog,.media-modal,.thickbox,.tb-modal')].map(x=>({id:x.id,cls:x.className,text:(x.innerText||'').slice(0,1200)})).slice(0,8),visibleInputs:[...document.querySelectorAll('input,select,button')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0}).map(e=>({id:e.id,name:e.name,text:(e.innerText||'').slice(0,65)})).slice(-65)}));
+                console.log('INSERT_CODE_UI='+JSON.stringify(modal));
+              }
               console.log('READ_ONLY_EDITOR_DISCOVERY=PASS');
             }finally{await browser.close();}
           };
