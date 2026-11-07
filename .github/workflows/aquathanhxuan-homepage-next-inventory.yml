@@ -1,0 +1,58 @@
+name: Aqua homepage next-section read-only inventory
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-homepage-next-inventory.yml'
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - name: Inspect real homepage ESC Table sources without modifying CMS
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request, urllib.error
+          from urllib.parse import urlparse
+          env = {}
+          for line in os.environ.get('ENV_FILE', '').splitlines():
+              m = re.match(r'^\s*(?:export\s+)?([\w]+)\s*=\s*(.*)$', line)
+              if m:
+                  env[m.group(1)] = m.group(2).strip().strip('"\'')
+          wp = env.get('WC_URL','').rstrip('/')
+          if wp != 'https://admin.aquathanhxuan.io.vn':
+              raise SystemExit('BLOCKED: unexpected WordPress origin')
+          def get(path):
+              req = urllib.request.Request(wp + path, headers={'Accept':'application/json','User-Agent':'AquaHomepageInventory/1.0'})
+              try:
+                  with urllib.request.urlopen(req, timeout=25) as res:
+                      return json.loads(res.read())
+              except urllib.error.HTTPError as e:
+                  print('FETCH_STATUS', path, e.code)
+                  return None
+          page = get('/wp-json/wp/v2/pages/82454?_fields=id,slug,status,content,acf')
+          if isinstance(page,dict):
+              raw = (page.get('content') or {}).get('rendered','')
+              print('PAGE_STATUS', page.get('id'), page.get('slug'), page.get('status'))
+              print('PAGE_SHORTCODES', sorted(set(re.findall(r'\[table[^\]]*id\s*=\s*["\']?([A-Za-z0-9_\-]+)', raw, re.I))))
+              print('PAGE_HAS_HOME_02', 'home_02' in raw.lower())
+          else:
+              print('PAGE_PUBLIC_REST_UNAVAILABLE')
+          for endpoint in ['/wp-json/tablepress/v1/tables', '/wp-json/tablepress/v1/tables/home_02', '/wp-json/tablepress/v1/tables/home_03', '/wp-json/tablepress/v1/tables/home_04']:
+              data = get(endpoint)
+              if isinstance(data,dict):
+                  rows = data.get('data') if isinstance(data.get('data'),list) else data.get('items')
+                  print('TABLE', endpoint, 'fields=', sorted(data.keys()), 'rows=', len(rows) if isinstance(rows,list) else '?')
+                  if isinstance(rows,list) and rows:
+                      first=rows[0]
+                      print('TABLE_COLUMNS', endpoint, list(first.keys()) if isinstance(first,dict) else 'array-row')
+              elif isinstance(data,list):
+                  print('TABLE', endpoint, 'count=',len(data), 'preview_types=',[type(x).__name__ for x in data[:2]])
+              else:
+                  print('TABLE_UNAVAILABLE',endpoint)
+          PY
