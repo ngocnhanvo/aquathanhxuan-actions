@@ -133,9 +133,20 @@ try{
  const preview=String(await page.locator('#esc-pse-menu-json-result').textContent());
  if(!preview.includes('11 items hợp lệ'))throw Error('MENU_PREVIEW_FAILED '+preview.slice(0,280));
  page.once('dialog',d=>d.accept());
- await page.locator('#esc-pse-menu-json-replace').click();
- menus=await getMenus();
- const actual=menus?.menus?.Header?.vi?.items;
+ const [replaceResponse]=await Promise.all([
+   page.waitForResponse(response=>response.url().includes('admin-ajax.php')&&response.request().method()==='POST'&&String(response.request().postData()||'').includes('action=esc_pse_menu_json_replace'),{timeout:30000}),
+   page.locator('#esc-pse-menu-json-replace').click()
+ ]);
+ const replacePayload=await replaceResponse.json();
+ if(replacePayload.success!==true)throw Error('MENU_REPLACE_FAILED '+JSON.stringify(replacePayload?.data||{}).slice(0,300));
+ console.log('MENU_REPLACE_SUCCESS='+replacePayload?.data?.items);
+ let actual;
+ for(let attempt=0;attempt<8;attempt++){
+  menus=await getMenus();
+  actual=menus?.menus?.Header?.vi?.items;
+  if(Array.isArray(actual)&&actual.length===11)break;
+  await sleep(600);
+ }
  if(!Array.isArray(actual)||actual.length!==11)throw Error('MENU_VERIFY_COUNT '+actual?.length);
  for(let i=0;i<11;i++)if(actual[i]?.label!==desired[i][0]||String(actual[i]?.slug||'').replace(/^[/]+/,'')!=='san-pham/'+desired[i][1])throw Error('MENU_VERIFY_ITEM '+i+' '+JSON.stringify(actual[i]));
  console.log('AQUA_MENU_SETUP=PASS menu_id='+menuId+' items=11 page_id='+target.page.id);
