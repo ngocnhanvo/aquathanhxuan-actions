@@ -27,6 +27,23 @@ jobs:
               const body=await r.json().catch(()=>null);
               console.log('MEDIA_SEARCH '+JSON.stringify({term,status:r.status,total:r.headers.get('x-wp-total'),items:Array.isArray(body)?body.slice(0,25).map(x=>({id:x.id,title:x.title?.rendered,alt:x.alt_text,src:x.source_url,media_type:x.media_type})):[]}));
             }
+            for(const page of [1,2,3]){
+              const u=origin+'/wp-json/wp/v2/media?per_page=100&page='+page+'&orderby=date&order=desc&_fields=id,date,title,alt_text,source_url,media_type';
+              const r=await fetch(u,{headers:{accept:'application/json'}});
+              const data=await r.json().catch(()=>null);
+              console.log('MEDIA_RECENT '+JSON.stringify({page,status:r.status,total:r.headers.get('x-wp-total'),items:Array.isArray(data)?data.map(x=>({id:x.id,date:x.date,title:x.title?.rendered,alt:x.alt_text,src:x.source_url,kind:x.media_type})):[]}));
+              if(!r.ok||!Array.isArray(data)||data.length<100)break;
+            }
+            for(const endpoint of [
+              '/wp-json/wc/store/v1/products?category=1775&per_page=30',
+              '/wp-json/wp/v2/product?product_cat=1775&per_page=30',
+              '/wp-json/api/products?category=1775&per_page=30'
+            ]){
+              const r=await fetch(origin+endpoint,{headers:{accept:'application/json'}});
+              const body=await r.json().catch(()=>null);
+              const items=Array.isArray(body)?body:(Array.isArray(body?.products)?body.products:[]);
+              console.log('SUBSTRATE_PRODUCTS '+JSON.stringify({endpoint,status:r.status,total:r.headers.get('x-wp-total'),type:Array.isArray(body)?'array':typeof body,items:items.slice(0,30).map(x=>({id:x.id,name:x.name||x.title?.rendered||x.title,slug:x.slug,images:(x.images||[]).slice(0,2).map(z=>({id:z.id,src:z.src,alt:z.alt})),image:x.image,description:String(x.short_description||'').slice(0,120)}))}));
+            }
             const u=origin+'/wp-json/api/products/categories';
             const r=await fetch(u);
             const cats=await r.json().catch(()=>null);
