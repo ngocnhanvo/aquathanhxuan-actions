@@ -125,10 +125,7 @@ try {
         const button = document.querySelector('#html-upload');
         return button && !button.disabled;
       }, null, { timeout: 10000 });
-      await Promise.all([
-        page.waitForLoadState('domcontentloaded').catch(() => {}),
-        htmlUpload.click(),
-      ]);
+      await htmlUpload.click({ noWaitAfter: true });
 
       for (let poll = 0; poll < 20; poll += 1) {
         asset.media = await findMedia(asset.slug);
