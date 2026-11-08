@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "eb276373eb118385d72a1685299311643a6edc1b",
+  "intent": "Release corrected Visual Builder Product picker search, duplicate labels and inactive pagination fix after exact-ID regression tests. PHP only."
+}
