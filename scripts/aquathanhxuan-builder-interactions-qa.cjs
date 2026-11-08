@@ -145,9 +145,18 @@ const stamp = Date.now();
       await admin.locator('#esc-vb-item-panel').waitFor({state:'visible',timeout:20000});
       await admin.locator('#esc-vb-item-sort-open').click();
       await admin.locator('#esc-vb-item-sort-body').waitFor({state:'visible',timeout:20000});
-      await admin.waitForFunction(() =>
-        document.querySelector('#esc-vb-item-sort-status')?.textContent?.includes('Nhấp sản phẩm nguồn'),
-        null,{timeout:20000});
+      await admin.waitForTimeout(1600);
+      const pickDebug=await admin.evaluate(()=>({
+        status:document.querySelector('#esc-vb-item-sort-status')?.textContent,
+        context:document.querySelector('#esc-vb-item-context')?.textContent,
+        source:document.querySelector('#esc-vb-item-sort-source')?.textContent,
+        panelVisible:!document.querySelector('#esc-vb-item-panel')?.hidden,
+        bodyVisible:!document.querySelector('#esc-vb-item-sort-body')?.hidden,
+        indexedList:document.querySelectorAll('#esc-vb-item-sort-preview-list li button').length
+      }));
+      console.log('BUILDER_PRODUCT_PICK_INITIAL='+JSON.stringify(pickDebug));
+      assert(pickDebug.status?.includes('Nhấp sản phẩm nguồn'),
+        'Expected visual Product source picker: '+JSON.stringify(pickDebug));
       const selectedSource=cards.nth(0);
       const selectedTarget=cards.nth(1);
       const sourceId=await selectedSource.getAttribute('data-esc-builder-product-id');
