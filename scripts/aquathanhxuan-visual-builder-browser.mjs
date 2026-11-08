@@ -299,6 +299,30 @@ try {
       'Nested Product rows must be reindexed after reordering');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Nested Product source reorder must acknowledge exact ID mapping');
+    // Standard ESC Table picker: red source and blue target are chosen by
+    // clicking the existing cards, not by picking IDs from a second panel.
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-item-pick-start',tableId:'home_02products',sourceRow:0,
+        count:2,requestId:49,productIds:['82537','82535']}
+    })));
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Nested Product ESC Table must support the native shared visual picker');
+    assert.equal(await page.locator('#substrate-82537').getAttribute('data-esc-vb-item-source'),'',
+      'Product source should be outlined red');
+    await page.click('#substrate-82535');
+    assert.deepEqual(await page.evaluate(() => {
+      const item=window.__productMessages.at(-1);
+      return [item?.type,item?.tableId,item?.row];
+    }),['esc-vb-item-target-picked','home_02products',1],
+      'Clicking the Product target must emit the same native item-target event');
+    assert.equal(await page.locator('#substrate-82535').getAttribute('data-esc-vb-item-target'),'',
+      'Product destination should be outlined blue');
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-item-pick-clear'}
+    })));
+
     const nestedCue=await page.locator('#substrate-82537').getAttribute('data-esc-vb-region-label');
     assert(nestedCue?.includes('home_02products')&&nestedCue.includes('Sắp xếp item'),
       'Nested Product must show membership sorting cue, not generic Sale-only readonly guidance');
