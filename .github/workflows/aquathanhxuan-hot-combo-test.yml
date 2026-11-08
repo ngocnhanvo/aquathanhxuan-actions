@@ -28,6 +28,8 @@ jobs:
           node-version: '24'
       - run: pnpm install --frozen-lockfile
         working-directory: source
+      - run: git rev-parse HEAD
+        working-directory: source
       - run: pnpm exec vitest run src/lib/wordpress/tablepress/home03.test.ts
         working-directory: source
       - name: Check Hot Combo Astro diagnostics (keep unrelated baseline visible)
