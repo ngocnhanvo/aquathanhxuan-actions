@@ -53,9 +53,10 @@ const stamp = Date.now();
         const current = () => hero.locator('[data-hero-slide][data-active="true"]').first().getAttribute('data-esc-builder-row');
         const start = await current();
         await hero.locator('[data-hero-next]').click();
-        await admin.waitForFunction(({ selector, before }) =>
-          [...document.querySelectorAll(selector)].some(e => e.getAttribute('data-esc-builder-row') !== before && e.getAttribute('data-active') === 'true'),
-          { selector: 'iframe#esc-vb-frame [data-hero-slide]', before: start }, { timeout: 1000 }).catch(() => {});
+        await previewFrame.waitForFunction(before =>
+          [...document.querySelectorAll('[data-aqua-home-hero] [data-hero-slide][data-active="true"]')]
+            .some(e => e.getAttribute('data-esc-builder-row') !== before),
+          start, { timeout: 6000 });
         const next = await current();
         assert.notEqual(next, start, 'Hero next arrow stayed locked');
         await hero.locator('[data-hero-prev]').click();
