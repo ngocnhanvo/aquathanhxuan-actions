@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expected = '9912664d95d799de9f96cb609c2cb75658ea63f0';
+const expected = 'ec243562bfa9bc185e1e9eb480989e10a2f75b52';
 const stamp = Date.now();
 (async () => {
   const markerResponse = await fetch(frontend + '/aquathanhxuan-staging-build.json?builderqa=' + stamp, {
@@ -244,6 +244,22 @@ const stamp = Date.now();
       assert.equal(await ephemeral.locator('.aqua-sale__name-link h3').textContent(),
         'Playwright temporary Sale card');
       assert.equal(await ephemeral.locator('.aqua-sale__discount').textContent(),'-25%');
+      assert.equal(await ephemeral.getAttribute('data-esc-vb-region-state'),'readonly',
+        'Live-added card must inherit readonly affordance after insert event');
+      await ephemeral.locator('.aqua-sale__name-link').click();
+      assert.equal(await ephemeral.getAttribute('data-esc-vb-product-selected'),'',
+        'Live-added card must show selected marker immediately');
+      const selectedOutline=await ephemeral.evaluate(node=>{
+        const style=getComputedStyle(node);
+        return {kind:style.outlineStyle,color:style.outlineColor,width:style.outlineWidth};
+      });
+      assert.equal(selectedOutline.kind,'dashed',
+        'Selected live-added Product card must have persistent dashed outline');
+      await selectedSource.locator('.aqua-sale__name-link').click();
+      assert.equal(await selectedSource.getAttribute('data-esc-vb-product-selected'),'',
+        'Preloaded card uses the same selected marker');
+      assert.equal(await ephemeral.getAttribute('data-esc-vb-product-selected'),null,
+        'Selecting another Product clears the live-added card highlight');
       assert.equal(previewFrame.url(),previewUrl,'Product insert changed preview route');
       assert.deepEqual(writes,[],'Synthetic insert emitted mutation');
       await ephemeral.evaluate(node=>node.remove());
