@@ -194,6 +194,30 @@ const stamp = Date.now();
       await admin.locator('#esc-vb-item-sort-cancel').click();
       assert.deepEqual(writes,[],'Product swap preview must not write data');
       console.log('BUILDER_PRODUCT_PICK=PASS '+JSON.stringify({viewport:viewport.width,sourceId,targetId,canceled:true}));
+      // Delete follows the exact Product clicked in the website, not a
+      // second-choice dropdown. Never press confirmation in production QA.
+      await selectedSource.locator('.aqua-sale__name-link').click();
+      await admin.waitForFunction(id=>
+        document.querySelector('#esc-vb-item-context')?.textContent?.includes('dòng') &&
+        document.querySelector('#esc-vb-item-status')?.textContent?.includes(id) &&
+        !document.querySelector('#esc-vb-item-delete')?.disabled,
+        sourceId,{timeout:20000});
+      await admin.locator('#esc-vb-item-delete').click();
+      await admin.locator('#esc-vb-item-delete-dialog').waitFor({state:'visible',timeout:20000});
+      await admin.waitForFunction(id =>
+        document.querySelector('#esc-vb-item-delete-context')?.textContent?.includes(id) &&
+        !document.querySelector('#esc-vb-item-delete-confirm')?.disabled,
+        sourceId,{timeout:20000});
+      assert.equal(await admin.locator('#esc-vb-item-delete-picker-wrap').isVisible(),false,
+        'Already-selected Product must not require another item dropdown');
+      assert.equal(await cards.count()>=2,true,
+        'Opening the deletion confirmation must not alter Product cards');
+      assert((await admin.locator('#esc-vb-item-delete-context').textContent()).includes(sourceId),
+        'Confirmation must show exact selected Product ID');
+      await admin.locator('#esc-vb-item-delete-dismiss').click();
+      assert.deepEqual(writes,[], 'Cancel deletion must not mutate WordPress');
+      console.log('BUILDER_PRODUCT_DELETE_CONFIRM=PASS '+JSON.stringify({viewport:viewport.width,productId:sourceId,canceled:true,pickerHidden:true}));
+
       console.log('BUILDER_SAFE_INTERACTIONS=PASS viewport='+viewport.width+' no_cms_write=true');
       await context.close();
     }
