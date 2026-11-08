@@ -1,6 +1,6 @@
 # Latest ChatGPT response
 
-Time (Asia/Ho_Chi_Minh): 2026-11-08 09:31
+Time (Asia/Ho_Chi_Minh): 2026-11-08 09:48
 Project: aquathanhxuan.com
 Repository: ngocnhanvo/aquathanhxuan-actions
 Branch: main
@@ -9,11 +9,31 @@ Source gateway: bypass
 
 ## Final response
 
-Có thể mở rộng Visual Builder bằng tab **Quản lý item** dùng chung cho các ESC Table có danh sách item, minh họa với Sale home_01.
+Đúng ý ông rồi. Tôi đã sửa Visual Builder theo nguyên tắc: **nguồn Product chỉ khóa sửa dữ liệu sản phẩm, không khóa quản lý danh sách sản phẩm trong ESC Table.**
 
-Tôi đã đọc Knowledge và đối chiếu source Home_01.astro, home01.ts. Đề xuất cho phép chọn sản phẩm WooCommerce theo ID, thêm/bỏ liên kết, kéo thả hoặc nút lên/xuống, xem trước thay đổi, hoàn tác, rồi lưu nguyên tử về ESC Table. Xóa item chỉ bỏ hàng liên kết, không xóa sản phẩm WooCommerce. Hàng cấu hình section (section_title, all_label, all_link) phải tách khỏi hàng item; giữ version, row identity, khóa quyền và kiểm tra xung đột trước khi ghi. Các giá/ảnh/tên vẫn đến từ WooCommerce; Astro không gán cứng item hoặc thứ tự.
+| Thao tác | Quyền mới |
+|---|---|
+| Thêm ID sản phẩm vào ESC Table | Cho phép |
+| Xóa ID khỏi danh sách | Cho phép |
+| Hoán đổi thứ tự item | Cho phép |
+| Sửa tên, giá, ảnh hoặc thông tin sản phẩm | Vẫn khóa |
+| Sửa tiêu đề Sale, nhãn và liên kết của section | Giữ quyền sửa ESC Table hiện có |
 
-Đây là giải pháp đề xuất, chưa thực hiện sửa source, CMS hay deploy. Cần triển khai chung cho các ESC Table có danh sách thay vì hard-code riêng home_01. Có thể bổ sung schema phân biệt configuration rows và item rows để Builder không kéo nhầm. Trạng thái: DESIGN_PROPOSED.
+Việc xóa item chỉ loại bỏ tham chiếu trong ESC Table, **không xóa sản phẩm WooCommerce**. Các hàng cấu hình section được bảo vệ để không bị xóa hoặc hoán đổi nhầm.
 
+Mã nguồn PHP đã cập nhật tới commit a8df841 (https://github.com/ngocnhanvo/aquathanhxuan-php/commit/a8df8414296d48820a0cee71b7ad7ceb037f3760), và bộ kiểm thử nguồn tại GitHub Actions #42439698259 (https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42439698259) đã SUCCESS.
+
+**Đã triển khai production.** FTPS release #42439789842 (https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42439789842) SUCCESS, xác minh SHA256 cho đúng hai file PHP cập nhật; không build Astro, không ghi WooCommerce.
+
+Playwright production #42439908394 (https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42439908394) SUCCESS, xác minh được ba thao tác:
+- Thêm: ô nhập ID Product mở được; các thuộc tính sản phẩm là chỉ đọc.
+- Sắp xếp: chọn hai ID trong danh sách để hoán đổi.
+- Xóa: chọn ID hiện có từ danh sách và bỏ liên kết khỏi ESC Table.
+
+Không thực hiện nút xác nhận ghi dữ liệu thật trong Playwright production; thử nghiệm save được kiểm tra bằng PHP fixture trong CI để không làm thay đổi danh sách hiện hành. Sau thay đổi ESC Table, cần Làm mới section để lấy dữ liệu mới; website production cập nhật theo cơ chế build hiện có.
+
+Checkpoint: https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-product-source-item-manager.md
+
+Trạng thái: CODE_READY / PHP_PRODUCTION_DEPLOYED / QA_PASS.
 Chế độ code: auto-build
 Cổng ghi source: bypass
