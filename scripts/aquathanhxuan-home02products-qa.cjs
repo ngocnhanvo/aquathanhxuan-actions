@@ -304,6 +304,36 @@ const request=async u=>{
     report.sortDryRun={from:sourceText,to:targetText,preselected:true,saveEnabled:true};
     // Never click Save on a production dataset; Cancel must leave WordPress untouched.
     await page.locator('#esc-vb-item-sort-cancel').click();
+    // Exercise the actual hydrated Home_02 Product grid with a simulated
+    // *already saved* order message. This mutates preview DOM only, NEVER CMS.
+    const frameElement=page.locator('#esc-vb-frame');
+    const childOrigin=new URL(await frameElement.getAttribute('src'),WP).origin;
+    const reordered=[...expected];
+    [reordered[0],reordered[1]]=[reordered[1],reordered[0]];
+    const sendPreviewOrder=async ids=>page.evaluate(({ids,targetOrigin})=>{
+      const iframe=document.getElementById('esc-vb-frame');
+      iframe.contentWindow.postMessage({
+        type:'esc-vb-product-order-saved',tableId:'home_02products',
+        items:ids.map(key=>({key})),requestId:9318
+      },targetOrigin);
+    },{ids,targetOrigin:childOrigin});
+    const waitFirst=async id=>grid.evaluate((el,expectedId)=>new Promise((resolve,reject)=>{
+      const read=()=>el.querySelector(':scope > [data-substrate-card]')?.getAttribute('data-esc-builder-product-id');
+      if(read()===expectedId)return resolve(true);
+      const observer=new MutationObserver(()=>{
+        if(read()===expectedId){observer.disconnect();clearTimeout(timer);resolve(true)}
+      });
+      const timer=setTimeout(()=>{observer.disconnect();reject(new Error('Preview order not updated: '+read()))},5000);
+      observer.observe(el,{childList:true});
+    }),id);
+    try {
+      await sendPreviewOrder(reordered);
+      await waitFirst(reordered[0]);
+      report.reorderPreview={first:reordered[0],synced:true};
+    } finally {
+      await sendPreviewOrder(expected);
+      await waitFirst(expected[0]);
+    }
     assert.equal(forbiddenWrites,0,'Visual Builder attempted to write during read-only QA');
     report.builderControls={selectedProduct:expected[0],addDialog:true,
       deleteDialog:true,sortRows:options,forbiddenWrites};
