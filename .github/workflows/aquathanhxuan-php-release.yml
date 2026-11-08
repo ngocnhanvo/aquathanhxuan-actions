@@ -84,6 +84,7 @@ jobs:
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
           php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
+          php source-php/wp-content/plugins/esc-visual-builder/tests/shared-footer-links-source.test.php
           php source-php/wp-content/plugins/esc-visual-builder/tests/text-image-cells.test.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/item-manager.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/item-section-ui.php
