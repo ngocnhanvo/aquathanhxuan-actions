@@ -1,10 +1,6 @@
 name: Aqua Home 02 curated products production acceptance
 # Verify Product reference-only WordPress permission after PHP release 34ff3685.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/aquathanhxuan-home02products-qa.yml'
   workflow_dispatch:
 permissions:
   contents: write
