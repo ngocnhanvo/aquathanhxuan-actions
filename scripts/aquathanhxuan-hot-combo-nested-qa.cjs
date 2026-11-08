@@ -76,6 +76,30 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
     textSample:el.innerText.slice(0,900)
   }));
   console.log('HOT_COMBO_BUILDER_FRAME_DIAGNOSTIC='+JSON.stringify(diagnosis));
+  const ticket = new URL(iframeSrc).searchParams.get('ticket');
+  const stateResponse=await admin.request.post(WP+'/wp-json/esc-builder/v1/page-state',{
+    data:{page_id:82454,ticket,include_rules:true}});
+  const statePayload=await stateResponse.json();
+  console.log('HOT_COMBO_PAGE_STATE_DIAGNOSTIC='+JSON.stringify({
+    status:stateResponse.status(),
+    tables:statePayload.tables?.map(x=>({id:x.id,exists:x.exists})),
+    childEditable:statePayload.editable?.[CHILD],
+    error:statePayload.code
+  }));
+  const srcResponse=await admin.request.post(WP+'/wp-json/esc-builder/v1/table-source',{
+    data:{page_id:82454,ticket,table_id:CHILD}});
+  const srcPayload=await srcResponse.json();
+  console.log('HOT_COMBO_CHILD_SOURCE_DIAGNOSTIC='+JSON.stringify({
+    status:srcResponse.status(),sourceId:srcPayload.table?.id,
+    api:srcPayload.table?.meta?.api,rows:srcPayload.table?.items?.length,
+    error:srcPayload.code
+  }));
+  console.log('HOT_COMBO_PREVIEW_SECTION_DIAGNOSTIC='+JSON.stringify(
+    await frame.locator('[data-aqua-home-combo]').evaluate(el=>({
+      text:el.innerText.slice(0,700),
+      sourceTable:el.getAttribute('data-esc-source-table'),
+      nestedTables:[...el.querySelectorAll('[data-esc-source-table]')].map(x=>x.getAttribute('data-esc-source-table'))
+    }))));
   const grid=frame.locator('.aqua-hot-combo__products');
   await grid.waitFor({state:'visible',timeout:45000});
   assert.equal(await grid.getAttribute('data-esc-source-table'),CHILD,'Builder child Product table identity');
