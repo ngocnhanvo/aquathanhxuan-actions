@@ -113,6 +113,84 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
   assert(coordinates.every(x=>/^[a-f0-9]{64}$/.test(x.version||'')),'Child row version missing');
   assert.equal(await grid.locator('template[data-esc-builder-product-template]').count(),1,'No live Product mutation template');
   console.log('HOT_COMBO_BUILDER_SOURCE_PASS='+JSON.stringify(coordinates));
+  assert.equal(await grid.getAttribute('data-esc-builder-product-track'),'true',
+    'The generic nested Product mutation adapter must be deployed to Builder');
+
+  // Real WordPress + Astro production smoke test, deliberately READ ONLY.
+  // These gestures open mutation UIs and select candidates, but every Save,
+  // Confirm delete and Swap commit control is left untouched.
+  const mutationRequests=[];
+  admin.on('request',request=>{
+    if (/\\/esc-builder\\/v1\\/(?:insert-item|delete-item|swap-items)(?:[/?]|$)/.test(request.url()))
+      mutationRequests.push(request.url());
+  });
+  const firstCard=grid.locator('.aqua-hot-combo__product').first();
+  await firstCard.locator('.aqua-hot-combo__product-name').click();
+  await admin.waitForFunction(id=>
+    document.querySelector('#esc-vb-item-context')?.textContent?.includes(id+' · dòng 1'),
+    CHILD,{timeout:15000});
+  assert(!((await admin.locator('#esc-vb-item-status').textContent())||'')
+    .includes('Section không được phép chỉnh sửa'),'Product child selection must be authorized');
+
+  // The Add dialog must be able to read its Product schema and search the
+  // genuine WooCommerce catalog; already selected IDs remain disabled.
+  await admin.locator('#esc-vb-item-new').click();
+  await admin.locator('#esc-vb-item-dialog[open]').waitFor({state:'visible',timeout:15000});
+  const productSearch=admin.locator('#esc-vb-item-fields input[type="search"]');
+  await productSearch.waitFor({state:'visible',timeout:20000});
+  assert((await admin.locator('#esc-vb-item-dialog-context').textContent()).includes(CHILD));
+  await productSearch.fill('Kaokui');
+  const existingProduct=admin.locator('.esc-vb-product-results button')
+    .filter({hasText:'ID 82561'}).first();
+  await existingProduct.waitFor({state:'visible',timeout:20000});
+  assert.equal(await existingProduct.isDisabled(),true,
+    'Add dialog must block duplicate Product IDs');
+  assert.equal(await admin.locator('#esc-vb-item-confirm').isDisabled(),true,
+    'Adding without a newly selected Product is not allowed');
+  await admin.locator('#esc-vb-item-dismiss').click();
+
+  // Shared red/blue item picker must work for tool_combo01 without a fallback
+  // ID list. Cancel must restore the original cards without a write request.
+  await admin.locator('#esc-vb-item-sort-open').click();
+  await frame.locator('[data-esc-builder-product-id="82561"][data-esc-vb-item-source]')
+    .waitFor({state:'visible',timeout:20000});
+  await grid.locator('.aqua-hot-combo__product').nth(1)
+    .locator('.aqua-hot-combo__product-name').click();
+  await frame.locator('[data-esc-builder-product-id="82562"][data-esc-vb-item-target]')
+    .waitFor({state:'visible',timeout:15000});
+  await admin.waitForFunction(()=>
+    document.querySelector('#esc-vb-item-sort-save')?.disabled===false,
+    null,{timeout:15000});
+  assert.equal(await admin.locator('#esc-vb-item-sort-preview-list').isVisible(),false,
+    'Hot Combo direct card picker must not fall back to an indexed item list');
+  await admin.locator('#esc-vb-item-sort-cancel').click();
+  await frame.locator('[data-esc-builder-product-id="82561"][data-esc-vb-item-source]')
+    .waitFor({state:'hidden',timeout:12000});
+
+  // Validate the exact-row guarded Delete confirmation but never press Confirm.
+  await firstCard.locator('.aqua-hot-combo__product-name').click();
+  await admin.waitForFunction(id=>
+    document.querySelector('#esc-vb-item-context')?.textContent?.includes(id+' · dòng 1'),
+    CHILD,{timeout:15000});
+  await admin.locator('#esc-vb-item-delete').click();
+  await admin.locator('#esc-vb-item-delete-dialog[open]')
+    .waitFor({state:'visible',timeout:15000});
+  await admin.waitForFunction(()=>
+    document.querySelector('#esc-vb-item-delete-confirm')?.disabled===false,
+    null,{timeout:15000});
+  assert((await admin.locator('#esc-vb-item-delete-context').textContent()).includes('82561'),
+    'Delete dialog must bind the exact original Product row');
+  await admin.locator('#esc-vb-item-delete-dismiss').click();
+  assert.deepEqual(await grid.locator('.aqua-hot-combo__product')
+    .evaluateAll(els=>els.map(el=>el.getAttribute('data-esc-builder-product-id'))),IDS,
+    'Cancelled Add, Sort and Delete must preserve the live Builder Product cards');
+  assert.deepEqual(mutationRequests,[], 'Read-only QA must never send a mutation request');
+  const afterResponse=await fetch(WP+'/wp-json/tablepress/v1/table/'+CHILD+'?afterUi='+Date.now());
+  assert.equal(afterResponse.status,200,'Final canonical Product source not available');
+  const afterTable=await afterResponse.json();
+  assert.deepEqual(afterTable.items,child.items,'Read-only Builder QA changed ESC Table source unexpectedly');
+  console.log('HOT_COMBO_BUILDER_ITEM_MANAGEMENT_PASS: add-search, red-blue sort cancel, guarded delete cancel, canonical source unchanged');
+
   await admin.close();
   console.log('HOT_COMBO_NESTED_PRODUCTION_QA_PASS');
  }finally{await browser.close();}
