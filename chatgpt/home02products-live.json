@@ -70,7 +70,139 @@
       "slug": "nen-cho-be-thuy-sinh"
     }
   ],
-  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:55:12",
-  "run_id": 42462784285,
+  "category_native": {
+    "status": 200,
+    "topLevel": 7,
+    "nodes": [
+      {
+        "id": 1781,
+        "name": "Chihiros",
+        "slug": "chihiros",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/chihiros/",
+        "children": 0
+      },
+      {
+        "id": 1782,
+        "name": "Contro Soil",
+        "slug": "contro-soil",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/contro-soil/",
+        "children": 0
+      },
+      {
+        "id": 1786,
+        "name": "Dennerle",
+        "slug": "dennerle",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/dennerle/",
+        "children": 0
+      },
+      {
+        "id": 1787,
+        "name": "Gex",
+        "slug": "gex",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/gex/",
+        "children": 0
+      },
+      {
+        "id": 1783,
+        "name": "Master Soil",
+        "slug": "master-soil",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/master-soil/",
+        "children": 0
+      },
+      {
+        "id": 1784,
+        "name": "Tropica",
+        "slug": "tropica",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/tropica/",
+        "children": 0
+      },
+      {
+        "id": 1785,
+        "name": "Vũ Aqua",
+        "slug": "vu-aqua",
+        "parent": 1775,
+        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/vu-aqua/",
+        "children": 0
+      }
+    ]
+  },
+  "category_custom": {
+    "status": 200,
+    "topLevel": 12,
+    "nodes": [
+      {
+        "id": 1775,
+        "name": "Nền",
+        "slug": "nen-cho-be-thuy-sinh",
+        "parent": 0,
+        "link": null,
+        "children": 7
+      },
+      {
+        "id": 1781,
+        "name": "Chihiros",
+        "slug": "chihiros",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      },
+      {
+        "id": 1782,
+        "name": "Contro Soil",
+        "slug": "contro-soil",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      },
+      {
+        "id": 1783,
+        "name": "Master Soil",
+        "slug": "master-soil",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      },
+      {
+        "id": 1784,
+        "name": "Tropica",
+        "slug": "tropica",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      },
+      {
+        "id": 1785,
+        "name": "Vũ Aqua",
+        "slug": "vu-aqua",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      },
+      {
+        "id": 1786,
+        "name": "Dennerle",
+        "slug": "dennerle",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      },
+      {
+        "id": 1787,
+        "name": "Gex",
+        "slug": "gex",
+        "parent": 1775,
+        "link": null,
+        "children": 0
+      }
+    ]
+  },
+  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:75:12",
+  "run_id": 42462940021,
   "outcome": "failure"
 }
