@@ -25,7 +25,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install matching Playwright driver only
         run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
-      - name: Match real WordPress products and create home_02products via native ESC Table
+      - name: Fix Product API source on the existing verified table
+        id: repair
+        run: node scripts/aquathanhxuan-home02products-api-fix.cjs
+      - name: Verify and insert home_02products using native ESC Table
         id: cms
         run: node scripts/aquathanhxuan-home02products-create.cjs
       - name: Save verified CMS execution status
@@ -39,6 +42,7 @@ jobs:
               run_attempt: process.env.GITHUB_RUN_ATTEMPT,
               source_sha: context.sha,
               cms_step: '${{ steps.cms.outcome }}',
+              api_repair_step: '${{ steps.repair.outcome }}',
               checked_at: new Date().toISOString(),
               workflow: context.workflow
             }, null, 2) + '\n';
