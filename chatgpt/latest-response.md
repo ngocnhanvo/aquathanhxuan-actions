@@ -1,42 +1,38 @@
 # Latest ChatGPT response — Aqua Thanh Xuân
 
-Date: 2026-11-08, Asia/Ho_Chi_Minh
+Date: 2026-11-08 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
-Chế độ code: auto-build
-Cổng ghi source: bypass
+Mode: auto-build
+Source-write gateway: bypass
 
-## Goal
-Homepage Nền sidebar shows only genuine direct children of WordPress ProductCategory Nền; click a category navigates to listing products belonging to it. No sidebar image, no Tất cả sản phẩm filter/select. Right grid is an independent Product ESC Table **home_02products** containing the 10 verified products from legacy aquathanhxuan.com.
+## Scope
+Complete native Visual Builder support for WordPress ESC Table `home_02products` on homepage Nền: 10 real WooCommerce products, direct 7 real Nền categories, immutable Product attributes but reorder/add/delete Product ID references.
 
-## Verified PASS
-- WordPress has 10 imported real products: IDs 82535, 82537, 82539, 82541, 82543, 82545, 82547, 82549, 82551, 82552. Legacy record/name/slug/price/media verified by run 42460343206. No dummy data. Import workflow switched to manual.
-- Native WordPress ESC Table home_02products includes these 10 exact IDs in order, `meta.api=Product`; native Insert Code placed shortcode once in Home Page 82454. CMS writer run 42462179020 PASS both api repair and shortcode.
-- Initial Astro production release d254c5404499a7fe344bbba99d52951eaa41d4cc build run 42462368676 PASS.
-- Initial production QA run 42462688926 proved CMS + serialized cache ID list exact 10/10; grid emitted all cards. It failed because sidebar had 7 while old checkpoint expected 9.
-- Read-only WP native taxonomy: Nền term id=1775 has **exactly 7 direct child terms** in current WordPress: 1781 Chihiros, 1782 Contro Soil, 1783 Master Soil, 1784 Tropica, 1785 Vũ Aqua, 1786 Dennerle, 1787 Gex. Prior guessed term IDs 1779/1780 do NOT exist on current WP; do not fabricate or recreate. Native/custom source confirmed by run 42462940021.
-- Old frontend sidebar href /chihiros et al was HTTP 404; direct legacy archive candidate URLs also 404 (run 42463079726). Missing archive routes were the actual blocker.
-- PHP item-manager native Product ESC Table supports adding/removing/reordering Product ID references while source product data remains read-only; table schema is valid.
-- Latest source Visual Builder contract test run 42463495770: preview-browser/native-cells/homepage-data all SUCCESS (Astro master at that test was 21225387).
+## Verified complete
+- Real WordPress page 82454 has native Insert Code `home_02products`; Product ESC Table has exact 10 IDs [82535,82537,82539,82541,82543,82545,82547,82549,82551,82552] in order with meta.api=Product. CMS run 42462179020 PASS.
+- Product archive belongs to WordPress Page 82457 (key=ssr-products/action=ProductsSSRPage), now served via /san-pham/{category-slug}; SSR reads published WordPress build cache, not full runtime import.
+- Production build 42465187530 PASS for Astro 243e424903bab08e210426d52119f9252138880a.
+- Production end-to-end QA run 42465408148 PASS on 5 viewports (1440x900,1024x768,768x1024,844x390,390x844): 10 correct product cards, 7 genuine categories, no horizontal overflow, WordPress image healthy, category /san-pham/chihiros 200, initial Visual Builder 10 IDs and template present.
+- Expanded read-only Visual Builder QA run 42466634630 FAIL: clicking first Product wrongly chose outer section home_02; diagnostic run 42466882938 proved inspector context 'home_02 · dòng 1', empty status, although clicked card ID 82535 and nested [data-esc-source-table=home_02products] exists.
+- Root cause in Astro `src/lib/wordpress/builderSectionDrafts.ts`: selectItem() resolves [data-tablepress-preview] from outer section `home_02`, ignoring more specific nested `[data-esc-source-table=home_02products]`.
 
-## Recent code
-Astro master latest SHA **21225387b1b766d566cd0611bc0b7da9c1a60b69**:
-- Home_02.astro sidebar links now use existing Product listing Page '/san-pham?cat=' + real category slug instead of broken /slug/category paths. Sidebar category taxonomy remains real WP.
-- ProductsPage.astro includes per-product categorySlugs from actual WooCommerce categories[], matches query against this structured metadata; uses WP category tree labels for selected category heading. Existing product listing UI otherwise unchanged.
-- src/pages/[...slug].astro passes cache productCategories to ProductsPage.
-- Added regression test of mapping and route.
-- Does not create imaginary WordPress Pages or hardcode products/category labels.
+## Fix done in Astro master
+- Commit 954004c2: resolve Product selection and item picking using nearest nested [data-esc-source-table], not outer parent source; paint item marks on nested root if no direct [data-tablepress-preview].
+- Commit 21194274: event.preventDefault() and event.stopImmediatePropagation() on precise Product card click so generic section handlers don't override it.
+- Commit b97f664c4c455581ad7b611eccaeb503c3e9a849: regression test in home02Catalog.test.ts checks nested Product source routing.
+- Source tests `chatgpt/home02products-tests.json` run 42467236134 PASS for Preview Browser, PHP native cells, Homepage Data.
 
-Actions repo:
-- New build request `build-requests/2026-11-08-home02-category-listing-21225387.json` at commit d4e3567b462beefaa03ab2b6f8c19f350d42f25e, targets latest Astro SHA above. Uses ONLY existing production pipeline `.github/workflows/aquathanhxuan-wordpress-production-build.yml`.
-- Build status checkpoint `chatgpt/aquathanhxuan-build-latest.json` is **currently stale** (run 42462368676 for previous Astro SHA). Do not claim latest build passed until status contains `21225387...` with production_step success and logs verify.
-- Production QA `scripts/aquathanhxuan-home02products-qa.cjs` updated: compares exactly 7 real WP child slugs with sidebar links and verifies navigation to /san-pham?cat=... and client H1. Run `.github/workflows/aquathanhxuan-home02products-qa.yml` on latest deployed revision, not before.
+## In progress
+- Requested standard WordPress-controlled production build for Astro SHA b97f664c4c455581ad7b611eccaeb503c3e9a849 via `build-requests/2026-11-08-nested-product-builder-b97f664c.json` in Actions commit 01cc8e54.
+- Last verified production build status `chatgpt/aquathanhxuan-build-latest.json` still older 243e4249; DO NOT report new production PASS before matching SHA and success.
+- Actions QA `scripts/aquathanhxuan-home02products-qa.cjs` now includes read-only user interaction: click first product, assert Product status/source, open + dismiss add/delete dialogs, open + cancel sorter, assert zero write attempts. No production data mutation.
+- QA workflow `.github/workflows/aquathanhxuan-home02products-qa.yml` currently has push trigger on its own file and workflow_dispatch. After QA success, remove push trigger (manual-only). CMS writer already workflow_dispatch-only.
 
-## Still required
-1. Watch production build run for request source SHA 21225387 and verify success logs, marker source SHA.
-2. Trigger current Home02 QA workflow by modifying its workflow file (currently push trigger path), inspect `chatgpt/home02products-live.json`, fix any runtime/Visual Builder QA failures.
-3. After PASS, set QA workflow and native CMS writer to manual-only if not already, without triggering another unnecessary build.
-4. Confirm actual Visual Builder item add/delete/reorder access read-only (avoid writes to real production products just to test), production visual 5 viewports, image health, category nav.
-5. Store actual final response/checkpoint in this file as last step. Only DONE if all real QA/production checks PASS.
+## Next actions
+1. Wait/read `chatgpt/aquathanhxuan-build-latest.json` to match SHA b97f664c and production_step success. On failure, inspect actual workflow run logs, repair source, rerun existing pipeline.
+2. Trigger QA by updating a comment on existing QA workflow (if no dispatch tool), inspect `chatgpt/home02products-live.json` for new run. If fail, use builderClickProbe status/DOM identity and fix cause, not by faking test.
+3. After successful live item selection and add/delete/sort read-only dialogs, assert CMS table still exact 10 IDs and set QA workflow to manual-only.
+4. Update this latest-response.md with verified final run IDs/SHAs and result. Status DONE only after real production verification.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
