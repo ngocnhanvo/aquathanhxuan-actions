@@ -156,6 +156,45 @@ const request=async u=>{
     const selectedIds=await grid.locator('[data-esc-builder-product-id]').evaluateAll(nodes=>
       nodes.map(n=>n.getAttribute('data-esc-builder-product-id')));
     assert.deepEqual(selectedIds,expected,'Builder binds wrong Product IDs');
+    // Read-only control check. Never submit add/delete/swap to production.
+    let forbiddenWrites=0;
+    await page.route(/\/wp-json\/esc-builder\/v1\/(insert-item|delete-item|swap-items|save-section-order)/,
+      async route=>{forbiddenWrites++;await route.abort();});
+    const firstCard=grid.locator('[data-esc-builder-product-id]').first();
+    await firstCard.scrollIntoViewIfNeeded();
+    await firstCard.click({position:{x:Math.min(24,await firstCard.evaluate(el=>el.clientWidth/2)),y:20}});
+    const inspector=page.locator('#esc-vb-item-panel');
+    await inspector.waitFor({state:'visible',timeout:18000});
+    const selectionStatus=page.locator('#esc-vb-item-status');
+    await selectionStatus.getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i).waitFor({timeout:18000});
+    const selectText=await selectionStatus.textContent();
+    assert(selectText.includes(expected[0]),'Clicked Product ID did not map to WordPress row');
+    assert.equal(await page.locator('#esc-vb-item-duplicate').isEnabled(),false,
+      'Source Product attributes must stay read-only');
+    const add=page.locator('#esc-vb-item-new');
+    assert(await add.isEnabled(),'Add product reference control disabled');
+    await add.click();
+    const addDialog=page.locator('#esc-vb-item-dialog');
+    await addDialog.waitFor({state:'visible',timeout:12000});
+    await page.locator('#esc-vb-item-dismiss').click();
+    await addDialog.waitFor({state:'hidden',timeout:12000});
+    const del=page.locator('#esc-vb-item-delete');
+    assert(await del.isEnabled(),'Remove product reference control disabled');
+    await del.click();
+    const deleteDialog=page.locator('#esc-vb-item-delete-dialog');
+    await deleteDialog.waitFor({state:'visible',timeout:12000});
+    await page.locator('#esc-vb-item-delete-dismiss').click();
+    await deleteDialog.waitFor({state:'hidden',timeout:12000});
+    const sort=page.locator('#esc-vb-item-sort-open');
+    assert(await sort.isEnabled(),'Sort product references control disabled');
+    await sort.click();
+    await page.locator('#esc-vb-item-sort-preview-list').waitFor({state:'visible',timeout:16000});
+    const options=await page.locator('#esc-vb-item-sort-preview-list li').count();
+    assert(options>=2,'Sorting cannot see multiple Product rows');
+    await page.locator('#esc-vb-item-sort-cancel').click();
+    assert.equal(forbiddenWrites,0,'Visual Builder attempted to write during read-only QA');
+    report.builderControls={selectedProduct:expected[0],addDialog:true,
+      deleteDialog:true,sortRows:options,forbiddenWrites};
     report.builder=true;
     await ctx.close();
    }
