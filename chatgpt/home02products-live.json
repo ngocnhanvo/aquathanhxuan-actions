@@ -1,42 +1,6 @@
 {
   "cms": true,
-  "frontend": [
-    {
-      "width": 1440,
-      "height": 900,
-      "cards": 10,
-      "categories": 7,
-      "overflow": false
-    },
-    {
-      "width": 1024,
-      "height": 768,
-      "cards": 10,
-      "categories": 7,
-      "overflow": false
-    },
-    {
-      "width": 768,
-      "height": 1024,
-      "cards": 10,
-      "categories": 7,
-      "overflow": false
-    },
-    {
-      "width": 844,
-      "height": 390,
-      "cards": 10,
-      "categories": 7,
-      "overflow": false
-    },
-    {
-      "width": 390,
-      "height": 844,
-      "cards": 10,
-      "categories": 7,
-      "overflow": false
-    }
-  ],
+  "frontend": [],
   "builder": false,
   "ids": [
     "82535",
@@ -62,222 +26,9 @@
     "82551",
     "82552"
   ],
-  "sidebar": [
-    {
-      "name": "Chihiros›",
-      "href": "/san-pham/chihiros"
-    },
-    {
-      "name": "Contro Soil›",
-      "href": "/san-pham/contro-soil"
-    },
-    {
-      "name": "Master Soil›",
-      "href": "/san-pham/master-soil"
-    },
-    {
-      "name": "Tropica›",
-      "href": "/san-pham/tropica"
-    },
-    {
-      "name": "Vũ Aqua›",
-      "href": "/san-pham/vu-aqua"
-    },
-    {
-      "name": "Dennerle›",
-      "href": "/san-pham/dennerle"
-    },
-    {
-      "name": "Gex›",
-      "href": "/san-pham/gex"
-    }
-  ],
-  "wpCategories": [
-    {
-      "id": 1786,
-      "parent": 1775,
-      "name": "Dennerle",
-      "slug": "dennerle"
-    },
-    {
-      "id": 1775,
-      "parent": 0,
-      "name": "Nền",
-      "slug": "nen-cho-be-thuy-sinh"
-    }
-  ],
-  "category_native": {
-    "status": 200,
-    "topLevel": 7,
-    "nodes": [
-      {
-        "id": 1781,
-        "name": "Chihiros",
-        "slug": "chihiros",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/chihiros/",
-        "children": 0
-      },
-      {
-        "id": 1782,
-        "name": "Contro Soil",
-        "slug": "contro-soil",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/contro-soil/",
-        "children": 0
-      },
-      {
-        "id": 1786,
-        "name": "Dennerle",
-        "slug": "dennerle",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/dennerle/",
-        "children": 0
-      },
-      {
-        "id": 1787,
-        "name": "Gex",
-        "slug": "gex",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/gex/",
-        "children": 0
-      },
-      {
-        "id": 1783,
-        "name": "Master Soil",
-        "slug": "master-soil",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/master-soil/",
-        "children": 0
-      },
-      {
-        "id": 1784,
-        "name": "Tropica",
-        "slug": "tropica",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/tropica/",
-        "children": 0
-      },
-      {
-        "id": 1785,
-        "name": "Vũ Aqua",
-        "slug": "vu-aqua",
-        "parent": 1775,
-        "link": "https://admin.aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/vu-aqua/",
-        "children": 0
-      }
-    ]
-  },
-  "category_custom": {
-    "status": 200,
-    "topLevel": 12,
-    "nodes": [
-      {
-        "id": 1775,
-        "name": "Nền",
-        "slug": "nen-cho-be-thuy-sinh",
-        "parent": 0,
-        "link": null,
-        "children": 7
-      },
-      {
-        "id": 1781,
-        "name": "Chihiros",
-        "slug": "chihiros",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      },
-      {
-        "id": 1782,
-        "name": "Contro Soil",
-        "slug": "contro-soil",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      },
-      {
-        "id": 1783,
-        "name": "Master Soil",
-        "slug": "master-soil",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      },
-      {
-        "id": 1784,
-        "name": "Tropica",
-        "slug": "tropica",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      },
-      {
-        "id": 1785,
-        "name": "Vũ Aqua",
-        "slug": "vu-aqua",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      },
-      {
-        "id": 1786,
-        "name": "Dennerle",
-        "slug": "dennerle",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      },
-      {
-        "id": 1787,
-        "name": "Gex",
-        "slug": "gex",
-        "parent": 1775,
-        "link": null,
-        "children": 0
-      }
-    ]
-  },
-  "previousTerms": [],
-  "routes": [
-    {
-      "pathname": "/chihiros",
-      "status": 404,
-      "url": "https://aquathanhxuan.io.vn/chihiros",
-      "title": "404"
-    },
-    {
-      "pathname": "/product-category/nen-cho-be-thuy-sinh/chihiros/",
-      "status": 404,
-      "url": "https://aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/chihiros/",
-      "title": "404"
-    },
-    {
-      "pathname": "/san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "status": 200,
-      "url": "https://aquathanhxuan.io.vn/san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "title": "Nền"
-    },
-    {
-      "pathname": "/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "status": 404,
-      "url": "https://aquathanhxuan.io.vn/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "title": "404"
-    },
-    {
-      "pathname": "/nen-cho-be-thuy-sinh/chihiros/",
-      "status": 404,
-      "url": "https://aquathanhxuan.io.vn/nen-cho-be-thuy-sinh/chihiros/",
-      "title": "404"
-    }
-  ],
-  "archive": {
-    "url": "https://aquathanhxuan.io.vn/san-pham/chihiros",
-    "heading": "Chihiros"
-  },
   "builderClickProbe": {
     "context": "home_02products · chọn item để nhân bản hoặc xóa",
-    "status": "Đang xác định đúng dòng ESC Table của sản phẩm 82535...",
+    "status": "Section không được phép chỉnh sửa.",
     "selectedCardId": "82535",
     "selectedRow": "0",
     "panelVisible": true,
@@ -313,6 +64,45 @@
         "y": 232.9993896484375
       }
     ],
+    "windowClicks": [
+      {
+        "tag": "IMG",
+        "product": "82535",
+        "defaultPrevented": false
+      }
+    ],
+    "scriptSources": [
+      {
+        "src": "/_astro/PageTransition.astro_astro_type_script_index_0_lang.SIfvI6px.js",
+        "hasProductGuard": false,
+        "hasGenericSelection": false
+      },
+      {
+        "src": "/_astro/Home_01.astro_astro_type_script_index_0_lang.CEEHpKV8.js",
+        "hasProductGuard": false,
+        "hasGenericSelection": false
+      },
+      {
+        "src": "/_astro/Home_02.astro_astro_type_script_index_0_lang.CqTKjQaB.js",
+        "hasProductGuard": false,
+        "hasGenericSelection": false
+      },
+      {
+        "src": "/_astro/_pageId_.astro_astro_type_script_index_0_lang.MuVyQwnp.js",
+        "hasProductGuard": false,
+        "hasGenericSelection": false
+      },
+      {
+        "src": "",
+        "hasProductGuard": true,
+        "hasGenericSelection": true
+      },
+      {
+        "src": "/_astro/ContactWidget.astro_astro_type_script_index_0_lang.DMmeg5sm.js",
+        "hasProductGuard": false,
+        "hasGenericSelection": false
+      }
+    ],
     "productVisualSelected": true,
     "draftBridgeInstalled": 1,
     "editabilityBridgeInstalled": 1,
@@ -323,7 +113,7 @@
       "builderRow": "0"
     }
   },
-  "error": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#esc-vb-item-status').getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i) to be visible\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:211:75",
-  "run_id": 42469722050,
+  "error": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#esc-vb-item-status').getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i) to be visible\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:224:75",
+  "run_id": 42469846944,
   "outcome": "failure"
 }
