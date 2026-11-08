@@ -53,13 +53,20 @@ const request=async u=>{
     assert.equal(await section.locator('.aqua-substrate-catalog__feature').count(),0,'Old sidebar image still exists');
     const links=await menu.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href')));
     assert(links.every(x=>x&&x!=='#'&&!x.startsWith('javascript:')),'Invalid child category URL');
+    if(width===1440){
+      for(const href of links){
+        const url=new URL(href,ROOT);
+        assert.equal(url.origin,ROOT,'Subcategory navigation leaves current frontend origin');
+        const navResponse=await page.request.get(url.href,{timeout:25000});
+        assert.equal(navResponse.status(),200,'Category listing route missing: '+url.pathname);
+      }
+    }
     const dimensions=await page.evaluate(()=>({w:innerWidth,doc:document.documentElement.scrollWidth}));
     assert(dimensions.doc<=dimensions.w+1,'Horizontal overflow at '+width+'px');
     await section.scrollIntoViewIfNeeded();
     const first=cards.first().locator('img');
     await first.evaluate(async img=>{await img.decode()});
     assert(await first.evaluate(img=>img.naturalWidth>0),'Broken actual product media');
-    const before=await cards.locator(':scope:visible').count().catch(()=>0);
     const next=section.locator('[data-substrate-next]');
     if(await next.isEnabled()){
       const firstName=await cards.locator('.aqua-substrate-catalog__name').first().textContent();
