@@ -102,7 +102,9 @@ try {
       ];
       const fakeWindow = { parent: { postMessage: value => events.messages.push(value) } };
       new Function('document', 'Element', 'window', 'parentOrigin', 'NodeFilter',
-        'let selectionDispatched=false;\n' + policy)(document, Element, fakeWindow, 'https://admin.example.test', NodeFilter);
+        'let selectionDispatched=false;\n'+
+        'const loadedVersions={pub_footerlinks:"'+ 'a'.repeat(64) +'"};\n'+
+        'const discovered={pub_footerlinks:{text:[{row:0,field:"label"}]}};\n'+policy)(document, Element, fakeWindow, 'https://admin.example.test', NodeFilter);
       document.getElementById('parent-toggle').addEventListener('click', event => {
         const node = event.currentTarget;
         node.setAttribute('aria-expanded', String(node.getAttribute('aria-expanded') !== 'true'));
@@ -128,15 +130,12 @@ try {
     await page.click('#parent-toggle', { modifiers: ['Alt'] });
     assert.equal(await page.getAttribute('#parent-toggle', 'aria-expanded'), 'true');
     assert.equal(await page.evaluate(() => window.__events.menu.at(-1)?.[2]), 72);
-    await page.evaluate(() => {
-      window.__events.footerGlobal = 0;
-      document.addEventListener('click', event => {
-        if (event.target?.id === 'footer-global-link') window.__events.footerGlobal++;
-      });
-    });
     await page.click('#footer-global-link-text');
-    assert.equal(await page.evaluate(() => window.__events.footerGlobal), 1,
-      'Versioned global Footer ESC Table cell must reach native inspector');
+    assert.deepEqual(await page.evaluate(() => {
+      const section=window.__events.messages.filter(message=>message.type==='esc-vb-section').at(-1)?.section;
+      return [section?.tableId,section?.row,section?.field,section?.source];
+    }), ['pub_footerlinks',0,'label','ESC Table'],
+      'Versioned global Footer ESC Table cell must identify native inspector source');
     assert.deepEqual(await page.evaluate(() => window.__events.unavailable), [],
       'Global Footer cell must not trigger unrelated Info unsupported warning');
     await page.click('#footer-phone');
