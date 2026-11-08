@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "e2a4766c5cce79bf6e184dc0b21a9a2adff979a4",
+  "intent": "Fix asynchronous Product click selection and item-sort modal race; preserve direct delete confirmation by Product ID. PHP only."
+}
