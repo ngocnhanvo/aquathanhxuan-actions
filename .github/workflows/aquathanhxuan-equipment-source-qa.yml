@@ -29,7 +29,10 @@ jobs:
           node-version: '24'
       - run: pnpm install --frozen-lockfile
         working-directory: source
-      - run: pnpm exec vitest run src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/footerCmsContract.test.ts src/lib/wordpress/tablepress/home05.test.ts
+      - run: pnpm exec vitest run src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/footerCmsContract.test.ts src/lib/wordpress/tablepress/home05.test.ts src/lib/wordpress/tablepress/footerLinks.test.ts
+        working-directory: source
+      - name: Check Astro source without building production
+        run: pnpm exec astro check --js-only
         working-directory: source
       - name: Inspect public WordPress info and menu identity (read-only)
         shell: bash
