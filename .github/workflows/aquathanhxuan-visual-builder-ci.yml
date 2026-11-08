@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Verify nested ESC Product source selection and Product SSR regression tests.
+# Verify readonly Product click bypasses generic image editor in Builder.
 on:
   push:
     branches: [main]
