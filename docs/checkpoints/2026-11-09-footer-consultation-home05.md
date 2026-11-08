@@ -52,3 +52,12 @@ Theo ảnh web gốc: gom điện thoại, Messenger, Zalo và AI agent hiện c
 - Production WordPress build [42514928428](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514928428): SUCCESS; Astro deployment [42515003603](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515003603): SUCCESS.
 - Production read-only Playwright [42515172280](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515172280): PASS tất cả 5 viewport, Home05 native description editor PASS, Footer label native inspector PASS, `FOOTER_CONSULTATION_HOME05_QA=PASS`. Global Footer `pub_aquafooterlinks` có 10 label cells, version `bd9d6548882ee52a2f794c66122464d096e4d1c7910d6ba06dacdade6f602d1c`.
 - Không còn bug click inspector tái hiện. Chưa thực hiện production write/readback/rollback test; không coi read-only QA là bằng chứng save thành công. Chỉ thử ghi nếu thỏa backup, WRITE_SCOPE tối thiểu, cleanup và rollback.
+
+## Hiệu ứng sóng Footer đã deploy và nghiệm thu — 2026-11-09
+
+- Mẫu đã duyệt: ba lớp sóng trắng / cyan / tím ở mép trên dải bản quyền; giữ nguyên nội dung, logo, slogan, tâm căn giữa, liên kết CMS/ESC Table và bong bóng Tư vấn.
+- Astro `master` commit `e3ce52aca18627028b3ad8b45847be3f30b0be7c`. Thay đổi giao diện trong `src/astro/components/Layout/Footer.astro`: SVG `data-aqua-footer-wave`, `pointer-events-none`, `aria-hidden`, `preserveAspectRatio="none"`, nằm trong branding band cùng lớp nền; bài test `footerCmsContract.test.ts` bảo vệ cấu trúc.
+- Source contract CI [42536578128](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42536578128): 4/4 jobs PASS, có chạy footerCmsContract test.
+- WordPress production build [42536688194](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42536688194) SUCCESS; Astro deploy [42536756427](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42536756427) SUCCESS.
+- Production Playwright read-only [42536899413](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42536899413) SUCCESS: `FOOTER_WAVE_VIEWPORT_PASS` tại 1440×900, 1024×768, 768×1024, 844×390, 390×844. Assert 3 lớp sóng, không chặn click, không chồng chữ, đầy chiều rộng, nối liền với bản quyền, logo/slogan & copyright căn giữa. Footer consultation + Home_05 + native Builder label editor cũng PASS; `FOOTER_CONSULTATION_HOME05_QA=PASS`.
+- Không thực hiện ghi dữ liệu CMS khi nghiệm thu. Không cần triển khai lại nếu chưa có yêu cầu mới. Production source marker đã được QA xác minh bằng SHA.
