@@ -42,10 +42,19 @@ const fields = { facebook: legacyFacebook, zalo: legacyZaloLabel };
       return;
     }
     for (const [name, value] of Object.entries(fields)) await field(name).fill(value);
+    for (const [name, value] of Object.entries(fields)) assert.equal(await field(name).inputValue(),value, 'ACF input did not accept '+name);
     const publish = page.locator('#publish').first();
     assert(await publish.count(), 'Native Update/Publish button missing: refuse alternative write path');
+    // Do not navigate again until WordPress has actually completed its native POST.
+    const responsePromise = page.waitForResponse(response =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname === '/wp-admin/post.php', {timeout:45000});
     await publish.click();
-    await page.waitForLoadState('domcontentloaded', {timeout:45000});
+    const savedResponse = await responsePromise;
+    console.log('CONTACT_CMS_SAVE_HTTP=' + savedResponse.status());
+    assert(savedResponse.status() >= 200 && savedResponse.status() < 400, 'WordPress native save rejected');
+    await page.waitForLoadState('networkidle', {timeout:30000});
+    console.log('CONTACT_CMS_SAVE_NOTICE=' + JSON.stringify((await page.locator('#message, .notice-error, .notice-success').allTextContents()).map(x=>x.trim()).filter(Boolean).slice(0,3)));
     await enterEdit();
     const after = {};
     for (const name of Object.keys(fields)) after[name] = (await field(name).inputValue()).trim();
