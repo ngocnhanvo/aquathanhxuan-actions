@@ -1,30 +1,34 @@
 # Latest ChatGPT response — aquathanhxuan.com
 
-Date: 2026-11-08 Asia/Ho_Chi_Minh
-Chế độ code: auto-build
-Cổng ghi source: bypass
+Date: 2026-11-08 21:23:32 Asia/Ho_Chi_Minh
+Project: aquathanhxuan.com
+Repository: ngocnhanvo/aquathanhxuan-actions
+Branch: main
+Status: SAVED
+Source PHP: ngocnhanvo/aquathanhxuan-php@869b3ad842ef6d9cf29d7cc5710c7d429c265fee
+Source Astro: ngocnhanvo/aquathanhxuan-astro@0dfae1294f6371ae16825d71217cd3402f2c613e
+PHP release: 42488801666 PASS
+WordPress Astro build: 42488914584 PASS
+Astro production deployment: 42488981812 PASS
+Builder live QA: 42489254452 PASS (read-only, no real mutation)
+Offline browser and PHP source contracts: 42488633678 PASS
+Checkpoint: docs/checkpoints/2026-11-08-hot-combo-nested-item-management.md
 
-## User request
-Replace existing Hot Combo with native parent-child ESC Table, using actual legacy aquathanhxuan.com Product data. Continue until production QA reaches goal.
+## Nguyên văn phản hồi dự định gửi
 
-## Completed
-- Existing original Hot Combo section replaced with real WordPress-managed `home_03` → `shortcode-products` → `tool_combo01` (`meta.api=Product`).
-- Four actual WooCommerce item IDs from original: `82561, 82562, 82564, 82566`; prices 320000, 1500000, 1050000, 300000 VND respectively.
-- Fixed PHP page-scoped Builder manifest and permissions for bounded `shortcode-*` descendants. PHP master `ff22a9cac189a3f8d87c09f3682ad8d8f15349bc`.
-- Fixed Astro Builder to hydrate child data-only blocks from authenticated WordPress manifest. Astro master `f00122d22842c36337857d575f2204605107bfc1`.
-- Found and corrected FTP PHP release allowlist missing `change-index.php`; now checked SHA and deployed correctly.
-- PHP production release `42486874147` SUCCESS; Astro WordPress build `42486243780` SUCCESS; Astro production deploy `42486319332` SUCCESS.
-- Final GitHub Actions Playwright QA `42486986008` SUCCESS; five viewport checks, images, names, prices, no overflow; Builder manifest and table-source HTTP 200; nested grid visible, 4 Product IDs + row indices + version all PASS.
-- Detailed checkpoint: `docs/checkpoints/2026-11-08-hot-combo-nested-production-qa-pass.md`.
-- No invented second combo. Existing Product selection/list reference contract retained.
+Đã triển khai bản sửa lên production thành công.
 
-## QA scope caveat
-Read-only Visual Builder QA passed, including nested Product source metadata. An actual save/reorder operation was NOT run by this QA, so do not claim that mutation was tested end-to-end.
+- **WordPress/PHP:** Sửa lỗi phân quyền khiến ESC Table con `tool_combo01` bị từ chối khi thêm, xóa hoặc sắp xếp item.
+- **Astro:** Bổ sung cơ chế đồng bộ trực tiếp các thẻ sản phẩm Hot Combo sau khi thay đổi.
+- **Kiểm thử tự động:** Đã PASS các bài kiểm tra PHP và Chromium. Workflow phát hành PHP, build WordPress và deploy Astro đều báo thành công.
 
-## References
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42486986008
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42486874147
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42486319332
+Mình tiếp tục nghiệm thu trực tiếp trên Visual Builder production, đặc biệt là các thao tác mở Thêm, chọn hai item để sắp xếp và mở xác nhận Xóa mà không làm thay đổi danh sách sản phẩm thật.
+
+**Nghiệm thu trực tiếp: PASS.** Trong Visual Builder production, mình đã chọn đúng sản phẩm của `tool_combo01`, mở **Thêm item** và tìm kiếm sản phẩm WooCommerce. ID đã có trong bảng được chặn thêm trùng. Chức năng **Sắp xếp item** cho phép chọn hai card trực tiếp với viền đỏ/xanh và kích hoạt nút xác nhận. Hộp thoại **Xóa item** cũng nhận đúng sản phẩm được chọn.
+
+Sau khi hủy các thao tác thử, **cả bốn sản phẩm, giá và thứ tự gốc vẫn nguyên vẹn**. Kiểm thử Chromium đã xác nhận luồng cập nhật sau khi thêm/xóa/đổi thứ tự; riêng QA production không bấm lưu thay đổi thật để tránh tác động dữ liệu đang bán.
+
+Mã production: PHP `869b3ad`, Astro `0dfae12`. Bằng chứng: [QA trên Builder production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42489254452) và [kiểm thử tự động](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42488633678). Checkpoint đã được cập nhật trong `aquathanhxuan-actions`.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
