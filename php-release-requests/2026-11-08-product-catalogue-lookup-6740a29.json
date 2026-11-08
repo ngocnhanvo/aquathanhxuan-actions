@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "6740a298d24627ac6bc53f1748acad8508312986",
+  "intent": "Release Visual Builder complete published product search, pagination and exact-ID diagnostics. PHP only; no Astro build."
+}
