@@ -80,6 +80,11 @@ jobs:
           php -l wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
           php wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
           php wp-content/plugins/esc-visual-builder/tests/text-image-cells.test.php
+          php -l wp-content/plugins/esc-visual-builder/includes/item-manager.php
+          php -l wp-content/plugins/esc-visual-builder/includes/item-section-ui.php
+          php wp-content/plugins/esc-visual-builder/tests/items-and-sections.test.php
+          php wp-content/plugins/esc-visual-builder/tests/item-ui-script.test.php > /tmp/aqua-vb-items.js
+          node --check /tmp/aqua-vb-items.js
       - name: Identify PHP source revision
         run: git rev-parse HEAD
 
