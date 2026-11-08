@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='b82f644cc7abd91d4d425e7f43226064fb00455b';
+const expectedSha='e3ce52aca18627028b3ad8b45847be3f30b0be7c';
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const expectedHome=[
   'Nhập khẩu và phân phối chính hãng, được chọn lọc và kiểm tra kỹ trước khi giao tới tay khách hàng.',
@@ -34,6 +34,44 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    assert.equal(await home.locator('article').count(),4,'HOME05_CARD_COUNT');
    const footer=page.locator('#footer-contact');
    await footer.scrollIntoViewIfNeeded();
+   const waveLayout=await footer.evaluate(root=>{
+     const brand=root.querySelector('[data-aqua-footer-brand]');
+     const wave=brand?.querySelector('[data-aqua-footer-wave]');
+     const copyright=root.querySelector('[data-aqua-footer-copyright]');
+     const tagline=brand?.querySelector('p');
+     const logo=brand?.querySelector('a');
+     if(!brand||!wave||!copyright||!tagline||!logo)return null;
+     const br=brand.getBoundingClientRect();
+     const wr=wave.getBoundingClientRect();
+     const cr=copyright.getBoundingClientRect();
+     const tr=tagline.getBoundingClientRect();
+     const lr=logo.getBoundingClientRect();
+     return {
+       pathFills:[...wave.querySelectorAll('path')].map(el=>el.getAttribute('fill')),
+       ariaHidden:wave.getAttribute('aria-hidden'),
+       pointerEvents:getComputedStyle(wave).pointerEvents,
+       copyrightAlign:getComputedStyle(copyright).textAlign,
+       waveWidth:wr.width, brandWidth:br.width, waveHeight:wr.height,
+       waveBottomGap:Math.abs(wr.bottom-cr.top),
+       taglineGap:wr.top-tr.bottom,
+       taglineCenter:tr.left+tr.width/2,
+       logoCenter:lr.left+lr.width/2,
+       brandCenter:br.left+br.width/2
+     };
+   });
+   assert(waveLayout,'FOOTER_WAVE_STRUCTURE_MISSING_'+width);
+   assert.deepEqual(waveLayout.pathFills,['#ffffff','#06bfee','#332B8E'],'FOOTER_WAVE_LAYERS_'+width);
+   assert.equal(waveLayout.ariaHidden,'true','FOOTER_WAVE_DECORATIVE_'+width);
+   assert.equal(waveLayout.pointerEvents,'none','FOOTER_WAVE_POINTER_EVENTS_'+width);
+   assert.equal(waveLayout.copyrightAlign,'center','FOOTER_COPYRIGHT_ALIGNMENT_'+width);
+   assert(waveLayout.waveHeight>=35&&waveLayout.waveHeight<=55,'FOOTER_WAVE_HEIGHT_'+width);
+   assert(Math.abs(waveLayout.waveWidth-waveLayout.brandWidth)<=2,'FOOTER_WAVE_FULL_WIDTH_'+width);
+   assert(waveLayout.waveBottomGap<=2,'FOOTER_WAVE_SEAM_'+width);
+   assert(waveLayout.taglineGap>=4,'FOOTER_WAVE_OVERLAPS_TAGLINE_'+width+' '+JSON.stringify(waveLayout));
+   assert(Math.abs(waveLayout.taglineCenter-waveLayout.brandCenter)<=2 &&
+     Math.abs(waveLayout.logoCenter-waveLayout.brandCenter)<=2,
+     'FOOTER_BRANDING_CENTER_CHANGED_'+width+' '+JSON.stringify(waveLayout));
+   console.log('FOOTER_WAVE_VIEWPORT_PASS='+width+'x'+height);
    const featured=await footer.locator('[aria-labelledby="footer-featured-title"] li').allTextContents();
    const support=await footer.locator('[aria-labelledby="footer-policy-title"] li').allTextContents();
    assert.deepEqual(featured.map(s=>s.trim()),expectedFeatured,'FEATURED_FOOTER_PARITY');
