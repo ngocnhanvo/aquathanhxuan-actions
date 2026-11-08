@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Scoped, idempotent import for Home 06 filters and Home 07 lights; never rewrites prices of existing products.
-"""Import only 10 verified legacy storefront products. No invented price, title or media."""
+"""Import 19 verified legacy filter/light products. No invented price, title or media."""
 import hashlib, html, http.cookiejar, json, mimetypes, os, re, time, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 
@@ -177,7 +177,7 @@ for source,image in verified:
     assert len(candidates)==1,'Duplicate destination product slug '+slug
     dest=candidates[0]
     assert normalize(dest['name'])==normalize(name),'Slug belongs to another product '+slug
-    print('EQUIPMENT_PRODUCT_REUSED=+json.dumps({'id':dest['id'],'slug':slug}),flush=True)
+    print('EQUIPMENT_PRODUCT_REUSED='+json.dumps({'id':dest['id'],'slug':slug}),flush=True)
   else:
     media_id=ensure_media(image,image.get('alt') or name)
     prices=source['prices']
@@ -197,7 +197,7 @@ for source,image in verified:
     detail['categories']=[{'id':cid} for cid in category_by_source[source_id]]
     dest=api('/wp-json/wc/v3/products',method='POST',obj=detail)
     assert dest and int(dest['id'])>0, 'Product creation failed: '+slug
-    print('EQUIPMENT_PRODUCT_CREATED=+json.dumps({'id':dest['id'],'slug':slug}),flush=True)
+    print('EQUIPMENT_PRODUCT_CREATED='+json.dumps({'id':dest['id'],'slug':slug}),flush=True)
   target_id=int(dest['id'])
   # Guard locale before using product on the VI homepage. ACF may require a
   # separate update to maintain its field reference; do not fake a PASS.
@@ -227,4 +227,4 @@ for source,image in verified:
 Path('chatgpt/equipment-products-migration.json').write_text(
   json.dumps({'count':len(mappings),'mappings':mappings},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 assert len(mappings)==len(SOURCE_IDS),'Incomplete verified migration'
-print('EQUIPMENT_MIGRATION_PASS=+json.dumps(mappings,ensure_ascii=False),flush=True)
+print('EQUIPMENT_MIGRATION_PASS='+json.dumps(mappings,ensure_ascii=False),flush=True)
