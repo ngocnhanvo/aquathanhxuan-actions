@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Verify corrected Product ID regex after Astro 06d4a8c2 production build.
+# Diagnose native Product row lookup request with extended timeout.
 on:
   push:
     branches: [main]
