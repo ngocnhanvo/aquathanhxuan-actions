@@ -52,6 +52,26 @@ const request=async u=>{
     const sourceCategories=await request(WP+'/wp-json/wc/store/v1/products/categories?per_page=100&qa='+Date.now());
     report.wpCategories=sourceCategories.map(c=>({id:c.id,parent:c.parent,name:c.name,slug:c.slug})).filter(c=>c.parent===1775||c.id===1775);
     console.log('HOME02_CATEGORY_WP='+JSON.stringify(report.wpCategories));
+    for(const [tag,path] of [
+      ['native','/wp-json/wp/v2/product_cat?parent=1775&per_page=100&hide_empty=false'],
+      ['custom','/wp-json/api/products/categories']
+    ]){
+      try{
+        const response=await page.request.get(WP+path,{timeout:20000});
+        const body=response.ok()?await response.json():null;
+        const tree=Array.isArray(body)?body:Array.isArray(body?.data)?body.data:[];
+        const out=[];
+        const walk=(rows,parent=null)=>{for(const x of rows){
+          if(x.id===1775 || x.parent===1775 || parent===1775)out.push({
+            id:x.id,name:x.name,slug:x.slug,parent:x.parent,link:x.link||x.url||null,children:x.children?.length||0
+          });
+          if(Array.isArray(x.children))walk(x.children,x.id);
+        }};
+        walk(tree);
+        report['category_'+tag]={status:response.status(),topLevel:tree.length,nodes:out};
+      }catch(error){report['category_'+tag]={error:String(error)}}
+    }
+    console.log('HOME02_CATEGORY_SOURCES='+JSON.stringify({native:report.category_native,custom:report.category_custom}));
     assert.equal(await menu.count(),9,'Sidebar should contain nine real children of Nền');
     assert.equal(await section.locator('[data-substrate-filter]').count(),0,'Obsolete filter button still exists');
     assert.equal(await section.getByText('Tất cả sản phẩm',{exact:true}).count(),0);
