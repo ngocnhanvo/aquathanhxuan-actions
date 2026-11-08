@@ -73,7 +73,17 @@ try {
     const page = await context.newPage();
     const navigations = [];
     const requests = [];
-    page.on('request', request => requests.push(request.url()));
+    const previewImageRequests = [];
+    page.on('request', request => {
+      // The new card owns a real public Product image. Chromium may attempt
+      // to load it; the offline test intercepts every URL and never fetches it.
+      if (request.resourceType() === 'image' &&
+          request.url() === 'https://admin.example.test/product-82563.webp') {
+        previewImageRequests.push(request.url());
+        return;
+      }
+      requests.push(request.url());
+    });
     page.on('framenavigated', frame => navigations.push(frame.url()));
     await context.route('**/*', route => route.abort());
     await page.setContent(fixture);
@@ -460,6 +470,8 @@ try {
     assert.equal(await page.getAttribute('[data-esc-vb-footer-field]', 'data-esc-vb-region-state'), 'readonly');
     await page.screenshot({ path: path.join(output, name + '-readonly.png'), fullPage: true });
     assert.equal(context.pages().length, 1, 'Preview must not open a new tab');
+    assert.equal(previewImageRequests.length, 1,
+      'Only the expected public Product preview image may be requested (offline-aborted)');
     assert.equal(requests.length, 0, 'Offline preview must not send external/API requests');
     assert.equal(navigations.length, 0, 'Preview must not navigate');
     checks.push({ viewport: name, header: 'PASS', footer: 'PASS', controls: 'PASS', readonly: 'PASS', navigation: 'BLOCKED' });
