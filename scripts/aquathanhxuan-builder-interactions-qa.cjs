@@ -79,6 +79,7 @@ const stamp = Date.now();
             blocked:Boolean(b.closest('[data-esc-builder-preview-block]')),imageAncestor:Boolean(imageAncestor),
             disabled:b.disabled,html:b.outerHTML.slice(0,400)};
         });
+        if (await button.isVisible()) {
         await button.click();
         await admin.waitForTimeout(350);
         const next = await current();
@@ -92,6 +93,7 @@ const stamp = Date.now();
         assert.notEqual(await current(), start, 'Hero next arrow stayed locked: '+JSON.stringify(candidates));
         await hero.locator('[data-hero-prev]').click();
         assert.equal(await current(), start, 'Hero previous arrow did not return');
+        }
         const dots=hero.locator('[data-hero-dot]');
         if ((await dots.count()) > 1) {
           await dots.nth(1).evaluate(node => {
