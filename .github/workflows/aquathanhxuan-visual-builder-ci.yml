@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Verify Home 02 can render without the retired sidebar image.
+# Validate Home 02 links to real Product listing by WordPress category slugs.
 on:
   push:
     branches: [main]
