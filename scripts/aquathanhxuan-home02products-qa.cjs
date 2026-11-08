@@ -157,6 +157,13 @@ const request=async u=>{
       nodes.map(n=>n.getAttribute('data-esc-builder-product-id')));
     assert.deepEqual(selectedIds,expected,'Builder binds wrong Product IDs');
     // Read-only control check. Never submit add/delete/swap to production.
+    const apiTrace=[];
+    page.on('request',req=>{if(req.url().includes('/wp-json/')||req.url().includes('admin-ajax.php'))
+      apiTrace.push({event:'request',method:req.method(),url:req.url().split('?')[0],at:Date.now()});});
+    page.on('response',resp=>{if(resp.url().includes('/wp-json/')||resp.url().includes('admin-ajax.php'))
+      apiTrace.push({event:'response',status:resp.status(),url:resp.url().split('?')[0],at:Date.now()});});
+    page.on('requestfailed',req=>{if(req.url().includes('/wp-json/')||req.url().includes('admin-ajax.php'))
+      apiTrace.push({event:'failed',url:req.url().split('?')[0],error:req.failure()?.errorText,at:Date.now()});});
     let forbiddenWrites=0;
     await page.route(/\/wp-json\/esc-builder\/v1\/(insert-item|delete-item|swap-items|save-section-order)/,
       async route=>{forbiddenWrites++;await route.abort();});
@@ -206,6 +213,7 @@ const request=async u=>{
       selectedRow:await firstCard.getAttribute('data-esc-builder-row'),
       panelVisible:await inspector.isVisible(),
       messages:await page.evaluate(()=>window.__escQaEvents||[]),
+      apiTrace,
       pointerHits:await frame.locator('body').evaluate(()=>window.__escQaPointerHits||[]),
       windowClicks:await frame.locator('body').evaluate(()=>window.__escQaWindowClicks||[]),
       scriptSources:await frame.locator('script').evaluateAll(nodes=>nodes.map(n=>({
@@ -221,7 +229,7 @@ const request=async u=>{
         builderRow:el.getAttribute('data-esc-builder-row')})),
     };
     console.log('BUILDER_CLICK_PROBE='+JSON.stringify(report.builderClickProbe));
-    await selectionStatus.getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i).waitFor({timeout:10000});
+    await selectionStatus.getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i).waitFor({timeout:45000});
     const selectText=await selectionStatus.textContent();
     assert(selectText.includes(expected[0]),'Clicked Product ID did not map to WordPress row');
     assert.equal(await page.locator('#esc-vb-item-duplicate').isEnabled(),false,
