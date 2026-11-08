@@ -145,8 +145,8 @@ try {
         '<a class="aqua-sale__name-link" href="#"><h3></h3></a>'+
         '<div class="aqua-sale__prices"><strong></strong><del></del></div>'+
         '<button data-sale-add data-esc-builder-preview-block="cart-mutation"></button></article></template>'+
-        '<article id="product-82499" data-sale-card data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
-        '<article id="product-82481" data-sale-card data-esc-builder-product-id="82481"><a href="/product/b">Product B</a></article></div>';
+        '<article id="product-82499" data-sale-card data-esc-vb-product-readonly="true" data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
+        '<article id="product-82481" data-sale-card data-esc-vb-product-readonly="true" data-esc-builder-product-id="82481"><a href="/product/b">Product B</a></article></div>';
       document.querySelector('main').append(root);
       window.__productMessages=[];
       window.__productDispose=window.__vbExports.installBuilderSectionDrafts(
@@ -231,6 +231,28 @@ try {
       .textContent(),'-30%','Server-sourced Sale price controls the discount badge');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Inserted Product preview must be acknowledged');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82485"]')
+      .getAttribute('data-esc-vb-region-state'),'readonly',
+      'Live Product card must inherit readonly visual cues immediately');
+    await page.hover('[data-esc-builder-product-id="82485"] .aqua-sale__name-link');
+    const hoverOutline=await page.locator('[data-esc-builder-product-id="82485"]')
+      .evaluate(element=>getComputedStyle(element).outlineStyle);
+    assert.equal(hoverOutline,'dashed',
+      'Live Product card must show the same dashed border on hover');
+    await page.click('[data-esc-builder-product-id="82485"] .aqua-sale__name-link');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82485"]')
+      .getAttribute('data-esc-vb-product-selected'),'',
+      'Live Product card must retain its selected dashed border');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.productId),'82485',
+      'New Product card still selects correct canonical Product ID');
+    await page.click('#product-82481 a');
+    assert.equal(await page.locator('#product-82481')
+      .getAttribute('data-esc-vb-product-selected'),'',
+      'Existing server-rendered Product card gets identical selected border');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82485"]')
+      .getAttribute('data-esc-vb-product-selected'),null,
+      'Selecting another card clears prior selection highlight');
+
     await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
       origin:'https://admin.example.test',source:window,
       data:{type:'esc-vb-product-item-added',tableId:'home_01',row:1,requestId:39,
