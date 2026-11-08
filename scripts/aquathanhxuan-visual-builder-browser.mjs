@@ -86,7 +86,6 @@ try {
       requests.push(request.url());
     });
     page.on('framenavigated', frame => navigations.push(frame.url()));
-    page.on('pageerror', error => console.error('PREVIEW_PAGE_ERROR',error.message));
     await context.route('**/*', route => route.abort());
     await page.setContent(fixture);
     await page.evaluate(() => { window.__vbExports = {}; });
@@ -104,6 +103,7 @@ try {
       const fakeWindow = { parent: { postMessage: value => events.messages.push(value) } };
       new Function('document', 'Element', 'window', 'parentOrigin', 'NodeFilter',
         'let selectionDispatched=false;\n'+
+        'const pageEditorPosition=()=>null;\n'+
         'const loadedVersions={pub_footerlinks:"'+ 'a'.repeat(64) +'"};\n'+
         'const discovered={pub_footerlinks:{text:[{row:0,field:"label"}]}};\n'+policy)(document, Element, fakeWindow, 'https://admin.example.test', NodeFilter);
       document.getElementById('parent-toggle').addEventListener('click', event => {
@@ -132,7 +132,6 @@ try {
     assert.equal(await page.getAttribute('#parent-toggle', 'aria-expanded'), 'true');
     assert.equal(await page.evaluate(() => window.__events.menu.at(-1)?.[2]), 72);
     await page.click('#footer-global-link-text');
-    console.log('FOOTER_INSPECTOR_DIAG',JSON.stringify(await page.evaluate(()=>({messages:window.__events.messages,unavailable:window.__events.unavailable,native:document.querySelector('#footer-global-link')?.outerHTML}))));
     assert.deepEqual(await page.evaluate(() => {
       const section=window.__events.messages.filter(message=>message.type==='esc-vb-section').at(-1)?.section;
       return [section?.tableId,section?.row,section?.field,section?.source];
@@ -140,6 +139,21 @@ try {
       'Versioned global Footer ESC Table cell must identify native inspector source');
     assert.deepEqual(await page.evaluate(() => window.__events.unavailable), [],
       'Global Footer cell must not trigger unrelated Info unsupported warning');
+    // A malformed version must not gain edit access from the unsupported
+    // Footer region, even when its click points at a native-looking cell.
+    await page.evaluate(() => {
+      document.querySelector('#footer-contact [data-esc-source-table]')
+        .setAttribute('data-esc-rendered-version','stale-version');
+    });
+    const messagesBeforeInvalid=await page.evaluate(()=>window.__events.messages.length);
+    await page.click('#footer-global-link-text');
+    assert.equal(await page.evaluate(()=>window.__events.messages.length),messagesBeforeInvalid,
+      'Unversioned Footer cell must remain blocked from native inspector');
+    await page.evaluate(() => {
+      document.querySelector('#footer-contact [data-esc-source-table]')
+        .setAttribute('data-esc-rendered-version','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+      window.__events.unavailable.length=0;
+    });
     await page.click('#footer-phone');
     assert.equal(await page.evaluate(() => window.__events.footer.at(-1)), 'sodienthoaihanoi');
     await page.click('#footer-credit');
