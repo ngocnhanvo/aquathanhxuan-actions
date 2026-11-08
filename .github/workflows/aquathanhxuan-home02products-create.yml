@@ -1,0 +1,28 @@
+name: Aqua create Home 02 curated products ESC Table
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home02products-create.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-home02products-native-writer
+  cancel-in-progress: false
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install matching Playwright driver only
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Match real WordPress products and create home_02products via native ESC Table
+        run: node scripts/aquathanhxuan-home02products-create.cjs
