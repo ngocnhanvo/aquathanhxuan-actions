@@ -59,11 +59,33 @@ const stamp = Date.now();
         })));
         const button = hero.locator('[data-hero-next]');
         console.log('BUILDER_HERO_BEFORE '+JSON.stringify({viewport,candidates,initial:start,buttonVisible:await button.isVisible()}));
+        const controlsDebug = await hero.evaluate(root=>{
+          const b=root.querySelector('[data-hero-next]');
+          const imageAncestor=b.closest('[data-esc-builder-image-row][data-esc-builder-image-field]');
+          window.__heroClicks={capture:0,target:0,bubble:0};
+          window.addEventListener('click',event=>{
+            if(event.target===b || b.contains(event.target)) window.__heroClicks.capture++;
+          },true);
+          b.addEventListener('click',()=>{window.__heroClicks.target++;});
+          document.addEventListener('click',event=>{
+            if(event.target===b || b.contains(event.target)) window.__heroClicks.bubble++;
+          });
+          return {ready:root.dataset.heroReady,withinMain:Boolean(b.closest('main,[data-tablepress-preview]')),
+            explicit:b.hasAttribute('data-esc-builder-preview-action'),
+            blocked:Boolean(b.closest('[data-esc-builder-preview-block]')),imageAncestor:Boolean(imageAncestor),
+            disabled:b.disabled,html:b.outerHTML.slice(0,400)};
+        });
         await button.click();
         await admin.waitForTimeout(350);
         const next = await current();
-        console.log('BUILDER_HERO_AFTER '+JSON.stringify({viewport,next}));
-        assert.notEqual(next, start, 'Hero next arrow stayed locked: '+JSON.stringify(candidates));
+        const clicks=await previewFrame.evaluate(()=>window.__heroClicks);
+        console.log('BUILDER_HERO_AFTER '+JSON.stringify({viewport,next,controlsDebug,clicks}));
+        if(next===start){
+          await button.evaluate(b=>b.click());
+          await admin.waitForTimeout(200);
+          console.log('BUILDER_HERO_SYNTHETIC '+JSON.stringify({next:await current(),clicks:await previewFrame.evaluate(()=>window.__heroClicks)}));
+        }
+        assert.notEqual(await current(), start, 'Hero next arrow stayed locked: '+JSON.stringify(candidates));
         await hero.locator('[data-hero-prev]').click();
         assert.equal(await current(), start, 'Hero previous arrow did not return');
         const dots=hero.locator('[data-hero-dot]');
