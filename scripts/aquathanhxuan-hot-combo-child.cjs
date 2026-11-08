@@ -143,7 +143,7 @@ async function run(){
    // Native TablePress save must declare both the added grid column and
    // visibility dimension. Merely setData() does not update the editor's
    // internal declared column count and silently truncates the new field.
-   const nonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+   const nonce=(await page.content()).match(/edit_table:\s*'([^']+)'/)?.[1];
    assert(nonce,'Missing native edit table nonce');
    const params=new URLSearchParams();
    const originalOptions=oldParent.options && typeof oldParent.options==='object' ? oldParent.options : {};
