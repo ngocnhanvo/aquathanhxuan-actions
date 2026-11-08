@@ -37,7 +37,7 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
    })));
    assert.deepEqual(rows.map(x=>x.name),NAMES,'Names/order are not from WordPress Product table');
    assert(rows.every(x=>x.amount&&x.imageOK),'Prices or product images missing');
-   assert.deepEqual(rows.map(x=>(x.amount||'').replace(/\\D/g,'')),['320000','1500000','1050000','300000'],'Origin product prices changed');
+   assert.deepEqual(rows.map(x=>(x.amount||'').replace(/\D/g,'')),['320000','1500000','1050000','300000'],'Origin product prices changed');
    assert.equal(await section.locator('.aqua-hot-combo__products').getAttribute('data-esc-source-table'),CHILD);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'Horizontal overflow '+width);
    console.log('HOT_COMBO_VIEWPORT_PASS='+width+'x'+height+' '+JSON.stringify(rows));
