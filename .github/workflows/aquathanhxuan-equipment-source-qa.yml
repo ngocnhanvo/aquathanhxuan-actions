@@ -1,4 +1,4 @@
-name: Aqua equipment source-only contract tests
+name: Aqua homepage source-only contract tests
 on:
   push:
     branches: [main]
@@ -29,7 +29,43 @@ jobs:
           node-version: '24'
       - run: pnpm install --frozen-lockfile
         working-directory: source
-      - run: pnpm exec vitest run src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts src/lib/wordpress/tablepress/home02.test.ts
+      - run: pnpm exec vitest run src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/footerCmsContract.test.ts src/lib/wordpress/tablepress/home05.test.ts
         working-directory: source
+      - name: Inspect public WordPress info and menu identity (read-only)
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const wp='https://admin.aquathanhxuan.io.vn';
+          for (const [label,path] of [
+            ['info','/wp-json/wp/v2/thong-tin-chung?per_page=20&status=publish'],
+            ['menus','/wp-json/esc-api/v1/menus']
+          ]) {
+            const res=await fetch(wp+path,{headers:{Accept:'application/json'}});
+            if(!res.ok) throw Error('CMS_'+label+'_HTTP_'+res.status);
+            const body=await res.json();
+            if(label==='info') {
+              for(const record of body) {
+                const a=record.acf||{};
+                const fields=['tencongty','diachihcm','diachihanoi','hotline','sodienthoaihcm','sodienthoaihanoi','emailhcm','emailhanoi','facebook','zalo','motaseo'];
+                console.log('CMS_INFO_PUBLIC='+JSON.stringify({id:record.id,lang:a.product_lang,fields:Object.fromEntries(fields.map(k=>[k,String(a[k]||'')]))}));
+              }
+            } else {
+              const menus=body.menus||{};
+              console.log('CMS_MENU_CODES='+Object.keys(menus).join(','));
+              for(const [code,langs] of Object.entries(menus)) {
+                for(const [lang,data] of Object.entries(langs||{})) {
+                  function walk(items,parent='') {
+                    return (items||[]).flatMap(x=>[
+                      {label:x.label,slug:x.slug,href:x.href,parent,linkType:x.linkType},
+                      ...walk(x.children||[],x.label)
+                    ]);
+                  }
+                  const items=walk(data.items||[]);
+                  console.log('CMS_MENU_'+code+'_'+lang+'='+JSON.stringify(items.slice(0,125)));
+                }
+              }
+            }
+          }
+          NODE
       - run: git rev-parse HEAD
         working-directory: source
