@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Capture actual pointer hit target for nested Product card in Builder.
+# Verify corrected Product ID regex after Astro 06d4a8c2 production build.
 on:
   push:
     branches: [main]
