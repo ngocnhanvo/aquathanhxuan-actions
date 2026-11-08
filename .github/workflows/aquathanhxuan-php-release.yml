@@ -80,6 +80,7 @@ jobs:
           php source-php/tests/aquathanhxuan-static-delta.php
           php -l source-php/wp-content/plugins/github-trigger/vcs-build-trigger.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/site-config.php
+          php -l source-php/wp-content/plugins/esc-visual-builder/includes/change-index.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/text-editor-ui.php
           php source-php/wp-content/plugins/esc-visual-builder/tests/site-config.dynamic.test.php
