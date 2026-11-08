@@ -1,0 +1,34 @@
+name: Aqua equipment products guarded CMS migration
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-equipment-products-migrate.yml'
+      - 'scripts/aquathanhxuan-equipment-products-migrate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-equipment-cms-writes
+  cancel-in-progress: false
+jobs:
+  migrate:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aquathanhxuan-equipment-products-migrate.py
+      - name: Import real legacy products and scoped child taxonomy
+        run: python3 scripts/aquathanhxuan-equipment-products-migrate.py
+      - name: Keep import mapping for subsequent CMS writer
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: equipment-products-mapping
+          path: chatgpt/equipment-products-migration.json
+          if-no-files-found: ignore
