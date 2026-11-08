@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "f00122d22842c36337857d575f2204605107bfc1",
+  "php_source_sha": "ff22a9cac189a3f8d87c09f3682ad8d8f15349bc",
+  "scope": "nested-product-builder-post-release"
+}
