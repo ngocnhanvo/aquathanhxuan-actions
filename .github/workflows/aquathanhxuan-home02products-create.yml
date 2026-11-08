@@ -1,5 +1,5 @@
 name: Aqua create Home 02 curated products ESC Table
-# Verify native Page readback in an independent browser tab.
+# Verify native Page readback with an independent authenticated browser context.
 # Run the verified writer with corrected Product editor nonce parsing.
 on:
   push:
