@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "92d261b13d0c0955f83ac9461f3a7111de159c86",
+  "intent": "Return authoritative published WooCommerce Product card preview and canonical ESC Table Product ID order after successful versioned insert; update Builder without reloading iframe. PHP only."
+}
