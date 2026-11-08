@@ -1,0 +1,71 @@
+{
+  "published": [
+    {
+      "id": 82457,
+      "slug": "san-pham",
+      "title": "Sản phẩm",
+      "parent": 0,
+      "status": "publish",
+      "link": "https://admin.aquathanhxuan.io.vn/san-pham/",
+      "key": "ssr-products",
+      "action": "ProductsSSRPage",
+      "locale": "vi"
+    },
+    {
+      "id": 82454,
+      "slug": "trang-chu",
+      "title": "Trang chủ",
+      "parent": 0,
+      "status": "publish",
+      "link": "https://admin.aquathanhxuan.io.vn/trang-chu/",
+      "key": "home",
+      "action": "HomePage",
+      "locale": "vi"
+    }
+  ],
+  "adminRows": [
+    {
+      "id": "post-82457",
+      "title": "Sản phẩm",
+      "edit": "https://admin.aquathanhxuan.io.vn/wp-admin/post.php?post=82457&action=edit",
+      "status": ""
+    },
+    {
+      "id": "post-82454",
+      "title": "Trang chủ",
+      "edit": "https://admin.aquathanhxuan.io.vn/wp-admin/post.php?post=82454&action=edit",
+      "status": ""
+    }
+  ],
+  "acfFields": [
+    {
+      "name": "action",
+      "input": "acf[field_6a2a8b22a56db]",
+      "value": "HomePage",
+      "options": []
+    },
+    {
+      "name": "key",
+      "input": "acf[field_6a2a6ba7420cb]",
+      "value": "home",
+      "options": []
+    },
+    {
+      "name": "product_lang",
+      "input": "acf[field_6a00c6d37c09d]",
+      "value": "vi",
+      "options": [
+        {
+          "value": "vi",
+          "label": "Tiếng Việt"
+        },
+        {
+          "value": "en",
+          "label": "Tiếng Anh"
+        }
+      ]
+    }
+  ],
+  "run_id": 42464001594,
+  "outcome": "success"
+}
