@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Validate selected Product prefilled sorter and corrected Product editable-order hint after releases.
+# Verify native Product reorder, visible tooltip and preview DOM synchronization on Astro d3e6c112.
 on:
   push:
     branches: [main]
