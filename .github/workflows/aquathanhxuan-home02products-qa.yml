@@ -1,4 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
+# Diagnose sidebar category mapping against canonical WooCommerce terms.
 on:
   push:
     branches: [main]
