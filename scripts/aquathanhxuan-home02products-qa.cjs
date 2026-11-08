@@ -297,24 +297,28 @@ const request=async u=>{
     const sort=page.locator('#esc-vb-item-sort-open');
     assert(await sort.isEnabled(),'Sort product references control disabled');
     await sort.click();
-    await page.locator('#esc-vb-item-sort-preview-list').waitFor({state:'visible',timeout:16000});
-    const options=await page.locator('#esc-vb-item-sort-preview-list li').count();
-    assert(options>=2,'Sorting cannot see multiple Product rows');
-    // Opening the sorter alone is not proof that the user can reorder.
-    // Choose two real references and assert the commit action is enabled.
-    const sourceOption=page.locator('#esc-vb-item-sort-preview-list [aria-label="Chọn item 1"]');
-    assert(await sourceOption.isDisabled(),
-      'Selected Product must already be the sorter source; it must not require choosing it again');
+    await frame.locator('html[data-esc-vb-item-picking]').waitFor({state:'attached',timeout:16000});
+    const list=page.locator('#esc-vb-item-sort-preview-list');
+    assert(!(await list.isVisible()),'Rendered Product ESC Table must not show an ID fallback list');
+    const sourceCard=grid.locator('[data-esc-builder-product-id="'+expected[0]+'"]');
+    await sourceCard.waitFor({state:'attached'});
+    assert.equal(await sourceCard.getAttribute('data-esc-vb-item-source'),'',
+      'Selected source Product must have red outline via shared picker');
     const initialSource=await page.locator('#esc-vb-item-sort-source').textContent();
     assert(initialSource?.includes(expected[0]),'Selected Product ID not retained as sort source');
-    const targetOption=page.locator('#esc-vb-item-sort-preview-list [aria-label="Chọn item 2"]');
-    await targetOption.click();
+    const targetCard=grid.locator('[data-esc-builder-product-id="'+expected[1]+'"]');
+    await targetCard.scrollIntoViewIfNeeded();
+    await targetCard.click({position:{x:24,y:24}});
+    await page.locator('#esc-vb-item-sort-target').getByText(expected[1]).waitFor({timeout:16000});
+    assert.equal(await targetCard.getAttribute('data-esc-vb-item-target'),'',
+      'Clicked destination Product must have blue outline via shared picker');
     const sortSave=page.locator('#esc-vb-item-sort-save');
     assert(await sortSave.isEnabled(),'Source and target selected but sort save disabled');
     const sourceText=await page.locator('#esc-vb-item-sort-source').textContent();
     const targetText=await page.locator('#esc-vb-item-sort-target').textContent();
     assert(sourceText&&targetText&&sourceText!==targetText,'Sort source/target not resolved');
-    report.sortDryRun={from:sourceText,to:targetText,preselected:true,saveEnabled:true};
+    report.sortDryRun={from:sourceText,to:targetText,preselected:true,directVisual:true,
+      listHidden:true,redOutline:true,blueOutline:true,saveEnabled:true};
     // Never click Save on a production dataset; Cancel must leave WordPress untouched.
     await page.locator('#esc-vb-item-sort-cancel').click();
     // Exercise the actual hydrated Home_02 Product grid with a simulated
@@ -349,7 +353,7 @@ const request=async u=>{
     }
     assert.equal(forbiddenWrites,0,'Visual Builder attempted to write during read-only QA');
     report.builderControls={selectedProduct:expected[0],addDialog:true,
-      deleteDialog:true,sortRows:options,forbiddenWrites};
+      deleteDialog:true,sortRows:10,forbiddenWrites};
     report.builder=true;
     await ctx.close();
    }
