@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expected = '903906c8bef532e6f26038eaec7a41dd0356c892';
+const expected = '9912664d95d799de9f96cb609c2cb75658ea63f0';
 const stamp = Date.now();
 (async () => {
   const markerResponse = await fetch(frontend + '/aquathanhxuan-staging-build.json?builderqa=' + stamp, {
@@ -217,6 +217,40 @@ const stamp = Date.now();
       await admin.locator('#esc-vb-item-delete-dismiss').click();
       assert.deepEqual(writes,[], 'Cancel deletion must not mutate WordPress');
       console.log('BUILDER_PRODUCT_DELETE_CONFIRM=PASS '+JSON.stringify({viewport:viewport.width,productId:sourceId,canceled:true,pickerHidden:true}));
+      // Emulate the *post-save message only* (no WordPress insert) to verify
+      // the currently deployed Astro template can add and paint a Sale card
+      // without iframe reload. Server insertion payload has separate PHP tests.
+      const existingIds=await cards.evaluateAll(nodes=>nodes
+        .map(n=>n.getAttribute('data-esc-builder-product-id')).filter(Boolean));
+      const testId='99999999';
+      assert(!existingIds.includes(testId),'Synthetic Product ID conflicts with live cards');
+      assert(existingIds.length<40,'Cannot simulate Product insertion beyond ESC Table limit');
+      await admin.evaluate(({frameId,testId,existingIds})=>{
+        const iframe=document.querySelector(frameId);
+        iframe.contentWindow.postMessage({
+          type:'esc-vb-product-item-added',tableId:'home_01',
+          productOrder:[...existingIds,testId],row:existingIds.length,
+          requestId:915199,product:{
+            id:testId,name:'Playwright temporary Sale card',
+            url:'https://admin.aquathanhxuan.io.vn/san-pham/qa-temporary',
+            image:'/placeholders/product.webp',eligible:true,
+            currentPrice:750000,regularPrice:1000000,currency:'VND'
+          }
+        },'https://aquathanhxuan.io.vn');
+      },{frameId:'#esc-vb-frame',testId,existingIds});
+      await sale.locator('[data-sale-card][data-esc-builder-product-id="99999999"]')
+        .waitFor({state:'attached',timeout:10000});
+      const ephemeral=sale.locator('[data-sale-card][data-esc-builder-product-id="99999999"]');
+      assert.equal(await ephemeral.locator('.aqua-sale__name-link h3').textContent(),
+        'Playwright temporary Sale card');
+      assert.equal(await ephemeral.locator('.aqua-sale__discount').textContent(),'-25%');
+      assert.equal(previewFrame.url(),previewUrl,'Product insert changed preview route');
+      assert.deepEqual(writes,[],'Synthetic insert emitted mutation');
+      await ephemeral.evaluate(node=>node.remove());
+      console.log('BUILDER_PRODUCT_INSERT_LIVE=PASS '+JSON.stringify({
+        viewport:viewport.width,rendered:true,ephemeral:true,noCmsWrite:true
+      }));
+
 
       console.log('BUILDER_SAFE_INTERACTIONS=PASS viewport='+viewport.width+' no_cms_write=true');
       await context.close();
