@@ -352,6 +352,87 @@ try {
       'New Product card must use authoritative WooCommerce name');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Nested Product insert acknowledgement must be true for non-sale products');
+    // Hot Combo uses a third, reusable Product track layout. Exercise the
+    // same click picker and committed add/swap/delete preview adapter without
+    // ever writing WordPress or changing the immutable Product catalog.
+    await page.evaluate(() => {
+      const section=document.createElement('section');
+      section.dataset.tablepressPreview='home_03';
+      section.innerHTML='<div data-esc-source-table="tool_combo01" data-esc-builder-product-track="true">'+
+        '<template data-esc-builder-product-template>'+
+        '<article data-esc-builder-product-card data-esc-vb-product-readonly="true">'+
+        '<a href="#" data-esc-builder-product-link><img data-esc-builder-product-image src="/placeholders/product.webp"></a>'+
+        '<a href="#" data-esc-builder-product-link data-esc-builder-product-title></a>'+
+        '<strong data-esc-builder-product-price></strong></article></template>'+
+        ['82561','82562','82564','82566'].map((id,row)=>
+          '<article data-esc-builder-product-card data-esc-builder-product-id="'+id+
+          '" data-esc-vb-product-readonly="true" data-esc-source-row="'+row+
+          '" data-esc-builder-row="'+row+'"><a href="#">Product '+id+'</a></article>'
+        ).join('')+'</div>';
+      document.querySelector('main').append(section);
+      window.dispatchEvent(new MessageEvent('message',{
+        origin:'https://admin.example.test',source:window,
+        data:{type:'esc-vb-item-pick-start',tableId:'tool_combo01',sourceRow:0,
+          count:4,requestId:57,productIds:['82561','82562','82564','82566']}
+      }));
+    });
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Hot Combo child Product cards must support direct picker without ID fallback');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82561"]')
+      .getAttribute('data-esc-vb-item-source'),'','Hot Combo source has red border');
+    await page.click('[data-esc-builder-product-id="82562"] a');
+    assert.deepEqual(await page.evaluate(() => {
+      const item=window.__productMessages.at(-1);
+      return [item?.type,item?.tableId,item?.row];
+    }),['esc-vb-item-target-picked','tool_combo01',1]);
+    assert.equal(await page.locator('[data-esc-builder-product-id="82562"]')
+      .getAttribute('data-esc-vb-item-target'),'','Hot Combo target has blue border');
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-item-pick-clear'}
+    })));
+    assert.equal(await page.locator('[data-esc-builder-product-id="82561"]')
+      .getAttribute('data-esc-vb-item-source'),null,'Cancel restores source border');
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-order-saved',tableId:'tool_combo01',requestId:58,
+        items:[{key:'82562'},{key:'82561'},{key:'82564'},{key:'82566'}]}
+    })));
+    const comboCards='[data-esc-source-table="tool_combo01"] > [data-esc-builder-product-card]';
+    assert.deepEqual(await page.locator(comboCards).evaluateAll(nodes=>
+      nodes.map(n=>n.dataset.escBuilderProductId)),['82562','82561','82564','82566'],
+      'Hot Combo Product cards reorder according to canonical saved ID list');
+    assert.deepEqual(await page.locator(comboCards).evaluateAll(nodes=>
+      nodes.map(n=>n.dataset.escSourceRow)),['0','1','2','3'],
+      'Hot Combo swap updates source row identity');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true);
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-deleted',tableId:'tool_combo01',
+        row:1,productId:'82561',requestId:59}
+    })));
+    assert.equal(await page.locator(comboCards).count(),3);
+    assert.deepEqual(await page.locator(comboCards).evaluateAll(nodes=>
+      nodes.map(n=>n.dataset.escSourceRow)),['0','1','2'],
+      'Hot Combo delete shifts surviving canonical source rows');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true);
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-added',tableId:'tool_combo01',
+        row:1,requestId:60,productOrder:['82562','82563','82564','82566'],
+        product:{id:'82563',name:'Published Combo Product',url:'https://admin.example.test/p/82563',
+          image:'https://admin.example.test/product-82563.webp',
+          currentPrice:99000,regularPrice:99000,currency:'VND',eligible:false}}
+    })));
+    assert.deepEqual(await page.locator(comboCards).evaluateAll(nodes=>
+      nodes.map(n=>n.dataset.escBuilderProductId)),['82562','82563','82564','82566'],
+      'Hot Combo insert restores correct Product reference order');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82563"] [data-esc-builder-product-title]')
+      .textContent(),'Published Combo Product');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82563"] [data-esc-builder-product-price]')
+      .textContent(),'99.000','Hot Combo prices use localized Product data');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true);
+    console.log('HOT_COMBO_NESTED_PRODUCT_MUTATION_PREVIEW=PASS');
     await page.evaluate(() => {
       window.__productDispose();
       document.querySelector('[data-tablepress-preview="home_01"]').remove();
