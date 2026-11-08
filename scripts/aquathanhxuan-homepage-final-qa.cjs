@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expectedSha = '2b07d4b82c4d981f093f7fa825d3a2bc083a10e6';
+const expectedSha = 'c16db5fb234dd84e13464b316837e67be6f6256f';
 const viewports = [[1440, 900], [1024, 768], [768, 1024], [844, 390], [390, 844]];
 const sections = [
   ['Hero', '[data-aqua-home-hero]'],
@@ -150,8 +150,12 @@ async function assertHealthyImage(locator, caption) {
       const substrate=page.locator('[data-aqua-home-substrate]');
       const catalogueCards=substrate.locator('[data-substrate-card]');
       const catalogueCount=await catalogueCards.count();
-      assert(catalogueCount>=4,
-        'Substrate section must show a genuine WordPress product catalogue, not one hero banner');
+      assert.equal(catalogueCount,4,
+        'Only the four verified Nền Product records may be shown, never Uncategorized');
+      assert.deepEqual(
+        (await catalogueCards.evaluateAll(nodes=>nodes.map(n=>n.querySelector('[data-substrate-add]')?.getAttribute('data-product-id'))))
+          .map(Number).sort((a,b)=>a-b),[82481,82483,82489,82491],
+        'Nền grid unexpectedly contains off-category products');
       assert.equal(await substrate.locator('[data-substrate-filter="all"]').count(),1,
         'Substrate category navigation missing');
       await substrate.scrollIntoViewIfNeeded();
@@ -167,6 +171,21 @@ async function assertHealthyImage(locator, caption) {
       assert.equal(await firstProduct.locator('[data-substrate-add]').count(),1,
         'Substrate product cart control missing');
       const categories=substrate.locator('[data-substrate-filter]:not([data-substrate-filter="all"])');
+      assert.deepEqual((await categories.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-substrate-filter'))))
+        .map(Number).sort((a,b)=>a-b),[1779,1780],
+        'Substrate sidebar must contain only direct child categories under Nền');
+      assert.equal(await substrate.getByText('Uncategorized',{exact:true}).count(),0,
+        'Uncategorized must never be a Nền sidebar category');
+      for(const [selector,title] of [
+        ['[data-aqua-home-sale] .aqua-sale__heading','Sale'],
+        ['[data-aqua-home-substrate] .aqua-substrate-catalog__heading','Nền'],
+        ['[data-aqua-home-combo] .aqua-hot-combo__header h2','Hot Combo']
+      ]) {
+        const background=await page.locator(selector).evaluate(node=>getComputedStyle(node).backgroundImage);
+        assert(background.includes('linear-gradient'),
+          title+' header must match modern blue Nền heading');
+      }
+
       if(await categories.count()){
         await categories.first().click();
         const categoryId=await categories.first().getAttribute('data-substrate-filter');
