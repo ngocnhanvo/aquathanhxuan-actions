@@ -262,7 +262,7 @@ async function assertHealthyImage(locator, caption) {
         assert((await cells.count()) > 0, id + ' missing native cell ' + field);
         const coords = await cells.evaluateAll(nodes => nodes.map(node =>
           node.getAttribute('data-esc-builder-cell-row')));
-        assert(coords.every(row => row !== null && /^\\d+$/.test(row)),
+        assert(coords.every(row => row !== null && /^\d+$/.test(row)),
           id + ' missing row for ' + field);
         if (id === 'home_01') assert(coords.every(row => row === '0'),
           'Sale config must use physical native row zero');
@@ -281,13 +281,13 @@ async function assertHealthyImage(locator, caption) {
     const heroControl = admin.locator('#esc-vb-hero-show-text');
     await heroControl.waitFor({state:'visible',timeout:25000});
     assert.match(await admin.locator('#esc-vb-edit-row').inputValue(),
-      /^\\d+:show_text$/, 'Hero click did not select its source cell');
+      /^\d+:show_text$/, 'Hero click did not select its source cell');
     const nextShowText = beforeShowText === 'true' ? '0' : '1';
     await heroControl.selectOption(nextShowText);
-    await activeHero.locator('[data-show-text="' + (nextShowText === '1' ? 'true' : 'false') + '"]')
+    await heroBuilder.locator('[data-home-slide][data-active="true"][data-show-text="' + (nextShowText === '1' ? 'true' : 'false') + '"]')
       .waitFor({state:'attached',timeout:12000});
     await admin.locator('#esc-vb-edit-cancel').click();
-    await activeHero.locator('[data-show-text="' + beforeShowText + '"]')
+    await heroBuilder.locator('[data-home-slide][data-active="true"][data-show-text="' + beforeShowText + '"]')
       .waitFor({state:'attached',timeout:12000});
     console.log('HOMEPAGE_BUILDER_HERO_TOGGLE=PASS draft_and_cancel=true cms_write=false');
 
