@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Inspect both native and custom WordPress taxonomy sources for missing child categories.
+# Audit historical category term IDs and deployed archive route candidates.
 on:
   push:
     branches: [main]
