@@ -3,7 +3,7 @@
   "purpose": "Nghiệm thu popup mobile clamp X/Y, Footer, Home05, AI agent và Visual Builder sau deploy",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
-  "note": "Postdeploy diagnostic for consultation hrefs",
-  "diagnostic": "Compare public WordPress ACF, incremental info logs and deployed common-data cache",
-  "attempt": 5
+  "note": "Read-only production editor open checks for Footer label and Home05 description",
+  "diagnostic": "Check native Visual Builder edit caption/input; no Save, no CMS write",
+  "attempt": 6
 }
