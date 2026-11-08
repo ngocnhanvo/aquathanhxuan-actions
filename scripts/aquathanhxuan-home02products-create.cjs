@@ -174,7 +174,9 @@ const run=async()=>{
    // Verify in an independent tab to avoid interrupting the native save.
    await page.waitForTimeout(1800);
   }
-  const verifyPage=await page.context().newPage();
+  const verifyContext=await browser.newContext();
+  await verifyContext.addCookies(await page.context().cookies());
+  const verifyPage=await verifyContext.newPage();
   await verifyPage.goto(editUrl,{waitUntil:'domcontentloaded',timeout:45000});
   const readback=await verifyPage.locator('#content').inputValue();
   assert.equal(readback.split(shortcode).length-1,1,'Home shortcode missing after reload');
