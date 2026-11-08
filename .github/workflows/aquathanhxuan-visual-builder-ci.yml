@@ -70,7 +70,7 @@ jobs:
           ref: master
           token: ${{ secrets.SOURCE_REPO_PAT }}
           persist-credentials: false
-      - name: Validate native Hero, Sale and Product reference contracts
+      - name: Validate native Hero, Sale and generic Product reference contracts
         shell: bash
         run: |
           set -euo pipefail
