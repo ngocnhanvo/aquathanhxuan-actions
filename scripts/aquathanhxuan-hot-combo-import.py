@@ -74,7 +74,7 @@ for expected in EXPECTED['found']:
   assert prices.get('regular_price')==expected['regular_price'],'Source regular price changed'
   image=next((x for x in source.get('images') or [] if x.get('src')),None)
   assert image and image['src']==expected['image'],'Origin image changed/missing'
-  assert source.get('is_in_stock') is True,'Origin no longer in stock'
+  assert isinstance(source.get('is_in_stock'),bool),'Origin stock status missing'
   verified.append((source,image))
 print('HOT_COMBO_ORIGIN_RECORDS_VERIFIED='+str(len(verified)),flush=True)
 
@@ -161,7 +161,7 @@ for source,image in verified:
     detail={
       'name':name,'slug':slug,'type':'simple','status':'publish',
       'catalog_visibility':'visible','regular_price':regular,
-      'manage_stock':False,'stock_status':'instock',
+      'manage_stock':False,'stock_status':'instock' if source['is_in_stock'] else 'outofstock',
       'images':[{'id':media_id,'alt':image.get('alt') or name}],
       'meta_data':[{'key':'_esc_origin_product_id','value':str(source_id)},
                    {'key':'product_lang','value':'vi'}],
