@@ -1,40 +1,33 @@
 # Latest ChatGPT response — aquathanhxuan.com
 
-Date: 2026-11-08 21:25 Asia/Ho_Chi_Minh
+Date: 2026-11-08 22:27 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
-Repository: ngocnhanvo/aquathanhxuan-actions
-Branch: main
 Status: SAVED
 Knowledge: ngocnhanvo/knowledge@78865ea3036b8d816f82d97b7bdecb1e3361c30a
-Source PHP: ngocnhanvo/aquathanhxuan-php@869b3ad842ef6d9cf29d7cc5710c7d429c265fee
-Source Astro: ngocnhanvo/aquathanhxuan-astro@0dfae1294f6371ae16825d71217cd3402f2c613e
-Checkpoint: docs/checkpoints/2026-11-08-hot-combo-nested-item-management.md
-Verified runs: 42488633678, 42488801666, 42488914584, 42488981812, 42489254452 — all success.
-No application source changes in this continuation turn.
+Astro: ngocnhanvo/aquathanhxuan-astro@f86657ebb2fd6dc7fc78590c41e18b2c1a78db69
+PHP: ngocnhanvo/aquathanhxuan-php@869b3ad842ef6d9cf29d7cc5710c7d429c265fee (unchanged)
+Checkpoint: docs/checkpoints/2026-11-08-home02-nested-tool-products.md
 
 ## Nguyên văn phản hồi dự định gửi
 
-## Đã khôi phục checkpoint mới nhất
+## Đã hoàn tất: ESC Table con cho “Nền thủy sinh”
 
-Mình đã đọc `chatgpt/latest-response.md` và đối chiếu HEAD của các repository. Công việc gần nhất là sửa **thêm, xóa và sắp xếp item của ESC Table con `tool_combo01` trong Visual Builder**.
+Mình đã chuyển danh sách sản phẩm từ dạng bảng nhúng độc lập sang mô hình cha–con:
 
-| Repository | Commit hiện tại |
-|---|---|
-| WordPress/PHP `master` | [`869b3ad`](https://github.com/ngocnhanvo/aquathanhxuan-php/commit/869b3ad842ef6d9cf29d7cc5710c7d429c265fee) |
-| Astro `master` | [`0dfae12`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/0dfae1294f6371ae16825d71217cd3402f2c613e) |
-| Knowledge `main` | [`78865ea`](https://github.com/ngocnhanvo/knowledge/commit/78865ea3036b8d816f82d97b7bdecb1e3361c30a) |
+- **`home_02`** quản lý tiêu đề và bố cục section, với trường `shortcode-products` tham chiếu đến **`tool_home02products`**.
+- **`tool_home02products`** là ESC Table con nguồn **Product**, quản lý 10 Product ID và thứ tự sản phẩm.
+- Trang chủ WordPress chỉ nhúng **`[table id=home_02 /]`** cho section này; mã nhúng riêng `home_02products` đã được gỡ.
+- Bảng `home_02products` cũ được giữ làm bản đối chiếu; không chỉnh sửa/xóa bản ghi WooCommerce.
 
-Checkpoint ghi nhận bản sửa đã triển khai production và vượt qua kiểm thử tự động. Tuy nhiên, **QA trực tiếp mới kiểm tra giao diện mà chưa lưu thay đổi thật vào WordPress**. Đây là điểm cần phân biệt trước khi xác nhận toàn bộ luồng hoạt động.
+**Kết quả kiểm thử và triển khai:**
+- CMS migration & readback: [PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494247980).
+- Source Astro production: [`f86657e`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/f86657ebb2fd6dc7fc78590c41e18b2c1a78db69).
+- WordPress build [PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494478116), Astro deploy [PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494552586).
+- [Production QA & Visual Builder PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494730962): đủ 10 sản phẩm trên 5 kích cỡ màn hình; Builder nhận đúng bảng con, ID, row và phiên bản; kiểm tra mở thêm sản phẩm, chọn card nguồn/đích để sắp xếp, mở xác nhận xóa và hủy an toàn.
 
-Mình sẽ giữ nguyên những phần đã hoàn thành, kiểm tra lại bằng chứng triển khai và phần còn thiếu thay vì sửa lại từ đầu.
+**Lưu ý nghiệm thu:** các thao tác thử thêm/sắp xếp/xóa trong QA chỉ mở và hủy, **không ghi thay đổi Product thực tế lên production**. Mình không xem đó là bằng chứng đã kiểm thử lưu thật qua Visual Builder.
 
----
-
-Đã xác minh độc lập 5 workflow GitHub Actions liên quan: kiểm thử mã nguồn, PHP release, WordPress-triggered Astro build, Astro production deployment và Production Builder QA đều **SUCCESS**. [Kiểm thử mã nguồn](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42488633678) và [QA Builder production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42489254452) đã đạt.
-
-Script QA production chủ động không gửi API ghi `insert-item`, `delete-item` hoặc `swap-items`: đã xác nhận chọn item, mở thêm/tìm kiếm, chọn hai thẻ viền đỏ/xanh, mở xác nhận xóa và hủy an toàn. Bốn Product ID `82561`, `82562`, `82564`, `82566` giữ nguyên. Kiểm thử Chromium độc lập kiểm tra cả cơ chế đồng bộ Preview.
-
-**Kết luận:** checkpoint hiện tại đã đóng `DONE`, source/deploy đúng HEAD, không còn bước dở thuộc phạm vi đã ghi nhận. Không lặp deploy hay ghi thử lên dữ liệu bán hàng. Một bài kiểm thử thực sự bấm Lưu trên production, rồi hoàn nguyên, **chưa được thực hiện**; không đánh đồng QA read-only với xác minh ghi production.
+Checkpoint: [Home 02 nested tool Product](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-home02-nested-tool-products.md).
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
