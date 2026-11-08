@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Validate the native SSR Product archive reading the published WordPress build cache.
+# Verify WordPress SSR Product archive cache and correct Page ID normalization.
 on:
   push:
     branches: [main]
