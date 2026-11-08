@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "8732dcfe3c63d9a9d9cdde9250562a46684dbc5b",
+  "intent": "Fix Visual Builder product search to display all published matches (duplicate marked), hide inactive Load More, validate status and run regression tests. PHP only."
+}
