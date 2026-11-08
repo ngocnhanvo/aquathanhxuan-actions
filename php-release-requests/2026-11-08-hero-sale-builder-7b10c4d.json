@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "7b10c4d92d42f1afaeb953b5bb24d19b48b98004",
+  "intent": "Publish native ESC Table Hero/Sale cell editor and cache fix through verified FTPS; do not trigger Astro build"
+}
