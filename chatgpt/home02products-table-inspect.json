@@ -1,0 +1,168 @@
+{
+  "144": {
+    "http": 404,
+    "native": {
+      "title": "Tất cả bảng ‹ ESC Table ‹ aquathanhxuan.com — WordPress",
+      "apiElements": [],
+      "formFields": [],
+      "tpTable": null
+    }
+  },
+  "home_01": {
+    "http": 200,
+    "api": "Product",
+    "meta": {
+      "api": "Product",
+      "image": ""
+    },
+    "itemCount": 8,
+    "firstItem": {
+      "key": "",
+      "section_title": "Sale bùng nổ",
+      "all_label": "Xem tất cả ưu đãi",
+      "all_link": "/san-pham"
+    },
+    "native": {
+      "title": "Edit Table ‹ ESC Table ‹ aquathanhxuan.com — WordPress",
+      "apiElements": [
+        {
+          "id": "js_custom_api_source",
+          "name": null,
+          "value": "Product",
+          "text": "Không sử dụngProductProductCategoryPageAPI tùy chỉnh"
+        },
+        {
+          "id": "js_custom_api",
+          "name": "custom_api",
+          "value": "Product",
+          "text": ""
+        },
+        {
+          "id": "esc-table-api-source-selector",
+          "name": null,
+          "text": "\n\tjQuery(window).on('load', function () {\n\t\tconst $ = jQuery;\n\t\tconst $input = $('#js_custom_api');\n\n\t\tif (!$input.length || $('#js_custom_api_source').length) {\n\t\t\treturn;\n\t\t}\n\n\t\t"
+        }
+      ],
+      "formFields": [
+        {
+          "id": "js_custom_api_source",
+          "name": ""
+        },
+        {
+          "id": "js_custom_api",
+          "name": "custom_api",
+          "value": "Product"
+        }
+      ],
+      "tpTable": {
+        "id": "home_01",
+        "meta": {
+          "id": "home_01",
+          "name": "Trang chủ - Sale",
+          "description": "Danh sách sản phẩm đang giảm giá trên trang chủ.",
+          "lastModified": "08/11/2026 12:18 chiều",
+          "lastEditor": "Võ Ngọc Nhân"
+        },
+        "options": {
+          "last_editor": 4,
+          "table_head": 1,
+          "table_foot": 0,
+          "alternating_row_colors": true,
+          "row_hover": true,
+          "print_name": false,
+          "print_name_position": "above",
+          "print_description": false,
+          "print_description_position": "below",
+          "extra_css_classes": "",
+          "use_datatables": true,
+          "datatables_sort": true,
+          "datatables_filter": true,
+          "datatables_paginate": true,
+          "datatables_lengthchange": true,
+          "datatables_paginate_entries": 10,
+          "datatables_info": true,
+          "datatables_scrollx": false,
+          "datatables_custom_commands": ""
+        }
+      }
+    }
+  },
+  "home_02products": {
+    "http": 200,
+    "api": "",
+    "meta": {
+      "api": "",
+      "image": ""
+    },
+    "itemCount": 10,
+    "firstItem": {
+      "key": "82535"
+    },
+    "native": {
+      "title": "Edit Table ‹ ESC Table ‹ aquathanhxuan.com — WordPress",
+      "apiElements": [
+        {
+          "id": "js_custom_api_source",
+          "name": null,
+          "value": "",
+          "text": "Không sử dụngProductProductCategoryPageAPI tùy chỉnh"
+        },
+        {
+          "id": "js_custom_api",
+          "name": "custom_api",
+          "value": "",
+          "text": ""
+        },
+        {
+          "id": "esc-table-api-source-selector",
+          "name": null,
+          "text": "\n\tjQuery(window).on('load', function () {\n\t\tconst $ = jQuery;\n\t\tconst $input = $('#js_custom_api');\n\n\t\tif (!$input.length || $('#js_custom_api_source').length) {\n\t\t\treturn;\n\t\t}\n\n\t\t"
+        }
+      ],
+      "formFields": [
+        {
+          "id": "js_custom_api_source",
+          "name": ""
+        },
+        {
+          "id": "js_custom_api",
+          "name": "custom_api",
+          "value": ""
+        }
+      ],
+      "tpTable": {
+        "id": "home_02products",
+        "meta": {
+          "id": "home_02products",
+          "name": "Trang chủ - sản phẩm khu vực Nền",
+          "description": "Sản phẩm chọn thủ công, độc lập danh mục sidebar",
+          "lastModified": "08/11/2026 2:59 chiều",
+          "lastEditor": "Võ Ngọc Nhân"
+        },
+        "options": {
+          "last_editor": 4,
+          "table_head": 1,
+          "table_foot": 0,
+          "alternating_row_colors": true,
+          "row_hover": true,
+          "print_name": false,
+          "print_name_position": "above",
+          "print_description": false,
+          "print_description_position": "below",
+          "extra_css_classes": "",
+          "use_datatables": true,
+          "datatables_sort": true,
+          "datatables_filter": true,
+          "datatables_paginate": true,
+          "datatables_lengthchange": true,
+          "datatables_paginate_entries": 10,
+          "datatables_info": true,
+          "datatables_scrollx": false,
+          "datatables_custom_commands": ""
+        }
+      }
+    }
+  },
+  "run_id": 42461070871,
+  "outcome": "success"
+}
