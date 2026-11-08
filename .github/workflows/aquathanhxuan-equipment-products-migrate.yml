@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/aquathanhxuan-equipment-products-migrate.yml'
       - 'scripts/aquathanhxuan-equipment-products-migrate.py'
+      - 'scripts/aquathanhxuan-equipment-sections-create.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,3 +33,24 @@ jobs:
           name: equipment-products-mapping
           path: chatgpt/equipment-products-migration.json
           if-no-files-found: ignore
+  sections:
+    needs: [migrate]
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: equipment-products-mapping
+          path: mapping-artifact
+      - run: node --check scripts/aquathanhxuan-equipment-sections-create.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Create linked equipment sections through native WordPress editor
+        run: node scripts/aquathanhxuan-equipment-sections-create.cjs
