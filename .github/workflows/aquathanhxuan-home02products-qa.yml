@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Verify the Product image click priority fix deployed at Astro d50fcf6b.
+# Validate direct Product selection before generic section inspector, Astro 95ac503e.
 on:
   push:
     branches: [main]
