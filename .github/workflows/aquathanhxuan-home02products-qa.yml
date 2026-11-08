@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Read-only item selection, dialogs, sort and five-viewpoint production QA.
+# Verify corrected nested Product table selection on Astro b97f664c.
 on:
   push:
     branches: [main]
