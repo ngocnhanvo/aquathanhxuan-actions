@@ -1,5 +1,9 @@
 name: Aqua Home 02 curated products production acceptance
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home02products-qa.yml'
   workflow_dispatch:
 permissions:
   contents: write
