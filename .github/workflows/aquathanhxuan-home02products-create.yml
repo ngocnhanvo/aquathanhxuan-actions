@@ -6,7 +6,7 @@ on:
       - '.github/workflows/aquathanhxuan-home02products-create.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: aquathanhxuan-home02products-native-writer
   cancel-in-progress: false
@@ -25,4 +25,30 @@ jobs:
       - name: Install matching Playwright driver only
         run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - name: Match real WordPress products and create home_02products via native ESC Table
+        id: cms
         run: node scripts/aquathanhxuan-home02products-create.cjs
+      - name: Save verified CMS execution status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const path = 'chatgpt/home02products-status.json';
+            const content = JSON.stringify({
+              run_id: context.runId,
+              run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+              source_sha: context.sha,
+              cms_step: '${{ steps.cms.outcome }}',
+              checked_at: new Date().toISOString(),
+              workflow: context.workflow
+            }, null, 2) + '\n';
+            const ref = context.ref.replace('refs/heads/', '');
+            const existing = await github.rest.repos.getContent({
+              owner: context.repo.owner, repo: context.repo.repo, path, ref
+            }).catch(e => e.status === 404 ? null : Promise.reject(e));
+            await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner, repo: context.repo.repo, path,
+              message: 'Record Home 02 CMS writer run status',
+              content: Buffer.from(content).toString('base64'),
+              branch: ref,
+              ...(existing?.data?.sha ? {sha: existing.data.sha} : {})
+            });
