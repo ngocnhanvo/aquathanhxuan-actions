@@ -2,32 +2,32 @@
 
 Date (Asia/Ho_Chi_Minh): 2026-11-08
 Project: aquathanhxuan.com
-Task: Fix Visual Builder Product-source ESC Table source/target selection for item swap
+Task: Remove redundant re-selection dropdown in Product-source ESC Table delete dialog
 Code mode: auto-build
 Source gateway: bypass
 
 ## Final response
 
-DONE — Product-source item swap selection now works on the production homepage Visual Builder.
+DONE — Visual Builder Product card selection now identifies the exact ESC Table row and the Delete confirmation uses it without asking the editor to select again.
 
-Problem: In home_01 (meta.api=Product), sorting forced `from=null` and only let editors select source/target through indexed ID list. WooCommerce-hydrated Product cards lacked canonical source row metadata; clicking products could not select source. WordPress Product attributes remain read-only, but Product ID references in ESC Table can be reordered.
+Root cause: WordPress `item-section-ui.php` unconditionally set `row=null` for any `source_api==='Product'` when opening the Delete modal, forcing a dropdown and defaulting to item 0. Product cards could also emit competing section/text selection events and async row resolution could race with item-sort modal.
 
-Implemented:
-- `aquathanhxuan-astro/src/astro/tablepress/Home_01.astro`: add immutable `data-esc-builder-product-id` to each Product card in Builder preview only.
-- `aquathanhxuan-astro/src/lib/wordpress/builderSectionDrafts.ts`: shared Product ID -> exact ESC Table source row mapping (not rendered DOM index), source/target click selection, red/blue visual marks, carousel arrows continue working, safe Product-card DOM reorder after confirmed WordPress save; guard ambiguous product IDs. WooCommerce names/prices/images not edited.
-- `aquathanhxuan-php/wp-content/plugins/esc-visual-builder/includes/item-section-ui.php`: open product visual picker and keep indexed list as fallback for unrendered products; accept `esc-vb-item-source-picked` and target; after versioned backend swap success send Product reference order to iframe.
-- No CMS product data or ESC Table item positions were changed as part of QA.
+Implementation:
+- Astro `src/lib/wordpress/builderSectionDrafts.ts`: normal click of a WooCommerce-hydrated Product card emits `esc-vb-product-selected` carrying immutable Product ID, not DOM index, while leaving cart/navigation guards and readonly data unchanged. After WordPress confirms deletion, `esc-vb-product-item-deleted` removes only the matching rendered card.
+- PHP `wp-content/plugins/esc-visual-builder/includes/item-section-ui.php`: asynchronously read authoritative Product ESC Table and map selected ID to unique canonical row, handle competing Builder selection signals and stale responses, prefill Delete modal with exact ID/row and hide picker, revalidate ID+row against fresh schema, retain version + SHA-256 row hash + explicit confirmation, send post-save preview removal. Generic ESC Table fallback unchanged. Added safe Product selection race guard for Sort.
+- No Product record deleted/edited in WooCommerce. Live QA intentionally canceled the Delete dialog instead of pressing confirmation.
 
 Commits:
-PHP master cebbc88028498a241c45037a7d21a5fe1395932a, 5211812e8ec8a20c28afa3371c6949d5662e0d2b.
-Astro master 4a7e461dce729c170beaf2259ff1de6a12c49761, 52ac002b68aab8463af973d341d34d86085de6ff, e21ff0d453b026f6ee927dbbf4aecc92ecf8986b, 07733ebb92aa255db8f141e382b8e7556cf809c5, 3388ab1988d083eaf3a0c149a09e9367a69b0640.
+- Astro master: 903906c8bef532e6f26038eaec7a41dd0356c892
+- PHP master: e2a4766c5cce79bf6e184dc0b21a9a2adff979a4
+- Actions main QA script: 9341bce22a0b9bbccf24850243799449498c4d25; marker updated ab83cea66649790894e3eb68242df946776d78d7.
 
 Evidence:
-- Source/Chromium contracts: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42445989329 SUCCESS, 3 jobs PASS.
-- PHP production deployment: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42446094205 SUCCESS with SHA-256 verification.
-- WordPress-controlled Astro build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42446176356 SUCCESS.
-- Astro production deployment: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42446243621 SUCCESS; deployed Astro source SHA 3388ab1988d083eaf3a0c149a09e9367a69b0640.
-- Authenticated real-production read-only Playwright: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42446709013 SUCCESS. Tested 1440x900 and 390x844, item schema HTTP 200, indexed list 12, visually clicked Product source ID 82477 and destination ID 82479, save action became enabled, red/blue marks present, canceled without CMS write, no product navigation/cart mutation.
+- Source/Chromium CI: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42447559034 SUCCESS, 3 jobs PASS.
+- PHP production release final: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42447971224 SUCCESS; prior initial PHP release https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42447641797 SUCCESS.
+- Astro production deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42447742523 SUCCESS, via WordPress-controlled build https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42447688828 SUCCESS.
+- Authenticated Playwright production QA rerun: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42447843054 (attempt 2) SUCCESS. Desktop 1440x900 and mobile 390x844 both passed Product source/target selection, direct Delete modal showing selected Product ID 82477, hidden re-selection picker, canceled without CMS write, safe carousel/navigation.
+- A prior QA attempt revealed sort/source async race and was fixed before final SUCCESS.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
