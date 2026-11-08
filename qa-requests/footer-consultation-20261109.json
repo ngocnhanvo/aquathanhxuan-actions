@@ -3,7 +3,7 @@
   "purpose": "Nghiệm thu popup mobile clamp X/Y, Footer, Home05, AI agent và Visual Builder sau deploy",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
-  "note": "Production QA after Astro footer global cell-selection build 42511950470",
+  "note": "Diagnostic Footer editor click capture following initial QA timeout",
   "diagnostic": "Test actual Home05 and Footer label editor opened; do not save",
-  "attempt": 8
+  "attempt": 9
 }
