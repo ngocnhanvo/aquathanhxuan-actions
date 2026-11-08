@@ -202,7 +202,40 @@
       }
     ]
   },
-  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:75:12",
-  "run_id": 42462940021,
+  "previousTerms": [],
+  "routes": [
+    {
+      "pathname": "/chihiros",
+      "status": 404,
+      "url": "https://aquathanhxuan.io.vn/chihiros",
+      "title": "404"
+    },
+    {
+      "pathname": "/product-category/nen-cho-be-thuy-sinh/chihiros/",
+      "status": 404,
+      "url": "https://aquathanhxuan.io.vn/product-category/nen-cho-be-thuy-sinh/chihiros/",
+      "title": "404"
+    },
+    {
+      "pathname": "/san-pham/nen-cho-be-thuy-sinh/chihiros/",
+      "status": 404,
+      "url": "https://aquathanhxuan.io.vn/san-pham/nen-cho-be-thuy-sinh/chihiros/",
+      "title": "404"
+    },
+    {
+      "pathname": "/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/",
+      "status": 404,
+      "url": "https://aquathanhxuan.io.vn/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/",
+      "title": "404"
+    },
+    {
+      "pathname": "/nen-cho-be-thuy-sinh/chihiros/",
+      "status": 404,
+      "url": "https://aquathanhxuan.io.vn/nen-cho-be-thuy-sinh/chihiros/",
+      "title": "404"
+    }
+  ],
+  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:95:12",
+  "run_id": 42463079726,
   "outcome": "failure"
 }
