@@ -44,6 +44,10 @@ const stamp = Date.now();
       const sale = frame.locator('[data-aqua-home-sale]').first();
       await hero.waitFor({ state:'visible', timeout: 45000 });
       await sale.waitFor({ state:'visible', timeout: 45000 });
+      await admin.frameLocator('#esc-vb-frame').locator('[data-aqua-home-hero][data-hero-ready="true"]')
+        .waitFor({ state:'attached', timeout: 45000 });
+      await admin.frameLocator('#esc-vb-frame').locator('[data-aqua-home-sale][data-sale-ready="true"]')
+        .waitFor({ state:'attached', timeout: 45000 });
       const previewFrame = admin.frames().find(f => f.url().includes('/esc-builder/preview/'));
       assert(previewFrame, 'Builder preview frame missing');
       const previewUrl = previewFrame.url();
@@ -90,6 +94,14 @@ const stamp = Date.now();
         assert.equal(await current(), start, 'Hero previous arrow did not return');
         const dots=hero.locator('[data-hero-dot]');
         if ((await dots.count()) > 1) {
+          await dots.nth(1).evaluate(node => {
+            // Scroll the dot away from the sticky Header before a real hit-tested click.
+            const rect = node.getBoundingClientRect();
+            const header = document.querySelector('#main-header')?.getBoundingClientRect();
+            if (header && rect.top < header.bottom + 20) {
+              window.scrollBy({ top: rect.top - header.bottom - 40, behavior: 'instant' });
+            }
+          });
           await dots.nth(1).click();
           assert.notEqual(await current(),start,'Hero dot stayed locked');
         }
