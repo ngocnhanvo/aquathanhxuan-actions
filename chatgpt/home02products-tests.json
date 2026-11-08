@@ -1,8 +1,8 @@
 {
-  "run_id": 42477302319,
-  "source_sha": "655aa02ae4a52e1ca16898545d94548285c3b31d",
-  "preview": "success",
+  "run_id": 42478984680,
+  "source_sha": "a697257d8857052222682758baa43730169b5f26",
+  "preview": "failure",
   "native": "success",
   "data": "success",
-  "checked_at": "2026-11-08T11:48:52.246Z"
+  "checked_at": "2026-11-08T12:11:46.595Z"
 }\n
