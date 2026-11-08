@@ -347,8 +347,8 @@
     "source": "home_02products"
   },
   "builderClickProbe": {
-    "context": "home_02products · dòng 1",
-    "status": "Đã chọn sản phẩm 82535 · dòng 1. Dùng ↕ Sắp xếp item để đổi vị trí, hoặc Thêm/Xóa item để quản lý danh sách. Tên, giá và ảnh sửa tại WooCommerce.",
+    "context": "home_02products · chọn item để nhân bản hoặc xóa",
+    "status": "Đang xác định đúng dòng ESC Table của sản phẩm 82535...",
     "selectedCardId": "82535",
     "selectedRow": "0",
     "panelVisible": true,
@@ -377,61 +377,67 @@
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139114624
+        "at": 1794140481222
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139116230
+        "at": 1794140483306
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
-        "at": 1794139116503
+        "at": 1794140483407
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139116503
+        "at": 1794140483427
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139116583
+        "at": 1794140483537
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139116677
-      },
-      {
-        "event": "response",
-        "status": 200,
-        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139118088
+        "at": 1794140483629
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
-        "at": 1794139118106
+        "at": 1794140485039
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139118182
+        "at": 1794140485059
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794139118272
+        "at": 1794140485171
+      },
+      {
+        "event": "response",
+        "status": 200,
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
+        "at": 1794140485232
+      },
+      {
+        "event": "request",
+        "method": "POST",
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
+        "at": 1794140485579
       }
     ],
     "pointerHits": [
@@ -470,7 +476,7 @@
         "hasGenericSelection": false
       },
       {
-        "src": "/_astro/_pageId_.astro_astro_type_script_index_0_lang.DLY4d_iK.js",
+        "src": "/_astro/_pageId_.astro_astro_type_script_index_0_lang.BnDRXjME.js",
         "hasProductGuard": false,
         "hasGenericSelection": false
       },
@@ -499,6 +505,10 @@
     "from": "1. 82535",
     "to": "2. 82537",
     "preselected": true,
+    "directVisual": true,
+    "listHidden": true,
+    "redOutline": true,
+    "blueOutline": true,
     "saveEnabled": true
   },
   "reorderPreview": {
@@ -512,6 +522,6 @@
     "sortRows": 10,
     "forbiddenWrites": 0
   },
-  "run_id": 42477938962,
+  "run_id": 42479686697,
   "outcome": "success"
 }
