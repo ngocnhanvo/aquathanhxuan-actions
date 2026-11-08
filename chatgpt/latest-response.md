@@ -1,20 +1,33 @@
-# Latest ChatGPT response — Aqua Thanh Xuân
+# Latest ChatGPT response — aquathanhxuan.com
+
 Date: 2026-11-08 Asia/Ho_Chi_Minh
 Chế độ code: auto-build
 Cổng ghi source: bypass
 
-## User question
-How to distinguish combo1 versus combo2 in WordPress ESC Tables, or use WooCommerce product categories?
+## User inquiry
+User corrected proposed Hot Combo architecture, noting ESC Table already supports child tables through `tool_` shortcode prefixes and requested inspection of the actual flow.
 
-## Recommended architecture (DESIGN ONLY)
-- Do NOT use WooCommerce product categories to identify Hot Combo instances. Product taxonomy is intended for discovery and can be shared among bundles; Hot Combo membership is curated, ordered and potentially has per-item quantity/role, unrelated to one category.
-- Parent `home_03` ESC Table: each row is a combo definition with stable `combo_key` (e.g. `combo01`, `combo02`), title, image, description, CTA/bundle_product_id if genuine, `products_table` (e.g. `home_03products01` / `home_03products02`). Row order controls which combo first; moving rows never changes combo membership.
-- Each referenced child ESC Table has `meta.api="Product"`, ordered immutable WooCommerce Product IDs that can be selected, removed and reordered via the existing shared native Visual Builder item picker (red source, blue destination). Product name/price/image remain WooCommerce-owned readonly in Builder.
-- The current `home03.ts` parser does NOT yet support `combo_key`/`products_table`; WordPress TablePress/ESC Table schema and Astro parser must be extended, linked child table shortcode managed by native WordPress Insert Code per Knowledge. Do not assume referencing an ID automatically loads a table.
-- With 1 combo, hide switcher. With 2+, switch tabs/buttons and change photo/description/list/CTA as one atomic visual unit. Quantity or bundle pricing needs explicit verified WooCommerce product/bundle/cart arrangement, not fabricated pricing.
-- Using categories optionally for category landing pages is orthogonal and should never replace combo identity.
-- Alternative single child ESC Table with combo_key field per product could scale but current `Product` adapter uses Product IDs and is not verified to preserve arbitrary per-row grouping columns; separate Product reference tables are safest now.
-- No data/source/deploy changes made; user requested design explanation only.
+## Source-confirmed findings
+- Read `ngocnhanvo/knowledge/main` README, AGENTS, `stacks/wordpress-editor-esc-table.md` and current Actions checkpoint. Read actual `ngocnhanvo/aquathanhxuan-astro/master` implementation and candidate `aquathanhxuan-php/master` ESC Table plugin code.
+- `src/lib/wordpress/tablepress/getData.ts` deliberately leaves `shortcode-*` cell fields intact, while transforming full ESC Table dataset including `meta.api="Product"` references. No special `tool_` check in this processor.
+- **Actual child table linkage**: `src/lib/wordpress/tablepress/embedTablePress.ts` iterates each source table item from `page.contents`, tests `key.startsWith('shortcode-') && value`, finds `data_tablePress.find(t => t.shortcode === value)`, then `page.contents.push({ type:'shortcode', shortcode:value, data:tblpress })`. Therefore `tool_` is an ID convention; the active lookup trigger is the `shortcode-*` column field, and the field's value must be the exact existing child TablePress ID. This is an EXISTING native parent-child linkage mechanism.
+- Example DESIGN only, not actual created data: parent `home_03` has rows for two combos with `shortcode-products` values `tool_combo01` and `tool_combo02`; child `tool_combo01` and `tool_combo02` each are independently editable Product-sourced ESC Tables. No invented WooCommerce products or taxonomy required.
+- `src/astroutils/ExtractHTML.astro` renders only shortcode tokens present in `page.content`, but passes `page` into the parent Astro component. Child records inserted into `page.contents` are NOT automatically rendered as independent sections; parent `Home_03.astro` should resolve each linked child from `page.contents` and render the appropriate combo constituent list.
+- Data-shape caveat: primary `content.data=json` (raw processed table), but nested appended `content.data=tblpress` (wrapper with `.json`). Astro parent must normalize wrapper before using child Product items.
+- Risk for future coding: no deduplication, cycle check or clear validation in `embedTablePress.ts` when pushing child entries; don't allow arbitrary self-links/loops or silently show wrong child. May need safe resolution/deduplication if implementing generalized nested tables. Keep provenance and full Visual Builder editable Product item contract.
+- `Home_03.astro` currently uses `getHome03Combo(data)` and renders its rows as vertical sections; it doesn't yet use `page.contents` child rows.
+- WordPress pages require native Insert Code to insert PARENT `home_03` shortcode per Knowledge. Nested linkage may be expressed via field `shortcode-products` in parent table; do NOT automatically duplicate Insert Code of each child in main page, since current loader resolves them from rows.
 
-Status: DONE — design decision answered; implementation not requested.
+## User-facing conclusion
+The user's observation is valid. Correct the design recommendation: REUSE existing `shortcode-*` reference to `tool_` child tables and keep combo identity with the child table ID (plus stable row key if useful). Do NOT create an unrelated custom `products_table` loader. Work remaining for implementation would be to normalize child data in `Home_03`, build combo switcher and source-aware Product list, verify WordPress content and Visual Builder, and add tests. This was an INSPECTION REQUEST ONLY, so no app code, user data or production changed in this turn.
+
+Files:
+https://github.com/ngocnhanvo/aquathanhxuan-astro/blob/master/src/lib/wordpress/tablepress/embedTablePress.ts
+https://github.com/ngocnhanvo/aquathanhxuan-astro/blob/master/src/lib/wordpress/tablepress/getData.ts
+https://github.com/ngocnhanvo/aquathanhxuan-astro/blob/master/src/astroutils/ExtractHTML.astro
+https://github.com/ngocnhanvo/aquathanhxuan-astro/blob/master/src/astro/tablepress/Home_03.astro
+
+Trạng thái: DONE — inspection complete; implementation not requested
+Chế độ code: auto-build
+Cổng ghi source: bypass
 Trạng thái: DONE — hoàn tất
