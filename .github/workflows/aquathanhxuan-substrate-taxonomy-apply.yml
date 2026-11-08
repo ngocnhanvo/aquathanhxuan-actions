@@ -1,0 +1,27 @@
+name: Aqua create verified Nền product subcategories
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-substrate-taxonomy-apply.yml'
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-substrate-taxonomy-writer
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright driver only
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Classify only 4 verified soil products
+        run: node scripts/aquathanhxuan-substrate-taxonomy-apply.cjs
