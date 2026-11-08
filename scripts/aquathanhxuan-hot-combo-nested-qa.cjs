@@ -24,7 +24,9 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
    await page.goto(BASE+'/?hotcomboqa='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
    const section=page.locator('[data-aqua-home-combo]');
    await section.waitFor({state:'visible',timeout:30000});
+   await section.scrollIntoViewIfNeeded();
    const cards=section.locator('.aqua-hot-combo__products .aqua-hot-combo__product');
+   await cards.locator('img').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
    assert.equal(await cards.count(),4,'Expected four authentic combo constituents at '+width);
    const rows=await cards.evaluateAll(els=>els.map(el=>({
     id:el.getAttribute('data-esc-builder-product-id'),
@@ -35,6 +37,7 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
    })));
    assert.deepEqual(rows.map(x=>x.name),NAMES,'Names/order are not from WordPress Product table');
    assert(rows.every(x=>x.amount&&x.imageOK),'Prices or product images missing');
+   assert.deepEqual(rows.map(x=>(x.amount||'').replace(/\\D/g,'')),['320000','1500000','1050000','300000'],'Origin product prices changed');
    assert.equal(await section.locator('.aqua-hot-combo__products').getAttribute('data-esc-source-table'),CHILD);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true,'Horizontal overflow '+width);
    console.log('HOT_COMBO_VIEWPORT_PASS='+width+'x'+height+' '+JSON.stringify(rows));
