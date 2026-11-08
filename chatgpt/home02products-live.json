@@ -276,8 +276,8 @@
     "heading": "Chihiros"
   },
   "builderClickProbe": {
-    "context": "home_02 · dòng 1",
-    "status": "",
+    "context": "home_02products · chọn item để nhân bản hoặc xóa",
+    "status": "Đang xác định đúng dòng ESC Table của sản phẩm 82535...",
     "selectedCardId": "82535",
     "selectedRow": "0",
     "panelVisible": true,
@@ -289,10 +289,10 @@
         "row": null
       },
       {
-        "type": "esc-vb-section",
-        "tableId": "home_02",
-        "productId": "",
-        "row": 0
+        "type": "esc-vb-product-selected",
+        "tableId": "home_02products",
+        "productId": "82535",
+        "row": null
       },
       {
         "type": "esc-vb-pong",
@@ -313,7 +313,7 @@
         "y": 232.9993896484375
       }
     ],
-    "productVisualSelected": false,
+    "productVisualSelected": true,
     "draftBridgeInstalled": 1,
     "editabilityBridgeInstalled": 1,
     "frameElement": {
@@ -324,6 +324,6 @@
     }
   },
   "error": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#esc-vb-item-status').getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i) to be visible\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:211:75",
-  "run_id": 42469415792,
+  "run_id": 42469722050,
   "outcome": "failure"
 }
