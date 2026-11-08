@@ -1,5 +1,5 @@
 name: Aqua create Home 02 curated products ESC Table
-# Save only the verified native preview wrapper appended to homepage Page.
+# Verify native Page readback in an independent browser tab.
 # Run the verified writer with corrected Product editor nonce parsing.
 on:
   push:
