@@ -13,7 +13,13 @@ const CONFIG=[
   {id:'home_07',child:'tool_home07products',title:'Đèn',slug:'den',sourceIds:LIGHT_IDS}
 ];
 assert(process.env.WP_ADMIN_USERNAME&&process.env.WP_ADMIN_PASSWORD,'Missing WordPress credentials');
-const mapping=JSON.parse(fs.readFileSync('chatgpt/equipment-products-migration.json','utf8'));
+const artifactFile=[
+  'mapping-artifact/equipment-products-migration.json',
+  'mapping-artifact/chatgpt/equipment-products-migration.json',
+  'chatgpt/equipment-products-migration.json'
+].find(file=>fs.existsSync(file));
+assert(artifactFile,'Missing verified equipment product import artifact');
+const mapping=JSON.parse(fs.readFileSync(artifactFile,'utf8'));
 assert.equal(mapping.count,19,'Importer must verify all 19 source products first');
 assert(Array.isArray(mapping.mappings)&&mapping.mappings.length===19,'Product source mapping missing');
 const mapped=new Map(mapping.mappings.map(x=>[Number(x.source_id),x]));
