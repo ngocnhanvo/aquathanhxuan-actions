@@ -185,6 +185,8 @@ const request=async u=>{
       panelVisible:await inspector.isVisible(),
       messages:await page.evaluate(()=>window.__escQaEvents||[]),
       productVisualSelected:await firstCard.evaluate(el=>el.hasAttribute('data-esc-vb-product-selected')),
+      draftBridgeInstalled:await frame.locator('style[data-esc-vb-item-pick-style]').count(),
+      editabilityBridgeInstalled:await frame.locator('#esc-vb-editability-hint').count(),
       frameElement:await firstCard.evaluate(el=>({tag:el.tagName,
         parentTable:el.closest('[data-esc-source-table]')?.getAttribute('data-esc-source-table'),
         state:el.getAttribute('data-esc-vb-region-state'),
