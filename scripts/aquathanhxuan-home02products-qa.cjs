@@ -173,6 +173,14 @@ const request=async u=>{
     const firstCard=grid.locator('[data-esc-builder-product-id]').first();
     await frame.locator('body').evaluate(()=>{
       window.__escQaPointerHits=[];
+      window.__escQaWindowClicks=[];
+      window.addEventListener('click',e=>{
+        const el=e.target instanceof Element?e.target:null;
+        window.__escQaWindowClicks.push({
+          tag:el?.tagName,product:el?.closest('[data-esc-builder-product-id]')?.getAttribute('data-esc-builder-product-id')||'',
+          defaultPrevented:e.defaultPrevented,
+        });
+      },true);
       window.addEventListener('pointerdown',e=>{
         const el=e.target instanceof Element?e.target:null;
         const at=document.elementFromPoint(e.clientX,e.clientY);
@@ -199,6 +207,11 @@ const request=async u=>{
       panelVisible:await inspector.isVisible(),
       messages:await page.evaluate(()=>window.__escQaEvents||[]),
       pointerHits:await frame.locator('body').evaluate(()=>window.__escQaPointerHits||[]),
+      windowClicks:await frame.locator('body').evaluate(()=>window.__escQaWindowClicks||[]),
+      scriptSources:await frame.locator('script').evaluateAll(nodes=>nodes.map(n=>({
+        src:n.getAttribute('src')||'',hasProductGuard:(n.textContent||'').includes('productOwner=productCard.closest'),
+        hasGenericSelection:(n.textContent||'').includes('esc-vb-section'),
+      })).filter(x=>x.src||x.hasProductGuard).slice(0,30)),
       productVisualSelected:await firstCard.evaluate(el=>el.hasAttribute('data-esc-vb-product-selected')),
       draftBridgeInstalled:await frame.locator('style[data-esc-vb-item-pick-style]').count(),
       editabilityBridgeInstalled:await frame.locator('#esc-vb-editability-hint').count(),
