@@ -29,6 +29,7 @@ Previous:
 - 2393d71: ordered selection ID support independent of Nền taxonomy.
 - 95b5841, cb01713: separate ESC Table lookup (old wrong ID).
 Latest:
+- 47cc9cca6d1cf250407731cc623337a26880acb6: Fix nested product_cat links to include full parent Nền path, matching legacy hierarchical URL structure.
 - 107686c018d30208e72bbd4b37a5ba1bb7526153: Astro Home_02 now references **home_02products** exactly; source in src/astro/tablepress/Home_02.astro.
 
 ## CMS writer prepared and auto-trigger workflow committed
