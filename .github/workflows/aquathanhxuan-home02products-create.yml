@@ -1,5 +1,5 @@
 name: Aqua create Home 02 curated products ESC Table
-# Run only the verified table writer; nonce comes from a validated Product editor.
+# Run the verified writer with corrected Product editor nonce parsing.
 on:
   push:
     branches: [main]
