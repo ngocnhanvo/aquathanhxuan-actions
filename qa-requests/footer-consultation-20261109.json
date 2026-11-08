@@ -1,9 +1,9 @@
 {
-  "source_sha": "b82f644cc7abd91d4d425e7f43226064fb00455b",
-  "purpose": "Nghiệm thu popup mobile clamp X/Y, Footer, Home05, AI agent và Visual Builder sau deploy",
+  "source_sha": "e3ce52aca18627028b3ad8b45847be3f30b0be7c",
+  "purpose": "Nghiệm thu ba lớp sóng Footer, căn giữa logo/slogan/bản quyền và các chức năng cũ ở 5 viewport",
   "expected_site": "aquathanhxuan.io.vn",
-  "iteration": 3,
-  "note": "Verify native Footer ESC Table inspector access and reject stale versions after editability guard fix",
-  "diagnostic": "Read-only live Builder click inspector for Footer label and Home05 description; no Save",
-  "attempt": 11
+  "iteration": 4,
+  "note": "Footer wave source e3ce52a, do not write CMS; validate responsive SVG decoration",
+  "diagnostic": "5 viewport wave + footer links/consultation/Home05 and read-only Visual Builder inspection",
+  "attempt": 12
 }
