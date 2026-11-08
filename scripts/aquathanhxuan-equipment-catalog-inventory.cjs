@@ -23,7 +23,7 @@ const HOME=82454;
   };
   const entry=await get('/wp-json/wp/v2/pages/'+HOME+'?context=edit');
   const plain=entry.json?.content?.raw||entry.json?.content?.rendered||'';
-  const matches=[...plain.matchAll(/\\[table\\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map(m=>m[1]);
+  const matches=[...plain.matchAll(/\[table\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map(m=>m[1]);
   console.log('EQUIP_PAGE='+JSON.stringify({http:entry.status,page:HOME,shortcodes:matches}));
   const rawcats=[];
   for(let i=1;i<=6;i++){
@@ -52,7 +52,7 @@ const HOME=82454;
 
   await page.goto(WP+'/wp-admin/post.php?post='+HOME+'&action=edit&esc_full_admin=1',{waitUntil:'domcontentloaded',timeout:55000});
   const pageMarkup=await page.locator('#content').inputValue();
-  console.log('EQUIP_NATIVE_HOME='+JSON.stringify({shortcodes:[...pageMarkup.matchAll(/\\[table\\s+id=([A-Za-z0-9_-]+)/g)].map(m=>m[1]),bytes:pageMarkup.length}));
+  console.log('EQUIP_NATIVE_HOME='+JSON.stringify({shortcodes:[...pageMarkup.matchAll(/\[table\s+id=['"]?([A-Za-z0-9_-]+)/g)].map(m=>m[1]),bytes:pageMarkup.length}));
   const legacy=[
     'Lọc treo Sunsun YBG 600','Lọc treo Sunsun YBG 500','Lọc treo Sunsun YBG 400',
     'Lọc treo Sunsun YBG 300','Lọc Thác Jeneca XP-03','Lọc Thác Jeneca XP-05',
