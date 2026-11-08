@@ -44,11 +44,29 @@ const normalize=s=>String(s||'').normalize('NFC').replace(/<[^>]*>/g,' ').replac
     assert.equal(r.status,200,'ESC Table REST failed '+id);
     return r.data;
   };
+  const ensureProductApi=async(id,table)=>{
+    if(table?.meta?.api==='Product')return table;
+    assert(!table?.meta?.api,'Unexpected Product source already assigned '+id);
+    await page.goto(editTable(id),{waitUntil:'domcontentloaded',timeout:45000});
+    await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData),null,{timeout:25000});
+    const selector=page.locator('#js_custom_api_source');
+    await selector.waitFor({state:'visible',timeout:18000});
+    await selector.selectOption('Product');
+    await page.waitForFunction(()=>document.querySelector('#js_custom_api')?.value==='Product',
+      null,{timeout:15000});
+    await page.getByRole('button',{name:'Save Changes'}).first().click();
+    await page.waitForTimeout(1600);
+    const checked=await readTable(id);
+    assert.equal(checked?.meta?.api,'Product','Native Product selector did not persist '+id);
+    console.log('EQUIPMENT_PRODUCT_SOURCE_VERIFIED='+id);
+    return checked;
+  };
   const createTable=async({id,name,description,keys,labels,rows,api})=>{
     assert.equal(keys.length,labels.length,'ESC Table schema label mismatch');
     assert(rows.every(row=>row.length===keys.length),'ESC Table row width mismatch');
     let table=await readTable(id);
     if(table){
+      if(api==='Product')table=await ensureProductApi(id,table);
       assert.equal(String(table.meta?.api||''),api,'Existing table uses another API '+id);
       assert(Array.isArray(table.items),'Existing ESC Table items missing '+id);
       assert.equal(table.items.length,rows.length,'Existing table item count differs; do not overwrite '+id);
@@ -90,7 +108,9 @@ const normalize=s=>String(s||'').normalize('NFC').replace(/<[^>]*>/g,' ').replac
     assert(result.status===200&&result.result?.success===true&&result.result?.table_id===id,
       'Native TablePress save failed '+id+': '+JSON.stringify(result));
     table=await readTable(id);
-    assert(table && String(table.meta?.api||'')===api,'New table readback failed '+id);
+    assert(table,'New table readback failed '+id);
+    if(api==='Product')table=await ensureProductApi(id,table);
+    assert.equal(String(table.meta?.api||''),api,'New TablePress API source readback failed '+id);
     assert.equal(table.items?.length,rows.length,'New ESC Table row readback count '+id);
     for(let i=0;i<rows.length;i++)
       for(let c=0;c<keys.length;c++)
