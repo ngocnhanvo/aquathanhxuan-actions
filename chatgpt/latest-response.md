@@ -1,6 +1,6 @@
 # Latest ChatGPT response
 
-Time (Asia/Ho_Chi_Minh): 2026-11-08 10:10
+Time (Asia/Ho_Chi_Minh): 2026-11-08 10:19
 Project: aquathanhxuan.com
 Repository: ngocnhanvo/aquathanhxuan-php
 Branch: master
@@ -9,17 +9,23 @@ Source gateway: bypass
 
 ## Final response
 
-Fixed reported Visual Builder Product picker failure for WordPress product ID 82499. Screenshot showed old popup without pagination, indicating prior PHP source was not yet on production.
+User screenshot: searching Product "Vật liệu lọc Continuum Bact rox M 1L" in Visual Builder home_01 returns not found; "Xem thêm sản phẩm" button shows despite no results and clicking does nothing.
 
-Changes:
-- PHP backend searches the full published WooCommerce product catalogue, name substring/SKU substring/exact ID, excludes existing ESC Table IDs *before* pagination, 15 results per page.
-- Picker UI includes “Xem thêm sản phẩm”.
-- Exact numeric ID with no result now explains: already in current ESC Table, not product, unpublished, or unreadable by WooCommerce.
-- PHP master commits: 41a5439dae8d2bfbb966f5ab08dd242c0ade1776, d8d4770ad50f3f1816b1e0d497505af4c4ab3cea, d5513da8fd10290ab91d42fbac870876bcfe95a8, 6740a298d24627ac6bc53f1748acad8508312986.
-- Release request commit in Actions/main: 25f111ce198a1b0ca6c6de1953f125ce4c38d3e3.
-- Release run: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42441414730 — SUCCESS. PHP syntax/project test PASS; item-manager.php and item-section-ui.php installed with sha256_verified=PASS, ready marker PASS, no Astro build.
-- Remaining: authenticated Playwright UI test + check exact WordPress status/table membership for product 82499 in production. Avoid claiming specific product is eligible without those checks.
+Root causes addressed:
+1. Earlier backend excluded already-present table IDs from *search results*, causing false not-found. New backend searches all published WP products and returns `already_added` flag; picker displays duplicate (disabled) with "Đã có trong bảng".
+2. WordPress CSS button styles overrode native [hidden] property. Added `#esc-vb-item-dialog .esc-vb-product-more[hidden]{display:none!important}`; button only shows if has_more=true.
+3. Exact WordPress numeric ID lookup now queries ID directly and identifies draft/nonproduct cases. Direct insertion also rejects unpublished products.
+
+PHP master commit head: eb276373eb118385d72a1685299311643a6edc1b.
+Previous commits: af513ae3325e108b5ceed2e9c2a7ba6f63346f95 (backend), 2756504cd28ba21b2ceeb1d972509c018f2aa6b9 (UI), 93f1ed06b6eca26b8cabe4e83202d3d7c8c7e390 (publish guard), 8732dcfe3c63d9a9d9cdde9250562a46684dbc5b (test).
+First release request 007095188107429815c8ec97fde0c943fb34d567 failed regression test before FTP; fixed exact-ID draft logic and re-released.
+
+Successful release request: 87a20ba6b666538dd364d49d470d4f8d14c7184d.
+Run: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42442098902 — SUCCESS.
+Log confirms PHP syntax, `items-and-sections.test.php` Product picker published search/duplicates/ID PASS, both PHP files installed with SHA256 verified, ready marker PASS, no Astro build.
+
+Outstanding: authenticated live Playwright interaction and actual WordPress product ID 82499 status/table membership not independently read. New code should show it with selection enabled when published and absent from current ESC Table, or disabled with "Đã có trong bảng" if already present.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa xác minh tương tác popup sản phẩm 82499 trong trình duyệt
+Trạng thái: PARTIAL — chưa có Playwright kiểm thử UI đăng nhập và xác minh record thật 82499
