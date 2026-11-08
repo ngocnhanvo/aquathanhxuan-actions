@@ -1,6 +1,10 @@
 name: Aqua Hot Combo nested section production QA
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/hot-combo-nested-*.json'
 permissions:
   contents: read
 jobs:
