@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Verify natural-height Nền sidebar and keep mobile horizontal category list.
+# Verify Product sorter keeps selected ESC Table row and explains editable order.
 on:
   push:
     branches: [main]
