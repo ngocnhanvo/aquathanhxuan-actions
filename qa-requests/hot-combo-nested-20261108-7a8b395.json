@@ -1,0 +1,13 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "astro_source_sha": "7a8b39562e2191c109aecbdc911e85cd3f1812c2",
+  "cms_parent": "home_03",
+  "cms_child": "tool_combo01",
+  "product_ids": [
+    "82561",
+    "82562",
+    "82564",
+    "82566"
+  ]
+}
