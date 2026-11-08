@@ -86,6 +86,7 @@ try {
       requests.push(request.url());
     });
     page.on('framenavigated', frame => navigations.push(frame.url()));
+    page.on('pageerror', error => console.error('PREVIEW_PAGE_ERROR',error.message));
     await context.route('**/*', route => route.abort());
     await page.setContent(fixture);
     await page.evaluate(() => { window.__vbExports = {}; });
@@ -131,6 +132,7 @@ try {
     assert.equal(await page.getAttribute('#parent-toggle', 'aria-expanded'), 'true');
     assert.equal(await page.evaluate(() => window.__events.menu.at(-1)?.[2]), 72);
     await page.click('#footer-global-link-text');
+    console.log('FOOTER_INSPECTOR_DIAG',JSON.stringify(await page.evaluate(()=>({messages:window.__events.messages,unavailable:window.__events.unavailable,native:document.querySelector('#footer-global-link')?.outerHTML}))));
     assert.deepEqual(await page.evaluate(() => {
       const section=window.__events.messages.filter(message=>message.type==='esc-vb-section').at(-1)?.section;
       return [section?.tableId,section?.row,section?.field,section?.source];
