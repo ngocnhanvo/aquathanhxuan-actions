@@ -47,6 +47,11 @@ const request=async u=>{
       String(node.querySelector('[data-substrate-add]')?.getAttribute('data-product-id')||'')));
     assert.deepEqual(ids,expected,'Grid product ordering differs from separate ESC Table');
     const menu=section.locator('.aqua-substrate-catalog__sidebar nav a');
+    report.sidebar=await menu.evaluateAll(nodes=>nodes.map(n=>({name:n.textContent?.trim(),href:n.getAttribute('href')})));
+    console.log('HOME02_SIDEBAR_ACTUAL='+JSON.stringify(report.sidebar));
+    const sourceCategories=await request(WP+'/wp-json/wc/store/v1/products/categories?per_page=100&qa='+Date.now());
+    report.wpCategories=sourceCategories.map(c=>({id:c.id,parent:c.parent,name:c.name,slug:c.slug})).filter(c=>c.parent===1775||c.id===1775);
+    console.log('HOME02_CATEGORY_WP='+JSON.stringify(report.wpCategories));
     assert.equal(await menu.count(),9,'Sidebar should contain nine real children of Nền');
     assert.equal(await section.locator('[data-substrate-filter]').count(),0,'Obsolete filter button still exists');
     assert.equal(await section.getByText('Tất cả sản phẩm',{exact:true}).count(),0);
