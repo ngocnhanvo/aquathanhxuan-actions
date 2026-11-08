@@ -1,6 +1,10 @@
 name: Aqua Home 02 curated products production acceptance
 # Read-only item selection, dialogs, sort and five-viewpoint production QA.
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home02products-qa.yml'
   workflow_dispatch:
 permissions:
   contents: write
