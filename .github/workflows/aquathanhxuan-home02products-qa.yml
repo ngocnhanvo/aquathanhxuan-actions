@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Trace actual Product click event sequence in the live Visual Builder.
+# Verify the Product image click priority fix deployed at Astro d50fcf6b.
 on:
   push:
     branches: [main]
