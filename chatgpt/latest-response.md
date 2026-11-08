@@ -1,30 +1,21 @@
 # Latest ChatGPT response
 
-Time (Asia/Ho_Chi_Minh): 2026-11-08 09:56
+Time (Asia/Ho_Chi_Minh): 2026-11-08
 Project: aquathanhxuan.com
-Repository: ngocnhanvo/aquathanhxuan-actions
-Branch: main
+Repository: ngocnhanvo/aquathanhxuan-php
+Branch: master
 Code mode: auto-build
 Source gateway: bypass
 
 ## Final response
 
-Đã triển khai bộ tìm kiếm sản phẩm ngay tại trường key trong popup "Thêm item mới" của Visual Builder khi ESC Table có meta.api = Product.
+Đã sửa code tìm kiếm Product trong ESC Visual Builder:
 
-- Tìm theo tên sản phẩm, SKU hoặc ID WooCommerce; kết quả hiển thị tên, SKU, ID.
-- Chọn sản phẩm sẽ ghi ID thật vào key, không sao chép hay sửa tên, giá, hình ảnh hoặc dữ liệu Product.
-- Không hiển thị sản phẩm đã có trong ESC Table. Server giữ kiểm tra ID sản phẩm tồn tại và chống trùng.
-- Với ESC Table không phải Product, cách nhập key cũ không bị thay đổi.
-- Product attributes trong popup được ẩn vì là readonly.
+- Backend: tìm trong toàn bộ WordPress product đã publish, tìm một phần tên/SKU hoặc ID chính xác; giới hạn 15 kết quả mỗi trang, có cờ has_more, không xét sản phẩm đã có trong ESC Table, lọc trước khi phân trang.
+- UI: thêm nút Xem thêm sản phẩm và phân trang; chọn kết quả ghi ID vào key, không sửa dữ liệu gốc.
+- Commit PHP master: 41a5439dae8d2bfbb966f5ab08dd242c0ade1776 (backend); d8d4770ad50f3f1816b1e0d497505af4c4ab3cea (UI).
+- Chưa kích hoạt được workflow phát hành PHP qua GitHub connector hiện hành; chưa có kết quả PHP syntax check/Playwright/production QA. Không được báo DEPLOYED hoặc QA PASS.
 
-PHP source master commit: 9ac31356f444c02e9cf6c4fd692d9d3f59331ece
-https://github.com/ngocnhanvo/aquathanhxuan-php/commit/9ac31356f444c02e9cf6c4fd692d9d3f59331ece
-
-FTPS production release: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42440503514
-Result: SUCCESS (source identity + PHP syntax/project tests + FTPS + production ready marker).
-
-Chưa có kiểm thử tương tác Playwright riêng cho popup tìm kiếm sản phẩm; không tuyên bố UI QA PASS. Không cần build Astro vì chỉ thay plugin PHP.
-
-Trạng thái: PARTIAL — chưa hoàn tất xác minh tương tác tìm kiếm bằng browser
 Chế độ code: auto-build
 Cổng ghi source: bypass
+Trạng thái: PARTIAL — chưa hoàn tất triển khai và xác minh production
