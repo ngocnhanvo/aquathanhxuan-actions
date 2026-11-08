@@ -1,34 +1,40 @@
 # Latest ChatGPT response — aquathanhxuan.com
 
-Date: 2026-11-08 21:23:32 Asia/Ho_Chi_Minh
+Date: 2026-11-08 21:25 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
 Repository: ngocnhanvo/aquathanhxuan-actions
 Branch: main
 Status: SAVED
+Knowledge: ngocnhanvo/knowledge@78865ea3036b8d816f82d97b7bdecb1e3361c30a
 Source PHP: ngocnhanvo/aquathanhxuan-php@869b3ad842ef6d9cf29d7cc5710c7d429c265fee
 Source Astro: ngocnhanvo/aquathanhxuan-astro@0dfae1294f6371ae16825d71217cd3402f2c613e
-PHP release: 42488801666 PASS
-WordPress Astro build: 42488914584 PASS
-Astro production deployment: 42488981812 PASS
-Builder live QA: 42489254452 PASS (read-only, no real mutation)
-Offline browser and PHP source contracts: 42488633678 PASS
 Checkpoint: docs/checkpoints/2026-11-08-hot-combo-nested-item-management.md
+Verified runs: 42488633678, 42488801666, 42488914584, 42488981812, 42489254452 — all success.
+No application source changes in this continuation turn.
 
 ## Nguyên văn phản hồi dự định gửi
 
-Đã triển khai bản sửa lên production thành công.
+## Đã khôi phục checkpoint mới nhất
 
-- **WordPress/PHP:** Sửa lỗi phân quyền khiến ESC Table con `tool_combo01` bị từ chối khi thêm, xóa hoặc sắp xếp item.
-- **Astro:** Bổ sung cơ chế đồng bộ trực tiếp các thẻ sản phẩm Hot Combo sau khi thay đổi.
-- **Kiểm thử tự động:** Đã PASS các bài kiểm tra PHP và Chromium. Workflow phát hành PHP, build WordPress và deploy Astro đều báo thành công.
+Mình đã đọc `chatgpt/latest-response.md` và đối chiếu HEAD của các repository. Công việc gần nhất là sửa **thêm, xóa và sắp xếp item của ESC Table con `tool_combo01` trong Visual Builder**.
 
-Mình tiếp tục nghiệm thu trực tiếp trên Visual Builder production, đặc biệt là các thao tác mở Thêm, chọn hai item để sắp xếp và mở xác nhận Xóa mà không làm thay đổi danh sách sản phẩm thật.
+| Repository | Commit hiện tại |
+|---|---|
+| WordPress/PHP `master` | [`869b3ad`](https://github.com/ngocnhanvo/aquathanhxuan-php/commit/869b3ad842ef6d9cf29d7cc5710c7d429c265fee) |
+| Astro `master` | [`0dfae12`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/0dfae1294f6371ae16825d71217cd3402f2c613e) |
+| Knowledge `main` | [`78865ea`](https://github.com/ngocnhanvo/knowledge/commit/78865ea3036b8d816f82d97b7bdecb1e3361c30a) |
 
-**Nghiệm thu trực tiếp: PASS.** Trong Visual Builder production, mình đã chọn đúng sản phẩm của `tool_combo01`, mở **Thêm item** và tìm kiếm sản phẩm WooCommerce. ID đã có trong bảng được chặn thêm trùng. Chức năng **Sắp xếp item** cho phép chọn hai card trực tiếp với viền đỏ/xanh và kích hoạt nút xác nhận. Hộp thoại **Xóa item** cũng nhận đúng sản phẩm được chọn.
+Checkpoint ghi nhận bản sửa đã triển khai production và vượt qua kiểm thử tự động. Tuy nhiên, **QA trực tiếp mới kiểm tra giao diện mà chưa lưu thay đổi thật vào WordPress**. Đây là điểm cần phân biệt trước khi xác nhận toàn bộ luồng hoạt động.
 
-Sau khi hủy các thao tác thử, **cả bốn sản phẩm, giá và thứ tự gốc vẫn nguyên vẹn**. Kiểm thử Chromium đã xác nhận luồng cập nhật sau khi thêm/xóa/đổi thứ tự; riêng QA production không bấm lưu thay đổi thật để tránh tác động dữ liệu đang bán.
+Mình sẽ giữ nguyên những phần đã hoàn thành, kiểm tra lại bằng chứng triển khai và phần còn thiếu thay vì sửa lại từ đầu.
 
-Mã production: PHP `869b3ad`, Astro `0dfae12`. Bằng chứng: [QA trên Builder production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42489254452) và [kiểm thử tự động](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42488633678). Checkpoint đã được cập nhật trong `aquathanhxuan-actions`.
+---
+
+Đã xác minh độc lập 5 workflow GitHub Actions liên quan: kiểm thử mã nguồn, PHP release, WordPress-triggered Astro build, Astro production deployment và Production Builder QA đều **SUCCESS**. [Kiểm thử mã nguồn](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42488633678) và [QA Builder production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42489254452) đã đạt.
+
+Script QA production chủ động không gửi API ghi `insert-item`, `delete-item` hoặc `swap-items`: đã xác nhận chọn item, mở thêm/tìm kiếm, chọn hai thẻ viền đỏ/xanh, mở xác nhận xóa và hủy an toàn. Bốn Product ID `82561`, `82562`, `82564`, `82566` giữ nguyên. Kiểm thử Chromium độc lập kiểm tra cả cơ chế đồng bộ Preview.
+
+**Kết luận:** checkpoint hiện tại đã đóng `DONE`, source/deploy đúng HEAD, không còn bước dở thuộc phạm vi đã ghi nhận. Không lặp deploy hay ghi thử lên dữ liệu bán hàng. Một bài kiểm thử thực sự bấm Lưu trên production, rồi hoàn nguyên, **chưa được thực hiện**; không đánh đồng QA read-only với xác minh ghi production.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
