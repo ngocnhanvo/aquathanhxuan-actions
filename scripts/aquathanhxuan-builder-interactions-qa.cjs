@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expected = '3388ab1988d083eaf3a0c149a09e9367a69b0640';
+const expected = '903906c8bef532e6f26038eaec7a41dd0356c892';
 const stamp = Date.now();
 (async () => {
   const markerResponse = await fetch(frontend + '/aquathanhxuan-staging-build.json?builderqa=' + stamp, {
