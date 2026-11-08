@@ -1,9 +1,9 @@
 {
-  "source_sha": "22ed25954be504233328880c6d086f85189cc678",
-  "purpose": "Confirm deployed Info cache fix, consultation channels, Footer, Home05, responsive and Visual Builder",
+  "source_sha": "145b61fe01df4796cbf1488dae55c387ab17f8e6",
+  "purpose": "QA popup flip on mobile 390x844, footer, Home05 and Visual Builder",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
   "note": "Postdeploy diagnostic for consultation hrefs",
   "diagnostic": "Compare public WordPress ACF, incremental info logs and deployed common-data cache",
-  "attempt": 3
+  "attempt": 4
 }
