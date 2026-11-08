@@ -171,6 +171,20 @@ const request=async u=>{
       });
     });
     const firstCard=grid.locator('[data-esc-builder-product-id]').first();
+    await frame.locator('body').evaluate(()=>{
+      window.__escQaPointerHits=[];
+      window.addEventListener('pointerdown',e=>{
+        const el=e.target instanceof Element?e.target:null;
+        const at=document.elementFromPoint(e.clientX,e.clientY);
+        window.__escQaPointerHits.push({
+          tag:el?.tagName,cls:String(el?.className||'').slice(0,160),
+          closestProduct:el?.closest('[data-esc-builder-product-id]')?.getAttribute('data-esc-builder-product-id')||'',
+          closestTable:el?.closest('[data-tablepress-preview]')?.getAttribute('data-tablepress-preview')||'',
+          atTag:at?.tagName,atClass:String(at?.className||'').slice(0,160),
+          x:e.clientX,y:e.clientY,
+        });
+      },true);
+    });
     await firstCard.scrollIntoViewIfNeeded();
     await firstCard.click({position:{x:Math.min(24,await firstCard.evaluate(el=>el.clientWidth/2)),y:20}});
     const inspector=page.locator('#esc-vb-item-panel');
@@ -184,6 +198,7 @@ const request=async u=>{
       selectedRow:await firstCard.getAttribute('data-esc-builder-row'),
       panelVisible:await inspector.isVisible(),
       messages:await page.evaluate(()=>window.__escQaEvents||[]),
+      pointerHits:await frame.locator('body').evaluate(()=>window.__escQaPointerHits||[]),
       productVisualSelected:await firstCard.evaluate(el=>el.hasAttribute('data-esc-vb-product-selected')),
       draftBridgeInstalled:await frame.locator('style[data-esc-vb-item-pick-style]').count(),
       editabilityBridgeInstalled:await frame.locator('#esc-vb-editability-hint').count(),
