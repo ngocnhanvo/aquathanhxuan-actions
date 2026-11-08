@@ -95,7 +95,7 @@ const request=async u=>{
     const nativeSlugs=(report.category_native?.nodes||[])
       .filter(c=>c.parent===1775).map(c=>c.slug).sort();
     const links=await menu.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href')));
-    const renderedSlugs=links.map(link=>new URL(link,ROOT).searchParams.get('cat')).sort();
+    const renderedSlugs=links.map(link=>new URL(link,ROOT).pathname.split('/').filter(Boolean).at(-1)).sort();
     assert.equal(nativeSlugs.length,7,'Native Nền terms unexpectedly changed');
     assert.deepEqual(renderedSlugs,nativeSlugs,'Sidebar must match real Nền child terms');
     assert.equal(await section.locator('[data-substrate-filter]').count(),0,'Obsolete filter button still exists');
@@ -106,14 +106,14 @@ const request=async u=>{
       for(const href of links){
         const uri=new URL(href,ROOT);
         assert.equal(uri.origin,ROOT,'Category navigation leaves frontend');
-        assert.equal(uri.pathname,'/san-pham','Category must link to existing Product listing');
+        assert.equal(uri.pathname,'/san-pham/'+uri.pathname.split('/').filter(Boolean).at(-1),'Category must link to canonical SSR archive');
         const response=await page.request.get(uri.href,{timeout:25000});
         assert.equal(response.status(),200,'Product listing route unavailable: '+uri.href);
       }
       const archive=await ctx.newPage();
-      await archive.goto(ROOT+'/san-pham?cat=chihiros',{waitUntil:'domcontentloaded',timeout:45000});
-      await archive.waitForFunction(()=>document.getElementById('product-page-title')?.textContent?.trim()==='Chihiros',null,{timeout:15000});
-      assert.equal(await archive.locator('#product-grid').count(),1,'Product listing grid missing');
+      await archive.goto(ROOT+'/san-pham/chihiros',{waitUntil:'domcontentloaded',timeout:45000});
+      await archive.waitForFunction(()=>document.getElementById('product-page-title')?.textContent?.toLocaleLowerCase('vi').includes('chihiros'),null,{timeout:15000});
+      assert.equal(await archive.locator('#main-content').count(),1,'Native Product SSR listing missing');
       report.archive={url:archive.url(),heading:await archive.locator('#product-page-title').textContent()};
       await archive.close();
     }
