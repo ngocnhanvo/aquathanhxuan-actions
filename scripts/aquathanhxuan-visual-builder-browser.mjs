@@ -299,6 +299,9 @@ try {
       'Nested Product rows must be reindexed after reordering');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Nested Product source reorder must acknowledge exact ID mapping');
+    const nestedCue=await page.locator('#substrate-82537').getAttribute('data-esc-vb-region-label');
+    assert(nestedCue?.includes('home_02products')&&nestedCue.includes('Sắp xếp item'),
+      'Nested Product must show membership sorting cue, not generic Sale-only readonly guidance');
     await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
       origin:'https://admin.example.test',source:window,
       data:{type:'esc-vb-product-item-deleted',tableId:'home_02products',
