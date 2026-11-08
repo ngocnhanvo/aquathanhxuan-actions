@@ -29,31 +29,31 @@
   "sidebar": [
     {
       "name": "Chihiros›",
-      "href": "/san-pham?cat=chihiros"
+      "href": "/san-pham/chihiros"
     },
     {
       "name": "Contro Soil›",
-      "href": "/san-pham?cat=contro-soil"
+      "href": "/san-pham/contro-soil"
     },
     {
       "name": "Master Soil›",
-      "href": "/san-pham?cat=master-soil"
+      "href": "/san-pham/master-soil"
     },
     {
       "name": "Tropica›",
-      "href": "/san-pham?cat=tropica"
+      "href": "/san-pham/tropica"
     },
     {
       "name": "Vũ Aqua›",
-      "href": "/san-pham?cat=vu-aqua"
+      "href": "/san-pham/vu-aqua"
     },
     {
       "name": "Dennerle›",
-      "href": "/san-pham?cat=dennerle"
+      "href": "/san-pham/dennerle"
     },
     {
       "name": "Gex›",
-      "href": "/san-pham?cat=gex"
+      "href": "/san-pham/gex"
     }
   ],
   "wpCategories": [
@@ -218,9 +218,7 @@
     },
     {
       "pathname": "/san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "status": 404,
-      "url": "https://aquathanhxuan.io.vn/san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "title": "404"
+      "error": "Error: apiRequestContext.get: socket hang up (ECONNRESET)\nCall log:\n  - → GET https://aquathanhxuan.io.vn/san-pham/nen-cho-be-thuy-sinh/chihiros/\n    - user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n"
     },
     {
       "pathname": "/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/",
@@ -235,7 +233,7 @@
       "title": "404"
     }
   ],
-  "error": "AssertionError [ERR_ASSERTION]: Product listing route unavailable: https://aquathanhxuan.io.vn/san-pham?cat=chihiros\n\n404 !== 200\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:111:16",
-  "run_id": 42463797563,
+  "error": "apiRequestContext.get: socket hang up (ECONNRESET)\nCall log:\n  - → GET https://aquathanhxuan.io.vn/san-pham/chihiros\n    - user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:110:43",
+  "run_id": 42464754935,
   "outcome": "failure"
 }
