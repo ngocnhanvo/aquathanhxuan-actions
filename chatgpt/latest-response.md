@@ -5,37 +5,24 @@ Project: aquathanhxuan.com
 Chế độ code: auto-build
 Cổng ghi source: bypass
 
-## User complaint
-The Visual Builder Product item sorter displayed a redundant numbered ID list in the sidebar, even though another ESC Table already uses direct item source red outline / item destination blue outline picking. User explicitly requested reuse of the existing standard item picker mechanism, not a separate Product-specific process.
+## Current user request
+Document a **cross-project Knowledge rule** so any future ESC Table with `meta.api="Product"` uses the SAME native Visual Builder direct card sorting UX (red source outline, blue target outline, confirmation), not a separate Product-specific numbered ID selection UI.
 
-## Root cause and fix
-- PHP `wp-content/plugins/esc-visual-builder/includes/item-section-ui.php` previously forced `fallbackPicker=true` for every `meta.api=Product` table even when the iframe identified the card, so it rendered an unnecessary indexed ID chooser. Fixed so Product and ordinary ESC Tables use exactly the same direct visual picker, with list fallback only when the actual component has no matching item identifiers. Preserve existing guarded WordPress save and cancel behavior.
-- Astro `src/lib/wordpress/builderSectionDrafts.ts`: `beginItemPicking` looked only for outer `[data-tablepress-preview=ID]`; nested Product table `home_02products` has a separate `[data-esc-source-table=home_02products]` underneath the visible `home_02` section. Fixed nearest verified source lookup to support direct red-blue picking from actual Product cards, same `esc-vb-item-source-picked`/`esc-vb-item-target-picked` events as ordinary ESC Table items.
-- Existing Preview immediate Product order sync, product data immutability, and public frontend unchanged.
-- PHP master SHA `701346d9416dd393cfb9afc03b51c00e424be2ef` (regression included); Astro master SHA `89e03da33f38661dcd996e0a3c29808022b7b4ad` (regression included).
-- Actions synthetic Chromium test now clicks nested source and target cards and asserts native red/blue outlines and correct source table ID/row, avoiding a second ID UI.
-- Production read-only Playwright QA now requires Product index list HIDDEN, checks red outline on 82535, clicks blue outline on 82537, confirms save enabled; cancels with ZERO backend writes and restores simulated preview order.
+## Completed
+- Read and updated `ngocnhanvo/knowledge` branch `main`; no application source or production data was modified in this task.
+- Added authoritative section `## Chuẩn bắt buộc: ESC Table nguồn Product phải sắp xếp item bằng cùng cơ chế Visual Builder dùng chung (2026-11-08)` to `stacks/wordpress-editor-esc-table.md` (commit `3894b2c97c66ec4e58b5c7d7ce0d0294a3d07dbe`).
+- This rule binds all ESC Table `Product` sources in Astro+WordPress projects and templates, including nested tables, Sale sliders and product grids. Product attributes immutable in Builder, but membership/order/add/remove editable; native direct click-to-pick with red/blue outlines, selected source retained, indexed list fallback ONLY when marked component items unavailable; correct Table ID + original row mapping and authorization; prevent section/image overlay stealing clicks; Preview reorder/add/remove sync with live pagination and subset Sale semantics; cancel no CMS writes.
+- Defined mandatory QA with both nested and standalone Product ESC tables, direct card picking, no ID list when cards available, source/target selection, cancel/confirm, WordPress data integrity, readback, responsive and regression tests. Nonmutating production QA simulation is NOT proof of backend persistence.
+- Added prominent references in `knowledge/README.md` (commit `e3c0e2aa498285636ba172e551a83ebd95848b41`) and `knowledge/AGENTS.md` (commit `78865ea3036b8d816f82d97b7bdecb1e3361c30a`).
+- Verified all three files read back successfully from `knowledge/main` with source-aware fields and Product rules intact.
 
-## Verified deployments and QA
-- CI contract run `42479214159`: PASS across native-cells, preview-browser and homepage-data.
-- PHP release run `42479373646`: SUCCESS for PHP SHA 701346d9.
-- WordPress-controlled Astro production build run `42479395068`: SUCCESS for Astro SHA 89e03da3; underlying Astro deploy run `42479465659`: SUCCESS.
-- Live production Visual Builder QA run `42479686697`: SUCCESS.
-  - Product 82535 preselected as source (red outline).
-  - Clicking Product 82537 creates destination blue outline.
-  - `sortDryRun={directVisual:true,listHidden:true,redOutline:true,blueOutline:true,saveEnabled:true}`.
-  - Preview correctly reflects simulated authoritative Product reorder (first card 82537) and is restored to the original 82535 order.
-  - No WordPress/WooCommerce writes: `forbiddenWrites=0`. Ten original Product IDs unchanged.
-  - Add/Delete dialog controls intact; responsive 5 viewports 1440,1024,768,844,390 widths PASS; 10 Product cards and 7 authentic Nền subcategories, no horizontal overflow.
-- QA workflow `.github/workflows/aquathanhxuan-home02products-qa.yml` restored to manual-only `workflow_dispatch` in Actions commit `8837e6da1c9f910541ad8bf7dbc2d791783d7b1a`.
+## Source references
+- https://github.com/ngocnhanvo/knowledge/blob/main/stacks/wordpress-editor-esc-table.md
+- https://github.com/ngocnhanvo/knowledge/blob/main/README.md
+- https://github.com/ngocnhanvo/knowledge/blob/main/AGENTS.md
 
-## References
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479686697
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479214159
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479373646
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479395068
-
-No remaining build, source or QA task for the user's request to use the old shared direct ESC item reorder picker.
+## Scope and limits
+This request was to RECORD THE RULE for other projects. No unrequested deployments/edits in other projects or templates. Other projects will need to read updated Knowledge and implement/test against their own current code; a Knowledge commit alone does not upgrade their installed application binaries.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
