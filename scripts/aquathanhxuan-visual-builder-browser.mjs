@@ -61,6 +61,7 @@ body{font:16px/1.5 system-ui;margin:0;background:#f1f5f9;color:#0f172a}header,ma
 <section id="unsupported">Unsupported public content</section>
 </main>
 <footer id="footer-contact">
+<ul data-esc-source-table="pub_footerlinks" data-esc-rendered-version="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"><li data-esc-source-row="0"><a id="footer-global-link" href="#footer-contact" data-esc-builder-cell-row="0" data-esc-builder-cell-field="label">Footer global link</a></li></ul>
 <p data-esc-vb-footer-field="sodienthoaihanoi">Phone: <a id="footer-phone" href="tel:0123456789"><span data-esc-vb-footer-value>0123456789</span></a></p>
 <p data-esc-vb-footer-asset-row="4" data-esc-vb-footer-asset-table="pub_example_07" data-esc-vb-footer-asset-version="${'a'.repeat(64)}"><span data-esc-vb-footer-asset-label>Credit</span>: <a id="footer-credit" href="https://outside.example.test/" data-esc-vb-footer-asset-value>Publisher</a></p>
 </footer></body></html>`;
@@ -127,6 +128,17 @@ try {
     await page.click('#parent-toggle', { modifiers: ['Alt'] });
     assert.equal(await page.getAttribute('#parent-toggle', 'aria-expanded'), 'true');
     assert.equal(await page.evaluate(() => window.__events.menu.at(-1)?.[2]), 72);
+    await page.evaluate(() => {
+      window.__events.footerGlobal = 0;
+      document.addEventListener('click', event => {
+        if (event.target?.id === 'footer-global-link') window.__events.footerGlobal++;
+      });
+    });
+    await page.click('#footer-global-link');
+    assert.equal(await page.evaluate(() => window.__events.footerGlobal), 1,
+      'Versioned global Footer ESC Table cell must reach native inspector');
+    assert.deepEqual(await page.evaluate(() => window.__events.unavailable), [],
+      'Global Footer cell must not trigger unrelated Info unsupported warning');
     await page.click('#footer-phone');
     assert.equal(await page.evaluate(() => window.__events.footer.at(-1)), 'sodienthoaihanoi');
     await page.click('#footer-credit');
