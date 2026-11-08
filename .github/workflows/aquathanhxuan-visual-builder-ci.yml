@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Test both Sale filtered cards and full nested Product ESC Table live mutations.
+# Verify direct red/blue Product item pick in nested source with no duplicate ID-list UI.
 on:
   push:
     branches: [main]
