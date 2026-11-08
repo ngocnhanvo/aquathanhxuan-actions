@@ -277,7 +277,7 @@ try {
         '<template data-esc-builder-product-template>'+
         '<article data-substrate-card data-esc-vb-product-readonly="true">'+
         '<a class="aqua-substrate-catalog__image-link" href="#"><div class="aqua-substrate-catalog__image">'+
-        '<span class="aqua-substrate-catalog__discount"></span><img src=""></div></a>'+
+        '<span class="aqua-substrate-catalog__discount"></span></div></a>'+
         '<a class="aqua-substrate-catalog__name" href="#"></a>'+
         '<div class="aqua-substrate-catalog__prices"><strong></strong><del></del></div>'+
         '<button data-substrate-add></button></article></template>'+
