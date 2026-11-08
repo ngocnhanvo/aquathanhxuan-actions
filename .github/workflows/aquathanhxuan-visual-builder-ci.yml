@@ -113,7 +113,7 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Test aligned homepage widths and all genuine Nền category children
-        run: pnpm exec vitest run src/lib/wordpress/tablepress/home00.test.ts src/lib/wordpress/tablepress/home01.test.ts src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts
+        run: pnpm exec vitest run src/lib/wordpress/tablepress/home00.test.ts src/lib/wordpress/tablepress/home01.test.ts src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts src/lib/wordpress/footerCmsContract.test.ts
       - name: Identify source revision
         run: git rev-parse HEAD
 
