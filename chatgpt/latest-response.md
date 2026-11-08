@@ -5,51 +5,37 @@ Project: aquathanhxuan.com
 Chế độ code: auto-build
 Cổng ghi source: bypass
 
-## Objective and cause
-User screenshot shows Product cards inside WordPress ESC Table `home_02products` with misleading readonly Sale tooltip; user cannot reorder items effectively. Previous acceptance checked opening Sort and selected count, but did not prove source/target selection or preview DOM reconciliation.
-Root causes:
-1. PHP `item-section-ui.php` always cleared the selected Product source row at Sort open, forcing a duplicate source choice; UI status only suggested Delete.
-2. Astro `builderEditabilityCues.ts` hardcoded a Sale-only WooCommerce lock tooltip for all readonly Product cards; obscured ESC Table membership/order capability.
-3. Astro `builderSectionDrafts.ts` `syncProductReferenceOrder`, add/delete live adapters only operated on `[data-sale-track]`, not nested `[data-esc-source-table=home_02products][data-substrate-products]`. Consequently a saved Product ID reorder would not change the visible Home_02 cards immediately.
-4. Astro Home_02 pagination captured the initial card array and did not recompute after Builder DOM changes.
+## User complaint
+The Visual Builder Product item sorter displayed a redundant numbered ID list in the sidebar, even though another ESC Table already uses direct item source red outline / item destination blue outline picking. User explicitly requested reuse of the existing standard item picker mechanism, not a separate Product-specific process.
 
-## Implemented fixes
-- PHP `master` deployed application code from commit `2cbeede37da1799383df59aec77a1df08ea7706e` (PHP release source SHA `7f46db6a738f7f27e6a5c29488cc46f23706546c` includes regression test):
-  - Preselect exactly the Product card row verified against the current WordPress item-schema by immutable key ID.
-  - Reveal Sort button in inspector after selection, state clearly that the ESC Table can add/delete/reorder Product references while WooCommerce owns name/price/image.
-  - Item sort source defaults to selected Product; user only picks target and confirms. Generic section selection still requires choosing source.
-  - PHP UI output regression checks in `tests/item-ui-script.test.php` (test-only follow-up source SHA `69ae115380905422509b7105665d14a407026965`).
-  - Live PHP release run `42476091669` PASS.
-- Astro `master` latest deployed source SHA `d3e6c112d2d3da52ee2b7e651f3af06354d9f937`:
-  - Source-aware tooltip with exact `home_02products`, available sorting, immutable WooCommerce fields.
-  - Reusable `productReferenceHost` resolves nested ESC Table Product grid or Sale carousel, syncing Product order, delete, and insertion of genuine non-discounted Product cards.
-  - Sale retains filtered subset semantics (do not require all IDs present in visible carousel), but full curated Product grids verify all referenced IDs.
-  - Reindex rows and dispatch bubbling `esc:builder-items-updated`; Home_02 pagination re-reads current cards rather than stale initial array.
-  - Source regression test in `home02Catalog.test.ts`.
-  - Existing full-height Nền sidebar and 10 verified Product IDs remain unchanged.
+## Root cause and fix
+- PHP `wp-content/plugins/esc-visual-builder/includes/item-section-ui.php` previously forced `fallbackPicker=true` for every `meta.api=Product` table even when the iframe identified the card, so it rendered an unnecessary indexed ID chooser. Fixed so Product and ordinary ESC Tables use exactly the same direct visual picker, with list fallback only when the actual component has no matching item identifiers. Preserve existing guarded WordPress save and cancel behavior.
+- Astro `src/lib/wordpress/builderSectionDrafts.ts`: `beginItemPicking` looked only for outer `[data-tablepress-preview=ID]`; nested Product table `home_02products` has a separate `[data-esc-source-table=home_02products]` underneath the visible `home_02` section. Fixed nearest verified source lookup to support direct red-blue picking from actual Product cards, same `esc-vb-item-source-picked`/`esc-vb-item-target-picked` events as ordinary ESC Table items.
+- Existing Preview immediate Product order sync, product data immutability, and public frontend unchanged.
+- PHP master SHA `701346d9416dd393cfb9afc03b51c00e424be2ef` (regression included); Astro master SHA `89e03da33f38661dcd996e0a3c29808022b7b4ad` (regression included).
+- Actions synthetic Chromium test now clicks nested source and target cards and asserts native red/blue outlines and correct source table ID/row, avoiding a second ID UI.
+- Production read-only Playwright QA now requires Product index list HIDDEN, checks red outline on 82535, clicks blue outline on 82537, confirms save enabled; cancels with ZERO backend writes and restores simulated preview order.
 
-## Verified tests, release and evidence
-- WordPress Product swap backend mock regression (WordPress TablePress Product reference key swap + rollback/locked fields) PASS via native-cells test.
-- Actual Playwright Chromium synthetic test for Sale carousel filtered Product subset and independent nested ESC Product grid: source-selected Product, saved-order DOM reconciliation, correct row indices, Product reference deletion and non-sale addition; no external requests. CI `42477302319` all preview-browser/native-cells/homepage-data SUCCESS.
-- Astro production pipeline run `42477515906` PASS for exact source SHA `d3e6c112d2d3da52ee2b7e651f3af06354d9f937`, underlying Astro deploy run `42477571716` PASS.
-- Read-only live production QA run `42477938962` **SUCCESS**:
-  - ESC Table meta.api=Product, 10 reference IDs unchanged, CMS Page shortcode and cached Product order match.
-  - 1440x900,1024x768,768x1024,844x390,390x844 all PASS (10 Product cards, 7 genuine Nền category links, no horizontal overflow, correct archive).
-  - Authenticated Visual Builder Product 82535 maps to table `home_02products`, displays new source-aware sorting tooltip; Add/Delete dialog opens and closes.
-  - Sort opens with **Product 82535 already source**, source button disabled as preselected, destination Product 82537 selectable, **Save enabled**; user QA cancels without WordPress mutation.
-  - Test sends a simulated already-saved order event to real Builder iframe, sees first DOM card change to 82537, restores original 82535 in finally; proves **immediate Preview sorting works**.
-  - `forbiddenWrites=0`. The test did not commit any real WooCommerce/Product/ESC Table data or change persisted production order.
-- QA workflow `.github/workflows/aquathanhxuan-home02products-qa.yml` returned to workflow_dispatch-only via Actions commit `9fc06e597dd21ab2c126e9194be98dc41d7958e2`.
-
-## User-facing behavior
-In WordPress Visual Builder, click a Product card in Nền section, inspector reveals `home_02products` selected item and button `↕ Sắp xếp item`. Click Sort, chosen Product is already source, select a destination card or indexed Product item, then click `Chấp nhận hoán đổi`. WordPress saves the two reference IDs; Builder updates DOM order. Names/prices/images remain readonly in Builder and editable only in WooCommerce.
+## Verified deployments and QA
+- CI contract run `42479214159`: PASS across native-cells, preview-browser and homepage-data.
+- PHP release run `42479373646`: SUCCESS for PHP SHA 701346d9.
+- WordPress-controlled Astro production build run `42479395068`: SUCCESS for Astro SHA 89e03da3; underlying Astro deploy run `42479465659`: SUCCESS.
+- Live production Visual Builder QA run `42479686697`: SUCCESS.
+  - Product 82535 preselected as source (red outline).
+  - Clicking Product 82537 creates destination blue outline.
+  - `sortDryRun={directVisual:true,listHidden:true,redOutline:true,blueOutline:true,saveEnabled:true}`.
+  - Preview correctly reflects simulated authoritative Product reorder (first card 82537) and is restored to the original 82535 order.
+  - No WordPress/WooCommerce writes: `forbiddenWrites=0`. Ten original Product IDs unchanged.
+  - Add/Delete dialog controls intact; responsive 5 viewports 1440,1024,768,844,390 widths PASS; 10 Product cards and 7 authentic Nền subcategories, no horizontal overflow.
+- QA workflow `.github/workflows/aquathanhxuan-home02products-qa.yml` restored to manual-only `workflow_dispatch` in Actions commit `8837e6da1c9f910541ad8bf7dbc2d791783d7b1a`.
 
 ## References
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42477938962
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42477515906
-- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42476091669
+- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479686697
+- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479214159
+- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479373646
+- https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42479395068
 
-No pending code, build, or live QA steps remain in the requested Product reference sorting issue.
+No remaining build, source or QA task for the user's request to use the old shared direct ESC item reorder picker.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
