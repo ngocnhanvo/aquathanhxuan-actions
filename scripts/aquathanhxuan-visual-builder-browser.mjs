@@ -40,7 +40,7 @@ for (const module of ['shared-menu', 'shared-footer', 'shared-footer-media', 'sh
 }
 
 const fixture = `<!doctype html><html class="esc-builder-preview"><head><meta charset="utf-8"><style>
-body{font:16px/1.5 system-ui;margin:0;background:#f1f5f9;color:#0f172a}header,main,footer{margin:16px;padding:20px;background:white;border:1px solid #cbd5e1;border-radius:10px}nav{display:flex;gap:18px;flex-wrap:wrap}button,a{font:inherit}button{padding:8px 12px;cursor:pointer}section{padding:16px;margin:10px 0;border:1px solid #ddd}[data-esc-vb-region-state="editable"]:hover{outline:2px dashed #2563eb}[data-esc-vb-region-state="readonly"]:hover{outline:2px dashed #94a3b8}#esc-vb-editability-hint{position:fixed;bottom:0;right:0;padding:12px;background:#eff6ff;max-width:85%}[hidden]{display:none!important}
+body{font:16px/1.5 system-ui;margin:0;background:#f1f5f9;color:#0f172a}header,main,footer{margin:16px;padding:20px;background:white;border:1px solid #cbd5e1;border-radius:10px}nav{display:flex;gap:18px;flex-wrap:wrap}button,a{font:inherit}button{padding:8px 12px;cursor:pointer}section{padding:16px;margin:10px 0;border:1px solid #ddd}[data-esc-vb-region-state="editable"]:hover{outline:2px dashed #2563eb}[data-esc-vb-region-state="readonly"]:hover{outline:2px dashed #94a3b8}#esc-vb-editability-hint{position:fixed;bottom:0;right:0;pointer-events:none;padding:12px;background:#eff6ff;max-width:85%}[hidden]{display:none!important}
 </style></head><body>
 <header id="main-header"><nav>
 <a id="menu-link" data-esc-vb-menu-item-id="71" href="https://outside.example.test/" target="_blank" rel="noopener noreferrer">Menu item</a>
