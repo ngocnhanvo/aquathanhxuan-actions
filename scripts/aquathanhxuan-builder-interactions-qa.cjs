@@ -20,6 +20,22 @@ const stamp = Date.now();
     for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
       const context = await browser.newContext({ viewport, hasTouch: viewport.width < 500 });
       const admin = await context.newPage();
+      const itemSchemaRequests=[];
+      context.on('request',req=>{
+        if(req.url().includes('/esc-builder/v1/item-schema')){
+          itemSchemaRequests.push({phase:'request',method:req.method()});
+        }
+      });
+      context.on('response',res=>{
+        if(res.url().includes('/esc-builder/v1/item-schema')){
+          itemSchemaRequests.push({phase:'response',status:res.status()});
+        }
+      });
+      context.on('requestfailed',req=>{
+        if(req.url().includes('/esc-builder/v1/item-schema')){
+          itemSchemaRequests.push({phase:'failed',error:req.failure()?.errorText});
+        }
+      });
       const writes = [];
       context.on('request', request => {
         const url = request.url();
@@ -145,7 +161,7 @@ const stamp = Date.now();
       await admin.locator('#esc-vb-item-panel').waitFor({state:'visible',timeout:20000});
       await admin.locator('#esc-vb-item-sort-open').click();
       await admin.locator('#esc-vb-item-sort-body').waitFor({state:'visible',timeout:20000});
-      await admin.waitForTimeout(1600);
+      await admin.waitForTimeout(8000);
       const pickDebug=await admin.evaluate(()=>({
         status:document.querySelector('#esc-vb-item-sort-status')?.textContent,
         context:document.querySelector('#esc-vb-item-context')?.textContent,
@@ -154,7 +170,7 @@ const stamp = Date.now();
         bodyVisible:!document.querySelector('#esc-vb-item-sort-body')?.hidden,
         indexedList:document.querySelectorAll('#esc-vb-item-sort-preview-list li button').length
       }));
-      console.log('BUILDER_PRODUCT_PICK_INITIAL='+JSON.stringify(pickDebug));
+      console.log('BUILDER_PRODUCT_PICK_INITIAL='+JSON.stringify({...pickDebug,itemSchemaRequests,ticketType:await admin.evaluate(()=>typeof window.escVBGetTicket)}));
       assert(pickDebug.status?.includes('Nhấp sản phẩm nguồn'),
         'Expected visual Product source picker: '+JSON.stringify(pickDebug));
       const selectedSource=cards.nth(0);
