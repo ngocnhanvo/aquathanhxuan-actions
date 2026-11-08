@@ -67,7 +67,7 @@ const run=async()=>{
    const raw=await detail.json();
    assert.equal(String(raw.status),'publish','Nonpublished product: '+name);
    assert.equal(normalize(raw.title?.raw||raw.title?.rendered),normalize(name),'Wrong product identity: '+name);
-   assert.equal(String(raw.acf?.product_lang||''),'vi','Missing or wrong product_lang for '+name);
+   assert.equal(String(raw.acf?.product_lang?.value||raw.acf?.product_lang||''),'vi','Missing or wrong product_lang for '+name);
    matched.push({id:String(found.id),name});
   }
   console.log('HOME02PRODUCTS_SOURCE_MATCH='+JSON.stringify({matched,missing}));
