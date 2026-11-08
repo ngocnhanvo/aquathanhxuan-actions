@@ -140,9 +140,36 @@ async function run(){
    await page.waitForFunction(()=>Boolean(window.tp?.editor?.setData),null,{timeout:25000});
    const current=await page.evaluate(()=>window.tp.editor.getData());
    assert.deepEqual(current,parentData,'Concurrent Home_03 edit detected');
-   await page.evaluate(rows=>{window.tp.editor.setData(rows);window.tp.helpers.unsaved_changes.set()},linked);
-   await page.getByRole('button',{name:'Save Changes'}).first().click();
-   await page.waitForTimeout(1500);
+   // Native TablePress save must declare both the added grid column and
+   // visibility dimension. Merely setData() does not update the editor's
+   // internal declared column count and silently truncates the new field.
+   const nonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+   assert(nonce,'Missing native edit table nonce');
+   const params=new URLSearchParams();
+   const originalOptions=oldParent.options && typeof oldParent.options==='object' ? oldParent.options : {};
+   const fields=[
+     ['action','tablepress_save_table'],['_ajax_nonce',nonce],
+     ['tablepress[id]',PARENT],['tablepress[new_id]',PARENT],
+     ['tablepress[name]',String(oldParent.name || 'Hot combo')],
+     ['tablepress[description]',String(oldParent.description || '')],
+     ['tablepress[data]',JSON.stringify(linked)],
+     ['tablepress[options]',JSON.stringify(originalOptions)],
+     ['tablepress[visibility]',JSON.stringify({rows:linked.map(()=>1),columns:linked[0].map(()=>1)})],
+     ['tablepress[number][rows]',String(linked.length)],
+     ['tablepress[number][columns]',String(linked[0].length)],
+     ['custom_api',String(oldParent.meta?.api || '')],
+     ['custom_image',''],['custom_cols',''],['custom_rows','']
+   ];
+   for(const [k,v] of fields)params.append(k,v);
+   const saved=await page.evaluate(async body=>{
+     const response=await fetch('/wp-admin/admin-ajax.php',{
+       method:'POST',credentials:'same-origin',
+       headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body
+     });
+     return {status:response.status,result:await response.json()};
+   },params.toString());
+   assert(saved.status===200 && saved.result.success && saved.result.table_id===PARENT,
+     'Native parent TablePress save failed '+JSON.stringify(saved));
    const verify=await page.request.get(url('/wp-json/tablepress/v1/table/'+PARENT+'?ts='+Date.now()));
    assert.equal(verify.status(),200,'Parent readback failed');
    const result=await verify.json();
