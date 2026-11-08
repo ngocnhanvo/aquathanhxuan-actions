@@ -1,31 +1,25 @@
 # Latest ChatGPT response
 
-Time (Asia/Ho_Chi_Minh): 2026-11-08 10:19
+Time (Asia/Ho_Chi_Minh): 2026-11-08
 Project: aquathanhxuan.com
-Repository: ngocnhanvo/aquathanhxuan-php
+Repository: ngocnhanvo/aquathanhxuan-astro
 Branch: master
 Code mode: auto-build
 Source gateway: bypass
 
 ## Final response
 
-User screenshot: searching Product "Vật liệu lọc Continuum Bact rox M 1L" in Visual Builder home_01 returns not found; "Xem thêm sản phẩm" button shows despite no results and clicking does nothing.
+User reported the Prev/Next item slider arrows in Visual Builder home_01 (Sale section) are blocked and expects navigation *to other pages* to be blocked, but native carousel controls to work.
 
-Root causes addressed:
-1. Earlier backend excluded already-present table IDs from *search results*, causing false not-found. New backend searches all published WP products and returns `already_added` flag; picker displays duplicate (disabled) with "Đã có trong bảng".
-2. WordPress CSS button styles overrode native [hidden] property. Added `#esc-vb-item-dialog .esc-vb-product-more[hidden]{display:none!important}`; button only shows if has_more=true.
-3. Exact WordPress numeric ID lookup now queries ID directly and identifies draft/nonproduct cases. Direct insertion also rejects unpublished products.
+Inspected frontend `src/astro/tablepress/Home_01.astro` and `src/pages/esc-builder/preview/[pageId].astro`. The preview click interceptor `isSafePreviewControl` only permits an ordinary button[type=button] when it has an explicit `data-esc-builder-preview-action` opt-in (or interactive aria semantics). Home_01 arrows lacked that opt-in, so their clicks were consumed by section selection before the existing `data-sale-prev/next` scroll handlers.
 
-PHP master commit head: eb276373eb118385d72a1685299311643a6edc1b.
-Previous commits: af513ae3325e108b5ceed2e9c2a7ba6f63346f95 (backend), 2756504cd28ba21b2ceeb1d972509c018f2aa6b9 (UI), 93f1ed06b6eca26b8cabe4e83202d3d7c8c7e390 (publish guard), 8732dcfe3c63d9a9d9cdde9250562a46684dbc5b (test).
-First release request 007095188107429815c8ec97fde0c943fb34d567 failed regression test before FTP; fixed exact-ID draft logic and re-released.
-
-Successful release request: 87a20ba6b666538dd364d49d470d4f8d14c7184d.
-Run: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42442098902 — SUCCESS.
-Log confirms PHP syntax, `items-and-sections.test.php` Product picker published search/duplicates/ID PASS, both PHP files installed with SHA256 verified, ready marker PASS, no Astro build.
-
-Outstanding: authenticated live Playwright interaction and actual WordPress product ID 82499 status/table membership not independently read. New code should show it with selection enabled when published and absent from current ESC Table, or disabled with "Đã có trong bảng" if already present.
+Fix:
+- Added `data-esc-builder-preview-action="carousel-prev"` and `"carousel-next"` to existing sale carousel arrow buttons. Does not alter product links, add-to-cart, source selection or section data.
+- Added Vitest regression check in `src/lib/wordpress/tablepress/home01.test.ts` asserting both marked controls and the existing scroll handlers.
+- Astro master commits: 40c17d5528f0a23310458c39ec48d7460db44ce3; 112720f416a94f0e98731748693e1a11194cb148.
+- Existing production workflow `aquathanhxuan-actions/.github/workflows/aquathanhxuan-production-deploy.yml` only responds to `repository_dispatch: wp_trigger_build`; GitHub connector in current session only supports reading workflow runs and not dispatching. No new run appeared after commits. Did not create bypass pipeline.
+- Pending: execute actual approved Astro production build and Playwright verify button advances track, product navigation remains blocked and section selection works. No deployed assertion.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa có Playwright kiểm thử UI đăng nhập và xác minh record thật 82499
+Trạng thái: PARTIAL — commit source complete; Astro production build and browser QA unverified
