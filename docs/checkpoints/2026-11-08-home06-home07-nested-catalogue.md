@@ -29,3 +29,10 @@ Source gateway: bypass
 5. Update this checkpoint and `chatgpt/latest-response.md` with truthfully verified DONE/PARTIAL and direct run links.
 
 Never assume an in-progress job or a trigger submission equals PASS. Never alter source Products from WooCommerce through Builder. The earlier Home02 success is separate from completing Home06/07.
+
+## Continuation — CMS writes and Classic Editor fix (2026-11-08)
+- Run 42497091963: import PASS, sections FAIL at immediate REST readback for the first new Product child. On its next run, the table was found/reused and the native Product selector fixed the source.
+- Run 42497379069: importer PASS; writer read-after-write confirmed `tool_home06products` (10 refs, Product), `home_06` parent, `tool_home07products` (9 refs, Product) and `home_07` parent; all four relationships PASS. **The Page insertion did not run successfully**: WordPress Quicktags input `#qt_content_tablepress_quicktags_button` was hidden after direct `tinymce.hide()`; the workflow correctly failed without publishing Page 82454.
+- Corrective Actions commit `385fe5b7eec332316df8c8887fd80701e6986cd0`: switch to native WordPress Text tab `#content-html` before clicking Quicktags, matching previously verified Home02/Home03 native Insert Code flows. Triggered run `42498167316`; check actual job result before further changes.
+- Do **not** duplicate Product children/parents or manually paste shortcode. The pending step is **only** native Insert Code of `home_06` and `home_07` in Page 82454 with full read-after-write and exact order.
+- After CMS PASS: build pinned Astro `c5e12e223e1e92806a32c68c35f759ca1e8a8110` through existing production build request, verify deploy SHA, then production equipment QA and Builder interactions.
