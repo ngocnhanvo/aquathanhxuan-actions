@@ -2,34 +2,50 @@
 
 Date: 2026-11-08 (Asia/Ho_Chi_Minh)
 Project: aquathanhxuan.com
-Goal: Restore legacy Nền sidebar navigation and independently curated mixed-product listing.
 Code mode: auto-build
 Source gateway: bypass
 
-## Current checkpoint — PARTIAL
+## Current goal
+Restore Nền homepage layout with true child-category sidebar navigation and an independently curated Product ESC Table. User corrected table ID to **home_02products** (third underscore reserved for locale suffix _vi/_en) and forbids invented products.
 
-User requested:
-- Remove the lower sidebar image, remove the sidebar "Tất cả sản phẩm" selector and item selection/filtering.
-- Left sidebar: only real direct children of WordPress ProductCategory Nền, each clicked category navigates to its own product listing page, not filtering right-side products.
-- Right: independent WooCommerce product collection chosen and ordered by a separate WordPress ESC Table, including items outside Nền (e.g. đèn rọi, coco). Preserve CMS/Visual Builder ownership.
+## Verified legacy data
+Public source https://aquathanhxuan.com homepage under "PHÂN NỀN & CỐT NỀN" has exactly these 10 displayed products in order:
+1. Đèn Led UFO BAO YOU WRGB
+2. Đèn A60-80W ZAQUA
+3. ĐÈN KAOKUI 70W PRO
+4. Đèn COCO FA Series 100w
+5. Đèn thủy sinh Neo Helios Flat Nano S3 Pro 13W
+6. Đèn Rọi Coco Spotlight SD300 5W
+7. Đèn Rọi Coco Spotlight SD300 7W
+8. Phân nền cao cấp Prodibio Aqua Growth Soil 9L
+9. Cốt nền cao cấp Prodibio Aqua Terra 6L
+10. Cốt nền cao cấp Prodibio Aqua Terra 3L
 
-Previous checkpoint: Astro production aca33f1; WordPress Nền parent category ID 1775 and 9 real direct child terms, including 7 empty ones, had passed production QA.
+This is source/reference, NOT confirmation these IDs/products exist in destination WordPress.
 
-Source updates committed to ngocnhanvo/aquathanhxuan-astro/master:
-- 4b06bfa23170deac41e6ccd6a1bde90462be189f: Home_02 sidebar now uses navigational anchors to subcategory routes based on the existing parent category path; removed sidebar image, removed "Tất cả sản phẩm", removed client-side category filtering.
-- 2393d71b68846c734520ebe1184843c9e1db2e56: getHome02Catalog accepts an ordered optional selection of exact WooCommerce product IDs, independent of Nền taxonomy.
-- 95b584194590719509017b2f97976b61a355898d: Home_02 accepts curated IDs from a separate home_02_products ESC Table in page.contents.
-- cb0171362ce5bab9054c36ad92f9bb5d53e86b7b: correct table shortcode match logic.
+## Source commits
+Previous:
+- 4b06bfa: removed sidebar image, All products selector, client-side product filtering; now category anchors.
+- 2393d71: ordered selection ID support independent of Nền taxonomy.
+- 95b5841, cb01713: separate ESC Table lookup (old wrong ID).
+Latest:
+- 107686c018d30208e72bbd4b37a5ba1bb7526153: Astro Home_02 now references **home_02products** exactly; source in src/astro/tablepress/Home_02.astro.
 
-IMPORTANT REMAINING WORK:
-1. Create real ESC Table with ID home_02_products in WordPress/TablePress (not created in this turn), set meta.api=Product. Its item rows must store exact product IDs via api-key, with order matching desired visual ordering. Add actual existing WooCommerce products including đèn rọi/coco, verify names and availability. Insert shortcode into WordPress homepage Page using native Insert Code. Do not invent products.
-2. Confirm Page contents actually exposes the processed table to Home_02; if renderer passes only current table, adjust integration through the existing CMS pipeline rather than hardcode.
-3. Verify category link routes, especially parent button_href prefix. Do not claim working without route QA.
-4. Run production-compatible source tests and browser/Visual Builder QA desktop/mobile; inspect build/deploy status. No build/test/deployment PASS has been independently verified for these commits in this turn.
-5. Verify Visual Builder edit/add/remove/reorder for curated Product table, with product fields read-only. Update source if needed.
-6. Recheck legacy product listing parity using actual products; do not fill gaps with fabricated data.
+## CMS writer prepared and auto-trigger workflow committed
+- Actions script: scripts/aquathanhxuan-home02products-create.cjs (commit 8b3c9d703164960912d8cf283ce02ecfe14e7d53).
+- Actions push + workflow_dispatch: .github/workflows/aquathanhxuan-home02products-create.yml (commit 5799ca759533eb022f900ce3a43e33fccafb7dcb).
+- Writer authenticates to WordPress, matches legacy names to REAL published WooCommerce products using the Store API, verifies each WordPress record and ACF product_lang=vi, creates only the subset with real verified IDs, writes home_02products with native TablePress custom_api=Product, uses native Quicktags Insert Code to attach to homepage Page ID 82454, and performs readback. No product/media imports, no fabricated IDs/prices/images.
+- Writer fails closed if no products matched or relevant WP/CMS contracts differ, and does not overwrite an existing curated table with divergent contents.
+- A workflow push trigger was submitted but run ID/status CANNOT be confirmed by available GitHub connector; fetch_commit_workflow_runs only returns pull_request-triggered jobs and yielded no runs. **DO NOT CLAIM TABLE ACTUALLY EXISTS YET.**
 
-Do not mark DONE until real CMS table and production QA pass. Preserve rollback and source SHA.
+## Remaining required
+1. Inspect GitHub Actions run for workflow aquathanhxuan-home02products-create.yml. The current connected GitHub tool has no generic list/dispatch workflow runs; attempt alternative authorized API/connector paths rather than assume success.
+2. If workflow failed, inspect logs; fix true error and rerun only the permitted workflow, prevent duplicate CMS writes. Confirm remote WordPress table home_02products has meta.api Product and exact existing IDs, and Page shortcode [table id=home_02products /] via native insert. Count unimported legacy source products.
+3. Confirm Astro Home_02 receives page.contents and maps selected IDs correctly; Visual Builder add/reorder/delete of Product items on home_02products must be verified.
+4. Verify sidebar child category link routes (current URL is based on parent href path prefix and may need native product_cat.link field instead); QA real browser.
+5. Run source tests, production build through existing pipeline, and five-viewport QA; no build/production PASS confirmed this turn. After success, change workflow to manual dispatch-only to avoid accidental repeat on workflow file edits.
+6. If any old source product missing in destination WooCommerce, report it; source migration only through verified separate scoped import (no invented details).
+7. Observe WordPress writer write scope, accurate product_lang, and locale closure (home_02products defaults VI according to Knowledge).
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
