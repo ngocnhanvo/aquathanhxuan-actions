@@ -29,31 +29,31 @@
   "sidebar": [
     {
       "name": "Chihiros›",
-      "href": "/chihiros"
+      "href": "/san-pham?cat=chihiros"
     },
     {
       "name": "Contro Soil›",
-      "href": "/contro-soil"
+      "href": "/san-pham?cat=contro-soil"
     },
     {
       "name": "Master Soil›",
-      "href": "/master-soil"
+      "href": "/san-pham?cat=master-soil"
     },
     {
       "name": "Tropica›",
-      "href": "/tropica"
+      "href": "/san-pham?cat=tropica"
     },
     {
       "name": "Vũ Aqua›",
-      "href": "/vu-aqua"
+      "href": "/san-pham?cat=vu-aqua"
     },
     {
       "name": "Dennerle›",
-      "href": "/dennerle"
+      "href": "/san-pham?cat=dennerle"
     },
     {
       "name": "Gex›",
-      "href": "/gex"
+      "href": "/san-pham?cat=gex"
     }
   ],
   "wpCategories": [
@@ -235,7 +235,7 @@
       "title": "404"
     }
   ],
-  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:95:12",
-  "run_id": 42463079726,
+  "error": "AssertionError [ERR_ASSERTION]: Product listing route unavailable: https://aquathanhxuan.io.vn/san-pham?cat=chihiros\n\n404 !== 200\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:111:16",
+  "run_id": 42463797563,
   "outcome": "failure"
 }
