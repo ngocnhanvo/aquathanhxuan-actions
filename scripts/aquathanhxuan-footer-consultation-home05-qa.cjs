@@ -113,6 +113,26 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    assert.equal(await links.count(),10,'BUILDER_FOOTER_GLOBAL_ROWS');
    const home=admin.frameLocator('#esc-vb-frame').locator('[data-aqua-home-benefits]');
    assert.equal(await home.locator('article p[data-esc-builder-cell-field="description"]').count(),4,'BUILDER_HOME05_DESC_FIELDS');
+   // Read-only UI regression: a mapped cell must open the native ESC Table
+   // editor. Do not press Save: production content must remain unchanged.
+   const desc=home.locator('article p[data-esc-builder-cell-field="description"]').first();
+   await desc.click();
+   await admin.waitForFunction(()=>
+     (document.querySelector('#esc-vb-edit-caption')?.textContent||'').includes('home_05') &&
+     Boolean(document.querySelector('#esc-vb-edit-row option[value="0:description"]')),
+     null,{timeout:20000});
+   assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,
+     'BUILDER_HOME05_DESC_EDIT_DISABLED');
+   console.log('FOOTER_CONSULTATION_HOME05_DESCRIPTION_EDITOR_PASS');
+   const footerLabel=footer.locator('[data-esc-source-table="pub_aquafooterlinks"] [data-esc-builder-cell-field="label"]').first();
+   await footerLabel.click();
+   await admin.waitForFunction(()=>
+     (document.querySelector('#esc-vb-edit-caption')?.textContent||'').includes('pub_aquafooterlinks') &&
+     Boolean(document.querySelector('#esc-vb-edit-row option[value$=":label"]')),
+     null,{timeout:20000});
+   assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,
+     'BUILDER_FOOTER_LABEL_EDIT_DISABLED');
+   console.log('FOOTER_CONSULTATION_FOOTER_LABEL_EDITOR_PASS');
    await admin.screenshot({path:'artifacts/footer-consultation-home05/builder.png'});
    console.log('FOOTER_CONSULTATION_HOME05_BUILDER_PASS');
    await admin.close();
