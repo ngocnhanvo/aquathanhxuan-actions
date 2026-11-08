@@ -283,6 +283,20 @@ const request=async u=>{
     await page.locator('#esc-vb-item-sort-preview-list').waitFor({state:'visible',timeout:16000});
     const options=await page.locator('#esc-vb-item-sort-preview-list li').count();
     assert(options>=2,'Sorting cannot see multiple Product rows');
+    // Opening the sorter alone is not proof that the user can reorder.
+    // Choose two real references and assert the commit action is enabled.
+    const sourceOption=page.locator('#esc-vb-item-sort-preview-list [aria-label="Chọn item 1"]');
+    await sourceOption.click();
+    await page.locator('#esc-vb-item-sort-target').waitFor({state:'visible'});
+    const targetOption=page.locator('#esc-vb-item-sort-preview-list [aria-label="Chọn item 2"]');
+    await targetOption.click();
+    const sortSave=page.locator('#esc-vb-item-sort-save');
+    assert(await sortSave.isEnabled(),'Source and target selected but sort save disabled');
+    const sourceText=await page.locator('#esc-vb-item-sort-source').textContent();
+    const targetText=await page.locator('#esc-vb-item-sort-target').textContent();
+    assert(sourceText&&targetText&&sourceText!==targetText,'Sort source/target not resolved');
+    report.sortDryRun={from:sourceText,to:targetText,saveEnabled:true};
+    // Never click Save on a production dataset; Cancel must leave WordPress untouched.
     await page.locator('#esc-vb-item-sort-cancel').click();
     assert.equal(forbiddenWrites,0,'Visual Builder attempted to write during read-only QA');
     report.builderControls={selectedProduct:expected[0],addDialog:true,
