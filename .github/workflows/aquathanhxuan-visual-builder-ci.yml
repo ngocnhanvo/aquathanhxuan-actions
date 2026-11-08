@@ -110,7 +110,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Test Hero and Sale ESC Table mapping
+      - name: Test Hero, Sale, substrate categories and shared heading contracts
         run: pnpm exec vitest run src/lib/wordpress/tablepress/home00.test.ts src/lib/wordpress/tablepress/home01.test.ts src/lib/wordpress/tablepress/home02.test.ts src/lib/wordpress/tablepress/home02Catalog.test.ts
       - name: Identify source revision
         run: git rev-parse HEAD
