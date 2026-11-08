@@ -389,6 +389,46 @@ async function assertHealthyImage(locator, caption) {
     assert(restored, 'Sale preview cancellation must preserve the published link');
     console.log('HOMEPAGE_BUILDER_SALE_CELLS=PASS title,label,href preview_and_cancel=true cms_write=false');
 
+    // Product API owns product attributes; ESC Table owns only ordered IDs.
+    // Exercise the production item manager without changing WordPress content.
+    await saleBuilder.locator('.aqua-sale__bolt').click();
+    await admin.locator('#esc-vb-item-panel').waitFor({state:'visible',timeout:20000});
+    await admin.locator('#esc-vb-item-new').click();
+    await admin.locator('[data-esc-item-field="key"]').waitFor({state:'visible',timeout:20000});
+    await admin.waitForFunction(() =>
+      !document.querySelector('#esc-vb-item-confirm')?.disabled,
+      null,{timeout:20000});
+    assert.equal(await admin.locator('[data-esc-item-field="key"]').getAttribute('data-esc-item-kind'),
+      'text','Product ID should be insertable');
+    for(const field of ['section_title','all_label','all_link']){
+      const input=admin.locator('[data-esc-item-field="'+field+'"]');
+      assert.equal(await input.getAttribute('readonly'),'',
+        'Product section attribute must be readonly: '+field);
+    }
+    await admin.locator('#esc-vb-item-dismiss').click();
+    console.log('HOMEPAGE_BUILDER_PRODUCT_ADD=PASS id_input=true product_fields_readonly=true cms_write=false');
+
+    await admin.locator('#esc-vb-item-sort-open').click();
+    const sortList=admin.locator('#esc-vb-item-sort-preview-list');
+    await admin.waitForFunction(() =>
+      document.querySelectorAll('#esc-vb-item-sort-preview-list li button').length>=2,
+      null,{timeout:20000});
+    assert((await sortList.innerText()).includes('82477'),
+      'Product sorting must expose actual source IDs');
+    await admin.locator('#esc-vb-item-sort-cancel').click();
+    console.log('HOMEPAGE_BUILDER_PRODUCT_SORT=PASS source_ids=true cms_write=false');
+
+    await admin.locator('#esc-vb-item-delete').click();
+    const deletePicker=admin.locator('#esc-vb-item-delete-picker');
+    await deletePicker.waitFor({state:'visible',timeout:20000});
+    assert((await deletePicker.locator('option').count())>=2,
+      'Product delete picker must expose actual source rows');
+    assert((await deletePicker.locator('option').allTextContents()).some(t=>t.includes('82477')),
+      'Product delete picker must preserve ID reference');
+    await admin.locator('#esc-vb-item-delete-dismiss').click();
+    console.log('HOMEPAGE_BUILDER_PRODUCT_DELETE=PASS source_ids=true cms_write=false');
+
+
     // Footer is streamed after the page sections. Wait for the same marker used
     // by the independently passing Footer Builder QA, not an immediate count.
     const builderFooter = frame.locator('#footer-contact');
