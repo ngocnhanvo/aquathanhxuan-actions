@@ -51,7 +51,18 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
    await admin.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
    await admin.locator('#wp-submit').click();
   }
-  await admin.waitForURL(url=>url.pathname.startsWith('/wp-admin/'),{timeout:45000});
+  try {
+    await admin.waitForURL(url=>url.pathname.startsWith('/wp-admin/'),{waitUntil:'domcontentloaded',timeout:30000});
+  } catch(error) {
+    console.log('HOT_COMBO_ADMIN_LOGIN_DIAGNOSTIC='+JSON.stringify({
+      url:admin.url(),title:await admin.title(),
+      loginForm:await admin.locator('#user_login').count(),
+      error:await admin.locator('#login_error').allTextContents(),
+      notice:await admin.locator('.message,.notice').allTextContents(),
+      formCount:await admin.locator('form').count()
+    }));
+    throw error;
+  }
   await admin.goto(WP+'/wp-admin/edit.php?post_type=page&page=esc-visual-builder&esc_vb_page=82454',{waitUntil:'domcontentloaded',timeout:60000});
   const frame=admin.frameLocator('#esc-vb-frame');
   const iframeSrc=await admin.locator('#esc-vb-frame').getAttribute('src');
