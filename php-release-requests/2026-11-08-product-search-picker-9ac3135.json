@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "9ac31356f444c02e9cf6c4fd692d9d3f59331ece",
+  "intent": "Release Visual Builder Product search picker and guarded WooCommerce lookup. No Astro build."
+}
