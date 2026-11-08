@@ -176,7 +176,8 @@ const eq=(a,b)=>assert.deepEqual(a,b);
    const beforeIds=allIds.filter(x=>x!==target);
    eq(updated.match(/\[table\s+id=[a-zA-Z0-9_-]+\s*\/\]/g)||[],beforeIds);
    await page.locator('#content-html').click();
-   await page.waitForFunction(()=>window.tinymce?.get('content')?.isHidden()===true,null,{timeout:20000});
+   // Text mode can be active without a TinyMCE instance on optimized admin pages.
+   await page.locator('#content').waitFor({state:'visible',timeout:20000});
    const baseline=await page.locator('#content').inputValue();
    assert.equal(baseline,original,'Switching WordPress editor modes changed page content');
    await page.locator('#content').fill(updated);
