@@ -52,6 +52,32 @@
         "row": null
       }
     ],
+    "apiTrace": [
+      {
+        "event": "request",
+        "method": "POST",
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
+        "at": 1794132450385
+      },
+      {
+        "event": "response",
+        "status": 403,
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
+        "at": 1794132451983
+      },
+      {
+        "event": "request",
+        "method": "POST",
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
+        "at": 1794132492485
+      },
+      {
+        "event": "response",
+        "status": 200,
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
+        "at": 1794132494756
+      }
+    ],
     "pointerHits": [
       {
         "tag": "IMG",
@@ -113,7 +139,7 @@
       "builderRow": "0"
     }
   },
-  "error": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#esc-vb-item-status').getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i) to be visible\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:224:75",
-  "run_id": 42469846944,
+  "error": "locator.waitFor: Timeout 45000ms exceeded.\nCall log:\n  - waiting for locator('#esc-vb-item-status').getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i) to be visible\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:232:75",
+  "run_id": 42470001173,
   "outcome": "failure"
 }
