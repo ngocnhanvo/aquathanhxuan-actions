@@ -230,12 +230,23 @@ const request=async u=>{
       },true);
     });
     await firstCard.scrollIntoViewIfNeeded();
-    const productCue=await firstCard.getAttribute('data-esc-vb-region-label');
+    // Astro's preview cues install asynchronously. Wait for their native
+    // readiness marker before evaluating the Product-specific hover label.
+    await frame.locator('#esc-vb-editability-hint').waitFor({state:'attached',timeout:25000});
+    const productCue=await firstCard.evaluate(el=>new Promise(resolve=>{
+      const get=()=>el.getAttribute('data-esc-vb-region-label');
+      if(get())return resolve(get());
+      const observer=new MutationObserver(()=>{
+        if(get()){observer.disconnect();clearTimeout(timer);resolve(get())}
+      });
+      const timer=setTimeout(()=>{observer.disconnect();resolve(get())},12000);
+      observer.observe(el,{attributes:true,attributeFilter:['data-esc-vb-region-label']});
+    }));
     const productSource=await firstCard.evaluate(el=>
       el.closest('[data-esc-source-table]')?.getAttribute('data-esc-source-table')||'');
     report.productCue={text:productCue,source:productSource};
     assert(productCue?.includes('home_02products')&&productCue.includes('Sắp xếp item'),
-      'Product card still has wrong hover hint: '+JSON.stringify(report.productCue));
+      'Product card still has wrong hover hint after Builder initialization: '+JSON.stringify(report.productCue));
     await firstCard.click({position:{x:Math.min(24,await firstCard.evaluate(el=>el.clientWidth/2)),y:20}});
     const inspector=page.locator('#esc-vb-item-panel');
     await inspector.waitFor({state:'visible',timeout:18000});
