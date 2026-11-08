@@ -160,6 +160,16 @@ const request=async u=>{
     let forbiddenWrites=0;
     await page.route(/\/wp-json\/esc-builder\/v1\/(insert-item|delete-item|swap-items|save-section-order)/,
       async route=>{forbiddenWrites++;await route.abort();});
+    await page.evaluate(()=>{
+      window.__escQaEvents=[];
+      window.addEventListener('message',ev=>{
+        const type=String(ev.data?.type||'');
+        if(type.startsWith('esc-vb-'))window.__escQaEvents.push({
+          type,tableId:String(ev.data?.tableId||ev.data?.section?.tableId||''),
+          productId:String(ev.data?.productId||''),row:ev.data?.row??ev.data?.section?.row??null,
+        });
+      });
+    });
     const firstCard=grid.locator('[data-esc-builder-product-id]').first();
     await firstCard.scrollIntoViewIfNeeded();
     await firstCard.click({position:{x:Math.min(24,await firstCard.evaluate(el=>el.clientWidth/2)),y:20}});
@@ -173,6 +183,8 @@ const request=async u=>{
       selectedCardId:await firstCard.getAttribute('data-esc-builder-product-id'),
       selectedRow:await firstCard.getAttribute('data-esc-builder-row'),
       panelVisible:await inspector.isVisible(),
+      messages:await page.evaluate(()=>window.__escQaEvents||[]),
+      productVisualSelected:await firstCard.evaluate(el=>el.hasAttribute('data-esc-vb-product-selected')),
       frameElement:await firstCard.evaluate(el=>({tag:el.tagName,
         parentTable:el.closest('[data-esc-source-table]')?.getAttribute('data-esc-source-table'),
         state:el.getAttribute('data-esc-vb-region-state'),
