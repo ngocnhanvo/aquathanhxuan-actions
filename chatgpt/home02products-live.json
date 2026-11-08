@@ -342,7 +342,11 @@
     "url": "https://aquathanhxuan.io.vn/san-pham/chihiros",
     "heading": "Chihiros"
   },
-  "error": "AssertionError [ERR_ASSERTION]: Product card still shows a generic WooCommerce-only lock instead of ESC Table reorder guidance\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:234:5",
-  "run_id": 42476540306,
+  "productCue": {
+    "text": null,
+    "source": "home_02products"
+  },
+  "error": "AssertionError [ERR_ASSERTION]: Product card still has wrong hover hint: {\"text\":null,\"source\":\"home_02products\"}\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:237:5",
+  "run_id": 42477694820,
   "outcome": "failure"
 }
