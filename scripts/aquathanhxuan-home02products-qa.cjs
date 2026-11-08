@@ -72,6 +72,26 @@ const request=async u=>{
       }catch(error){report['category_'+tag]={error:String(error)}}
     }
     console.log('HOME02_CATEGORY_SOURCES='+JSON.stringify({native:report.category_native,custom:report.category_custom}));
+    try {
+      const all=await request(WP+'/wp-json/wp/v2/product_cat?per_page=100&hide_empty=false');
+      report.previousTerms=all.filter(c=>[1779,1780].includes(c.id))
+        .map(c=>({id:c.id,name:c.name,parent:c.parent,slug:c.slug,link:c.link,count:c.count}));
+    }catch(e){report.previousTermsError=String(e)}
+    if(width===1440){
+      report.routes=[];
+      for(const pathname of [
+        '/chihiros','/product-category/nen-cho-be-thuy-sinh/chihiros/',
+        '/san-pham/nen-cho-be-thuy-sinh/chihiros/',
+        '/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/',
+        '/nen-cho-be-thuy-sinh/chihiros/'
+      ]){
+        try{
+          const r=await page.request.get(ROOT+pathname,{timeout:15000});
+          report.routes.push({pathname,status:r.status(),url:r.url(),title:(await r.text()).match(/<title>([^<]*)<\/title>/i)?.[1]||''});
+        }catch(e){report.routes.push({pathname,error:String(e)})}
+      }
+      console.log('HOME02_ARCHIVE_ROUTES='+JSON.stringify(report.routes));
+    }
     assert.equal(await menu.count(),9,'Sidebar should contain nine real children of Nền');
     assert.equal(await section.locator('[data-substrate-filter]').count(),0,'Obsolete filter button still exists');
     assert.equal(await section.getByText('Tất cả sản phẩm',{exact:true}).count(),0);
