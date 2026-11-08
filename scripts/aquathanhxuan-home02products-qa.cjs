@@ -286,8 +286,10 @@ const request=async u=>{
     // Opening the sorter alone is not proof that the user can reorder.
     // Choose two real references and assert the commit action is enabled.
     const sourceOption=page.locator('#esc-vb-item-sort-preview-list [aria-label="Chọn item 1"]');
-    await sourceOption.click();
-    await page.locator('#esc-vb-item-sort-target').waitFor({state:'visible'});
+    assert(await sourceOption.isDisabled(),
+      'Selected Product must already be the sorter source; it must not require choosing it again');
+    const initialSource=await page.locator('#esc-vb-item-sort-source').textContent();
+    assert(initialSource?.includes(expected[0]),'Selected Product ID not retained as sort source');
     const targetOption=page.locator('#esc-vb-item-sort-preview-list [aria-label="Chọn item 2"]');
     await targetOption.click();
     const sortSave=page.locator('#esc-vb-item-sort-save');
@@ -295,7 +297,7 @@ const request=async u=>{
     const sourceText=await page.locator('#esc-vb-item-sort-source').textContent();
     const targetText=await page.locator('#esc-vb-item-sort-target').textContent();
     assert(sourceText&&targetText&&sourceText!==targetText,'Sort source/target not resolved');
-    report.sortDryRun={from:sourceText,to:targetText,saveEnabled:true};
+    report.sortDryRun={from:sourceText,to:targetText,preselected:true,saveEnabled:true};
     // Never click Save on a production dataset; Cancel must leave WordPress untouched.
     await page.locator('#esc-vb-item-sort-cancel').click();
     assert.equal(forbiddenWrites,0,'Visual Builder attempted to write during read-only QA');
