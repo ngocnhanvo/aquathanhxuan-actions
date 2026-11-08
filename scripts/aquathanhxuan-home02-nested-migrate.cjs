@@ -176,11 +176,31 @@ const eq=(a,b)=>assert.deepEqual(a,b);
    const beforeIds=allIds.filter(x=>x!==target);
    eq(updated.match(/\[table\s+id=[a-zA-Z0-9_-]+\s*\/\]/g)||[],beforeIds);
    await page.locator('#content-html').click();
-   // Text mode can be active without a TinyMCE instance on optimized admin pages.
-   await page.locator('#content').waitFor({state:'visible',timeout:20000});
+   // Use the native Classic Editor switcher; the Aqua admin may remain Visual
+   // after the first click. Do not change Page via REST/database.
+   const inspect=()=>page.evaluate(()=>({
+     textareaVisible:Boolean(document.getElementById('content')?.getClientRects().length),
+     tabText:document.getElementById('content-html')?.className,
+     wrapper:document.getElementById('wp-content-wrap')?.className,
+     editorHidden:window.tinymce?.get('content')?.isHidden?.(),
+     switchAvailable:typeof window.switchEditors?.go==='function'
+   }));
+   let editorState=await inspect();
+   console.log('HOME02_EDITOR_MODE_INITIAL='+JSON.stringify(editorState));
+   if(!editorState.textareaVisible){
+     await page.evaluate(()=>{
+       if(typeof window.switchEditors?.go==='function')window.switchEditors.go('content','html');
+       const ed=window.tinymce?.get('content');
+       if(ed && !ed.isHidden())ed.hide();
+     });
+     editorState=await inspect();
+     console.log('HOME02_EDITOR_MODE_AFTER_NATIVE_SWITCH='+JSON.stringify(editorState));
+   }
+   assert(editorState.textareaVisible,'WordPress native Text editor remains hidden');
    const baseline=await page.locator('#content').inputValue();
    assert.equal(baseline,original,'Switching WordPress editor modes changed page content');
    await page.locator('#content').fill(updated);
+   assert.equal(await page.locator('#content').inputValue(),updated,'Page editor lost exact update');
    await page.locator('#publish').click();
    await page.waitForTimeout(1700);
    const verifyContext=await browser.newContext();
