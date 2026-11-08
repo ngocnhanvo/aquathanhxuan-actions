@@ -113,7 +113,7 @@ const getIds=html=>[...html.matchAll(/\[table\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map
     // wrapper* within WordPress Text mode. Original Page HTML remains byte-for-byte.
     const recovered=modified.slice(0,start)+modified.slice(end);
     const normalized=recovered===prior||(
-      /\\r?\\n$/.test(prior) && recovered===prior.replace(/\\r?\\n$/,''));
+      /\r?\n$/.test(prior) && recovered===prior.replace(/\r?\n$/,''));
     if(!normalized){
       let first=0;while(first<Math.min(recovered.length,prior.length)&&recovered[first]===prior[first])first++;
       console.log('EQUIPMENT_NATIVE_INSERT_DIFF='+JSON.stringify({
