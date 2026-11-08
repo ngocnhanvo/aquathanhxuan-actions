@@ -27,6 +27,8 @@ jobs:
         run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - name: Verify real ESC Table, frontend products, sidebar and Builder
         id: qa
+        env:
+          BUILDER_ONLY: '1'
         run: node scripts/aquathanhxuan-home02products-qa.cjs
       - name: Preserve viewport screenshots
         if: always()
