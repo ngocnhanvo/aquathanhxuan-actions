@@ -1,8 +1,8 @@
 {
-  "run_id": 42460657397,
+  "run_id": 42460789637,
   "run_attempt": "1",
-  "source_sha": "58e9273630cd56bca45489147f748055c43d1d58",
+  "source_sha": "49e31c4c77f0d3e257ca262b9d7a1be2a669db46",
   "cms_step": "failure",
-  "checked_at": "2026-11-08T07:55:09.549Z",
+  "checked_at": "2026-11-08T07:57:16.321Z",
   "workflow": "Aqua create Home 02 curated products ESC Table"
 }
