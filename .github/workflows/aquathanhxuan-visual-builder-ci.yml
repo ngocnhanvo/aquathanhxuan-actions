@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Verify numerical Product ID matching and correct nested ESC Table click source.
+# Verify natural-height Nền sidebar and keep mobile horizontal category list.
 on:
   push:
     branches: [main]
