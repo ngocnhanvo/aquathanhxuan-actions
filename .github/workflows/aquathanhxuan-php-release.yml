@@ -52,8 +52,8 @@ jobs:
           if current != after or os.environ['GITHUB_SHA'] != after:
               raise SystemExit('Actions checkout differs from push SHA')
           raw=subprocess.check_output(['git','diff','--no-renames','--name-status',before,after,'--','php-release-requests/'],text=True)
-          lines=[line.split('\\t') for line in raw.strip().splitlines() if line]
-          if len(lines)!=1 or lines[0][0] not in ('A','M') or not re.fullmatch(r'php-release-requests/[a-zA-Z0-9._-]+\\.json',lines[0][1]):
+          lines=[line.split('\t') for line in raw.strip().splitlines() if line]
+          if len(lines)!=1 or lines[0][0] not in ('A','M') or not re.fullmatch(r'php-release-requests/[a-zA-Z0-9._-]+\.json',lines[0][1]):
               raise SystemExit('Exactly one new/updated PHP release request required')
           payload=json.loads(pathlib.Path(lines[0][1]).read_text())
           expected={
