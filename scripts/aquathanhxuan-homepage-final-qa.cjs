@@ -437,24 +437,22 @@ async function assertHealthyImage(locator, caption) {
     assert(restored, 'Sale preview cancellation must preserve the published link');
     console.log('HOMEPAGE_BUILDER_SALE_CELLS=PASS title,label,href preview_and_cancel=true cms_write=false');
 
-    // Product API owns product attributes; ESC Table owns only ordered IDs.
-    // Exercise the production item manager without changing WordPress content.
+    // Product API owns WooCommerce attributes; ESC Table owns ordered IDs.
+    // Product picker searches the whole published catalogue and keeps key
+    // hidden until a valid item has been selected, so never treat it as a
+    // visible text input or require editing Product attributes.
     await saleBuilder.locator('.aqua-sale__bolt').click();
     await admin.locator('#esc-vb-item-panel').waitFor({state:'visible',timeout:20000});
     await admin.locator('#esc-vb-item-new').click();
-    await admin.locator('[data-esc-item-field="key"]').waitFor({state:'visible',timeout:20000});
-    await admin.waitForFunction(() =>
-      !document.querySelector('#esc-vb-item-confirm')?.disabled,
-      null,{timeout:20000});
-    assert.equal(await admin.locator('[data-esc-item-field="key"]').getAttribute('data-esc-item-kind'),
-      'text','Product ID should be insertable');
-    for(const field of ['section_title','all_label','all_link']){
-      const input=admin.locator('[data-esc-item-field="'+field+'"]');
-      assert.equal(await input.getAttribute('readonly'),'',
-        'Product section attribute must be readonly: '+field);
-    }
+    await admin.locator('input[data-esc-item-field="key"]').waitFor({state:'attached',timeout:20000});
+    assert.equal(await admin.locator('input[data-esc-item-field="key"]').getAttribute('type'),
+      'hidden','Product reference key should be selected using searchable picker');
+    const search=admin.locator('#esc-vb-item-dialog input[type="search"]');
+    await search.waitFor({state:'visible',timeout:20000});
+    assert.equal(await admin.locator('#esc-vb-item-confirm').isDisabled(),true,
+      'Product insert must require explicit selection');
     await admin.locator('#esc-vb-item-dismiss').click();
-    console.log('HOMEPAGE_BUILDER_PRODUCT_ADD=PASS id_input=true product_fields_readonly=true cms_write=false');
+    console.log('HOMEPAGE_BUILDER_PRODUCT_ADD=PASS product_picker=true reference_only=true cms_write=false');
 
     await admin.locator('#esc-vb-item-sort-open').click();
     const sortList=admin.locator('#esc-vb-item-sort-preview-list');
@@ -466,15 +464,25 @@ async function assertHealthyImage(locator, caption) {
     await admin.locator('#esc-vb-item-sort-cancel').click();
     console.log('HOMEPAGE_BUILDER_PRODUCT_SORT=PASS source_ids=true cms_write=false');
 
+    // Clicking a Product card selects its immutable Product ID, and the delete
+    // confirmation must not ask the operator to choose the same item again.
+    const selectedCard=saleBuilder.locator('[data-sale-card][data-esc-builder-product-id]').first();
+    const selectedId=await selectedCard.getAttribute('data-esc-builder-product-id');
+    assert(selectedId,'No published Product ID available for delete confirmation');
+    await selectedCard.locator('.aqua-sale__name-link').click();
+    await admin.waitForFunction(id=>
+      document.querySelector('#esc-vb-item-status')?.textContent?.includes(id) &&
+      !document.querySelector('#esc-vb-item-delete')?.disabled,
+      selectedId,{timeout:20000});
     await admin.locator('#esc-vb-item-delete').click();
-    const deletePicker=admin.locator('#esc-vb-item-delete-picker');
-    await deletePicker.waitFor({state:'visible',timeout:20000});
-    assert((await deletePicker.locator('option').count())>=2,
-      'Product delete picker must expose actual source rows');
-    assert((await deletePicker.locator('option').allTextContents()).some(t=>t.includes('82477')),
-      'Product delete picker must preserve ID reference');
+    await admin.locator('#esc-vb-item-delete-dialog').waitFor({state:'visible',timeout:20000});
+    await admin.waitForFunction(id=>
+      document.querySelector('#esc-vb-item-delete-context')?.textContent?.includes(id),
+      selectedId,{timeout:20000});
+    assert.equal(await admin.locator('#esc-vb-item-delete-picker-wrap').isVisible(),false,
+      'Selected Product should not require a second delete dropdown');
     await admin.locator('#esc-vb-item-delete-dismiss').click();
-    console.log('HOMEPAGE_BUILDER_PRODUCT_DELETE=PASS source_ids=true cms_write=false');
+    console.log('HOMEPAGE_BUILDER_PRODUCT_DELETE=PASS selected_id='+selectedId+' picker_hidden=true cms_write=false');
 
 
     // Footer is streamed after the page sections. Wait for the same marker used
