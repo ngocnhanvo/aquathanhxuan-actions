@@ -52,13 +52,18 @@ const stamp = Date.now();
       if ((await slides.count()) > 1) {
         const current = () => hero.locator('[data-hero-slide][data-active="true"]').first().getAttribute('data-esc-builder-row');
         const start = await current();
-        await hero.locator('[data-hero-next]').click();
-        await previewFrame.waitForFunction(before =>
-          [...document.querySelectorAll('[data-aqua-home-hero] [data-hero-slide][data-active="true"]')]
-            .some(e => e.getAttribute('data-esc-builder-row') !== before),
-          start, { timeout: 6000 });
+        const candidates = await slides.evaluateAll(nodes=>nodes.map(node=>({
+          row:node.getAttribute('data-esc-builder-row'),
+          audience:node.getAttribute('data-audience'),
+          active:node.getAttribute('data-active')
+        })));
+        const button = hero.locator('[data-hero-next]');
+        console.log('BUILDER_HERO_BEFORE '+JSON.stringify({viewport,candidates,initial:start,buttonVisible:await button.isVisible()}));
+        await button.click();
+        await admin.waitForTimeout(350);
         const next = await current();
-        assert.notEqual(next, start, 'Hero next arrow stayed locked');
+        console.log('BUILDER_HERO_AFTER '+JSON.stringify({viewport,next}));
+        assert.notEqual(next, start, 'Hero next arrow stayed locked: '+JSON.stringify(candidates));
         await hero.locator('[data-hero-prev]').click();
         assert.equal(await current(), start, 'Hero previous arrow did not return');
         const dots=hero.locator('[data-hero-dot]');
