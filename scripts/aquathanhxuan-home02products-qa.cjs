@@ -7,7 +7,7 @@ const WP='https://admin.aquathanhxuan.io.vn';
 const expectedSource=JSON.parse(fs.readFileSync('chatgpt/home02products-import-status.json','utf8'));
 const expected=(expectedSource.mappings||[]).map(x=>String(x.target_id));
 assert.equal(expected.length,10,'Expected ten verified migrated products');
-const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
+const widths=process.env.BUILDER_ONLY==='1'?[]:[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const output='artifacts/home02products';
 fs.mkdirSync(output,{recursive:true});
 const report={cms:false,frontend:[],builder:false,ids:expected};
