@@ -124,6 +124,14 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,
      'BUILDER_HOME05_DESC_EDIT_DISABLED');
    console.log('FOOTER_CONSULTATION_HOME05_DESCRIPTION_EDITOR_PASS');
+   const footerGroup=footer.locator('[data-esc-source-table="pub_aquafooterlinks"]').first();
+   const footerVersion=await footerGroup.getAttribute('data-esc-rendered-version');
+   const footerLabels=footer.locator('[data-esc-source-table="pub_aquafooterlinks"] [data-esc-source-field="label"]');
+   assert(await footerLabels.count()>0,'BUILDER_FOOTER_SOURCE_LABELS_MISSING');
+   const mapped=await footer.locator('[data-esc-source-table="pub_aquafooterlinks"] [data-esc-builder-cell-field="label"]').count();
+   console.log('FOOTER_LABEL_MAPPING_DIAGNOSTIC='+JSON.stringify({footerVersion,mapped,sourceLabels:await footerLabels.count()}));
+   assert(/^[a-f0-9]{64}$/.test(footerVersion||'') && mapped>0,
+     'BUILDER_FOOTER_GLOBAL_VERSION_OR_CELL_MAPPING_MISSING');
    const footerLabel=footer.locator('[data-esc-source-table="pub_aquafooterlinks"] [data-esc-builder-cell-field="label"]').first();
    await footerLabel.click();
    await admin.waitForFunction(()=>
