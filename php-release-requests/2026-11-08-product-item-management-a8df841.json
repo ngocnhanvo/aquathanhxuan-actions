@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "a8df8414296d48820a0cee71b7ad7ceb037f3760",
+  "intent": "Release guarded Product ESC Table item membership and ordering actions through existing FTPS pipeline; no Astro build, no WooCommerce record edits"
+}
