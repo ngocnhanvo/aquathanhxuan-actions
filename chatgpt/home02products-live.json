@@ -1,0 +1,32 @@
+{
+  "cms": true,
+  "frontend": [],
+  "builder": false,
+  "ids": [
+    "82535",
+    "82537",
+    "82539",
+    "82541",
+    "82543",
+    "82545",
+    "82547",
+    "82549",
+    "82551",
+    "82552"
+  ],
+  "cachedIds": [
+    "82535",
+    "82537",
+    "82539",
+    "82541",
+    "82543",
+    "82545",
+    "82547",
+    "82549",
+    "82551",
+    "82552"
+  ],
+  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:50:12",
+  "run_id": 42462688926,
+  "outcome": "failure"
+}
