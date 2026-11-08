@@ -1,9 +1,7 @@
 name: Aqua Nền requested children write-once
+# Manual only after the initial guarded CMS category migration.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/aquathanhxuan-substrate-brands-create.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
