@@ -1,0 +1,47 @@
+name: Aqua audit real legacy Home 02 products
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home02products-legacy.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: aquathanhxuan-home02-legacy-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Read actual legacy product identities
+        id: audit
+        run: node scripts/aquathanhxuan-home02products-legacy-inventory.cjs
+      - name: Publish source product verification report
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'chatgpt/home02products-legacy.json';
+            const data = fs.existsSync(path)
+              ? JSON.parse(fs.readFileSync(path,'utf8')) : {error:'Audit produced no report'};
+            data.run_id=context.runId;
+            data.source_sha=context.sha;
+            data.outcome='${{ steps.audit.outcome }}';
+            const content=Buffer.from(JSON.stringify(data,null,2)+'\n').toString('base64');
+            const ref=context.ref.replace('refs/heads/','');
+            const previous=await github.rest.repos.getContent({
+              owner:context.repo.owner,repo:context.repo.repo,path,ref
+            }).catch(e=>e.status===404?null:Promise.reject(e));
+            await github.rest.repos.createOrUpdateFileContents({
+              owner:context.repo.owner,repo:context.repo.repo,path,branch:ref,
+              message:'Record verified Home 02 legacy product audit',
+              content,...(previous?.data?.sha?{sha:previous.data.sha}:{})
+            });
