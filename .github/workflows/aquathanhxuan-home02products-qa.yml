@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Validate cached Product SSR archive and Visual Builder on Astro 243e4249.
+# Read-only item selection, dialogs, sort and five-viewpoint production QA.
 on:
   push:
     branches: [main]
