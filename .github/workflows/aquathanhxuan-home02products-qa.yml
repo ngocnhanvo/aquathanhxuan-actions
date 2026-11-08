@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Verify native Product reorder, visible tooltip and preview DOM synchronization on Astro d3e6c112.
+# Verify Product tooltip after preview readiness and test UI swap without saving.
 on:
   push:
     branches: [main]
