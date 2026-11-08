@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expectedSha = 'a98b3ffb94496875512508dc25e3e65bc0a7d2d8';
+const expectedSha = '28e6a2fa8e5d32a71babf6375e8160290d3d3312';
 const viewports = [[1440, 900], [1024, 768], [768, 1024], [844, 390], [390, 844]];
 const sections = [
   ['Hero', '[data-aqua-home-hero]'],
