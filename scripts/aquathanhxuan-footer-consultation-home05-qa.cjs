@@ -52,6 +52,7 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    const menu=page.locator('#consultation-menu');
    assert.equal(await launcher.getAttribute('aria-expanded'),'true','PANEL_OPEN');
    await menu.locator('a[href^="tel:"]').first().waitFor({state:'visible'});
+   console.log('CONSULTATION_CHANNEL_DIAGNOSTIC='+JSON.stringify(await menu.locator('a').evaluateAll(nodes=>nodes.map(x=>({href:x.getAttribute('href'),label:x.textContent.trim()})))));
    await menu.locator('a[href*="m.me/"]').first().waitFor({state:'visible'});
    await menu.locator('a[href*="zalo.me/"]').first().waitFor({state:'visible'});
    assert.equal(await menu.locator('a[href*="zalo.me/"]').first().getAttribute('href'),'https://zalo.me/0972551688','ZALO_CANONICAL_TARGET');
