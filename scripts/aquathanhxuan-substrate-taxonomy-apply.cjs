@@ -38,7 +38,7 @@ const sleep=ms=>new Promise(done=>setTimeout(done,ms));
   const expectedIds=specs.flatMap(x=>x.products);
   const existingProducts=new Map();
   for(const id of expectedIds){
-   const response=await api('/wp-json/wp/v2/product/'+id+'?context=edit');
+   const response=await api('/wp-json/wp/v2/product/'+id);
    assert.equal(response.status,200,'Cannot read expected published product '+id);
    assert.equal(response.data.status,'publish','Do not modify unpublished product '+id);
    const n=String(response.data.title?.rendered||'').toLowerCase();
@@ -103,7 +103,7 @@ const sleep=ms=>new Promise(done=>setTimeout(done,ms));
    let after;
    for(let attempt=0;attempt<25;attempt++){
     await sleep(400);
-    const response=await api('/wp-json/wp/v2/product/'+id+'?context=edit');
+    const response=await api('/wp-json/wp/v2/product/'+id);
     if(response.status===200 && Array.isArray(response.data.product_cat)){
      after=[...response.data.product_cat].sort((a,b)=>a-b);
      if(JSON.stringify(after)===JSON.stringify(desired))break;
