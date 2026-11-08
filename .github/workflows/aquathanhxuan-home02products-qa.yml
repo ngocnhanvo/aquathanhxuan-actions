@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Verify corrected nested Product table selection on Astro b97f664c.
+# Trace actual Product click event sequence in the live Visual Builder.
 on:
   push:
     branches: [main]
