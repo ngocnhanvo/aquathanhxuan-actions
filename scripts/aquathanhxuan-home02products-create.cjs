@@ -170,10 +170,13 @@ const run=async()=>{
    assert(addition.includes(shortcode),'Native Insert Code did not preserve its shortcode');
    assert(!/<script\b|<iframe\b/i.test(addition),'Unexpected executable markup in inserted preview');
    await page.locator('#publish').click();
-   await page.waitForLoadState('domcontentloaded');
+   // Publishing may start a redirect while navigation is still in flight.
+   // Verify in an independent tab to avoid interrupting the native save.
+   await page.waitForTimeout(1800);
   }
-  await page.goto(editUrl,{waitUntil:'domcontentloaded'});
-  const readback=await page.locator('#content').inputValue();
+  const verifyPage=await page.context().newPage();
+  await verifyPage.goto(editUrl,{waitUntil:'domcontentloaded',timeout:45000});
+  const readback=await verifyPage.locator('#content').inputValue();
   assert.equal(readback.split(shortcode).length-1,1,'Home shortcode missing after reload');
   completed=true;
   console.log('HOME02PRODUCTS_CMS_PASS='+JSON.stringify({table:ID,homepage:PAGE_ID,ids:matched.map(x=>x.id),missing}));
