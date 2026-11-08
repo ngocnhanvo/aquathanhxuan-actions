@@ -38,7 +38,15 @@ const base='https://admin.aquathanhxuan.io.vn';
         })):undefined
       })):json?.message||null};
     }catch(error){rest[url]={error:String(error)}}
-    return {title:document.title,options,rows,rest};
+    const productResponse=await fetch('/wp-json/wp/v2/product?status=publish&per_page=100',{credentials:'same-origin'});
+    const productJson=await productResponse.json();
+    const products={status:productResponse.status,items:Array.isArray(productJson)?productJson.map(x=>({
+      id:x.id,name:x.title?.rendered,slug:x.slug,
+      product_cat:x.product_cat,categories:x.categories,
+      acfCategory:x.acf?.category,
+      categoryNames:x.product_categories
+    })):productJson?.message};
+    return {title:document.title,options,rows,rest,products};
   });
   console.log('CATEGORY_INVENTORY='+JSON.stringify(report));
   assert(report.options.length>0,'Category management parent dropdown absent');
