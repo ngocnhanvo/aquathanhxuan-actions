@@ -2,7 +2,7 @@
 
 Date: 2026-11-08 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
-Status: IN_PROGRESS — do not report final DONE without actual CMS, deploy and Builder QA
+Status: DONE — CMS + production deploy + Visual Builder QA verified
 Code mode: auto-build
 Source gateway: bypass
 
@@ -21,7 +21,7 @@ Source gateway: bypass
 - Guarded import run 42496783741 SUCCESS: 19 verified Product mappings (10 filters newly imported, 7 lights reused, 2 accessories imported), real media and original prices, 5 child WooCommerce terms created, no invented records. Product IDs for new filter list: 82577,82579,82580,82581,82583,82585,82587,82589,82591,82592. Lighting list: 82535,82537,82539,82541,82543,82545,82547,82594,82596. Root and child categories assigned preserving existing taxonomy.
 - Astro catalog sidebar fix: `src/lib/wordpress/tablepress/home02Catalog.ts` commit 7cc9670, regression tests commit c5e12e2. Source QA run 42497158378 PASS, 3 suites, 26 tests, source SHA c5e12e223e1e92806a32c68c35f759ca1e8a8110.
 
-## Pending and concrete next actions
+## Previously planned actions (completed; retained for history)
 1. Check workflow `Aqua equipment products guarded CMS migration` run 42497091963 (initial script) and run 42497379069 (newer script `46a48b53...`). These each execute idempotent import and *then* native Page+ESC Table writer using generated mapping artifact; later run includes native fallback for persisting `meta.api=Product`. Do not dispatch more imports unnecessarily. Read job logs, repair actual failure and rerun only if necessary.
 2. Writer: `scripts/aquathanhxuan-equipment-sections-create.cjs`, importer `scripts/aquathanhxuan-equipment-products-migrate.py`, workflow `.github/workflows/aquathanhxuan-equipment-products-migrate.yml`. It must verify actual child tables, parent `shortcode-products`, native Page Insert Code `home_06`/`home_07` after home_04 and before home_05. Do not duplicate standalone child shortcodes. Do not touch existing six sections.
 3. After CMS PASS, create a JSON build-request under `build-requests/*.json` with pinned Astro SHA c5e12e223e1e92806a32c68c35f759ca1e8a8110; this triggers the *existing* WordPress production Build Website workflow; record build/deploy run IDs and verify source marker.
@@ -43,3 +43,12 @@ Never assume an in-progress job or a trigger submission equals PASS. Never alter
 - Astro source SHA `c5e12e223e1e92806a32c68c35f759ca1e8a8110` confirmed current master. Vitest source QA run 42497158378: 26 tests PASS.
 - Canonical WordPress-controlled production build request `build-requests/2026-11-08-home06-home07-c5e12e2.json`, Actions run **42499512154** started, must verify SUCCESS and triggered Astro deploy. A parallel identical-SHA build request from another active project continuation was also queued as run 42499528323; avoid unnecessarily dispatching another build. Both target the same pinned SHA.
 - Production QA request `qa-requests/equipment-production.json` **NOT created yet**; create only after successful deploy and marker verification, then run `.github/workflows/aquathanhxuan-equipment-production-qa.yml`, inspect 5 viewports and Builder add/delete/sort Cancel for both nested Product tables. Until verified, overall status PARTIAL.
+
+## FINAL DONE — production and Visual Builder verified (2026-11-08 23:31 Asia/Ho_Chi_Minh)
+- CMS native WordPress Page Insert Code: **run 42499333049 SUCCESS**; independent readback Page 82454 exactly `home_00,home_01,home_02,home_03,home_04,home_06,home_07,home_05`; no child shortcode separately pasted.
+- Four native ESC Tables source/parent relationship PASS: `home_06 → tool_home06products` Product 10 refs; `home_07 → tool_home07products` Product 9 refs. Real WooCommerce products/media, readonly records.
+- Astro master source SHA **c5e12e223e1e92806a32c68c35f759ca1e8a8110**. Source contract test run 42497158378 PASS (26 tests). WordPress-controlled production build run **42499512154 SUCCESS**, deploy **42499591212 SUCCESS**. A duplicate same-source request also finished **42499528323 SUCCESS**, deploy **42499819912 SUCCESS**; no further build should be dispatched.
+- Initial production QA run **42499774804**: Product REST, source & 5 public viewports PASS, but Builder iframe timeout during overlapping same-SHA redeploy; did NOT mark that run PASS.
+- Latest production QA run **42500127511 SUCCESS**: marker `EQUIPMENT_DEPLOY_READY=c5e12e2...`, Product source 10/9, all five public sizes (1440x900,1024x768,768x1024,844x390,390x844), Visual Builder native Product child source, Product IDs/row coordinates, Add dialog and red-blue sort source/target, cancel without mutation: `EQUIPMENT_BUILDER_PASS=tool_home06products`, `EQUIPMENT_BUILDER_PASS=tool_home07products`, `EQUIPMENT_PRODUCTION_QA_PASS`.
+- QA is intentionally **read-only with cancellation** on production. Live persist/reload/rollback of an actual Product item reorder was **not** exercised. Do not claim that extra persistence scenario was tested.
+- Overall original task of Home06 + Home07 nested independent Product sections is **DONE** by the above contracted checks. No remaining deployment/QA step, no further source changes necessary.
