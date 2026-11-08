@@ -105,7 +105,30 @@ const json=async url=>{
   });
   for(const config of configs){
    const section=frame.locator('[data-aqua-home-substrate][data-esc-source-table="'+config.id+'"]');
-   await section.waitFor({state:'visible',timeout:55000});
+   try{
+    await section.waitFor({state:'attached',timeout:22000});
+    await section.scrollIntoViewIfNeeded({timeout:12000});
+    await section.waitFor({state:'visible',timeout:13000});
+   }catch(error){
+    const urls=admin.frames().map(f=>f.url());
+    const screenshot='qa-artifacts/equipment/builder-preview-diagnostic.png';
+    await admin.screenshot({path:screenshot,fullPage:false,timeout:9000}).catch(()=>{});
+    let preview={};
+    try{
+     preview={
+      body:(await frame.locator('body').innerText({timeout:4500})).slice(0,2200),
+      tableIDs:await frame.locator('[data-esc-source-table]').evaluateAll(
+        els=>els.map(e=>e.getAttribute('data-esc-source-table')).filter(Boolean).slice(0,60)),
+      substrates:await frame.locator('[data-aqua-home-substrate]').count(),
+      pageState:await frame.locator('body').getAttribute('data-page-id')
+     };
+    }catch(e){preview.error=String(e)}
+    console.log('EQUIPMENT_BUILDER_IFRAME_DIAG='+JSON.stringify({
+      expected:config.id,iframeSrc:src,frameURLs:urls,preview,
+      exception:String(error).slice(0,600)
+    }));
+    throw error;
+   }
    const grid=section.locator('[data-substrate-products]');
    assert.equal(await grid.getAttribute('data-esc-source-table'),config.child,'Builder nested identity mismatch');
    assert(manifest.tables.some(t=>t.id===config.child&&t.exists),'Nested table missing from Builder manifest');
