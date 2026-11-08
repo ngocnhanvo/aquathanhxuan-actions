@@ -53,6 +53,27 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    assert.equal(await launcher.getAttribute('aria-expanded'),'true','PANEL_OPEN');
    await menu.locator('a[href^="tel:"]').first().waitFor({state:'visible'});
    console.log('CONSULTATION_CHANNEL_DIAGNOSTIC='+JSON.stringify(await menu.locator('a').evaluateAll(nodes=>nodes.map(x=>({href:x.getAttribute('href'),label:x.textContent.trim()})))));
+   if (width === 1440) {
+     const fetchDetails = async (url, transformer) => {
+       try {
+         const res = await page.request.get(url,{timeout:12000});
+         const body = res.ok() ? await res.json() : null;
+         return {status:res.status(),...transformer(body)};
+       } catch(e) {return {error:e.message};}
+     };
+     const cached=await fetchDetails(site+'/data/cms-common.json?diagnostic='+Date.now(),body=>({
+       info:body?.data_info?{facebook:body.data_info.facebook,zalo:body.data_info.zalo,hotline:body.data_info.hotline}:null,
+       keys:body?Object.keys(body).slice(0,15):[]
+     }));
+     const source=await fetchDetails(wp+'/wp-json/wp/v2/thong-tin-chung?per_page=20&status=publish',body=>({
+       records:Array.isArray(body)?body.map(x=>({id:x.id,facebook:x.acf?.facebook,zalo:x.acf?.zalo})):null
+     }));
+     const logs=await fetchDetails(wp+'/wp-json/astro/v1/get-thongtinchung-logs',body=>({
+       records:Array.isArray(body)?body.map(x=>({id:x.id,action:x.action,type:x.type,facebook:x.info?.acf?.facebook,zalo:x.info?.acf?.zalo})):null
+     }));
+     console.log('CONTACT_SOURCE_DIAGNOSTIC='+JSON.stringify({cached,source,logs}));
+   }
+   assert(await menu.locator('a[href*="m.me/"]').count()>0,'MESSENGER_MISSING_IN_DEPLOYED_INFO');
    await menu.locator('a[href*="m.me/"]').first().waitFor({state:'visible'});
    await menu.locator('a[href*="zalo.me/"]').first().waitFor({state:'visible'});
    assert.equal(await menu.locator('a[href*="zalo.me/"]').first().getAttribute('href'),'https://zalo.me/0972551688','ZALO_CANONICAL_TARGET');
