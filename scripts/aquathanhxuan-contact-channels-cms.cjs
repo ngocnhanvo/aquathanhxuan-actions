@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const wp = 'https://admin.aquathanhxuan.io.vn';
 const site = 'https://aquathanhxuan.io.vn';
 const legacyFacebook = 'https://www.facebook.com/aquathanhxuan.hn/';
-const legacyZaloLabel = '1900.666.888';
+const legacyZaloLabel = '0972551688'; // Actual Zalo destination verified on the original website.
 const postId = 62; // verified from public thong-tin-chung REST source.
 assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD, 'Missing WordPress admin login');
 const fields = { facebook: legacyFacebook, zalo: legacyZaloLabel };
