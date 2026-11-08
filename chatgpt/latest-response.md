@@ -3,25 +3,25 @@
 Date: 2026-11-09 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
 Knowledge: ngocnhanvo/knowledge main
-Astro: ngocnhanvo/aquathanhxuan-astro master @ b82f644cc7abd91d4d425e7f43226064fb00455b
+Astro: ngocnhanvo/aquathanhxuan-astro master @ e3ce52aca18627028b3ad8b45847be3f30b0be7c
 PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
 Actions: ngocnhanvo/aquathanhxuan-actions main
 Checkpoint: docs/checkpoints/2026-11-09-footer-consultation-home05.md
 
-## Latest completed task
-- Footer ESC Table native inspector click was blocked by the generic unsupported Footer affordance handler in builderEditabilityCues.ts at document capture.
-- Astro fix b82f644 allows a versioned, identified global Footer ESC Table cell through the UI cue guard and keeps unsupported regions blocked.
-- Offline Chromium fixture now validates a nested link-text click plus stale version rejection.
-- Source contracts [42514768537](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514768537): SUCCESS, 4/4 jobs.
-- WordPress-controlled production build [42514928428](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514928428): SUCCESS.
-- Astro production deploy [42515003603](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515003603): SUCCESS.
-- Production read-only UI QA [42515172280](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515172280): SUCCESS, all five viewport assertions and Home05 description + Footer label inspector click PASS.
-- No CMS write made by QA, no data mutation or rollback needed.
+## Latest completed task — decorative Footer waves
+- User approved a reference image with smooth white/cyan/purple waves above the dark purple copyright bar; preserve all content and centering.
+- Implemented as self-contained decorative SVG in src/astro/components/Layout/Footer.astro, with no CMS data alterations, no image requests, aria-hidden and pointer-events-none.
+- Astro source commit e3ce52aca18627028b3ad8b45847be3f30b0be7c.
+- Added Footer source regression test; Actions CI run 42536578128: all 4 jobs PASS.
+- WordPress-controlled production build run 42536688194 SUCCESS.
+- Astro production deployment run 42536756427 SUCCESS.
+- Playwright QA run 42536899413 SUCCESS, five viewport wave assertions and all existing Footer, Home05, consultation launcher and Visual Builder inspector checks PASS.
+- No WordPress/CMS data written. No follow-up build required for this completed request.
 
-## Carry-forward scope
-- Header, Home02, Home03/04, Home05, Home06/07, consultation widget and Footer visual presentation already passed existing checkpoints; do not redo.
-- Native inspector click regression is fixed and deployed. An actual save/readback/rollback production test remains unverified: any future such test must follow Knowledge CORE-04 backup + narrow WRITE_SCOPE + cleanup. Do not claim full write-roundtrip was tested.
-- Avoid unnecessary builds unless a new application change needs deployment.
+## Carry-forward
+- Do not redo Footer wave, Home02/Home05/06/07 or Visual Builder work that already passed.
+- Production native inspector click is working. The explicit save/readback/rollback editing test is still distinct and unverified; do not claim a CMS write-roundtrip test passed.
+- For any new task, recheck HEAD, live runs, and checkpoint before modifying.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
