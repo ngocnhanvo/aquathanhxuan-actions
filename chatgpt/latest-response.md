@@ -2,31 +2,35 @@
 
 Date: 2026-11-08 (Asia/Ho_Chi_Minh)
 Project: aquathanhxuan.com
-Goal: Match all homepage section widths to Nền thủy sinh and restore the seven Nền child categories shown in the legacy category menu.
+Goal: Restore legacy Nền sidebar navigation and independently curated mixed-product listing.
 Code mode: auto-build
 Source gateway: bypass
 
-## Final response
+## Current checkpoint — PARTIAL
 
-DONE — Completed and production verified.
+User requested:
+- Remove the lower sidebar image, remove the sidebar "Tất cả sản phẩm" selector and item selection/filtering.
+- Left sidebar: only real direct children of WordPress ProductCategory Nền, each clicked category navigates to its own product listing page, not filtering right-side products.
+- Right: independent WooCommerce product collection chosen and ordered by a separate WordPress ESC Table, including items outside Nền (e.g. đèn rọi, coco). Preserve CMS/Visual Builder ownership.
 
-1. WordPress product_cat parent Nền ID 1775 (slug nen-cho-be-thuy-sinh) now has seven additional REAL direct child categories: Chihiros ID 1781, Contro Soil ID 1782, Master Soil ID 1783, Tropica ID 1784, Vũ Aqua ID 1785, Dennerle ID 1786, and Gex ID 1787. The two previously created children Dennerle Scaper’s Soil ID 1779 and Shrimp King Active Soil ID 1780 remain intact. Total direct Nền child categories = 9. These seven new brand terms are empty (zero assigned Products) and were created without fabricating items or touching existing WooCommerce Products.
-   - Guarded WordPress term writer, source preflight, explicit parent ID validation, deduplicated operations and read-after-write: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456180009 SUCCESS.
-   - This writer workflow was switched to manual workflow_dispatch only after success; no automatic production writes on subsequent source commits.
-2. Astro Home_02 sidebar now presents EVERY genuine WordPress Nền direct child category even if it has 0 Products, with an honest empty product state when selected; excludes Uncategorized and unrelated taxonomy. Category labels come from WordPress and are not hardcoded into Astro.
-   - Source: src/lib/wordpress/tablepress/home02Catalog.ts
-3. Align Sale bùng nổ and other homepage content section widths to Home_02: shared max-width 1376px, horizontal 48px inset on desktop/tablet and 24px inset on phones. CSS for Home_00 (hero content), Home_01 (Sale), Home_03 (Hot Combo), Home_04 (Equipment), Home_05 (Benefits) is updated. Fixed the historical Sale short-landscape override at 844x390 that caused 8px additional edge divergence.
-   - Final Astro master deployed SHA aca33f1b0764a6c10e14ae9a05199dd09f42578e.
-4. Regression suite updated for genuine unpopulated taxonomy terms and width equality:
-   - Unit + WordPress Builder contract + synthetic browser https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456249710 SUCCESS, all three jobs PASS (rerun after fixtures were updated).
-   - WordPress-controlled Astro production build https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456823663 SUCCESS.
-   - Astro production deploy https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456878565 SUCCESS; source provenance verified.
-   - Authenticated real-production five-viewport QA (rerun after deploy) https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456812773 SUCCESS. All widths 1440x900, 1024x768, 768x1024, 844x390, 390x844: HOMEPAGE_SECTION_WIDTHS=PASS, HOMEPAGE_SUBSTRATE_CATALOG=PASS (4 genuine Nền products and all 9 direct child categories, including the seven requested empty terms), HOMEPAGE_VIEWPORT=PASS with no horizontal overflow. Visual Builder home_02 canonical cell coordinates and existing Product workflows PASS; no QA write.
-   - Screenshots attached to the final QA workflow run.
-5. Prior QA runs failed for expected reasons: predeployment SHA guard, then Sale's legacy short-landscape width override; final corrected source deploy and QA PASS. No pending task.
+Previous checkpoint: Astro production aca33f1; WordPress Nền parent category ID 1775 and 9 real direct child terms, including 7 empty ones, had passed production QA.
 
-Production: https://aquathanhxuan.io.vn
+Source updates committed to ngocnhanvo/aquathanhxuan-astro/master:
+- 4b06bfa23170deac41e6ccd6a1bde90462be189f: Home_02 sidebar now uses navigational anchors to subcategory routes based on the existing parent category path; removed sidebar image, removed "Tất cả sản phẩm", removed client-side category filtering.
+- 2393d71b68846c734520ebe1184843c9e1db2e56: getHome02Catalog accepts an ordered optional selection of exact WooCommerce product IDs, independent of Nền taxonomy.
+- 95b584194590719509017b2f97976b61a355898d: Home_02 accepts curated IDs from a separate home_02_products ESC Table in page.contents.
+- cb0171362ce5bab9054c36ad92f9bb5d53e86b7b: correct table shortcode match logic.
+
+IMPORTANT REMAINING WORK:
+1. Create real ESC Table with ID home_02_products in WordPress/TablePress (not created in this turn), set meta.api=Product. Its item rows must store exact product IDs via api-key, with order matching desired visual ordering. Add actual existing WooCommerce products including đèn rọi/coco, verify names and availability. Insert shortcode into WordPress homepage Page using native Insert Code. Do not invent products.
+2. Confirm Page contents actually exposes the processed table to Home_02; if renderer passes only current table, adjust integration through the existing CMS pipeline rather than hardcode.
+3. Verify category link routes, especially parent button_href prefix. Do not claim working without route QA.
+4. Run production-compatible source tests and browser/Visual Builder QA desktop/mobile; inspect build/deploy status. No build/test/deployment PASS has been independently verified for these commits in this turn.
+5. Verify Visual Builder edit/add/remove/reorder for curated Product table, with product fields read-only. Update source if needed.
+6. Recheck legacy product listing parity using actual products; do not fill gaps with fabricated data.
+
+Do not mark DONE until real CMS table and production QA pass. Preserve rollback and source SHA.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: DONE — hoàn tất
+Trạng thái: PARTIAL — chưa hoàn tất
