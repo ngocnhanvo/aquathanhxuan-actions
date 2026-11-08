@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Validate selected Product row is retained by sorter and JS guidance test is scoped correctly.
+# Test both Sale filtered cards and full nested Product ESC Table live mutations.
 on:
   push:
     branches: [main]
