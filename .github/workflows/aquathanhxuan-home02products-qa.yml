@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Audit historical category term IDs and deployed archive route candidates.
+# Verify product archive navigation and the live WordPress category count.
 on:
   push:
     branches: [main]
