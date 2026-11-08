@@ -26,7 +26,51 @@
     "82551",
     "82552"
   ],
-  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:50:12",
-  "run_id": 42462688926,
+  "sidebar": [
+    {
+      "name": "Chihiros›",
+      "href": "/chihiros"
+    },
+    {
+      "name": "Contro Soil›",
+      "href": "/contro-soil"
+    },
+    {
+      "name": "Master Soil›",
+      "href": "/master-soil"
+    },
+    {
+      "name": "Tropica›",
+      "href": "/tropica"
+    },
+    {
+      "name": "Vũ Aqua›",
+      "href": "/vu-aqua"
+    },
+    {
+      "name": "Dennerle›",
+      "href": "/dennerle"
+    },
+    {
+      "name": "Gex›",
+      "href": "/gex"
+    }
+  ],
+  "wpCategories": [
+    {
+      "id": 1786,
+      "parent": 1775,
+      "name": "Dennerle",
+      "slug": "dennerle"
+    },
+    {
+      "id": 1775,
+      "parent": 0,
+      "name": "Nền",
+      "slug": "nen-cho-be-thuy-sinh"
+    }
+  ],
+  "error": "AssertionError [ERR_ASSERTION]: Sidebar should contain nine real children of Nền\n\n7 !== 9\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:55:12",
+  "run_id": 42462784285,
   "outcome": "failure"
 }
