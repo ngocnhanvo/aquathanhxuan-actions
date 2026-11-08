@@ -178,15 +178,37 @@ const normalize=s=>String(s||'').normalize('NFC').replace(/<[^>]*>/g,' ').replac
     assert(oldShortcodes.every(x=>[...expectedPrevious,...newShortcodes].includes(x)),
       'Unexpected shortcode on Page; manual review required');
     if(changed.length){
-      // The quicktags Insert ESC Table button is only visible in the native
-      // WordPress Text tab. Hiding TinyMCE directly leaves its toolbar hidden.
-      // Use the same verified editor transition as the Home 02/03 writers.
-      await page.locator('#content-html').click();
-      await page.locator('#content').waitFor({state:'visible',timeout:15000});
-      await page.waitForFunction(()=>window.tinymce?.get('content')?.isHidden()===true,
-        null,{timeout:15000});
-      assert(await page.locator('#qt_content_tablepress_quicktags_button').isVisible(),
-        'Native ESC Table Quicktags must be visible in WordPress Text mode');
+      // Use WordPress's native switchEditors.go() rather than relying only
+      // on the optimized Classic Editor tab click. Some admin views leave
+      // the Text textarea/Quicktags hidden after the tab receives a click.
+      const editorState=await page.evaluate(()=>{
+        const editor=window.tinymce?.get('content');
+        const switcher=window.switchEditors?.go;
+        const textarea=document.getElementById('content');
+        const wrap=document.getElementById('wp-content-wrap');
+        const quicktags=document.getElementById('qt_content_tablepress_quicktags_button');
+        if(!editor||typeof switcher!=='function'||!textarea||!wrap||!quicktags)
+          throw Error('Native WordPress editor components unavailable');
+        // A previous optimized mode transition may have hidden TinyMCE
+        // without activating the HTML tab. Restore the native starting mode
+        // before calling WordPress's own Visual -> Text transition.
+        if(editor.isHidden())editor.show();
+        switcher('content','html');
+        const visible=el=>{
+          const css=getComputedStyle(el),box=el.getBoundingClientRect();
+          return css.display!=='none'&&css.visibility!=='hidden'&&box.width>0&&box.height>0;
+        };
+        return {
+          textVisible:visible(textarea),quicktagsVisible:visible(quicktags),
+          hidden:editor.isHidden(),wrapClass:wrap.className,
+          textareaDisplay:getComputedStyle(textarea).display,
+          quicktagsDisplay:getComputedStyle(quicktags).display,
+          textareaAria:textarea.getAttribute('aria-hidden')
+        };
+      });
+      console.log('EQUIPMENT_NATIVE_EDITOR_STATE='+JSON.stringify(editorState));
+      assert(editorState.hidden&&editorState.textVisible&&editorState.quicktagsVisible,
+        'Native Text mode/Quicktags not available; do not alter Page');
       const baseline=await page.locator('#content').inputValue();
       assert.equal(baseline,pageBefore,'Native editor toggling altered Page content');
       for(const id of changed){
