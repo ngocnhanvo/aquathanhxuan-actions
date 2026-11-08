@@ -3,5 +3,7 @@
   "purpose": "Read-only production UI and WordPress Visual Builder QA for global footer, consultation menu, and Home05",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
-  "note": "Postdeploy diagnostic for consultation hrefs"
+  "note": "Postdeploy diagnostic for consultation hrefs",
+  "diagnostic": "Compare public WordPress ACF, incremental info logs and deployed common-data cache",
+  "attempt": 2
 }
