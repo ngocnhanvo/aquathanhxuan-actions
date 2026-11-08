@@ -71,38 +71,24 @@ const getIds=html=>[...html.matchAll(/\[table\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map
      'WordPress native Text Quicktags toolbar remains unavailable');
    assert.equal(await page.locator('#content').inputValue(),original,
      'Switching to native Text toolbar changed WordPress content');
+   // Generate all wrappers via WordPress Insert Code first. Do not rewrite
+   // the textarea between picker activations: the optimized WP editor retains
+   // a stale Quicktags selection buffer after each insertion.
    for(const sec of missing){
-    const prior=await page.locator('#content').inputValue();
-    const token='[table id='+sec.after+' /]';
-    const index=prior.indexOf(token);
-    assert(index>=0,'Insertion anchor not found '+sec.after);
-    const open=prior.lastIndexOf('<div',index);
-    const close=prior.indexOf('</div>',index);
-    assert(open>=0&&close>index,'Insertion anchor not inside a native wrapper');
-    const segment=prior.slice(open,close+6);
-    assert(segment.includes('tablepress-preview-wrap')&&
-      segment.includes('data-table-id="'+sec.after+'"'),
-      'Insertion anchor is not the correct native TablePress wrapper');
-    const cursor=close+6;
-    await page.evaluate(pos=>{
-      const textarea=document.getElementById('content');
-      if(!(textarea instanceof HTMLTextAreaElement))throw Error('Native Page textarea missing');
-      textarea.focus();textarea.setSelectionRange(pos,pos);window.wpActiveEditor='content';
-    },cursor);
-    // After the first native insertion the optimized admin can reattach a
-    // TinyMCE overlay over Quicktags. Keep Text mode and activate the actual
-    // registered WordPress Quicktags input through its native click handler.
     await page.evaluate(()=>{
       const editor=window.tinymce?.get('content');
       if(editor&&!editor.isHidden())editor.hide();
       const wrap=document.getElementById('wp-content-wrap');
-      wrap?.classList.remove('tmce-active');
-      wrap?.classList.add('html-active');
+      wrap?.classList.remove('tmce-active');wrap?.classList.add('html-active');
+      const textarea=document.getElementById('content');
+      if(!(textarea instanceof HTMLTextAreaElement))throw Error('Native textarea not found');
+      textarea.focus();textarea.setSelectionRange(textarea.value.length,textarea.value.length);
+      window.wpActiveEditor='content';
     });
     const button=page.locator('#qt_content_tablepress_quicktags_button');
     await button.waitFor({state:'visible',timeout:12000});
     await button.evaluate(element=>{
-      if(!(element instanceof HTMLInputElement))throw Error('Native Quicktags button unavailable');
+      if(!(element instanceof HTMLInputElement))throw Error('Native Quicktags button missing');
       element.click();
     });
     const shortcode='[table id='+sec.id+' /]';
@@ -111,45 +97,69 @@ const getIds=html=>[...html.matchAll(/\[table\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map
     await picker.click();
     await page.waitForFunction(shortcode=>document.getElementById('content')?.value.includes(shortcode),
       shortcode,{timeout:25000});
-    const modified=await page.locator('#content').inputValue();
-    assert.equal(getIds(modified).filter(id=>id===sec.id).length,1,'Duplicate Page insertion '+sec.id);
-    const at=modified.indexOf(shortcode),start=modified.lastIndexOf('<div',at),
-      end=modified.indexOf('</div>',at)+6;
-    assert(start>=0&&end>at,'New native Insert Code wrapper missing '+sec.id);
-    const wrapper=modified.slice(start,end);
-    assert(wrapper.includes('tablepress-preview-wrap')&&wrapper.includes('data-table-id="'+sec.id+'"'),
-      'New native Insert Code wrapper has wrong identity '+sec.id);
-    assert(!/<script\b|<iframe\b/i.test(wrapper),'Unsafe shortcode wrapper '+sec.id);
-    // TablePress's native Quicktags picker inserts at the start of this
-    // optimized Classic Editor even when the textarea caret was positioned
-    // after home_04. Keep its native wrapper verbatim and relocate *only that
-    // wrapper* within WordPress Text mode. Original Page HTML remains byte-for-byte.
-    const recovered=modified.slice(0,start)+modified.slice(end);
-    const normalized=recovered===prior||(
-      /\r?\n$/.test(prior) && recovered===prior.replace(/\r?\n$/,''));
-    if(!normalized){
-      let first=0;while(first<Math.min(recovered.length,prior.length)&&recovered[first]===prior[first])first++;
-      console.log('EQUIPMENT_NATIVE_INSERT_DIFF='+JSON.stringify({
-        section:sec.id,cursor,start,end,priorLength:prior.length,
-        restoredLength:recovered.length,firstDiff:first,
-        before:prior.slice(Math.max(0,first-100),first+200),
-        after:recovered.slice(Math.max(0,first-100),first+200)
-      }));
-    }
-    assert(normalized,
-      'Native Insert Code unexpectedly modified unrelated Page content '+sec.id);
-    const positioned=prior.slice(0,cursor)+wrapper+prior.slice(cursor);
-    await page.evaluate(value=>{
-      const textarea=document.getElementById('content');
-      if(!(textarea instanceof HTMLTextAreaElement))throw Error('Classic Editor textarea unavailable');
-      textarea.value=value;
-      textarea.dispatchEvent(new Event('input',{bubbles:true}));
-      textarea.dispatchEvent(new Event('change',{bubbles:true}));
-    },positioned);
-    assert.equal(await page.locator('#content').inputValue(),positioned,
-      'Cannot reposition native WordPress wrapper without content drift');
+    const native=await page.locator('#content').inputValue();
+    assert.equal(getIds(native).filter(id=>id===sec.id).length,1,'Native insert duplicated '+sec.id);
+    console.log('EQUIPMENT_NATIVE_PICKER_PASS='+sec.id);
+   }
+   // The verified picker may prepend/append a newly-created wrapper regardless
+   // of caret placement. Extract only those exact wrappers. The remaining
+   // legacy Page HTML must be unchanged except one trailing newline, which the
+   // WordPress native handler removes. No manually invented preview wrappers.
+   let generated=await page.locator('#content').inputValue();
+   const nativeWrappers=new Map();
+   for(const sec of [...missing].reverse()){
+    const token='[table id='+sec.id+' /]';
+    const at=generated.indexOf(token);
+    assert(at>=0,'New native shortcode missing '+sec.id);
+    const open=generated.lastIndexOf('<div',at),close=generated.indexOf('</div>',at)+6;
+    assert(open>=0&&close>at,'Native Insert Code wrapper missing '+sec.id);
+    const wrapper=generated.slice(open,close);
+    assert(wrapper.includes('tablepress-preview-wrap')&&
+      wrapper.includes('data-table-id="'+sec.id+'"'),
+      'Unexpected native ESC Table wrapper identity '+sec.id);
+    assert(!/<script\b|<iframe\b/i.test(wrapper),'Native wrapper contains executable markup');
+    nativeWrappers.set(sec.id,wrapper);
+    generated=generated.slice(0,open)+generated.slice(close);
+   }
+   const preserved=generated===original||
+     (/\r?\n$/.test(original)&&generated===original.replace(/\r?\n$/,''));
+   if(!preserved){
+    let first=0;while(first<Math.min(generated.length,original.length)&&
+      generated[first]===original[first])first++;
+    console.log('EQUIPMENT_NATIVE_EDITOR_DIFF='+JSON.stringify({
+      first,originalLength:original.length,recoveredLength:generated.length,
+      before:original.slice(Math.max(0,first-100),first+180),
+      after:generated.slice(Math.max(0,first-100),first+180)
+    }));
+   }
+   assert(preserved,'WordPress picker changed unrelated Page HTML');
+   let positioned=original;
+   for(const sec of missing){
+    const token='[table id='+sec.after+' /]';
+    const at=positioned.indexOf(token);
+    assert(at>=0,'Native insert anchor missing '+sec.after);
+    const start=positioned.lastIndexOf('<div',at);
+    const close=positioned.indexOf('</div>',at)+6;
+    assert(start>=0&&close>at,'Native anchor wrapper missing '+sec.after);
+    const wrapperBefore=positioned.slice(start,at);
+    assert(wrapperBefore.includes('tablepress-preview-wrap')&&
+      wrapperBefore.includes('data-table-id="'+sec.after+'"'),
+      'Native anchor identity mismatch '+sec.after);
+    positioned=positioned.slice(0,close)+nativeWrappers.get(sec.id)+positioned.slice(close);
     console.log('EQUIPMENT_NATIVE_INSERT_PASS='+sec.id);
    }
+   await page.evaluate(value=>{
+     const textarea=document.getElementById('content');
+     if(!(textarea instanceof HTMLTextAreaElement))throw Error('WordPress textarea unavailable');
+     textarea.value=value;
+     textarea.dispatchEvent(new Event('input',{bubbles:true}));
+     textarea.dispatchEvent(new Event('change',{bubbles:true}));
+     const editor=window.tinymce?.get('content');
+     if(editor&&!editor.isHidden())editor.hide();
+     const wrap=document.getElementById('wp-content-wrap');
+     wrap?.classList.remove('tmce-active');wrap?.classList.add('html-active');
+   },positioned);
+   assert.equal(await page.locator('#content').inputValue(),positioned,'Native Page placement drift');
    const expected=await page.locator('#content').inputValue();
    assert.deepEqual(getIds(expected),required,'Homepage shortcode order incorrect after insertion');
    await page.locator('#publish').click();
