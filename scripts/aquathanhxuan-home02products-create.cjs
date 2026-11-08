@@ -162,13 +162,13 @@ const run=async()=>{
    assert.equal(beforeNative,beforeOriginal,'Switching editor modes unexpectedly altered homepage content');
    assert(modified.startsWith(nativeBaseline),'Native Insert Code changed pre-existing Page content');
    const addition=modified.slice(nativeBaseline.length);
-   assert.equal((addition.match(/<div\\b/g)||[]).length,1,'Native Insert Code must append one preview wrapper');
+   assert.equal((addition.match(/<div\b/g)||[]).length,1,'Native Insert Code must append one preview wrapper');
    assert(addition.includes('class="tablepress-preview-wrap mceNonEditable"'),
      'Native ESC Table preview wrapper missing');
    assert(addition.includes('data-table-id="'+ID+'"'),'Wrong native preview table ID');
    assert(addition.includes('id="tablepress-img-'+ID+'"'),'Wrong native preview image ID');
    assert(addition.includes(shortcode),'Native Insert Code did not preserve its shortcode');
-   assert(!/<script\\b|<iframe\\b/i.test(addition),'Unexpected executable markup in inserted preview');
+   assert(!/<script\b|<iframe\b/i.test(addition),'Unexpected executable markup in inserted preview');
    await page.locator('#publish').click();
    await page.waitForLoadState('domcontentloaded');
   }
