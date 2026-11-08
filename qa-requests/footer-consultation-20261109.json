@@ -1,9 +1,9 @@
 {
-  "source_sha": "31f388af4876319f41960c2d702ff86c113fff56",
+  "source_sha": "5fe6945edac16cb0f7c81288c89e722d81e60ef4",
   "purpose": "Nghiệm thu popup mobile clamp X/Y, Footer, Home05, AI agent và Visual Builder sau deploy",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
-  "note": "Reverify Footer global ESC Table editing after PHP release 42511474405",
-  "diagnostic": "Home05 description and global Footer label editor must open; no save",
-  "attempt": 7
+  "note": "Production QA after Astro footer global cell-selection build 42511950470",
+  "diagnostic": "Test actual Home05 and Footer label editor opened; do not save",
+  "attempt": 8
 }
