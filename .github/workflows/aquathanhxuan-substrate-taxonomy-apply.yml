@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aquathanhxuan-substrate-taxonomy-apply.yml'
+      - 'scripts/aquathanhxuan-substrate-taxonomy-apply.cjs'
 permissions:
   contents: read
 concurrency:
