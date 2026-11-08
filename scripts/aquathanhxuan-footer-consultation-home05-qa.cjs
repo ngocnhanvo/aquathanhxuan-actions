@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='145b61fe01df4796cbf1488dae55c387ab17f8e6';
+const expectedSha='31f388af4876319f41960c2d702ff86c113fff56';
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const expectedHome=[
   'Nhập khẩu và phân phối chính hãng, được chọn lọc và kiểm tra kỹ trước khi giao tới tay khách hàng.',
@@ -80,8 +80,9 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    const label=await menu.locator('a[href*="zalo.me/"]').innerText();
    assert(label.includes('0972551688')||label.includes('1900.666.888'),'ZALO_LABEL');
    const closeRect=await menu.locator('#close-consultation').boundingBox();
-   assert(closeRect && closeRect.y>=-1 && closeRect.y+closeRect.height<=height+1,
-     'CLOSE_CONSULTATION_OUTSIDE_VIEWPORT_'+width+'x'+height);
+   assert(closeRect && closeRect.x>=-1 && closeRect.x+closeRect.width<=width+1 &&
+     closeRect.y>=-1 && closeRect.y+closeRect.height<=height+1,
+     'CLOSE_CONSULTATION_OUTSIDE_VIEWPORT_'+width+'x'+height+' '+JSON.stringify(closeRect));
    await menu.locator('#close-consultation').click();
    assert.equal(await menu.getAttribute('aria-hidden'),'true','PANEL_CLOSE');
    await launcher.click();
