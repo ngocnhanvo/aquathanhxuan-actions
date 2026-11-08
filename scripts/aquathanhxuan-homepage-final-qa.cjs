@@ -189,7 +189,7 @@ async function assertHealthyImage(locator, caption) {
       // The seven requested brands exist in WordPress but have no classified
       // products yet. They must be visible, and empty filters must stay empty.
       const expectedNames=['Chihiros','Contro Soil','Master Soil','Tropica','Vũ Aqua','Dennerle','Gex'];
-      const renderedNames=await categories.evaluateAll(nodes=>nodes.map(n=>n.textContent.trim()).filter(Boolean));
+      const renderedNames=await categories.evaluateAll(nodes=>nodes.map(n=>n.querySelector('span')?.textContent.trim()).filter(Boolean));
       for(const name of expectedNames)
         assert(renderedNames.includes(name),'Missing real child category: '+name);
       await substrate.locator('[data-substrate-filter="1781"]').click();
