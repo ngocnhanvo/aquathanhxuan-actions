@@ -1,10 +1,7 @@
 name: Aqua create verified Nền product subcategories
+# Permanent CMS writer: never auto-run on source changes.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/aquathanhxuan-substrate-taxonomy-apply.yml'
-      - 'scripts/aquathanhxuan-substrate-taxonomy-apply.cjs'
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
