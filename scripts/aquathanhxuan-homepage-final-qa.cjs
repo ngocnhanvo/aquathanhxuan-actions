@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expectedSha = '685c891569c20dccf1381b6374855e247e6b616b';
+const expectedSha = '2b07d4b82c4d981f093f7fa825d3a2bc083a10e6';
 const viewports = [[1440, 900], [1024, 768], [768, 1024], [844, 390], [390, 844]];
 const sections = [
   ['Hero', '[data-aqua-home-hero]'],
@@ -144,6 +144,54 @@ async function assertHealthyImage(locator, caption) {
       assert(layout.saleCards > 0, 'Real WooCommerce sale cards missing');
       assert.equal(layout.benefits, 4, 'Benefits row count');
       assert(layout.footerCategories >= 3, 'Real WordPress Footer categories missing');
+
+      // Approved preview: old category/product catalogue information restored
+      // in the new Aqua visual skin. Read-only; never mutate WordPress records.
+      const substrate=page.locator('[data-aqua-home-substrate]');
+      const catalogueCards=substrate.locator('[data-substrate-card]');
+      const catalogueCount=await catalogueCards.count();
+      assert(catalogueCount>=4,
+        'Substrate section must show a genuine WordPress product catalogue, not one hero banner');
+      assert.equal(await substrate.locator('[data-substrate-filter="all"]').count(),1,
+        'Substrate category navigation missing');
+      await substrate.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      let visibleCards=await catalogueCards.evaluateAll(nodes=>nodes.filter(node=>!node.hidden).length);
+      assert(visibleCards>=2,'Substrate product cards are not visible');
+      const firstProduct=substrate.locator('[data-substrate-card]:visible').first();
+      assert((await firstProduct.locator('.aqua-substrate-catalog__name').textContent())?.trim().length>2,
+        'Substrate Product name is missing');
+      assert((await firstProduct.locator('.aqua-substrate-catalog__prices strong').textContent())?.trim().length>0,
+        'Substrate WooCommerce price is missing');
+      await assertHealthyImage(firstProduct.locator('img'),'Substrate first WooCommerce Product');
+      assert.equal(await firstProduct.locator('[data-substrate-add]').count(),1,
+        'Substrate product cart control missing');
+      const categories=substrate.locator('[data-substrate-filter]:not([data-substrate-filter="all"])');
+      if(await categories.count()){
+        await categories.first().click();
+        const categoryId=await categories.first().getAttribute('data-substrate-filter');
+        visibleCards=await catalogueCards.evaluateAll(nodes=>nodes.filter(node=>!node.hidden).length);
+        assert(visibleCards>=1,'Category tab should show category products');
+        const matched=await substrate.locator('[data-substrate-card]:visible').first().getAttribute('data-categories');
+        assert(matched?.split(',').includes(categoryId),
+          'Product displayed outside selected WordPress category');
+        await substrate.locator('[data-substrate-filter="all"]').click();
+      }
+      const nextPage=substrate.locator('[data-substrate-next]');
+      if(await nextPage.isEnabled()){
+        const before=await substrate.locator('[data-substrate-card]:visible').first()
+          .locator('.aqua-substrate-catalog__name').textContent();
+        await nextPage.click();
+        const after=await substrate.locator('[data-substrate-card]:visible').first()
+          .locator('.aqua-substrate-catalog__name').textContent();
+        assert.notEqual(after,before,'Product pagination does not change visible items');
+        await substrate.locator('[data-substrate-prev]').click();
+      }
+      await substrate.screenshot({path:artifacts+'/substrate-'+width+'x'+height+'.png'});
+      console.log('HOMEPAGE_SUBSTRATE_CATALOG=PASS '+JSON.stringify({
+        viewport:width+'x'+height,products:catalogueCount,categories:await categories.count(),
+        initialVisible:visibleCards
+      }));
 
       // Capture genuine in-viewport pixels for each lazy-painted section.
       // Full-page Chromium screenshots alone can skip content-visibility sections.
