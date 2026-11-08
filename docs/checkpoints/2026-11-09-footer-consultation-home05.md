@@ -20,7 +20,19 @@ Theo ảnh web gốc: gom điện thoại, Messenger, Zalo và AI agent hiện c
 - Playwright QA action 42507896678: PASS 1440x900, 1024x768, 768x1024, 844x390 với nội dung footer, Home05, Messenger + Zalo + AI và không scroll ngang. FAIL tại 390x844 do click nút đóng popup ở ngoài viewport; phát hiện chỉ kiểm tra tọa độ Y, chưa X.
 - Fix SHA 31f388a: thay căn ngang popup dựa vào `panelLeft = clamp(rect.right - panelWidth, 12, innerWidth - panelWidth - 12)`; tăng QA kiểm tra cả X/Y.
 
-## Đang thực hiện
+## Kết quả nghiệm thu sau deploy — 2026-11-09
+- Production build [42508241996](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42508241996) SUCCESS; deployed source SHA `31f388af4876319f41960c2d702ff86c113fff56`.
+- Production deploy [42508312422](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42508312422) SUCCESS.
+- Playwright QA [42508470220](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42508470220) SUCCESS (job `128816155642`); `FOOTER_CONSULTATION_HOME05_VIEWPORT_PASS` xuất hiện cho 1440×900, 1024×768, 768×1024, 844×390 và 390×844. `FOOTER_CONSULTATION_HOME05_BUILDER_PASS` và `FOOTER_CONSULTATION_HOME05_QA=PASS`.
+- Các assert đối chiếu đúng 4 mô tả Home05, 5 featured links, 5 support rows, logo/địa chỉ/hotline/email, một launcher, Messenger/Zalo, popup nằm trọn viewport và không scroll ngang.
+- Trong Visual Builder, QA xác nhận `pub_aquafooterlinks` hiển thị 10 hàng nguồn và 4 trường `description` Home05 mang `data-esc-builder-cell-field`; đây là **kiểm tra metadata/mapping read-only**, chưa xác thực round-trip thay đổi → lưu → đọc lại → hoàn tác trên production.
+- QA artifact [13627893301](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42508470220/artifacts/13627893301): 11 files, 544555 bytes, retention 7 ngày.
+
+## Điểm còn mở / giới hạn xác minh
+- Không còn blocker build, deploy hoặc QA hiển thị. Chưa có kiểm thử production ghi/sửa/hủy thực tế các cell/footer link. Chỉ thực hiện write-and-rollback nếu có quy trình backup, write scope và cleanup an toàn; không sửa dữ liệu CMS thật chỉ để làm đẹp trạng thái.
+- `chatgpt/latest-response.md` đang là snapshot của công việc Home06/Home07, cần cập nhật khi đóng checkpoint.
+
+## Lịch sử checkpoint trước QA cuối (đã hoàn thành)
 - Production build action **42508241996** từ request `build-requests/2026-11-09-consultation-horizontal-31f388a.json` đang chạy.
 - QA script `scripts/aquathanhxuan-footer-consultation-home05-qa.cjs` đã thay `expectedSha` thành `31f388af...` và assert X/Y.
 - Khi deploy SUCCESS mới cập nhật `qa-requests/footer-consultation-20261109.json` (expected SHA 31f) để trigger workflow `.github/workflows/aquathanhxuan-footer-consultation-home05-qa.yml`. Đừng chạy QA trước deploy (sai SHA).
