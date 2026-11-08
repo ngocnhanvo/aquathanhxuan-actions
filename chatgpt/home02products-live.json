@@ -360,12 +360,6 @@
         "tableId": "home_02products",
         "productId": "82535",
         "row": null
-      },
-      {
-        "type": "esc-vb-pong",
-        "tableId": "",
-        "productId": "",
-        "row": null
       }
     ],
     "apiTrace": [
@@ -373,61 +367,61 @@
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135585371
+        "at": 1794137236249
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135587381
+        "at": 1794137238306
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
-        "at": 1794135587459
+        "at": 1794137238437
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135587459
+        "at": 1794137238437
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135587576
+        "at": 1794137238564
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135587679
+        "at": 1794137238658
+      },
+      {
+        "event": "response",
+        "status": 200,
+        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
+        "at": 1794137240071
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
-        "at": 1794135589029
+        "at": 1794137240071
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135589095
+        "at": 1794137240195
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135589180
-      },
-      {
-        "event": "response",
-        "status": 200,
-        "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794135589421
+        "at": 1794137240236
       }
     ],
     "pointerHits": [
@@ -491,6 +485,11 @@
       "builderRow": "0"
     }
   },
+  "sortDryRun": {
+    "from": "1. 82535",
+    "to": "2. 82537",
+    "saveEnabled": true
+  },
   "builderControls": {
     "selectedProduct": "82535",
     "addDialog": true,
@@ -498,6 +497,6 @@
     "sortRows": 10,
     "forbiddenWrites": 0
   },
-  "run_id": 42473610405,
+  "run_id": 42475657244,
   "outcome": "success"
 }
