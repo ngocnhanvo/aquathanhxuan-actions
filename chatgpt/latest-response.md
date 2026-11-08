@@ -2,21 +2,28 @@
 
 Date (Asia/Ho_Chi_Minh): 2026-11-08
 Project: aquathanhxuan.com
-Task: Record shared Visual Builder preview interaction contract in knowledge
+Task: Repair homepage controls blocked in ESC Visual Builder under shared Knowledge policy
 Code mode: auto-build
 Source gateway: bypass
 
 ## Final response
 
-Completed the requested **Knowledge rule only** (no template/application source changes in this turn).
+DONE: generalized Visual Builder preview interaction guard and production QA for Aqua homepage.
 
-Repository: ngocnhanvo/knowledge, branch main.
-- stacks/wordpress-editor-esc-table.md: mandatory shared Preview Interaction Guard contract. Safe UI controls (slider/carousel, tab, accordion, dropdown etc.) remain interactive; page navigation and side effects (cart/form/checkout/API mutations) are blocked; unknown handlers fail closed with shared adapters instead of per-component/per-table allowlists; retain ESC cell selection, Alt+click, readonly and browser QA.
-- README.md and AGENTS.md: linked to the new canonical section.
-- Commits: 31cc90b40b6ba164eab299c471f85993197dd170, 85bf56448323eff07bfbd2ec99fbc1b525f5dd1b, 63c53c1bbcbd19dc724c548db0b9ccf4dd008972.
-- Read-back verification confirmed all three files on knowledge/main.
-- No changes were made to the shared template runtime or to other project source in this task. The new Knowledge rule is authoritative guidance, not proof that every template already implements the guard.
+Source: ngocnhanvo/aquathanhxuan-astro master (latest deployed SHA b51304e3a65c4b950a193d16f4b61252d2d47b90).
+- `src/pages/esc-builder/preview/[pageId].astro`: shared behavior-based safe UI controls (semantic tab/disclosure/local aria-controls, compatible explicit opt-in); capture-phase block on unknown buttons and actions with form/cart/storage/API side effects, including mouse/touch/keyboard; exact ESC cell selection preserved.
+- `src/astro/tablepress/Home_01.astro`: explicitly mark Sale add-to-cart mutation to prevent writes in preview; carousel arrows remain enabled.
+- `src/astro/components/Tool/ContactWidget.astro`: block opening chat which reads/writes session storage and network, and block clear-history side effect inside preview.
+- `src/pages/esc-builder/preview/[pageId].astro`: Builder-only sticky Header pointer-events pass-through, leaving header links/buttons interactive but preventing its inert background intercepting Hero dot clicks.
+- Home_00 hero arrows/dots, Home_01 sale arrows, and native text/readonly interactions remain intact.
+- Generic offline Chromium and native PHP contracts: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42443947209 SUCCESS (3 jobs PASS).
+- WordPress-controlled production build for initial source 8bb706b: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42444051016 SUCCESS.
+- Final production build (source b51304e): https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42444849458 SUCCESS; production deploy child https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42444899994 SUCCESS.
+- Authenticated read-only production Playwright QA: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42445224871 SUCCESS, viewport 1440x900 and 390x844: Hero arrows/dots (desktop); dots (mobile, arrows intentionally hidden below 430px); Sale prev/next scrollLeft changes; product link keeps preview route; cart click causes no mutation request; no new tab; no CMS write.
+- Earlier QA failures diagnosed and corrected: async UI hydration race and Header overlay hit interception, plus QA attempting intentionally hidden mobile arrows. Final run PASS.
+
+Scope: This task deployed to aquathanhxuan production only. Knowledge policy already exists; no cross-project template runtime edited.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: DONE — hoàn tất ghi quy tắc Knowledge
+Trạng thái: DONE — hoàn tất
