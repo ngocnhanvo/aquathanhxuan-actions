@@ -139,8 +139,8 @@ try {
     await page.evaluate(() => {
       const root=document.createElement('section');
       root.dataset.tablepressPreview='home_01';
-      root.innerHTML='<article id="product-82499" data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
-        '<article id="product-82481" data-esc-builder-product-id="82481"><a href="/product/b">Product B</a></article>';
+      root.innerHTML='<div data-sale-track><article id="product-82499" data-sale-card data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
+        '<article id="product-82481" data-sale-card data-esc-builder-product-id="82481"><a href="/product/b">Product B</a></article></div>';
       document.querySelector('main').append(root);
       window.__productMessages=[];
       window.__productDispose=window.__vbExports.installBuilderSectionDrafts(
@@ -165,6 +165,17 @@ try {
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.type),
       'esc-vb-item-target-picked');
     assert.equal(await page.locator('#product-82481').getAttribute('data-esc-vb-item-target'),'');
+    await page.evaluate(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin:'https://admin.example.test',source:window,
+        data:{type:'esc-vb-product-order-saved',tableId:'home_01',requestId:29,
+          items:[{key:'82481'},{key:'82477'},{key:'82499'}]}
+      }));
+    });
+    assert.equal(await page.locator('[data-sale-track] > :first-child').getAttribute('data-esc-builder-product-id'),'82481',
+      'Saved Product reference order must rearrange existing hydrated cards');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Product reorder must be acknowledged');
     await page.evaluate(() => {
       window.__productDispose();
       document.querySelector('[data-tablepress-preview="home_01"]').remove();
