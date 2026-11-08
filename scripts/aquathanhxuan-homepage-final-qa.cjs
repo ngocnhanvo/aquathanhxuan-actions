@@ -320,6 +320,15 @@ async function assertHealthyImage(locator, caption) {
       assert(imageHit.isImage, 'Hero slide 2 overlay intercepts image pointer: ' + JSON.stringify(imageHit));
       assert.equal(imageHit.row, secondRow, 'Hero slide 2 image maps to wrong native ESC row');
       console.log('HOMEPAGE_BUILDER_SECOND_IMAGE_HIT=PASS row=' + secondRow);
+      const imageBox = await secondSlide.locator('[data-esc-builder-image-field="image"] img').boundingBox();
+      assert(imageBox && imageBox.width > 0 && imageBox.height > 0, 'Second Hero image has no hit area');
+      await secondSlide.locator('[data-esc-builder-image-field="image"] img').click({
+        position: {x: imageBox.width * 0.83, y: imageBox.height * 0.45}
+      });
+      await admin.waitForFunction(expected =>
+        document.querySelector('#esc-vb-edit-row')?.value === expected,
+        secondRow + ':image', {timeout:25000});
+      console.log('HOMEPAGE_BUILDER_SECOND_IMAGE_EDIT=PASS row=' + secondRow + ' cms_write=false');
       const secondToggle = secondSlide.locator('[data-esc-builder-cell-field="show_text"]');
       await secondToggle.click();
       await admin.waitForFunction(expected =>
