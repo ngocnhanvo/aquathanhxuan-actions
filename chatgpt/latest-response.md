@@ -2,43 +2,31 @@
 
 Date (Asia/Ho_Chi_Minh): 2026-11-08
 Project: aquathanhxuan.com
-Task: Instantly render a newly added Product item on homepage Sale slider in ESC Visual Builder, no iframe reload
+Task: Fix missing selected/hover dashed outline on live-added Sale Product cards in ESC Visual Builder
 Code mode: auto-build
 Source gateway: bypass
 
 ## Final response
 
-DONE — Product-source ESC Table inserts now immediately render newly inserted WooCommerce Product in the same Sale carousel, after WordPress confirms the authoritative, version-guarded insertion. Product deletion/swap and Product readonly remain unchanged.
+DONE — Visual Builder Sale Product cards inserted after initial preview load now have identical readonly hover affordance and persistent selected dashed border as the server-rendered cards.
 
 Root cause:
-- WordPress `item-manager.php` returned `preview_items=null` for Product sources.
-- WordPress `item-section-ui.php` sent `esc-vb-item-saved` only if `preview_items` was an array; Product inserts therefore never notified Astro, and the inspector said reload.
-- Astro `builderSectionDrafts.ts` had only generic insert and Product delete/swap, no Product add renderer.
+- `builderEditabilityCues.ts` only marks `[data-esc-vb-product-readonly]` once during initial preview bootstrap. Cards inserted using `esc-vb-product-item-added` never inherited `data-esc-vb-region-state=readonly`, so the CSS dashed hover outline and the source hint were absent despite correct Product ID selection.
+- Ordinary Product click in `builderSectionDrafts.ts` notified PHP but did not persist a visual marker for the selected Product. Added one shared marker for initial and dynamically inserted Product cards.
 
-Changes:
-- PHP `item-manager.php`: successful Product insert response includes `preview_product` with WooCommerce-backed ID/name/current & regular price/discount eligibility/image/link/currency, plus `product_order` of canonical ESC Table Product IDs (including filtered/unrendered IDs). No Product attributes written to ESC Table.
-- PHP `item-section-ui.php`: sends `esc-vb-product-item-added` only after server save success, handles preview acknowledgement, and explicitly explains missing valid sale price when relevant.
-- Astro `Home_01.astro`: Builder-only native Sale Product card HTML template, including when no eligible Sale cards yet; public rendering unchanged.
-- Astro `builderSectionDrafts.ts`: validates Product ID, source order, prices and readonly; clones the native template and fills it from WooCommerce payload, inserts in authoritative ESC Table order, scrolls into view, and acknowledges success without iframe reload. Rejects duplicate notifications and does not send any CMS write.
-- PHP test `items-and-sections.test.php`: checks server-authoritative Product payload, canonical reference ordering and discount.
-- Synthetic Chromium contract and authenticated live production Playwright verify immediate card appearance plus duplicate prevention, deletion, Product selection and no CMS writes. Live QA sends a transient mock post-save event to iframe and removes card; did NOT modify ESC Table on production.
+Changes (Astro only):
+- `src/lib/wordpress/builderEditabilityCues.ts`: rerun readonly Product markings on the `esc:builder-items-updated` event that already fires after insert/delete/reorder; use a Set to avoid duplicate tracking and clean listeners on dispose. WordPress/WooCommerce readonly permission unchanged.
+- `src/lib/wordpress/builderSectionDrafts.ts`: when ordinary click selects any Product card, set `data-esc-vb-product-selected`, clear previous selection, and render a Builder-only persistent dashed outline; remove mark when a different nonproduct item is selected or Builder tears down. Existing Product ID -> ESC Table row logic unchanged.
+- `aquathanhxuan-actions/scripts/aquathanhxuan-visual-builder-browser.mjs`: expanded Chromium regression verifying initial and dynamic Product selected marker, readonly state, dashed hover, and highlight transfer between cards.
+- `aquathanhxuan-actions/scripts/aquathanhxuan-builder-interactions-qa.cjs`: authenticated read-only production QA verifies live-added ephemeral Product card receives readonly classification and dashed selected outline, then selects existing card and verifies highlight transfer. No actual Product inserted or edited in production.
 
-Commits:
-PHP master latest 92d261b13d0c0955f83ac9461f3a7111de159c86.
-Astro master latest 9912664d95d799de9f96cb609c2cb75658ea63f0.
-Actions main Playwright QA commit 14ecd2104be913badf2520534aa7456fbbfe6ee5; synthetic Chromium fix 52e7904072b67c24b4d2a537580353e71ef40ee8.
+Commits: Astro master 6b98c406bc8b696f74b0730bcd16fbe04d512563, ec243562bfa9bc185e1e9eb480989e10a2f75b52. Actions main test 509ead53daae8653360e1abfe352502b958a7ae3 and c156ab6c45f4966c839a01e622c8b60efac857b3.
 
 Evidence:
-- Source/Chromium contracts https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42448960739 SUCCESS, 3 jobs PASS.
-- PHP production release https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449072737 SUCCESS.
-- WordPress-controlled Astro build https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449092590 SUCCESS.
-- Astro production deploy https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449156506 SUCCESS.
-- Authenticated read-only production Playwright https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449134490 attempt 2 SUCCESS; desktop 1440x900 and mobile 390x844: `BUILDER_PRODUCT_INSERT_LIVE=PASS`, `BUILDER_PRODUCT_DELETE_CONFIRM=PASS`, `BUILDER_PRODUCT_PICK=PASS`, no CMS write.
-- QA does not perform a real insert in production because user did not authorize changing live item order; full server payload is separately covered by backend regression.
-
-Limits:
-- The home_01 Sale carousel intentionally shows only products with a valid price discount. A published Product without an eligible sale is saved to ESC Table but not drawn in that slider; Builder now shows an explicit explanation.
-- Public production website content still updates only after approved Astro build, but Builder preview updates immediately after ESC Table insertion.
+- Source/Chromium regression: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449777661 SUCCESS (native-cells, homepage-data, preview-browser all PASS).
+- WordPress-controlled Astro build trigger: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449866502 SUCCESS.
+- Production Astro deployment: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449933697 SUCCESS, deployed Astro source SHA ec243562bfa9bc185e1e9eb480989e10a2f75b52.
+- Authenticated production Playwright QA: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42449887692 attempt 2 SUCCESS. Tested 1440x900 and 390x844; `BUILDER_PRODUCT_INSERT_LIVE=PASS`, `BUILDER_PRODUCT_DELETE_CONFIRM=PASS`, `BUILDER_PRODUCT_PICK=PASS`, `BUILDER_SAFE_INTERACTIONS=PASS`. Synthetic post-insert Product card, no CMS writes. Attempt 1 ran before deployment and correctly failed SHA guard; attempt 2 passes.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
