@@ -17,7 +17,7 @@ const sources = {
   php: execFileSync('git', ['-C', php, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
 };
 const modules = [
-  'builderHeaderNavLock', 'builderFooterSelection', 'builderEditabilityCues',
+  'builderHeaderNavLock', 'builderFooterSelection', 'builderEditabilityCues', 'builderSectionDrafts',
 ];
 const moduleScripts = [];
 for (const name of modules) {
@@ -134,6 +134,41 @@ try {
     assert.equal(await page.evaluate(() => window.__events.unknown + window.__events.submit), 0);
     await page.click('#slide', { modifiers: ['Alt'] });
     assert.equal(await page.evaluate(() => window.__events.ui), 5);
+    // Product references can be selected from real cards regardless of
+    // their rendered position; no WooCommerce attributes are editable.
+    await page.evaluate(() => {
+      const root=document.createElement('section');
+      root.dataset.tablepressPreview='home_01';
+      root.innerHTML='<article id="product-82499" data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
+        '<article id="product-82481" data-esc-builder-product-id="82481"><a href="/product/b">Product B</a></article>';
+      document.querySelector('main').append(root);
+      window.__productMessages=[];
+      window.__productDispose=window.__vbExports.installBuilderSectionDrafts(
+        document,'https://admin.example.test',value=>window.__productMessages.push(value));
+      window.dispatchEvent(new MessageEvent('message', {
+        origin:'https://admin.example.test',source:window,
+        data:{type:'esc-vb-item-pick-start',tableId:'home_01',sourceRow:null,
+          count:3,requestId:27,productIds:['82477','82499','82481']}
+      }));
+    });
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched), true,
+      'Product picker must map published cards to ESC Table references');
+    await page.click('#product-82499 a');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.row), 1,
+      'Source selection must use Product ID, not card position');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.type),
+      'esc-vb-item-source-picked');
+    assert.equal(await page.locator('#product-82499').getAttribute('data-esc-vb-item-source'),'');
+    await page.click('#product-82481 a');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.row), 2,
+      'Destination must use exact ESC Table row');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.type),
+      'esc-vb-item-target-picked');
+    assert.equal(await page.locator('#product-82481').getAttribute('data-esc-vb-item-target'),'');
+    await page.evaluate(() => {
+      window.__productDispose();
+      document.querySelector('[data-tablepress-preview="home_01"]').remove();
+    });
     await page.hover('#footer-phone');
     assert.equal(await page.getAttribute('[data-esc-vb-footer-field]', 'data-esc-vb-region-state'), 'editable');
     await page.screenshot({ path: path.join(output, name + '-editable.png'), fullPage: true });
