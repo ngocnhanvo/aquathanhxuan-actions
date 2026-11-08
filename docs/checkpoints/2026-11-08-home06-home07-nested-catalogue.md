@@ -42,7 +42,7 @@ Never assume an in-progress job or a trigger submission equals PASS. Never alter
 - Run **42499333049 SUCCESS**: both parents `home_06` and `home_07`, children `tool_home06products` (10 refs) and `tool_home07products` (9 refs), proper Product source PASS. Page 82454 persisted and independently read back exact section order `home_00,home_01,home_02,home_03,home_04,home_06,home_07,home_05`. Original six sections retained.
 - Astro source SHA `c5e12e223e1e92806a32c68c35f759ca1e8a8110` confirmed current master. Vitest source QA run 42497158378: 26 tests PASS.
 - Canonical WordPress-controlled production build request `build-requests/2026-11-08-home06-home07-c5e12e2.json`, Actions run **42499512154** started, must verify SUCCESS and triggered Astro deploy. A parallel identical-SHA build request from another active project continuation was also queued as run 42499528323; avoid unnecessarily dispatching another build. Both target the same pinned SHA.
-- Production QA request `qa-requests/equipment-production.json` **NOT created yet**; create only after successful deploy and marker verification, then run `.github/workflows/aquathanhxuan-equipment-production-qa.yml`, inspect 5 viewports and Builder add/delete/sort Cancel for both nested Product tables. Until verified, overall status PARTIAL.
+- Production QA request `qa-requests/equipment-production.json` **NOT created yet**; create only after successful deploy and marker verification, then run `.github/workflows/aquathanhxuan-equipment-production-qa.yml`, inspect 5 viewports and Builder add/delete/sort Cancel for both nested Product tables. At this interim point status was PARTIAL; final result is recorded below.
 
 ## FINAL DONE — production and Visual Builder verified (2026-11-08 23:31 Asia/Ho_Chi_Minh)
 - CMS native WordPress Page Insert Code: **run 42499333049 SUCCESS**; independent readback Page 82454 exactly `home_00,home_01,home_02,home_03,home_04,home_06,home_07,home_05`; no child shortcode separately pasted.
@@ -52,3 +52,18 @@ Never assume an in-progress job or a trigger submission equals PASS. Never alter
 - Latest production QA run **42500127511 SUCCESS**: marker `EQUIPMENT_DEPLOY_READY=c5e12e2...`, Product source 10/9, all five public sizes (1440x900,1024x768,768x1024,844x390,390x844), Visual Builder native Product child source, Product IDs/row coordinates, Add dialog and red-blue sort source/target, cancel without mutation: `EQUIPMENT_BUILDER_PASS=tool_home06products`, `EQUIPMENT_BUILDER_PASS=tool_home07products`, `EQUIPMENT_PRODUCTION_QA_PASS`.
 - QA is intentionally **read-only with cancellation** on production. Live persist/reload/rollback of an actual Product item reorder was **not** exercised. Do not claim that extra persistence scenario was tested.
 - Overall original task of Home06 + Home07 nested independent Product sections is **DONE** by the above contracted checks. No remaining deployment/QA step, no further source changes necessary.
+
+## Final acceptance — DONE (2026-11-08 23:32 Asia/Ho_Chi_Minh)
+- Source: Astro `master` c5e12e223e1e92806a32c68c35f759ca1e8a8110; source test workflow 42497158378 PASS, 26/26.
+- WooCommerce source parity: importer 42496783741 SUCCESS, exact 10 filters + 9 lights/accessories (7 reused, 12 imported), 5 scoped child categories under existing verified roots; original titles, images, regular prices preserved and verified.
+- TablePress source of truth: parents `home_06` and `home_07` each one row; children `tool_home06products` (10 Product refs) and `tool_home07products` (9 Product refs); native source Product and parent `shortcode-products` link verified.
+- WordPress native Page insert run **42499333049 SUCCESS** and read-after-write verified Page 82454 exactly eight parent sections in intended order. No Product children embedded separately.
+- Official WordPress Build Website run **42499512154 SUCCESS**, Astro deploy run **42499591212 SUCCESS**; independent production marker `DEPLOY_READY=PASS` matched source SHA. Parallel identical-SHA WordPress build 42499528323 and deploy 42499819912 also SUCCESS, no source divergence.
+- Full production Playwright QA run **42500127511 SUCCESS**: both child TablePress products correct, five viewports PASS (1440×900, 1024×768, 768×1024, 844×390, 390×844), actual prices/images/titles, no horizontal overflow. Builder preview confirms `tool_home06products` and `tool_home07products` in page manifest, canonical version/row identities, searchable Add dialog, red/blue native reorder picker, Delete dialog; all QA operations cancelled with *zero mutating requests* and persisted Product references unchanged. This is safe UI acceptance, not a claim of saved mutations.
+- An earlier QA run 42499774804 reached all five public responsive PASS but iframe preview was not ready; subsequent identical-SHA rerun 42500127511 fully PASS without changing Astro source or CMS Product data.
+- Evidence:
+  - https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42499333049
+  - https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42499512154
+  - https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42499591212
+  - https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42500127511
+- Final status: DONE — hoàn tất.
