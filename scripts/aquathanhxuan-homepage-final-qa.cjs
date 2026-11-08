@@ -325,9 +325,17 @@ async function assertHealthyImage(locator, caption) {
       await secondSlide.locator('[data-esc-builder-image-field="image"] img').click({
         position: {x: imageBox.width * 0.83, y: imageBox.height * 0.45}
       });
-      await admin.waitForFunction(expected =>
-        document.querySelector('#esc-vb-edit-row')?.value === expected,
-        secondRow + ':image', {timeout:25000});
+      // Image cells open the dedicated image editor, not the text editor row select.
+      const imageEditor = admin.locator('#esc-vb-image-editor');
+      await imageEditor.waitFor({state:'visible', timeout:25000});
+      await admin.waitForFunction(({row}) => {
+        const caption = document.querySelector('#esc-vb-image-caption')?.textContent || '';
+        const feedback = document.querySelector('#esc-vb-image-feedback')?.textContent || '';
+        return caption.includes('home_00 · image · dòng ' + (Number(row) + 1)) &&
+          !feedback.includes('Đang tải') && !feedback.includes('Không thể mở ảnh');
+      }, {row:secondRow}, {timeout:25000});
+      assert.equal(await admin.locator('#esc-vb-image-choose').isEnabled(), true,
+        'Hero slide 2 image editor cannot choose WordPress media');
       console.log('HOMEPAGE_BUILDER_SECOND_IMAGE_EDIT=PASS row=' + secondRow + ' cms_write=false');
       const secondToggle = secondSlide.locator('[data-esc-builder-cell-field="show_text"]');
       await secondToggle.click();
