@@ -1,5 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
-# Verify Product sorter keeps selected ESC Table row and explains editable order.
+# Validate selected Product row is retained by sorter and JS guidance test is scoped correctly.
 on:
   push:
     branches: [main]
