@@ -1,5 +1,7 @@
 {
   "environment": "production",
   "frontend_host": "aquathanhxuan.io.vn",
-  "source_sha": "22ed25954be504233328880c6d086f85189cc678"
+  "source_sha": "22ed25954be504233328880c6d086f85189cc678",
+  "retry": 2,
+  "reason": "WordPress admin navigation DOMContentLoaded check after auth navigation timeout"
 }
