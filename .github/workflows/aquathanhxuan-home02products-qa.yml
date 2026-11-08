@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Verify Product reference-only WordPress permission after PHP release 34ff3685.
+# Validate selected Product prefilled sorter and corrected Product editable-order hint after releases.
 on:
   push:
     branches: [main]
