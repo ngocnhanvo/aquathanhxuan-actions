@@ -43,3 +43,12 @@ Theo ảnh web gốc: gom điện thoại, Messenger, Zalo và AI agent hiện c
 ## Không làm lại
 - Các section Home_02/Home_06/Home_07 đã nghiệm thu ở checkpoint cũ; giữ nguyên.
 - Không làm hình ảnh generate; đây là phiên code.
+
+## Bản vá native Footer inspector đã nghiệm thu — 2026-11-09
+
+- Root cause: `builderEditabilityCues.ts` chặn click trong Footer `unsupported` tại document capture trước khi native ESC Table inspector nhận event.
+- Astro `master` commit `b82f644cc7abd91d4d425e7f43226064fb00455b`: bỏ chặn riêng những cell footer có `pub_` table id, version SHA-256, row và field hợp lệ; kiểm tra quyền/version live vẫn do native inspector phụ trách. Không mở quyền cho vùng Footer khác.
+- Actions Chromium contract commit `ce33f284df0743f6b9aa9b5e09235ccbadaecc61`: kiểm thử click text con của link, xác minh `esc-vb-section` truyền đúng tableId/row/field, chặn stale version. Run [42514768537](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514768537): 4/4 jobs PASS.
+- Production WordPress build [42514928428](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514928428): SUCCESS; Astro deployment [42515003603](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515003603): SUCCESS.
+- Production read-only Playwright [42515172280](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515172280): PASS tất cả 5 viewport, Home05 native description editor PASS, Footer label native inspector PASS, `FOOTER_CONSULTATION_HOME05_QA=PASS`. Global Footer `pub_aquafooterlinks` có 10 label cells, version `bd9d6548882ee52a2f794c66122464d096e4d1c7910d6ba06dacdade6f602d1c`.
+- Không còn bug click inspector tái hiện. Chưa thực hiện production write/readback/rollback test; không coi read-only QA là bằng chứng save thành công. Chỉ thử ghi nếu thỏa backup, WRITE_SCOPE tối thiểu, cleanup và rollback.
