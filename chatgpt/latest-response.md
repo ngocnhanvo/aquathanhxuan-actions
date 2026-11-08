@@ -1,29 +1,26 @@
-# Latest ChatGPT response — Aqua Thanh Xuân
+# Latest ChatGPT response — aquathanhxuan.com
 
 Date: 2026-11-08 Asia/Ho_Chi_Minh
-Project: aquathanhxuan.com
 Chế độ code: auto-build
 Cổng ghi source: bypass
 
-## Current user request
-Document a **cross-project Knowledge rule** so any future ESC Table with `meta.api="Product"` uses the SAME native Visual Builder direct card sorting UX (red source outline, blue target outline, confirmation), not a separate Product-specific numbered ID selection UI.
+## User's current request
+User supplied screenshot of old-style Hot Combo section: big main image on left and multiple constituent products in a panel on the right, asks what to do when there are two Hot Combos. Request is for solution/design (not yet explicit implementation or images).
 
-## Completed
-- Read and updated `ngocnhanvo/knowledge` branch `main`; no application source or production data was modified in this task.
-- Added authoritative section `## Chuẩn bắt buộc: ESC Table nguồn Product phải sắp xếp item bằng cùng cơ chế Visual Builder dùng chung (2026-11-08)` to `stacks/wordpress-editor-esc-table.md` (commit `3894b2c97c66ec4e58b5c7d7ce0d0294a3d07dbe`).
-- This rule binds all ESC Table `Product` sources in Astro+WordPress projects and templates, including nested tables, Sale sliders and product grids. Product attributes immutable in Builder, but membership/order/add/remove editable; native direct click-to-pick with red/blue outlines, selected source retained, indexed list fallback ONLY when marked component items unavailable; correct Table ID + original row mapping and authorization; prevent section/image overlay stealing clicks; Preview reorder/add/remove sync with live pagination and subset Sale semantics; cancel no CMS writes.
-- Defined mandatory QA with both nested and standalone Product ESC tables, direct card picking, no ID list when cards available, source/target selection, cancel/confirm, WordPress data integrity, readback, responsive and regression tests. Nonmutating production QA simulation is NOT proof of backend persistence.
-- Added prominent references in `knowledge/README.md` (commit `e3c0e2aa498285636ba172e551a83ebd95848b41`) and `knowledge/AGENTS.md` (commit `78865ea3036b8d816f82d97b7bdecb1e3361c30a`).
-- Verified all three files read back successfully from `knowledge/main` with source-aware fields and Product rules intact.
+## Confirmed source facts
+- Read current main Knowledge README, AGENTS and `stacks/wordpress-editor-esc-table.md`, including mandatory native red/blue Product ESC Table reference picker and native WordPress Insert Code contract.
+- Astro master `src/lib/wordpress/tablepress/home03.ts`: `home_03` reads real TablePress rows, each with title, description, image, button_label and button_href. Each row is a combo item; no child product references currently modeled.
+- Astro master `src/astro/tablepress/Home_03.astro`: displays `home_03` rows as sequential vertically stacked editorial combo cards; does not currently implement switchable bundle details with per-combo product list like supplied image. No code was changed.
 
-## Source references
-- https://github.com/ngocnhanvo/knowledge/blob/main/stacks/wordpress-editor-esc-table.md
-- https://github.com/ngocnhanvo/knowledge/blob/main/README.md
-- https://github.com/ngocnhanvo/knowledge/blob/main/AGENTS.md
+## Suggested architecture
+- Keep ONE homepage Hot Combo section; show one active combo at a time, switch using accessible tabs or previous/next/dots. With only one combo, hide controls; with two show two tabs; any number of combos is data-driven, not CSS hardcoded. Mobile tabs/swipe as appropriate, preserve banner and internal UI interaction in Visual Builder.
+- WordPress ESC Table `home_03` owns the combo definitions and their order (one row per combo: real title/description/photo/CTA and a validated linked products source ID; optional bundle product ID).
+- Each combo's constituent products are ordered references to genuine WooCommerce products in source `meta.api="Product"`, managed by the native common ESC visual item picker, not hardcoded in Astro. Practical conservative implementation: a separate Product reference ESC Table per combo, linked from the parent combo row; table IDs use names not conflicting with locale suffix reserved _vi/_en (e.g., `home_03productsA` and `home_03productsB`). For more scalable implementation, add native parent/group metadata to a shared Product table only if compatible with actual TablePress Product adapter and row schema; do not assume it already supports arbitrary group fields.
+- Switching active combo changes its main photo, description, product list, totals and CTA together. Derive price and stock from WooCommerce. 'Mua Combo' must use an actual WooCommerce bundle product or a documented atomic grouped-cart flow with validated stock/price; do not fake or silently represent standalone products as an existing purchasable bundle.
+- Rendering one combo by default, tab switching only changes local UI in preview (no route/mutation). Native editor/visual-builder controls manage parent combo order and per-combo product reference add/delete/sort; Product attributes readonly.
+- Mandatory QA: 1/2/3 combos; switched media, products and price; no cross-contamination; no duplicate/hardcoded IDs; responsive desktop/mobile, keyboard; Builder direct red/blue picker; page reload and saved ESC Table ref order; no accidental CMS mutation during preview tests.
 
-## Scope and limits
-This request was to RECORD THE RULE for other projects. No unrequested deployments/edits in other projects or templates. Other projects will need to read updated Knowledge and implement/test against their own current code; a Knowledge commit alone does not upgrade their installed application binaries.
+## Current status
+This is a **design recommendation only**, not a code implementation. No Astro/PHP/WordPress data or production source modified. If user approves implementing the proposed UX, next step is inspecting actual `home_03` table and WooCommerce bundle data, then defining linked product tables and native Insert Code placement, coding Astro+Builder support, build and real QA. Do not invent data.
 
-Chế độ code: auto-build
-Cổng ghi source: bypass
 Trạng thái: DONE — hoàn tất
