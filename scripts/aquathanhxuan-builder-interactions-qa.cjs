@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expected = 'b51304e3a65c4b950a193d16f4b61252d2d47b90';
+const expected = '3388ab1988d083eaf3a0c149a09e9367a69b0640';
 const stamp = Date.now();
 (async () => {
   const markerResponse = await fetch(frontend + '/aquathanhxuan-staging-build.json?builderqa=' + stamp, {
@@ -23,10 +23,10 @@ const stamp = Date.now();
       const writes = [];
       context.on('request', request => {
         const url = request.url();
-        if ((/\/wp-json\/(?:cocart|wc\/|api\/agent)|\/api\/agent\//.test(url) &&
+        if ((/\/wp-json\/(?:cocart|wc\/|api\/agent|esc-builder\/v1\/(?:swap-items|insert-item|delete-item))|\/api\/agent\//.test(url) &&
              /^(POST|PUT|PATCH|DELETE)$/i.test(request.method()))) writes.push({ method: request.method(), url: url.split('?')[0] });
       });
-      await context.route(/\/(?:wp-json\/(?:cocart|wc\/)|api\/agent\/)/, route => {
+      await context.route(/\/(?:wp-json\/(?:cocart|wc\/|esc-builder\/v1\/(?:swap-items|insert-item|delete-item))|api\/agent\/)/, route => {
         if (/^(POST|PUT|PATCH|DELETE)$/i.test(route.request().method())) return route.abort('blockedbyclient');
         return route.continue();
       });
@@ -137,6 +137,38 @@ const stamp = Date.now();
       assert.equal(previewFrame.url(), previewUrl, 'Product link navigated preview');
       assert.equal(context.pages().length,initialPages,'Preview opened external tab');
       assert.deepEqual(writes, [], 'Preview click issued a mutation');
+      // Visual ESC Table Product reference picker (no save/write). The card
+      // order shown by WooCommerce is not a trusted ESC Table row index.
+      const cards=sale.locator('[data-sale-card][data-esc-builder-product-id]');
+      assert((await cards.count()) >= 2, 'Sale needs two published cards for Product swap QA');
+      await sale.locator('.aqua-sale__bolt').click();
+      await admin.locator('#esc-vb-item-panel').waitFor({state:'visible',timeout:20000});
+      await admin.locator('#esc-vb-item-sort-open').click();
+      await admin.locator('#esc-vb-item-sort-body').waitFor({state:'visible',timeout:20000});
+      await admin.waitForFunction(() =>
+        document.querySelector('#esc-vb-item-sort-status')?.textContent?.includes('Nhấp sản phẩm nguồn'),
+        null,{timeout:20000});
+      const selectedSource=cards.nth(0);
+      const selectedTarget=cards.nth(1);
+      const sourceId=await selectedSource.getAttribute('data-esc-builder-product-id');
+      const targetId=await selectedTarget.getAttribute('data-esc-builder-product-id');
+      assert(sourceId&&targetId&&sourceId!==targetId,'Product card IDs must be unique');
+      await selectedSource.locator('.aqua-sale__name-link').click();
+      await admin.waitForFunction(()=>
+        !document.querySelector('#esc-vb-item-sort-source')?.textContent?.includes('Chưa chọn'),
+        null,{timeout:15000});
+      assert.equal(await selectedSource.getAttribute('data-esc-vb-item-source'),'',
+        'Product source must have red source mark');
+      await selectedTarget.locator('.aqua-sale__name-link').click();
+      await admin.waitForFunction(()=>
+        !document.querySelector('#esc-vb-item-sort-save')?.disabled,
+        null,{timeout:15000});
+      assert.equal(await selectedTarget.getAttribute('data-esc-vb-item-target'),'',
+        'Product target must have blue target mark');
+      assert.equal(previewFrame.url(),previewUrl,'Product swap picking navigated away');
+      await admin.locator('#esc-vb-item-sort-cancel').click();
+      assert.deepEqual(writes,[],'Product swap preview must not write data');
+      console.log('BUILDER_PRODUCT_PICK=PASS '+JSON.stringify({viewport:viewport.width,sourceId,targetId,canceled:true}));
       console.log('BUILDER_SAFE_INTERACTIONS=PASS viewport='+viewport.width+' no_cms_write=true');
       await context.close();
     }
