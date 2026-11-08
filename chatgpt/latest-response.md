@@ -1,40 +1,31 @@
 # Latest ChatGPT response
 
-Date (Asia/Ho_Chi_Minh): 2026-11-08
+Date: 2026-11-08 (Asia/Ho_Chi_Minh)
 Project: aquathanhxuan.com
-Task: Unify remaining homepage section headings with Nền thủy sinh and restrict Home_02 sidebar to actual direct children of WordPress Nền category
+Goal: Match all homepage section widths to Nền thủy sinh and restore the seven Nền child categories shown in the legacy category menu.
 Code mode: auto-build
 Source gateway: bypass
 
 ## Final response
 
-DONE — Confirmed and fixed. WordPress product_cat Nền ID 1775 slug `nen-cho-be-thuy-sinh` originally had zero subcategories and all 12 published Products were assigned to Uncategorized ID 16. Previous Home_02 fallback rendered all 12 Product cards and an Uncategorized sidebar tab. Instead of inventing the old demo brand categories, created two meaningful subcategories matching currently published soil Product families, moved only four verified product taxonomy assignments, and strictly filter the frontend to Nền and its children.
+DONE — Completed and production verified.
 
-WordPress changes (scoped; read-before-write / read-after-write; completed):
-- Created `Dennerle Scaper’s Soil`: ID 1779, parent 1775, slug `dennerle-scapers-soil`. Products 82481, 82483 now have `product_cat=[1775,1779]`.
-- Created `Shrimp King Active Soil`: ID 1780, parent 1775, slug `shrimp-king-active-soil`. Products 82489, 82491 now have `product_cat=[1775,1780]`.
-- The four Products previously had [16]; Uncategorized was removed only for these four. Remaining eight unrelated Products untouched; no invented empty taxonomy children, no price/image/description updates.
-- Read-only taxonomy inventory: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42454689080 SUCCESS.
-- Guarded CMS writer: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42455159181 SUCCESS (`SUBSTRATE_TAXONOMY_SUCCESS`: 4 updated, two preexisting matching new categories reused).
-- The writer workflow was changed to `workflow_dispatch`-only to disable automatic future CMS writes.
-- Two earlier writer QA attempts failed before taxonomy Product mutations: first REST `context=edit` returned 401, second after creating both child terms failed locating old product checklist; final writer used WP `rest-nonce` and scoped POST to Product `product_cat` only and succeeded.
+1. WordPress product_cat parent Nền ID 1775 (slug nen-cho-be-thuy-sinh) now has seven additional REAL direct child categories: Chihiros ID 1781, Contro Soil ID 1782, Master Soil ID 1783, Tropica ID 1784, Vũ Aqua ID 1785, Dennerle ID 1786, and Gex ID 1787. The two previously created children Dennerle Scaper’s Soil ID 1779 and Shrimp King Active Soil ID 1780 remain intact. Total direct Nền child categories = 9. These seven new brand terms are empty (zero assigned Products) and were created without fabricating items or touching existing WooCommerce Products.
+   - Guarded WordPress term writer, source preflight, explicit parent ID validation, deduplicated operations and read-after-write: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456180009 SUCCESS.
+   - This writer workflow was switched to manual workflow_dispatch only after success; no automatic production writes on subsequent source commits.
+2. Astro Home_02 sidebar now presents EVERY genuine WordPress Nền direct child category even if it has 0 Products, with an honest empty product state when selected; excludes Uncategorized and unrelated taxonomy. Category labels come from WordPress and are not hardcoded into Astro.
+   - Source: src/lib/wordpress/tablepress/home02Catalog.ts
+3. Align Sale bùng nổ and other homepage content section widths to Home_02: shared max-width 1376px, horizontal 48px inset on desktop/tablet and 24px inset on phones. CSS for Home_00 (hero content), Home_01 (Sale), Home_03 (Hot Combo), Home_04 (Equipment), Home_05 (Benefits) is updated. Fixed the historical Sale short-landscape override at 844x390 that caused 8px additional edge divergence.
+   - Final Astro master deployed SHA aca33f1b0764a6c10e14ae9a05199dd09f42578e.
+4. Regression suite updated for genuine unpopulated taxonomy terms and width equality:
+   - Unit + WordPress Builder contract + synthetic browser https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456249710 SUCCESS, all three jobs PASS (rerun after fixtures were updated).
+   - WordPress-controlled Astro production build https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456823663 SUCCESS.
+   - Astro production deploy https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456878565 SUCCESS; source provenance verified.
+   - Authenticated real-production five-viewport QA (rerun after deploy) https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42456812773 SUCCESS. All widths 1440x900, 1024x768, 768x1024, 844x390, 390x844: HOMEPAGE_SECTION_WIDTHS=PASS, HOMEPAGE_SUBSTRATE_CATALOG=PASS (4 genuine Nền products and all 9 direct child categories, including the seven requested empty terms), HOMEPAGE_VIEWPORT=PASS with no horizontal overflow. Visual Builder home_02 canonical cell coordinates and existing Product workflows PASS; no QA write.
+   - Screenshots attached to the final QA workflow run.
+5. Prior QA runs failed for expected reasons: predeployment SHA guard, then Sale's legacy short-landscape width override; final corrected source deploy and QA PASS. No pending task.
 
-Astro source:
-- `src/lib/wordpress/tablepress/home02Catalog.ts`: resolve actual Nền taxonomy from CMS group URL or exact name, render only products assigned to it or descendants, and sidebar only its real direct child categories. Removed site-wide Uncategorized/cross-category fallback. Uses processed CMS Products/categories.
-- `src/astro/tablepress/Home_01.astro`: Sale bùng nổ heading now has same blue gradient tab, border line, size/spacing style as Nền.
-- `src/astro/tablepress/Home_03.astro`: Hot Combo heading now matches blue gradient tab and border style.
-- `src/lib/wordpress/tablepress/home02Catalog.test.ts`: regression tests for strict taxonomy boundary, no Uncategorized leak, category filtering, and shared header style.
-- Production Astro SHA: c16db5fb234dd84e13464b316837e67be6f6256f.
-
-Verification:
-- Source PHP/TS/browser contracts: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42455298238 SUCCESS all 3 jobs.
-- WordPress-controlled build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42455441161 SUCCESS.
-- Astro production deployment: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42455505324 SUCCESS.
-- Authenticated production 5-viewport & Builder QA (attempt 2): https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42455331687 SUCCESS. All 1440x900, 1024x768, 768x1024, 844x390, 390x844 PASS, zero horizontal overflow. `HOMEPAGE_SUBSTRATE_CATALOG=PASS` with exactly four verified soil Products and exactly two direct child categories; asserts no Uncategorized, no off-category Products; Sale/Nền/Hot Combo headers all CSS gradient; Builder home_02 cell coordinates preserved, Product add/sort/delete read-only QA PASS, no CMS writes.
-- Screenshots: homepage-final-qa workflow artifact (substrate-* etc.) accessible from QA run.
-- Live URL: https://aquathanhxuan.io.vn
-- Future additions to the Nền taxonomy will appear if Products are assigned to child terms in WordPress and the normal approved build sync occurs. Do not automatically create empty demo brand categories.
-- User was informed in partial response before work that original Nền had no children and 12 published products were Uncategorized.
+Production: https://aquathanhxuan.io.vn
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
