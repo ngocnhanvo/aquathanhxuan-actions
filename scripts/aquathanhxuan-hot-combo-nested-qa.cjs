@@ -121,7 +121,7 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
   // Confirm delete and Swap commit control is left untouched.
   const mutationRequests=[];
   admin.on('request',request=>{
-    if (/\\/esc-builder\\/v1\\/(?:insert-item|delete-item|swap-items)(?:[/?]|$)/.test(request.url()))
+    if (/\/esc-builder\/v1\/(?:insert-item|delete-item|swap-items)(?:[/?]|$)/.test(request.url()))
       mutationRequests.push(request.url());
   });
   const firstCard=grid.locator('.aqua-hot-combo__product').first();
