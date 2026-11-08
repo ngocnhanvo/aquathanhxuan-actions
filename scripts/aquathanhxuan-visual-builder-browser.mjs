@@ -122,7 +122,7 @@ try {
     await page.click('#footer-credit');
     assert.deepEqual(await page.evaluate(() => window.__events.assets.at(-1)), [4, 'pub_example_07', 'a'.repeat(64)]);
     for (const id of ['slide', 'tab', 'summary']) await page.click('#' + id);
-    assert.equal(await page.evaluate(() => window.__events.ui), 5);
+    assert.equal(await page.evaluate(() => window.__events.ui), 3);
     await page.click('#native-next');
     assert.equal(await page.getAttribute('#native-carousel-track','data-active-slide'), '1');
     await page.click('#native-prev');
@@ -133,7 +133,7 @@ try {
     for (const id of ['unknown', 'submit']) await page.click('#' + id);
     assert.equal(await page.evaluate(() => window.__events.unknown + window.__events.submit), 0);
     await page.click('#slide', { modifiers: ['Alt'] });
-    assert.equal(await page.evaluate(() => window.__events.ui), 3);
+    assert.equal(await page.evaluate(() => window.__events.ui), 5);
     await page.hover('#footer-phone');
     assert.equal(await page.getAttribute('[data-esc-vb-footer-field]', 'data-esc-vb-region-state'), 'editable');
     await page.screenshot({ path: path.join(output, name + '-editable.png'), fullPage: true });
