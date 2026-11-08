@@ -290,6 +290,31 @@ async function assertHealthyImage(locator, caption) {
     await heroBuilder.locator('[data-home-slide][data-active="true"][data-show-text="' + beforeShowText + '"]')
       .waitFor({state:'attached',timeout:12000});
     console.log('HOMEPAGE_BUILDER_HERO_TOGGLE=PASS draft_and_cancel=true cms_write=false');
+    // Regression: the Builder must allow carousel interaction without navigation.
+    // In particular, slide 2 must select its own native ESC Table row.
+    if (slideCount > 1) {
+      const slideBefore = await heroBuilder.locator('[data-home-slide][data-active="true"]').getAttribute('data-esc-builder-row');
+      const nextControl = heroBuilder.locator('[data-hero-next]');
+      assert.equal(await nextControl.getAttribute('data-esc-builder-preview-action'), '',
+        'Next button missing preview interaction contract');
+      assert.equal(await heroBuilder.locator('[data-hero-prev]').getAttribute('data-esc-builder-preview-action'), '',
+        'Previous button missing preview interaction contract');
+      assert.equal(await heroBuilder.locator('[data-hero-dot]').first().getAttribute('data-esc-builder-preview-action'), '',
+        'Slide dots missing preview interaction contract');
+      await nextControl.click();
+      await admin.waitForTimeout(500);
+      const secondSlide = heroBuilder.locator('[data-home-slide][data-active="true"]').first();
+      const secondRow = await secondSlide.getAttribute('data-esc-builder-row');
+      assert(secondRow !== slideBefore, 'Builder next click did not change slide');
+      const secondToggle = secondSlide.locator('[data-esc-builder-cell-field="show_text"]');
+      await secondToggle.click();
+      await admin.waitForFunction(expected =>
+        document.querySelector('#esc-vb-edit-row')?.value === expected,
+        secondRow + ':show_text', {timeout:25000});
+      assert.equal(await admin.locator('#esc-vb-hero-show-text').isVisible(), true,
+        'Second banner text toggle is not editable');
+      console.log('HOMEPAGE_BUILDER_SECOND_SLIDE=PASS row=' + secondRow + ' cms_write=false');
+    }
 
     const productCards = saleBuilder.locator('[data-esc-vb-product-readonly="true"]');
     assert((await productCards.count()) > 0, 'Sale product cards must identify WooCommerce as owner');
