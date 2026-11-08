@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Validate direct Product selection before generic section inspector, Astro 95ac503e.
+# Capture actual pointer hit target for nested Product card in Builder.
 on:
   push:
     branches: [main]
