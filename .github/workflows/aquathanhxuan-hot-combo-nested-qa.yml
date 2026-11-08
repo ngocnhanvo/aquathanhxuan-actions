@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'qa-requests/hot-combo-nested-*.json'
+      - 'scripts/aquathanhxuan-hot-combo-nested-qa.cjs'
 permissions:
   contents: read
 jobs:
