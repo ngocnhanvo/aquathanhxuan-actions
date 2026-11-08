@@ -267,9 +267,68 @@ try {
       'Repeated insert is rejected');
 
 
+    // A separate Product ESC Table can live inside the decorative home_02
+    // section. Its insertion, deletion and saved order must update the actual
+    // grid, not the Sale-only [data-sale-track] carousel.
+    await page.evaluate(() => {
+      const section=document.createElement('section');
+      section.dataset.tablepressPreview='home_02';
+      section.innerHTML='<div data-esc-source-table="home_02products" data-substrate-products>'+
+        '<template data-esc-builder-product-template>'+
+        '<article data-substrate-card data-esc-vb-product-readonly="true">'+
+        '<a class="aqua-substrate-catalog__image-link" href="#"><div class="aqua-substrate-catalog__image">'+
+        '<span class="aqua-substrate-catalog__discount"></span><img src=""></div></a>'+
+        '<a class="aqua-substrate-catalog__name" href="#"></a>'+
+        '<div class="aqua-substrate-catalog__prices"><strong></strong><del></del></div>'+
+        '<button data-substrate-add></button></article></template>'+
+        '<article data-substrate-card id="substrate-82535" data-esc-vb-product-readonly="true" data-esc-builder-product-id="82535"></article>'+
+        '<article data-substrate-card id="substrate-82537" data-esc-vb-product-readonly="true" data-esc-builder-product-id="82537"></article>'+
+        '</div>';
+      document.querySelector('main').append(section);
+      window.dispatchEvent(new MessageEvent('message',{
+        origin:'https://admin.example.test',source:window,
+        data:{type:'esc-vb-product-order-saved',tableId:'home_02products',
+          items:[{key:'82537'},{key:'82535'}],requestId:42}
+      }));
+    });
+    assert.deepEqual(await page.locator('[data-substrate-products] > [data-substrate-card]')
+      .evaluateAll(nodes=>nodes.map(n=>n.dataset.escBuilderProductId)),['82537','82535'],
+      'Nested Product ESC Table cards must reorder immediately after a saved swap');
+    assert.deepEqual(await page.locator('[data-substrate-products] > [data-substrate-card]')
+      .evaluateAll(nodes=>nodes.map(n=>n.dataset.escBuilderRow)),['0','1'],
+      'Nested Product rows must be reindexed after reordering');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Nested Product source reorder must acknowledge exact ID mapping');
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-deleted',tableId:'home_02products',
+        productId:'82535',requestId:43}
+    })));
+    assert.equal(await page.locator('#substrate-82535').count(),0,
+      'Nested Product deletion must remove exactly the selected card');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true);
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-added',tableId:'home_02products',
+        row:1,requestId:44,productOrder:['82537','82539'],
+        product:{id:'82539',name:'Real WordPress Product',url:'https://admin.example.test/p/82539',
+          image:'https://admin.example.test/product-82539.webp',
+          currentPrice:250000,regularPrice:250000,currency:'VND',eligible:false}}
+    })));
+    assert.equal(await page.locator('[data-substrate-products] > [data-substrate-card]').count(),2,
+      'Nested Product addition should insert an additional card');
+    assert.equal(await page.locator('[data-substrate-products] > [data-substrate-card]').last()
+      .getAttribute('data-esc-builder-product-id'),'82539',
+      'New Product must follow verified WordPress reference order');
+    assert.equal(await page.locator('[data-substrate-products] > [data-substrate-card]').last()
+      .locator('.aqua-substrate-catalog__name').textContent(),'Real WordPress Product',
+      'New Product card must use authoritative WooCommerce name');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Nested Product insert acknowledgement must be true for non-sale products');
     await page.evaluate(() => {
       window.__productDispose();
       document.querySelector('[data-tablepress-preview="home_01"]').remove();
+      document.querySelector('[data-tablepress-preview="home_02"]').remove();
     });
     await page.hover('#footer-phone');
     assert.equal(await page.getAttribute('[data-esc-vb-footer-field]', 'data-esc-vb-region-state'), 'editable');
