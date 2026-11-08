@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/aquathanhxuan-hot-combo-child.yml'
       - 'scripts/aquathanhxuan-hot-combo-child.cjs'
+      - 'scripts/aquathanhxuan-hot-combo-import.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,8 +23,11 @@ jobs:
     env:
       WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
       WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
     steps:
       - uses: actions/checkout@v4
       - run: node --check scripts/aquathanhxuan-hot-combo-child.cjs
       - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: python3 -m py_compile scripts/aquathanhxuan-hot-combo-import.py
+      - run: python3 scripts/aquathanhxuan-hot-combo-import.py
       - run: node scripts/aquathanhxuan-hot-combo-child.cjs
