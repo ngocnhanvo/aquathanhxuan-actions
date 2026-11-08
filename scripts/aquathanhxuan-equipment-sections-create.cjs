@@ -178,12 +178,15 @@ const normalize=s=>String(s||'').normalize('NFC').replace(/<[^>]*>/g,' ').replac
     assert(oldShortcodes.every(x=>[...expectedPrevious,...newShortcodes].includes(x)),
       'Unexpected shortcode on Page; manual review required');
     if(changed.length){
-      const editor=await page.evaluate(()=>{
-        const e=window.tinymce?.get('content');
-        if(e&&!e.isHidden())e.hide();
-        return {hidden:!e||e.isHidden()};
-      });
-      assert(editor.hidden,'Native WordPress Text editor was not released');
+      // The quicktags Insert ESC Table button is only visible in the native
+      // WordPress Text tab. Hiding TinyMCE directly leaves its toolbar hidden.
+      // Use the same verified editor transition as the Home 02/03 writers.
+      await page.locator('#content-html').click();
+      await page.locator('#content').waitFor({state:'visible',timeout:15000});
+      await page.waitForFunction(()=>window.tinymce?.get('content')?.isHidden()===true,
+        null,{timeout:15000});
+      assert(await page.locator('#qt_content_tablepress_quicktags_button').isVisible(),
+        'Native ESC Table Quicktags must be visible in WordPress Text mode');
       const baseline=await page.locator('#content').inputValue();
       assert.equal(baseline,pageBefore,'Native editor toggling altered Page content');
       for(const id of changed){
