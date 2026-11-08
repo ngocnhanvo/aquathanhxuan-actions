@@ -289,6 +289,6 @@
     }
   },
   "error": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#esc-vb-item-status').getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i) to be visible\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:182:75",
-  "run_id": 42466882938,
+  "run_id": 42467563902,
   "outcome": "failure"
 }
