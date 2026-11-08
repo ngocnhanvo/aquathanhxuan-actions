@@ -1,4 +1,5 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
+# Verify Home 02 can render without the retired sidebar image.
 on:
   push:
     branches: [main]
