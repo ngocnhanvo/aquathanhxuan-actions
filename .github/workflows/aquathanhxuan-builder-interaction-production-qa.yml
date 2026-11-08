@@ -1,0 +1,28 @@
+name: Aqua homepage Visual Builder interaction QA (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-builder-interaction-production-qa.yml'
+      - 'scripts/aquathanhxuan-builder-interactions-qa.cjs'
+permissions:
+  contents: read
+jobs:
+  builder-interactions:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate read-only QA script
+        run: node --check scripts/aquathanhxuan-builder-interactions-qa.cjs
+      - name: Install matching Playwright JS driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Verify actual production Builder navigation and safe controls
+        run: node scripts/aquathanhxuan-builder-interactions-qa.cjs
