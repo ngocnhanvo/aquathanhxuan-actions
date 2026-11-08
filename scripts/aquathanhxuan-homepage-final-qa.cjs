@@ -87,7 +87,7 @@ async function assertHealthyImage(locator, caption) {
         'Footer/header logo sources diverged');
 
       for (const [label, selector] of [
-        ['Substrate', '[data-aqua-home-substrate] img'],
+        ['Substrate', '[data-aqua-home-substrate] [data-substrate-card]:visible img'],
         ['HotCombo', '[data-aqua-home-combo] img'],
         ['Equipment', '[data-aqua-home-equipment] article img'],
       ]) await assertHealthyImage(page.locator(selector).first(), label);
