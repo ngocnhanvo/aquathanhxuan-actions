@@ -1,9 +1,9 @@
 {
-  "source_sha": "145b61fe01df4796cbf1488dae55c387ab17f8e6",
-  "purpose": "QA popup flip on mobile 390x844, footer, Home05 and Visual Builder",
+  "source_sha": "31f388af4876319f41960c2d702ff86c113fff56",
+  "purpose": "Nghiệm thu popup mobile clamp X/Y, Footer, Home05, AI agent và Visual Builder sau deploy",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
   "note": "Postdeploy diagnostic for consultation hrefs",
   "diagnostic": "Compare public WordPress ACF, incremental info logs and deployed common-data cache",
-  "attempt": 4
+  "attempt": 5
 }
