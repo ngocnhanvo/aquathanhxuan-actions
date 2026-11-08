@@ -176,6 +176,31 @@ try {
       'Saved Product reference order must rearrange existing hydrated cards');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Product reorder must be acknowledged');
+    // Ordinary Product-card click is a Visual Builder source selection,
+    // not a request to edit/read-only WooCommerce attributes or navigate.
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-item-pick-clear'}
+    })));
+    await page.click('#product-82499 a');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.type),
+      'esc-vb-product-selected');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.productId),
+      '82499', 'Delete source must retain the exact immutable WooCommerce Product ID');
+    assert.equal(await page.locator('#product-82499').count(),1,
+      'Selection must not remove the Product card before confirmation');
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-deleted',tableId:'home_01',
+        productId:'82499',requestId:37}
+    })));
+    assert.equal(await page.locator('#product-82499').count(),0,
+      'A confirmed WordPress deletion removes only its selected Product card');
+    assert.equal(await page.locator('#product-82481').count(),1,
+      'Other Product cards must be preserved');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Confirmed deletion must acknowledge the exact rendered Product card');
+
     await page.evaluate(() => {
       window.__productDispose();
       document.querySelector('[data-tablepress-preview="home_01"]').remove();
