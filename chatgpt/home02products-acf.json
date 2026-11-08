@@ -1,0 +1,447 @@
+{
+  "wp_http": 200,
+  "wc_http": 200,
+  "wp_acf": {
+    "product_lang": {
+      "value": "vi",
+      "label": "Tiếng Việt"
+    },
+    "origin_product_id": null,
+    "currency": {
+      "value": "vi",
+      "label": "VNĐ"
+    },
+    "unit": {
+      "value": "vi_cai",
+      "label": "Cái"
+    },
+    "tld": "",
+    "seo_h1": ""
+  },
+  "wp_meta": {
+    "_acf_changed": false
+  },
+  "wc_lang_meta": [
+    {
+      "id": 364679,
+      "key": "product_lang",
+      "value": "vi"
+    },
+    {
+      "id": 364680,
+      "key": "_product_lang",
+      "value": "field_6a150971b29e6"
+    }
+  ],
+  "acf_fields": [
+    {
+      "tag": "LINK",
+      "name": null,
+      "id": "acf-global-css"
+    },
+    {
+      "tag": "LINK",
+      "name": null,
+      "id": "acf-input-css"
+    },
+    {
+      "tag": "LINK",
+      "name": null,
+      "id": "acf-datepicker-css"
+    },
+    {
+      "tag": "LINK",
+      "name": null,
+      "id": "acf-timepicker-css"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-js-extra"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-js"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-input-js"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-timepicker-js"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-color-picker-alpha-js"
+    },
+    {
+      "tag": "LI",
+      "name": null,
+      "id": "toplevel_page_edit-post_type-acf-field-group"
+    },
+    {
+      "tag": "INPUT",
+      "name": "acf-group_6a15096de40f9-hide",
+      "id": "acf-group_6a15096de40f9-hide",
+      "value": "acf-group_6a15096de40f9"
+    },
+    {
+      "tag": "INPUT",
+      "name": "acf-group_esc_product_seo_h1-hide",
+      "id": "acf-group_esc_product_seo_h1-hide",
+      "value": "acf-group_esc_product_seo_h1"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "acf-form-data"
+    },
+    {
+      "tag": "INPUT",
+      "name": "_acf_screen",
+      "id": "_acf_screen",
+      "value": "post"
+    },
+    {
+      "tag": "INPUT",
+      "name": "_acf_post_id",
+      "id": "_acf_post_id",
+      "value": "82535"
+    },
+    {
+      "tag": "INPUT",
+      "name": "_acf_validation",
+      "id": "_acf_validation",
+      "value": "1"
+    },
+    {
+      "tag": "INPUT",
+      "name": "_acf_nonce",
+      "id": "_acf_nonce",
+      "value": "6966c39506"
+    },
+    {
+      "tag": "INPUT",
+      "name": "_acf_changed",
+      "id": "_acf_changed",
+      "value": "0"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "acf_after_title-sortables"
+    },
+    {
+      "tag": "STYLE",
+      "name": null,
+      "id": "acf-style"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "acf-group_6a15096de40f9"
+    },
+    {
+      "tag": "H2",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-title"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-handle-order-higher-description"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-handle-order-higher-description-text"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-handle-order-lower-description"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-handle-order-lower-description-text"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-handlediv"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_6a15096de40f9-handlediv-text"
+    },
+    {
+      "tag": "SELECT",
+      "name": "acf[field_6a150971b29e6]",
+      "id": "acf-field_6a150971b29e6",
+      "value": "vi"
+    },
+    {
+      "tag": "INPUT",
+      "name": "acf[field_6a1509d8b29e7]",
+      "id": "acf-field_6a1509d8b29e7-input",
+      "value": ""
+    },
+    {
+      "tag": "SELECT",
+      "name": "acf[field_6a1509d8b29e7]",
+      "id": "acf-field_6a1509d8b29e7",
+      "value": ""
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "select2-acf-field_6a1509d8b29e7-container"
+    },
+    {
+      "tag": "SELECT",
+      "name": "acf[field_6a150a10b29e8]",
+      "id": "acf-field_6a150a10b29e8",
+      "value": "vi"
+    },
+    {
+      "tag": "SELECT",
+      "name": "acf[field_6a6470aa15e99]",
+      "id": "acf-field_6a6470aa15e99",
+      "value": "vi_cai"
+    },
+    {
+      "tag": "INPUT",
+      "name": "acf[field_6a7a0e2e6fb94]",
+      "id": "acf-field_6a7a0e2e6fb94",
+      "value": ""
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1"
+    },
+    {
+      "tag": "H2",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-title"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-handle-order-higher-description"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-handle-order-higher-description-text"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-handle-order-lower-description"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-handle-order-lower-description-text"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-handlediv"
+    },
+    {
+      "tag": "SPAN",
+      "name": null,
+      "id": "acf-group_esc_product_seo_h1-handlediv-text"
+    },
+    {
+      "tag": "INPUT",
+      "name": "acf[field_esc_product_seo_h1]",
+      "id": "acf-field_esc_product_seo_h1",
+      "value": ""
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-escaped-html-notice-js-extra"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "acf-escaped-html-notice-js"
+    },
+    {
+      "tag": "SCRIPT",
+      "name": null,
+      "id": "esc-acf-editor-js-after"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "acf-hidden-wp-editor"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "wp-acf_content-wrap"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "wp-acf_content-editor-tools"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "wp-acf_content-media-buttons"
+    },
+    {
+      "tag": "BUTTON",
+      "name": null,
+      "id": "acf_content-tmce"
+    },
+    {
+      "tag": "BUTTON",
+      "name": null,
+      "id": "acf_content-html"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "wp-acf_content-editor-container"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "qt_acf_content_toolbar"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_strong",
+      "value": "b"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_em",
+      "value": "i"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_link",
+      "value": "link"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_block",
+      "value": "b-quote"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_del",
+      "value": "del"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_ins",
+      "value": "ins"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_img",
+      "value": "img"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_ul",
+      "value": "ul"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_ol",
+      "value": "ol"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_li",
+      "value": "li"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_code",
+      "value": "code"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_tablepress_quicktags_button",
+      "value": "Table"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_more",
+      "value": "more"
+    },
+    {
+      "tag": "INPUT",
+      "name": null,
+      "id": "qt_acf_content_close",
+      "value": "đóng thẻ"
+    },
+    {
+      "tag": "IFRAME",
+      "name": null,
+      "id": "acf_content_ifr"
+    },
+    {
+      "tag": "TEXTAREA",
+      "name": "acf_content",
+      "id": "acf_content"
+    },
+    {
+      "tag": "DIV",
+      "name": null,
+      "id": "tp-acf-menu"
+    },
+    {
+      "tag": "A",
+      "name": null,
+      "id": "tp-acf-link"
+    },
+    {
+      "tag": "A",
+      "name": null,
+      "id": "tp-acf-replace-link"
+    },
+    {
+      "tag": "A",
+      "name": null,
+      "id": "tp-acf-cut-link"
+    }
+  ],
+  "locale_labels": [
+    "Chọn ngôn ngữ"
+  ],
+  "product_id": 82535,
+  "run_id": 42460220134,
+  "outcome": "success"
+}
