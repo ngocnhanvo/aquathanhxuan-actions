@@ -1,0 +1,32 @@
+name: Aqua production footer consultation and Home05 QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-footer-consultation-home05-qa.yml'
+      - 'qa-requests/footer-consultation-20261109.json'
+permissions:
+  contents: read
+jobs:
+  read-only-playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aquathanhxuan-footer-consultation-home05-qa.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aquathanhxuan-footer-consultation-home05-qa.cjs
+      - name: Upload five viewport evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-footer-consultation-home05-qa
+          path: artifacts/footer-consultation-home05
+          if-no-files-found: ignore
+          retention-days: 7
