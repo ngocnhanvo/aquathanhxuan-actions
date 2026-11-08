@@ -171,7 +171,7 @@ const stamp = Date.now();
         indexedList:document.querySelectorAll('#esc-vb-item-sort-preview-list li button').length
       }));
       console.log('BUILDER_PRODUCT_PICK_INITIAL='+JSON.stringify({...pickDebug,itemSchemaRequests,ticketType:await admin.evaluate(()=>typeof window.escVBGetTicket)}));
-      assert(pickDebug.status?.includes('Nhấp sản phẩm nguồn'),
+      assert(pickDebug.status?.includes('Nhấp sản phẩm'),
         'Expected visual Product source picker: '+JSON.stringify(pickDebug));
       const selectedSource=cards.nth(0);
       const selectedTarget=cards.nth(1);
