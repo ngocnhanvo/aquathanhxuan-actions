@@ -1,0 +1,28 @@
+name: Aqua global footer links native ESC Table
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-footerlinks-native-create.yml'
+      - 'scripts/aquathanhxuan-footerlinks-native-create.cjs'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-footerlinks-native-create
+  cancel-in-progress: false
+jobs:
+  create-footer-links:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aquathanhxuan-footerlinks-native-create.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aquathanhxuan-footerlinks-native-create.cjs
