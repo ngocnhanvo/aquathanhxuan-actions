@@ -1,9 +1,9 @@
 {
-  "source_sha": "5fe6945edac16cb0f7c81288c89e722d81e60ef4",
+  "source_sha": "76b7a643f215460dd983f9b424359a526be160af",
   "purpose": "Nghiệm thu popup mobile clamp X/Y, Footer, Home05, AI agent và Visual Builder sau deploy",
   "expected_site": "aquathanhxuan.io.vn",
   "iteration": 2,
-  "note": "Diagnostic Footer editor click capture following initial QA timeout",
+  "note": "Verify global Footer click interception and cache version fix in Astro 76b7a64",
   "diagnostic": "Test actual Home05 and Footer label editor opened; do not save",
-  "attempt": 9
+  "attempt": 10
 }
