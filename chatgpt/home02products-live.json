@@ -62,6 +62,73 @@
     "82551",
     "82552"
   ],
+  "sidebarGeometry": [
+    {
+      "width": 1440,
+      "flow": "grid",
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "clientHeight": 508,
+      "scrollHeight": 508,
+      "containerBottom": 1898.671875,
+      "firstTop": 1390.671875,
+      "lastBottom": 1898.671875,
+      "childCount": 7,
+      "viewportWidth": 1440
+    },
+    {
+      "width": 1024,
+      "flow": "grid",
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "clientHeight": 508,
+      "scrollHeight": 508,
+      "containerBottom": 1728.15625,
+      "firstTop": 1220.15625,
+      "lastBottom": 1728.15625,
+      "childCount": 7,
+      "viewportWidth": 1024
+    },
+    {
+      "width": 768,
+      "flow": "grid",
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "clientHeight": 508,
+      "scrollHeight": 508,
+      "containerBottom": 1664,
+      "firstTop": 1156,
+      "lastBottom": 1664,
+      "childCount": 7,
+      "viewportWidth": 768
+    },
+    {
+      "width": 844,
+      "flow": "grid",
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "clientHeight": 508,
+      "scrollHeight": 508,
+      "containerBottom": 1502,
+      "firstTop": 994,
+      "lastBottom": 1502,
+      "childCount": 7,
+      "viewportWidth": 844
+    },
+    {
+      "width": 390,
+      "flow": "flex",
+      "overflowX": "auto",
+      "overflowY": "auto",
+      "clientHeight": 46,
+      "scrollHeight": 46,
+      "containerBottom": 1054.984375,
+      "firstTop": 1010.984375,
+      "lastBottom": 1049.984375,
+      "childCount": 7,
+      "viewportWidth": 390
+    }
+  ],
   "sidebar": [
     {
       "name": "Chihiros›",
@@ -276,8 +343,8 @@
     "heading": "Chihiros"
   },
   "builderClickProbe": {
-    "context": "home_02products · dòng 1",
-    "status": "Đã chọn sản phẩm 82535 · dòng 1. Bấm Xóa item đang chọn để xác nhận.",
+    "context": "home_02products · chọn item để nhân bản hoặc xóa",
+    "status": "Đang xác định đúng dòng ESC Table của sản phẩm 82535...",
     "selectedCardId": "82535",
     "selectedRow": "0",
     "panelVisible": true,
@@ -306,61 +373,61 @@
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132931414
+        "at": 1794135585371
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132932986
+        "at": 1794135587381
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
-        "at": 1794132933334
+        "at": 1794135587459
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132933334
+        "at": 1794135587459
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132933442
+        "at": 1794135587576
       },
       {
         "event": "request",
         "method": "POST",
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132933535
+        "at": 1794135587679
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/changes",
-        "at": 1794132934865
+        "at": 1794135589029
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132934895
+        "at": 1794135589095
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132935001
+        "at": 1794135589180
       },
       {
         "event": "response",
         "status": 200,
         "url": "https://admin.aquathanhxuan.io.vn/wp-json/esc-builder/v1/item-schema",
-        "at": 1794132935079
+        "at": 1794135589421
       }
     ],
     "pointerHits": [
@@ -431,6 +498,6 @@
     "sortRows": 10,
     "forbiddenWrites": 0
   },
-  "run_id": 42470517775,
+  "run_id": 42473610405,
   "outcome": "success"
 }
