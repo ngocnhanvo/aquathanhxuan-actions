@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "cb43985fb4dcad2973b3f08b33ca4f92da9f461a",
+  "intent": "Fix Product source deletion confirmation to use Product clicked on Visual Builder; no second dropdown; preserve version/hash guard; inform preview only after confirmed WordPress deletion. PHP only."
+}
