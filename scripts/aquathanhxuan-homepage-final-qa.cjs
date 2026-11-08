@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expectedSha = 'c16db5fb234dd84e13464b316837e67be6f6256f';
+const expectedSha = '873a59aa298585bda53441cee341b7bbf619865c';
 const viewports = [[1440, 900], [1024, 768], [768, 1024], [844, 390], [390, 844]];
 const sections = [
   ['Hero', '[data-aqua-home-hero]'],
@@ -172,8 +172,8 @@ async function assertHealthyImage(locator, caption) {
         'Substrate product cart control missing');
       const categories=substrate.locator('[data-substrate-filter]:not([data-substrate-filter="all"])');
       assert.deepEqual((await categories.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-substrate-filter'))))
-        .map(Number).sort((a,b)=>a-b),[1779,1780],
-        'Substrate sidebar must contain only direct child categories under Nền');
+        .map(Number).sort((a,b)=>a-b),[1779,1780,1781,1782,1783,1784,1785,1786,1787],
+        'Substrate sidebar must contain all nine genuine WordPress child categories under Nền');
       assert.equal(await substrate.getByText('Uncategorized',{exact:true}).count(),0,
         'Uncategorized must never be a Nền sidebar category');
       for(const [selector,title] of [
@@ -186,16 +186,39 @@ async function assertHealthyImage(locator, caption) {
           title+' header must match modern blue Nền heading');
       }
 
-      if(await categories.count()){
-        await categories.first().click();
-        const categoryId=await categories.first().getAttribute('data-substrate-filter');
-        visibleCards=await catalogueCards.evaluateAll(nodes=>nodes.filter(node=>!node.hidden).length);
-        assert(visibleCards>=1,'Category tab should show category products');
-        const matched=await substrate.locator('[data-substrate-card]:visible').first().getAttribute('data-categories');
-        assert(matched?.split(',').includes(categoryId),
-          'Product displayed outside selected WordPress category');
-        await substrate.locator('[data-substrate-filter="all"]').click();
+      // The seven requested brands exist in WordPress but have no classified
+      // products yet. They must be visible, and empty filters must stay empty.
+      const expectedNames=['Chihiros','Contro Soil','Master Soil','Tropica','Vũ Aqua','Dennerle','Gex'];
+      const renderedNames=await categories.evaluateAll(nodes=>nodes.map(n=>n.textContent.trim()).filter(Boolean));
+      for(const name of expectedNames)
+        assert(renderedNames.includes(name),'Missing real child category: '+name);
+      await substrate.locator('[data-substrate-filter="1781"]').click();
+      assert.equal(await catalogueCards.locator(':visible').count(),0,
+        'Empty Chihiros category must not leak unrelated Nền products');
+      await substrate.locator('[data-substrate-filter="all"]').click();
+      const populated=substrate.locator('[data-substrate-filter="1779"]');
+      await populated.click();
+      visibleCards=await catalogueCards.evaluateAll(nodes=>nodes.filter(node=>!node.hidden).length);
+      assert.equal(visibleCards,2,'Existing Dennerle Scaper’s Soil products must be retained');
+      const matched=await substrate.locator('[data-substrate-card]:visible').first().getAttribute('data-categories');
+      assert(matched?.split(',').includes('1779'),'Product displayed under wrong subcategory');
+      await substrate.locator('[data-substrate-filter="all"]').click();
+
+      const substrateBox=await substrate.locator('.aqua-substrate-catalog__frame').boundingBox();
+      assert(substrateBox,'Nền section container not rendered');
+      for(const [label,selector] of [
+        ['Sale','[data-aqua-home-sale] .aqua-sale__inner'],
+        ['Combo','[data-aqua-home-combo] .aqua-hot-combo__inner'],
+        ['Equipment','[data-aqua-home-equipment] > div'],
+        ['Benefits','[data-aqua-home-benefits] > div']
+      ]){
+        const box=await page.locator(selector).boundingBox();
+        assert(box,'Missing section width container: '+label);
+        assert(Math.abs(box.x-substrateBox.x)<=2&&Math.abs(box.width-substrateBox.width)<=2,
+          'Section width differs from Nền at '+width+'px: '+label+
+          ' (actual='+JSON.stringify(box)+', expected='+JSON.stringify(substrateBox)+')');
       }
+      console.log('HOMEPAGE_SECTION_WIDTHS=PASS '+width+'x'+height);
       const nextPage=substrate.locator('[data-substrate-next]');
       if(await nextPage.isEnabled()){
         const before=await substrate.locator('[data-substrate-card]:visible').first()
