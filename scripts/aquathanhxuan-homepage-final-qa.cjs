@@ -321,8 +321,16 @@ async function assertHealthyImage(locator, caption) {
     await saleBuilder.locator('[data-esc-builder-cell-field="all_link"][href="' + previewHref + '"]')
       .waitFor({state:'attached',timeout:12000});
     await admin.locator('#esc-vb-edit-cancel').click();
-    assert.equal(await saleLink.getAttribute('href'), originalHref,
-      'Sale preview cancellation must preserve the published link');
+    // The parent sends an authenticated clear message to the iframe; wait for
+    // its event loop rather than racing an immediate DOM attribute read.
+    const restored = await saleLink.evaluate(async (anchor, expected) => {
+      for (let attempt = 0; attempt < 80; attempt++) {
+        if (anchor.getAttribute('href') === expected) return true;
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      return false;
+    }, originalHref);
+    assert(restored, 'Sale preview cancellation must preserve the published link');
     console.log('HOMEPAGE_BUILDER_SALE_CELLS=PASS title,label,href preview_and_cancel=true cms_write=false');
 
     // Footer is streamed after the page sections. Wait for the same marker used
