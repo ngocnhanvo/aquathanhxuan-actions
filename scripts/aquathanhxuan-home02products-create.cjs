@@ -37,9 +37,11 @@ const run=async()=>{
    await page.locator('#wp-submit').click();
   }
   await page.waitForURL(u=>u.pathname.startsWith('/wp-admin/'),{timeout:45000});
-  const dashboard=await page.request.get(url('/wp-admin/'),{timeout:30000});
-  assert.equal(dashboard.status(),200,'Cannot read authenticated WordPress dashboard');
-  const html=await dashboard.text();
+  // WordPress REST nonce is exposed on the authenticated Page editor,
+  // not reliably on the generic /wp-admin/ dashboard.
+  await page.goto(url('/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1'),
+    {waitUntil:'domcontentloaded',timeout:45000});
+  const html=await page.content();
   let nonce='';
   const match=html.match(/wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;/s);
   if(match){try{nonce=JSON.parse(match[1]).nonce||''}catch{}}
