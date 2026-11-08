@@ -49,6 +49,10 @@ body{font:16px/1.5 system-ui;margin:0;background:#f1f5f9;color:#0f172a}header,ma
 <main>
 <section data-tablepress-preview="sample_07"><h1>Preview interaction fixture</h1>
 <button type="button" data-esc-builder-preview-action id="slide">Next slide</button>
+<div id="native-carousel-track" data-active-slide="0">Carousel content</div>
+<button type="button" id="native-prev" aria-controls="native-carousel-track">Previous</button>
+<button type="button" id="native-next" aria-controls="native-carousel-track">Next</button>
+<button type="button" id="unsafe-mutation" aria-controls="native-carousel-track" data-esc-builder-preview-block="side-effect">Unsafe action</button>
 <button type="button" role="tab" aria-selected="false" id="tab">Details tab</button>
 <details><summary id="summary">Accordion</summary><p>Accordion content</p></details>
 <button type="button" id="unknown">Unapproved action</button>
@@ -76,7 +80,7 @@ try {
     await page.evaluate(() => { window.__vbExports = {}; });
     for (const script of moduleScripts) await page.addScriptTag({ content: script });
     await page.evaluate(policy => {
-      window.__events = { menu: [], footer: [], assets: [], unavailable: [], ui: 0, unknown: 0, submit: 0, messages: [] };
+      window.__events = { menu: [], footer: [], assets: [], unavailable: [], ui: 0, unknown: 0, submit: 0, mutations: 0, messages: [] };
       const events = window.__events;
       const hooks = window.__vbExports;
       const unavailable = message => events.unavailable.push(message);
@@ -93,6 +97,14 @@ try {
         node.setAttribute('aria-expanded', String(node.getAttribute('aria-expanded') !== 'true'));
       });
       for (const id of ['slide', 'tab', 'summary']) document.getElementById(id).addEventListener('click', () => events.ui++);
+      for (const [id, delta] of [['native-prev', -1], ['native-next', 1]]) {
+        document.getElementById(id).addEventListener('click', () => {
+          const track = document.getElementById('native-carousel-track');
+          track.dataset.activeSlide = String(Number(track.dataset.activeSlide || 0) + delta);
+          events.ui++;
+        });
+      }
+      document.getElementById('unsafe-mutation').addEventListener('click', () => { events.mutations++; });
       document.getElementById('unknown').addEventListener('click', () => events.unknown++);
       document.getElementById('submit').addEventListener('click', () => events.submit++);
     }, clickPolicy);
@@ -110,7 +122,14 @@ try {
     await page.click('#footer-credit');
     assert.deepEqual(await page.evaluate(() => window.__events.assets.at(-1)), [4, 'pub_example_07', 'a'.repeat(64)]);
     for (const id of ['slide', 'tab', 'summary']) await page.click('#' + id);
-    assert.equal(await page.evaluate(() => window.__events.ui), 3);
+    assert.equal(await page.evaluate(() => window.__events.ui), 5);
+    await page.click('#native-next');
+    assert.equal(await page.getAttribute('#native-carousel-track','data-active-slide'), '1');
+    await page.click('#native-prev');
+    assert.equal(await page.getAttribute('#native-carousel-track','data-active-slide'), '0');
+    assert.equal(await page.evaluate(() => window.__events.ui), 5);
+    await page.click('#unsafe-mutation');
+    assert.equal(await page.evaluate(() => window.__events.mutations), 0);
     for (const id of ['unknown', 'submit']) await page.click('#' + id);
     assert.equal(await page.evaluate(() => window.__events.unknown + window.__events.submit), 0);
     await page.click('#slide', { modifiers: ['Alt'] });
