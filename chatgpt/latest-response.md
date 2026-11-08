@@ -1,33 +1,38 @@
 # Latest ChatGPT response — aquathanhxuan.com
 
-Date: 2026-11-08 22:27 Asia/Ho_Chi_Minh
+Date: 2026-11-08 22:37 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
 Status: SAVED
 Knowledge: ngocnhanvo/knowledge@78865ea3036b8d816f82d97b7bdecb1e3361c30a
 Astro: ngocnhanvo/aquathanhxuan-astro@f86657ebb2fd6dc7fc78590c41e18b2c1a78db69
-PHP: ngocnhanvo/aquathanhxuan-php@869b3ad842ef6d9cf29d7cc5710c7d429c265fee (unchanged)
+PHP: ngocnhanvo/aquathanhxuan-php@869b3ad842ef6d9cf29d7cc5710c7d429c265fee
 Checkpoint: docs/checkpoints/2026-11-08-home02-nested-tool-products.md
+Evidence: CMS migration 42494247980, build 42494478116, deploy 42494552586, QA 42494730962 (all success).
 
 ## Nguyên văn phản hồi dự định gửi
 
-## Đã hoàn tất: ESC Table con cho “Nền thủy sinh”
+## Kết quả khôi phục checkpoint
 
-Mình đã chuyển danh sách sản phẩm từ dạng bảng nhúng độc lập sang mô hình cha–con:
+Mình đã đối chiếu GitHub và xác nhận: **công việc gần nhất về ESC Table con của `home_02` đã được triển khai thành công lên production.** Không cần làm lại bước chuyển đổi dữ liệu.
 
-- **`home_02`** quản lý tiêu đề và bố cục section, với trường `shortcode-products` tham chiếu đến **`tool_home02products`**.
-- **`tool_home02products`** là ESC Table con nguồn **Product**, quản lý 10 Product ID và thứ tự sản phẩm.
-- Trang chủ WordPress chỉ nhúng **`[table id=home_02 /]`** cho section này; mã nhúng riêng `home_02products` đã được gỡ.
-- Bảng `home_02products` cũ được giữ làm bản đối chiếu; không chỉnh sửa/xóa bản ghi WooCommerce.
+| Repository | Branch | Commit hiện tại |
+|---|---|---|
+| Knowledge | `main` | `78865ea` |
+| Astro | `master` | `f86657e` |
+| PHP | `master` | `869b3ad` |
+| Actions | `main` | `fcd6d2a` (tại thời điểm kiểm tra) |
 
-**Kết quả kiểm thử và triển khai:**
-- CMS migration & readback: [PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494247980).
-- Source Astro production: [`f86657e`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/f86657ebb2fd6dc7fc78590c41e18b2c1a78db69).
-- WordPress build [PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494478116), Astro deploy [PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494552586).
-- [Production QA & Visual Builder PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42494730962): đủ 10 sản phẩm trên 5 kích cỡ màn hình; Builder nhận đúng bảng con, ID, row và phiên bản; kiểm tra mở thêm sản phẩm, chọn card nguồn/đích để sắp xếp, mở xác nhận xóa và hủy an toàn.
+Checkpoint: [Home 02 nested Product — production checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-home02-nested-tool-products.md).
 
-**Lưu ý nghiệm thu:** các thao tác thử thêm/sắp xếp/xóa trong QA chỉ mở và hủy, **không ghi thay đổi Product thực tế lên production**. Mình không xem đó là bằng chứng đã kiểm thử lưu thật qua Visual Builder.
+**Đã xác minh:**
+- `home_02` chứa ESC Table con `tool_home02products`, với 10 sản phẩm WooCommerce thật.
+- Trang chủ chỉ cần nhúng `[table id=home_02 /]`.
+- Build, deploy và kiểm thử production đều thành công.
+- Visual Builder nhận đúng bảng con, cho phép mở chức năng thêm, xóa và sắp xếp sản phẩm.
 
-Checkpoint: [Home 02 nested tool Product](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-home02-nested-tool-products.md).
+Có một giới hạn nghiệm thu: **chưa kiểm thử thao tác lưu thay đổi thật rồi hoàn nguyên trên production**. Các bài QA trước đó mới kiểm tra giao diện tương tác và hủy thao tác an toàn.
+
+Job QA cuối `42494730962` đã xác nhận `HOME02_NESTED_PRODUCTION_QA_PASS`, Builder và đủ 5 viewport. Không có bước migration hoặc build chưa hoàn tất trong phạm vi yêu cầu mới nhất. Mình không kích hoạt lại workflow thành công hay sửa dữ liệu WooCommerce. Nếu cần xác minh thao tác ghi thật trên production, đó là bài thử riêng có đối chiếu trước/sau và hoàn nguyên an toàn, không được tự coi là đã PASS.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
