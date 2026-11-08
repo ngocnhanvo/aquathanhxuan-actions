@@ -1,0 +1,37 @@
+name: Aqua footer source taxonomy inventory
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-footer-source-inventory.yml'
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inspect public product category ancestry and published pages
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const base='https://admin.aquathanhxuan.io.vn';
+          for (const [name,path] of [
+            ['categories','/wp-json/wc/store/v1/products/categories?per_page=100'],
+            ['pages','/wp-json/wp/v2/pages?per_page=100&_fields=id,slug,title,acf']
+          ]) {
+            const res=await fetch(base+path,{headers:{Accept:'application/json'}});
+            console.log('SOURCE_'+name+'_HTTP='+res.status);
+            if(!res.ok) continue;
+            const body=await res.json();
+            if(name==='categories') {
+              console.log('SOURCE_CATEGORIES_COUNT='+body.length);
+              console.log('SOURCE_CATEGORIES='+JSON.stringify(body.map(x=>({id:x.id,name:x.name,slug:x.slug,parent:x.parent}))));
+            } else {
+              console.log('SOURCE_PAGES='+JSON.stringify(body.map(x=>({id:x.id,slug:x.slug,title:x.title?.rendered,lang:x.acf?.product_lang,key:x.acf?.key}))));
+            }
+          }
+          NODE
