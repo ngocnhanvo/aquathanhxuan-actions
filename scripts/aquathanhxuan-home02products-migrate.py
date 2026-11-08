@@ -150,10 +150,13 @@ for source,image in verified:
   # separate update to maintain its field reference; do not fake a PASS.
   product=api('/wp-json/wp/v2/product/'+str(target_id)+'?context=edit')
   actual_lang=(product.get('acf') or {}).get('product_lang')
+  if isinstance(actual_lang,dict): actual_lang=actual_lang.get('value')
   if actual_lang!='vi':
     api('/wp-json/wp/v2/product/'+str(target_id),method='POST',obj={'acf':{'product_lang':'vi'}})
     product=api('/wp-json/wp/v2/product/'+str(target_id)+'?context=edit')
-    assert (product.get('acf') or {}).get('product_lang')=='vi', 'Product ACF locale unverified: '+str(target_id)
+    confirmed_lang=(product.get('acf') or {}).get('product_lang')
+    if isinstance(confirmed_lang,dict): confirmed_lang=confirmed_lang.get('value')
+    assert confirmed_lang=='vi', 'Product ACF locale unverified: '+str(target_id)
   dest_check=api('/wp-json/wc/v3/products/'+str(target_id))
   assert normalize(dest_check['name'])==normalize(name)
   assert dest_check['slug']==slug
