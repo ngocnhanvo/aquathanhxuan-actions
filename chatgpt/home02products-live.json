@@ -1,7 +1,43 @@
 {
   "cms": true,
-  "frontend": [],
-  "builder": false,
+  "frontend": [
+    {
+      "width": 1440,
+      "height": 900,
+      "cards": 10,
+      "categories": 7,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "cards": 10,
+      "categories": 7,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "cards": 10,
+      "categories": 7,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "cards": 10,
+      "categories": 7,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "cards": 10,
+      "categories": 7,
+      "overflow": false
+    }
+  ],
+  "builder": true,
   "ids": [
     "82535",
     "82537",
@@ -218,7 +254,9 @@
     },
     {
       "pathname": "/san-pham/nen-cho-be-thuy-sinh/chihiros/",
-      "error": "Error: apiRequestContext.get: socket hang up (ECONNRESET)\nCall log:\n  - → GET https://aquathanhxuan.io.vn/san-pham/nen-cho-be-thuy-sinh/chihiros/\n    - user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n"
+      "status": 200,
+      "url": "https://aquathanhxuan.io.vn/san-pham/nen-cho-be-thuy-sinh/chihiros/",
+      "title": "Nền"
     },
     {
       "pathname": "/danh-muc-san-pham/nen-cho-be-thuy-sinh/chihiros/",
@@ -233,7 +271,10 @@
       "title": "404"
     }
   ],
-  "error": "apiRequestContext.get: socket hang up (ECONNRESET)\nCall log:\n  - → GET https://aquathanhxuan.io.vn/san-pham/chihiros\n    - user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n\n    at /__w/aquathanhxuan-actions/aquathanhxuan-actions/scripts/aquathanhxuan-home02products-qa.cjs:110:43",
-  "run_id": 42464754935,
-  "outcome": "failure"
+  "archive": {
+    "url": "https://aquathanhxuan.io.vn/san-pham/chihiros",
+    "heading": "Chihiros"
+  },
+  "run_id": 42465408148,
+  "outcome": "success"
 }
