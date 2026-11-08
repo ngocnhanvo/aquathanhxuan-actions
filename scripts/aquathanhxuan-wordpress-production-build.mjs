@@ -29,7 +29,9 @@ try {
     await page.locator('#user_login').fill(username);
     await page.locator('#user_pass').fill(password);
     await Promise.all([
-      page.waitForURL((url) => url.pathname.startsWith('/wp-admin/'), { timeout: 45_000 }),
+      // ACF/admin assets can keep network/load open well after authenticated navigation.
+      // The URL and the subsequent protected admin request still verify login.
+      page.waitForURL((url) => url.pathname.startsWith('/wp-admin/'), { waitUntil: 'domcontentloaded', timeout: 45_000 }),
       page.locator('#wp-submit').click(),
     ]);
   }
