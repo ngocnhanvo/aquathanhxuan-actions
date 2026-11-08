@@ -107,7 +107,18 @@ const getIds=html=>[...html.matchAll(/\[table\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map
     assert(wrapper.includes('tablepress-preview-wrap')&&wrapper.includes('data-table-id="'+sec.id+'"'),
       'New native Insert Code wrapper has wrong identity '+sec.id);
     assert(!/<script\b|<iframe\b/i.test(wrapper),'Unsafe shortcode wrapper '+sec.id);
-    assert.equal(modified.slice(0,start)+modified.slice(end),prior,
+    const recovered=modified.slice(0,start)+modified.slice(end);
+    if(recovered!==prior){
+      let first=0;while(first<Math.min(recovered.length,prior.length)&&
+        recovered[first]===prior[first])first++;
+      console.log('EQUIPMENT_NATIVE_INSERT_DIFF='+JSON.stringify({
+        section:sec.id,cursor,start,end,priorLength:prior.length,
+        restoredLength:recovered.length,firstDiff:first,
+        before:prior.slice(Math.max(0,first-100),first+200),
+        after:recovered.slice(Math.max(0,first-100),first+200)
+      }));
+    }
+    assert.equal(recovered,prior,
       'Inserting native shortcode unexpectedly rewrote other Page HTML '+sec.id);
     console.log('EQUIPMENT_NATIVE_INSERT_PASS='+sec.id);
    }
