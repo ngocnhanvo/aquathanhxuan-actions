@@ -14,10 +14,10 @@ const header=['title','description','lucide-icon'];
 const rows=[
   header,
   ['Tiêu đề','Mô tả','Biểu tượng'],
-  ['Sản phẩm','','package-check'],
-  ['Giao hàng','','truck'],
-  ['Hỗ trợ','','headset'],
-  ['Bảo hành','','shield-check']
+  ['Sản phẩm','Nhập khẩu và phân phối chính hãng, được chọn lọc và kiểm tra kỹ trước khi giao tới tay khách hàng.','package-check'],
+  ['Giao hàng','Đơn hàng được xử lý và giao đi ngay khi có xác nhận.','truck'],
+  ['Hỗ trợ','Khách hàng được hỗ trợ tư vấn miễn phí 24/7.','headset'],
+  ['Bảo hành','Sản phẩm được bảo hành theo chính sách nhà sản xuất.','shield-check']
 ];
 const editUrl=vars.WC_URL+'/wp-admin/admin.php?page=tablepress&action=edit&table_id='+id;
 (async()=>{
@@ -46,11 +46,29 @@ const editUrl=vars.WC_URL+'/wp-admin/admin.php?page=tablepress&action=edit&table
       await page.goto(editUrl,{waitUntil:'domcontentloaded'});
       await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData));
       const existing=await page.evaluate(()=>window.tp.editor.getData());
-      assert.deepEqual(existing,rows,'home_05 exists with different native content: refuse mutation');
+      const sameStructure = existing.length === rows.length &&
+        existing.every((line,i)=>Array.isArray(line) && line[0] === rows[i][0] &&
+          (i<2 ? JSON.stringify(line)===JSON.stringify(rows[i]) : line[2]===rows[i][2]));
+      assert(sameStructure,'Existing home_05 has unexpected rows/icons: refuse mutation');
+      const alreadyCurrent = JSON.stringify(existing)===JSON.stringify(rows);
+      if (!alreadyCurrent) {
+        assert(existing.slice(2).every(line=>line[1]===''),
+          'Existing nonempty descriptions require manual review: refuse overwrite');
+        await page.evaluate(value=>{
+          window.tp.editor.setData(value);
+          window.tp.helpers.unsaved_changes.set();
+        },rows);
+        await page.getByRole('button',{name:'Save Changes'}).first().click();
+        await page.waitForTimeout(2000);
+        await page.goto(editUrl,{waitUntil:'domcontentloaded',timeout:45000});
+        await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData));
+        assert.deepEqual(await page.evaluate(()=>window.tp.editor.getData()),rows,
+          'Description write did not persist in native TablePress');
+      }
       const existingName=await page.locator('#table-name').count()
         ? await page.locator('#table-name').inputValue() : '';
       if (existingName) assert.equal(existingName,'Lợi ích khách hàng','existing table name mismatch');
-      console.log('HOME05_NATIVE_TABLE=PASS_ALREADY_PRESENT name_readback='+JSON.stringify(existingName));
+      console.log('HOME05_NATIVE_TABLE=PASS_'+(alreadyCurrent?'UNCHANGED':'DESCRIPTIONS_UPDATED')+' name_readback='+JSON.stringify(existingName));
       return;
     }
     await page.goto(vars.WC_URL+'/wp-admin/admin.php?page=tablepress_add',{waitUntil:'domcontentloaded'});
