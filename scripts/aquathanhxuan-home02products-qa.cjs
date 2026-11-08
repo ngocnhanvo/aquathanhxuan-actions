@@ -47,6 +47,35 @@ const request=async u=>{
       String(node.querySelector('[data-substrate-add]')?.getAttribute('data-product-id')||'')));
     assert.deepEqual(ids,expected,'Grid product ordering differs from separate ESC Table');
     const menu=section.locator('.aqua-substrate-catalog__sidebar nav a');
+    const sidebarGeometry=await section.locator('.aqua-substrate-catalog__tabs').evaluate(nav=>{
+      const computed=getComputedStyle(nav);
+      const links=Array.from(nav.querySelectorAll('a'));
+      const container=nav.getBoundingClientRect();
+      const first=links[0]?.getBoundingClientRect();
+      const last=links.at(-1)?.getBoundingClientRect();
+      return {
+        flow:computed.display,overflowX:computed.overflowX,overflowY:computed.overflowY,
+        clientHeight:nav.clientHeight,scrollHeight:nav.scrollHeight,
+        containerBottom:container.bottom,firstTop:first?.top,lastBottom:last?.bottom,
+        childCount:links.length,viewportWidth:innerWidth
+      };
+    });
+    console.log('HOME02_SIDEBAR_GEOMETRY='+JSON.stringify(sidebarGeometry));
+    if(width>640){
+      assert.equal(sidebarGeometry.childCount,7,'The native Nền menu is incomplete');
+      assert(sidebarGeometry.scrollHeight<=sidebarGeometry.clientHeight+2,
+        'Desktop sidebar is internally clipped by a fixed height');
+      assert(sidebarGeometry.lastBottom<=sidebarGeometry.containerBottom+2,
+        'Last desktop child category is outside the sidebar');
+      assert(!['auto','scroll','hidden','clip'].includes(sidebarGeometry.overflowY),
+        'Desktop sidebar should use natural height, not internal scrolling');
+    }else{
+      assert.equal(sidebarGeometry.flow,'flex','Mobile category list must remain horizontal');
+      assert(['auto','scroll'].includes(sidebarGeometry.overflowX),
+        'Mobile categories must remain horizontally reachable');
+    }
+    report.sidebarGeometry=report.sidebarGeometry||[];
+    report.sidebarGeometry.push({width,...sidebarGeometry});
     report.sidebar=await menu.evaluateAll(nodes=>nodes.map(n=>({name:n.textContent?.trim(),href:n.getAttribute('href')})));
     console.log('HOME02_SIDEBAR_ACTUAL='+JSON.stringify(report.sidebar));
     const sourceCategories=await request(WP+'/wp-json/wc/store/v1/products/categories?per_page=100&qa='+Date.now());
