@@ -2,30 +2,27 @@
 
 Date: 2026-11-09 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
-Knowledge: ngocnhanvo/knowledge main (AGENTS/core policies read)
-Astro: ngocnhanvo/aquathanhxuan-astro master @ 31f388af4876319f41960c2d702ff86c113fff56
-PHP: ngocnhanvo/aquathanhxuan-php master @ 869b3ad842ef6d9cf29d7cc5710c7d429c265fee
+Knowledge: ngocnhanvo/knowledge main
+Astro: ngocnhanvo/aquathanhxuan-astro master @ b82f644cc7abd91d4d425e7f43226064fb00455b
+PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
 Actions: ngocnhanvo/aquathanhxuan-actions main
 Checkpoint: docs/checkpoints/2026-11-09-footer-consultation-home05.md
 
-## Source/build/deploy/QA
-- Contact popup combines phone, Messenger, Zalo and AI agent.
-- Footer managed by WordPress global ESC Table `pub_aquafooterlinks`; Home_05 has four descriptions.
-- Production build 42508241996: SUCCESS, requested source SHA 31f388a.
-- Production deploy 42508312422: SUCCESS.
-- Read-only Playwright QA 42508470220: SUCCESS, 5 viewport PASS 1440×900 / 1024×768 / 768×1024 / 844×390 / 390×844.
-- QA asserted Messenger/Zalo, one launcher, popup X/Y viewport, no horizontal overflow, Footer contents/links and four Home_05 descriptions.
-- Visual Builder QA asserted presence of 10 ESC Table rows sourced from `pub_aquafooterlinks` and 4 Home_05 `description` cell fields.
-- Artifact 13627893301: 11 files, retained 7 days.
+## Latest completed task
+- Footer ESC Table native inspector click was blocked by the generic unsupported Footer affordance handler in builderEditabilityCues.ts at document capture.
+- Astro fix b82f644 allows a versioned, identified global Footer ESC Table cell through the UI cue guard and keeps unsupported regions blocked.
+- Offline Chromium fixture now validates a nested link-text click plus stale version rejection.
+- Source contracts [42514768537](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514768537): SUCCESS, 4/4 jobs.
+- WordPress-controlled production build [42514928428](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42514928428): SUCCESS.
+- Astro production deploy [42515003603](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515003603): SUCCESS.
+- Production read-only UI QA [42515172280](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42515172280): SUCCESS, all five viewport assertions and Home05 description + Footer label inspector click PASS.
+- No CMS write made by QA, no data mutation or rollback needed.
 
-## Important distinction
-- PASS: production rendering and read-only Visual Builder source-field mapping.
-- NOT TESTED: true save/readback/rollback of edits to Visual Builder cells in production; do not claim this was verified. Follow CORE-04 backup/write scope/cleanup policy before any production write test.
-- Prior Home02/Home06/Home07 work already QA PASS, don't redo.
-
-## Next
-No code fix is required by the latest read-only QA. If an explicit requirement remains to prove full editability, construct minimally scoped reversible test, ensure backup/write authorization, verify write and rollback. Otherwise the current deployment task is complete.
+## Carry-forward scope
+- Header, Home02, Home03/04, Home05, Home06/07, consultation widget and Footer visual presentation already passed existing checkpoints; do not redo.
+- Native inspector click regression is fixed and deployed. An actual save/readback/rollback production test remains unverified: any future such test must follow Knowledge CORE-04 backup + narrow WRITE_SCOPE + cleanup. Do not claim full write-roundtrip was tested.
+- Avoid unnecessary builds unless a new application change needs deployment.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất
