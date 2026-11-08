@@ -1,0 +1,31 @@
+name: Aqua canonical contact channels CMS
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-contact-channels-cms.yml'
+      - 'scripts/aquathanhxuan-contact-channels-cms.cjs'
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-canonical-contact-channels
+  cancel-in-progress: false
+jobs:
+  contact-channels:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check guarded ACF migration syntax
+        run: node --check scripts/aquathanhxuan-contact-channels-cms.cjs
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Preserve reference Messenger and Zalo channels in WordPress
+        run: node scripts/aquathanhxuan-contact-channels-cms.cjs
