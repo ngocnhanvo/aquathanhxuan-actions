@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'qa-requests/equipment-production.json'
+      - 'scripts/aquathanhxuan-equipment-production-qa.cjs'
   workflow_dispatch:
 permissions:
   contents: read
