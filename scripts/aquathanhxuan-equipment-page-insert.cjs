@@ -89,9 +89,22 @@ const getIds=html=>[...html.matchAll(/\[table\s+id=['"]?([a-zA-Z0-9_-]+)/g)].map
       if(!(textarea instanceof HTMLTextAreaElement))throw Error('Native Page textarea missing');
       textarea.focus();textarea.setSelectionRange(pos,pos);window.wpActiveEditor='content';
     },cursor);
+    // After the first native insertion the optimized admin can reattach a
+    // TinyMCE overlay over Quicktags. Keep Text mode and activate the actual
+    // registered WordPress Quicktags input through its native click handler.
+    await page.evaluate(()=>{
+      const editor=window.tinymce?.get('content');
+      if(editor&&!editor.isHidden())editor.hide();
+      const wrap=document.getElementById('wp-content-wrap');
+      wrap?.classList.remove('tmce-active');
+      wrap?.classList.add('html-active');
+    });
     const button=page.locator('#qt_content_tablepress_quicktags_button');
     await button.waitFor({state:'visible',timeout:12000});
-    await button.click();
+    await button.evaluate(element=>{
+      if(!(element instanceof HTMLInputElement))throw Error('Native Quicktags button unavailable');
+      element.click();
+    });
     const shortcode='[table id='+sec.id+' /]';
     const picker=page.frameLocator('#TB_iframeContent').locator('input.insert-shortcode[title="'+shortcode+'"]');
     await picker.waitFor({state:'visible',timeout:18000});
