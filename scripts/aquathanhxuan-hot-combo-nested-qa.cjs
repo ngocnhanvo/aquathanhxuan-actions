@@ -53,7 +53,19 @@ const NAMES=['LED rọi Kaokui KK-F06','Chân gỗ 40x40x70','Bể cubic 40 siê
   }
   await admin.waitForURL(url=>url.pathname.startsWith('/wp-admin/'),{timeout:45000});
   await admin.goto(WP+'/wp-admin/edit.php?post_type=page&page=esc-visual-builder&esc_vb_page=82454',{waitUntil:'domcontentloaded',timeout:60000});
-  const grid=admin.frameLocator('#esc-vb-frame').locator('.aqua-hot-combo__products');
+  const frame=admin.frameLocator('#esc-vb-frame');
+  const iframeSrc=await admin.locator('#esc-vb-frame').getAttribute('src');
+  console.log('HOT_COMBO_BUILDER_PARENT='+JSON.stringify({title:await admin.title(),url:admin.url(),iframeSrc}));
+  await frame.locator('body').waitFor({state:'attached',timeout:40000});
+  const diagnosis=await frame.locator('body').evaluate(el=>({
+    url:document.URL,title:document.title,
+    comboCount:document.querySelectorAll('[data-aqua-home-combo]').length,
+    childCount:document.querySelectorAll('.aqua-hot-combo__products').length,
+    sectionIds:[...document.querySelectorAll('[data-tablepress-preview]')].map(x=>x.getAttribute('data-tablepress-preview')).slice(0,25),
+    textSample:el.innerText.slice(0,900)
+  }));
+  console.log('HOT_COMBO_BUILDER_FRAME_DIAGNOSTIC='+JSON.stringify(diagnosis));
+  const grid=frame.locator('.aqua-hot-combo__products');
   await grid.waitFor({state:'visible',timeout:45000});
   assert.equal(await grid.getAttribute('data-esc-source-table'),CHILD,'Builder child Product table identity');
   const coordinates=await grid.locator('.aqua-hot-combo__product').evaluateAll(els=>els.map(el=>({
