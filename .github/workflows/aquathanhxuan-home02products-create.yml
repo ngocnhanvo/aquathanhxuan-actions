@@ -1,4 +1,5 @@
 name: Aqua create Home 02 curated products ESC Table
+# Check native Insert Code transformations before saving homepage Page.
 # Run the verified writer with corrected Product editor nonce parsing.
 on:
   push:
