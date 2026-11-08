@@ -193,7 +193,7 @@ async function assertHealthyImage(locator, caption) {
       for(const name of expectedNames)
         assert(renderedNames.includes(name),'Missing real child category: '+name);
       await substrate.locator('[data-substrate-filter="1781"]').click();
-      assert.equal(await catalogueCards.locator(':visible').count(),0,
+      assert.equal(await substrate.locator('[data-substrate-card]:visible').count(),0,
         'Empty Chihiros category must not leak unrelated Nền products');
       await substrate.locator('[data-substrate-filter="all"]').click();
       const populated=substrate.locator('[data-substrate-filter="1779"]');
