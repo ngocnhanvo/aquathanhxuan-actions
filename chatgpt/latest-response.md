@@ -7,26 +7,21 @@ Branch: main
 Code mode: auto-build
 Source gateway: bypass
 
-## Phản hồi mới nhất — Hero và Sale Visual Builder: hoàn tất, QA_PASS
+## Phản hồi cuối — Đã sửa Visual Builder cho banner 2
 
-Mình đã đọc quy tắc trong `ngocnhanvo/knowledge@main`, kiểm tra commit/log/checkpoint và tiếp tục phần trang chủ còn dang dở mà không làm lại sticky bottom đã PASS.
+Đã sửa và triển khai production. Visual Builder hiện cho phép sử dụng nút Previous, Next và các dấu chấm chuyển banner mà không rời khỏi trang. Liên kết chuyển trang vẫn được chặn trong chế độ chỉnh sửa, đúng quy tắc đã thống nhất.
 
-**Đã sửa lỗi thực tế:** backend PHP của ESC Visual Builder không lưu kết quả khám phá quyền sửa native `home_01` (Product-backed Sale) vào static cache. Lần kiểm tra quyền tiếp theo nhận null và chặn chỉnh sửa. Đã sửa bằng cache danh sách ô hợp lệ, đảm bảo `section_title`, `all_label`, `all_link` thuộc ESC Table, còn dữ liệu sản phẩm thuộc WooCommerce. Trình biên tập Hero nhận dạng từng slide, có công tắc `show_text` và định danh ô nguồn theo table/row/field/version.
+**Nguyên nhân:** Các nút slider chưa gắn `data-esc-builder-preview-action`, nên lớp chặn click của Builder nhận nhầm chúng là thao tác chọn section.
 
-### Commit được phát hành
-- WordPress PHP `master`: [7b10c4d](https://github.com/ngocnhanvo/aquathanhxuan-php/commit/7b10c4d92d42f1afaeb953b5bb24d19b48b98004). Các file `site-config.php`, `text-editor.php`, `text-editor-ui.php` đã triển khai FTPS, đọc lại SHA256 PASS.
-- Astro production `master`: [a98b3ff](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/a98b3ffb94496875512508dc25e3e65bc0a7d2d8). Khai báo tọa độ source cho Hero/Sale, chỉnh `show_text`, `all_link` và đánh dấu card WooCommerce readonly.
+**Đã sửa:** Astro `master` commit [28e6a2f](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/28e6a2fa8e5d32a71babf6375e8160290d3d3312). WordPress build [42432376811](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42432376811) SUCCESS; deploy [42432445283](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42432445283) SUCCESS.
 
-### Pipeline và bằng chứng
-- Kiểm thử PHP native cell read/save, kiểm thử Vitest Astro, Chromium Visual Builder: [#42427413828](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42427413828) SUCCESS (sau rerun riêng các job).
-- PHP release: [#42427860869](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42427860869) SUCCESS.
-- Production build WordPress: [#42427965690](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42427965690) SUCCESS.
-- Canonical Astro deployment: [#42428031861](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42428031861) SUCCESS.
-- Playwright production final: [#42428419509](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42428419509) SUCCESS. Năm viewport đều PASS; `home_00`/`home_01` source coordinates + phiên bản PASS; Hero show_text preview/Cancel PASS; Sale title/label/link chọn đúng native row 0, sửa link preview/Cancel PASS; 12 WooCommerce Sale cards vẫn hiện; sticky bottom vẫn vắng mặt. Không ghi giá trị thử vào WordPress production. Save giao dịch thực tế đã được kiểm thử trong bộ PHP in-memory.
+**Kiểm thử thực tế:** Playwright [42432710459](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42432710459) SUCCESS. Trong Builder, bấm Next chuyển sang banner thứ hai; chọn công tắc chữ nhận chính xác `home_00 / row 1 / show_text`. Bài test không thay đổi WordPress; Hero, Sale và năm viewport đều PASS.
 
-**Checkpoint đã lưu (QA_PASS):** [docs/checkpoints/2026-11-08-homepage-hero-sale-visual-builder.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-homepage-hero-sale-visual-builder.md) tại commit `a9fba000107808e8c1c0ce72e8f6ec7d523b2f23`.
+**Lưu ý nội dung banner 2:** Dòng PRODAC nằm trong ảnh nền (không phải text HTML độc lập) nên không thể sửa từng chữ qua trình soạn thảo ô văn bản. Muốn thay chữ nằm sẵn trong ảnh, phải thay ảnh của banner 2 bằng công cụ sửa ảnh. Các phần overlay thuộc ESC Table và công tắc hiện/ẩn đã chọn được đúng slide.
 
-**Trạng thái mục tiêu:** hoàn tất, không còn bước triển khai/kiểm thử dang dở của yêu cầu Hero/Sale. Không chạy lại các bước PASS khi tiếp tục chat mới. Nếu cần thao tác lưu thật, sử dụng Visual Builder bình thường với ô nội dung thực tế; test tự động không viết dữ liệu thử vào CMS.
+Checkpoint: [2026-11-08-home00-slide2-builder-navigation.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-08-home00-slide2-builder-navigation.md).
+
+**Trạng thái:** `QA_PASS`, `PRODUCTION_DEPLOYED`, không ghi thử dữ liệu CMS.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
