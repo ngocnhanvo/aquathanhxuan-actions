@@ -281,8 +281,8 @@ try {
         '<a class="aqua-substrate-catalog__name" href="#"></a>'+
         '<div class="aqua-substrate-catalog__prices"><strong></strong><del></del></div>'+
         '<button data-substrate-add></button></article></template>'+
-        '<article data-substrate-card id="substrate-82535" data-esc-vb-product-readonly="true" data-esc-builder-product-id="82535"></article>'+
-        '<article data-substrate-card id="substrate-82537" data-esc-vb-product-readonly="true" data-esc-builder-product-id="82537"></article>'+
+        '<article data-substrate-card id="substrate-82535" data-esc-vb-product-readonly="true" data-esc-builder-product-id="82535"><span>Product 82535</span></article>'+
+        '<article data-substrate-card id="substrate-82537" data-esc-vb-product-readonly="true" data-esc-builder-product-id="82537"><span>Product 82537</span></article>'+
         '</div>';
       document.querySelector('main').append(section);
       window.dispatchEvent(new MessageEvent('message',{
