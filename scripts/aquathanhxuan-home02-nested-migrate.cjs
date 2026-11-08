@@ -175,43 +175,31 @@ const eq=(a,b)=>assert.deepEqual(a,b);
    const updated=original.slice(0,start)+original.slice(endPos+6);
    const beforeIds=allIds.filter(x=>x!==target);
    eq(updated.match(/\[table\s+id=[a-zA-Z0-9_-]+\s*\/\]/g)||[],beforeIds);
-   await page.locator('#content-html').click();
-   // Use the native Classic Editor switcher; the Aqua admin may remain Visual
-   // after the first click. Do not change Page via REST/database.
-   const inspect=()=>page.evaluate(()=>({
-     textareaVisible:Boolean(document.getElementById('content')?.getClientRects().length),
-     tabText:document.getElementById('content-html')?.className,
-     wrapper:document.getElementById('wp-content-wrap')?.className,
-     editorHidden:window.tinymce?.get('content')?.isHidden?.(),
-     switchAvailable:typeof window.switchEditors?.go==='function'
-   }));
-   let editorState=await inspect();
-   console.log('HOME02_EDITOR_MODE_INITIAL='+JSON.stringify(editorState));
-   // Always invoke WordPress native switcher. getClientRects can be nonempty
-   // even when the Text field remains aria-hidden under TinyMCE.
-   await page.evaluate(()=>{
-     if(typeof window.switchEditors?.go==='function')window.switchEditors.go('content','html');
-     const ed=window.tinymce?.get('content');
-     if(ed && !ed.isHidden())ed.hide();
+   // The Classic Editor switch button is not functional in the current
+   // optimized admin. Hide the active TinyMCE instance through its native API
+   // before updating the Page textarea, then use WordPress Update normally.
+   const state=await page.evaluate(()=>{
+     const editor=window.tinymce?.get('content');
+     if(!editor)throw Error('Native TinyMCE instance missing');
+     if(!editor.isHidden())editor.hide();
+     return {hidden:editor.isHidden(),rawLength:document.getElementById('content')?.value?.length};
    });
-   editorState=await inspect();
-   console.log('HOME02_EDITOR_MODE_AFTER_NATIVE_SWITCH='+JSON.stringify(editorState));
-   assert(editorState.editorHidden!==false,
-     'Native TinyMCE editor is still live and could override Page post_content');
+   console.log('HOME02_EDITOR_READY='+JSON.stringify(state));
+   assert(state.hidden,'Visual editor must release the Page textarea');
    const baseline=await page.locator('#content').inputValue();
-   // The native switcher may normalize markup, but the exact original was
-   // independently captured before switching. Replace only the approved block.
-   if(baseline!==original)console.log('HOME02_EDITOR_NORMALIZED_LENGTHS='+JSON.stringify({
-     before:original.length,after:baseline.length
-   }));
+   if(baseline!==original){
+     console.log('HOME02_EDITOR_CONTENT_DRIFT='+JSON.stringify({
+       prior:original.length,now:baseline.length
+     }));
+   }
    await page.evaluate(value=>{
      const textarea=document.getElementById('content');
-     if(!(textarea instanceof HTMLTextAreaElement))throw Error('Native Page editor missing');
+     if(!(textarea instanceof HTMLTextAreaElement))throw Error('WordPress content textarea missing');
      textarea.value=value;
      textarea.dispatchEvent(new Event('input',{bubbles:true}));
      textarea.dispatchEvent(new Event('change',{bubbles:true}));
    },updated);
-   assert.equal(await page.locator('#content').inputValue(),updated,'Page editor lost exact update');
+   assert.equal(await page.locator('#content').inputValue(),updated,'Native editor lost the edited content');
    await page.locator('#publish').click();
    await page.waitForTimeout(1700);
    const verifyContext=await browser.newContext();
