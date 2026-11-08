@@ -178,7 +178,7 @@ try {
           items:[{key:'82481'},{key:'82477'},{key:'82499'}]}
       }));
     });
-    assert.equal(await page.locator('[data-sale-track] > :first-child').getAttribute('data-esc-builder-product-id'),'82481',
+    assert.equal(await page.locator('[data-sale-track] > [data-sale-card]').first().getAttribute('data-esc-builder-product-id'),'82481',
       'Saved Product reference order must rearrange existing hydrated cards');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Product reorder must be acknowledged');
