@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const frontend = 'https://aquathanhxuan.io.vn';
 const wordpress = 'https://admin.aquathanhxuan.io.vn';
-const expectedSha = '6effb8e2af07edf87aaecdb9891b818f3529db16';
+const expectedSha = 'a98b3ffb94496875512508dc25e3e65bc0a7d2d8';
 const viewports = [[1440, 900], [1024, 768], [768, 1024], [844, 390], [390, 844]];
 const sections = [
   ['Hero', '[data-aqua-home-hero]'],
@@ -244,6 +244,87 @@ async function assertHealthyImage(locator, caption) {
       assert(fields.every(x => x.field && x.row !== null), 'Builder incomplete cell mapping ' + id);
       console.log('HOMEPAGE_BUILDER_COORDS=PASS ' + id + ' count=' + fields.length);
     }
+    // Native Hero/Sale cells must be editable by exact table/row/field and
+    // version, not by matching text. These checks NEVER write to WordPress.
+    const heroBuilder = frame.locator('[data-esc-source-table="home_00"]').first();
+    const saleBuilder = frame.locator('[data-esc-source-table="home_01"]').first();
+    for (const [id, root, required] of [
+      ['home_00', heroBuilder, ['show_text']],
+      ['home_01', saleBuilder, ['section_title', 'all_label', 'all_link']],
+    ]) {
+      await root.waitFor({state:'visible',timeout:45000});
+      assert.equal(await root.getAttribute('data-esc-source-type'), 'esc_table',
+        id + ' must identify its native source');
+      assert.match(await root.getAttribute('data-esc-rendered-version') || '',
+        /^[a-f0-9]{64}$/, id + ' missing native version');
+      for (const field of required) {
+        const cells = root.locator('[data-esc-builder-cell-field="' + field + '"]');
+        assert((await cells.count()) > 0, id + ' missing native cell ' + field);
+        const coords = await cells.evaluateAll(nodes => nodes.map(node =>
+          node.getAttribute('data-esc-builder-cell-row')));
+        assert(coords.every(row => row !== null && /^\\d+$/.test(row)),
+          id + ' missing row for ' + field);
+        if (id === 'home_01') assert(coords.every(row => row === '0'),
+          'Sale config must use physical native row zero');
+      }
+      console.log('HOMEPAGE_BUILDER_COORDS=PASS ' + id);
+    }
+    const heroSlides = heroBuilder.locator('[data-home-slide]');
+    const slideCount = await heroSlides.count();
+    assert(slideCount >= 1, 'Hero source has no slides');
+    assert.equal(await heroBuilder.locator('[data-esc-builder-cell-field="show_text"]').count(),
+      slideCount, 'Every Hero slide needs its own toggle');
+    const activeHero = heroBuilder.locator('[data-home-slide][data-active="true"]').first();
+    const beforeShowText = await activeHero.getAttribute('data-show-text');
+    assert(['true', 'false'].includes(beforeShowText), 'Hero current text toggle invalid');
+    await activeHero.locator('[data-esc-builder-cell-field="show_text"]').click();
+    const heroControl = admin.locator('#esc-vb-hero-show-text');
+    await heroControl.waitFor({state:'visible',timeout:25000});
+    assert.match(await admin.locator('#esc-vb-edit-row').inputValue(),
+      /^\\d+:show_text$/, 'Hero click did not select its source cell');
+    const nextShowText = beforeShowText === 'true' ? '0' : '1';
+    await heroControl.selectOption(nextShowText);
+    await activeHero.locator('[data-show-text="' + (nextShowText === '1' ? 'true' : 'false') + '"]')
+      .waitFor({state:'attached',timeout:12000});
+    await admin.locator('#esc-vb-edit-cancel').click();
+    await activeHero.locator('[data-show-text="' + beforeShowText + '"]')
+      .waitFor({state:'attached',timeout:12000});
+    console.log('HOMEPAGE_BUILDER_HERO_TOGGLE=PASS draft_and_cancel=true cms_write=false');
+
+    const productCards = saleBuilder.locator('[data-esc-vb-product-readonly="true"]');
+    assert((await productCards.count()) > 0, 'Sale product cards must identify WooCommerce as owner');
+    const saleTitle = saleBuilder.locator('[data-esc-builder-cell-field="section_title"]').first();
+    await saleTitle.click();
+    await admin.waitForFunction(expected =>
+      document.querySelector('#esc-vb-edit-row')?.value === expected,
+      '0:section_title',{timeout:25000});
+    assert((await admin.locator('#esc-vb-edit-title').inputValue()).trim(),
+      'Sale section title did not load its native cell');
+    const saleLabel = saleBuilder.locator('[data-esc-builder-cell-field="all_label"]').first();
+    await saleLabel.click();
+    await admin.waitForFunction(expected =>
+      document.querySelector('#esc-vb-edit-row')?.value === expected,
+      '0:all_label',{timeout:25000});
+    const saleLink = saleBuilder.locator('[data-esc-builder-cell-field="all_link"]').first();
+    const originalHref = await saleLink.getAttribute('href');
+    assert(validUrl(originalHref), 'Sale current CTA href invalid');
+    // Dispatch on the anchor itself: clicking its nested text span correctly
+    // selects all_label, while clicking its outer anchor selects all_link.
+    await saleLink.evaluate(anchor => anchor.click());
+    await admin.waitForFunction(expected =>
+      document.querySelector('#esc-vb-edit-row')?.value === expected,
+      '0:all_link',{timeout:25000});
+    const saleTextarea = admin.locator('#esc-vb-edit-title');
+    assert(validUrl(await saleTextarea.inputValue()), 'Sale ESC Table link not loaded');
+    const previewHref='/san-pham?esc_vb_qa_preview=1';
+    await saleTextarea.fill(previewHref);
+    await saleBuilder.locator('[data-esc-builder-cell-field="all_link"][href="' + previewHref + '"]')
+      .waitFor({state:'attached',timeout:12000});
+    await admin.locator('#esc-vb-edit-cancel').click();
+    assert.equal(await saleLink.getAttribute('href'), originalHref,
+      'Sale preview cancellation must preserve the published link');
+    console.log('HOMEPAGE_BUILDER_SALE_CELLS=PASS title,label,href preview_and_cancel=true cms_write=false');
+
     // Footer is streamed after the page sections. Wait for the same marker used
     // by the independently passing Footer Builder QA, not an immediate count.
     const builderFooter = frame.locator('#footer-contact');
