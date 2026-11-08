@@ -1,5 +1,5 @@
 name: Aqua Home 02 curated products production acceptance
-# Diagnose sidebar category mapping against canonical WooCommerce terms.
+# Inspect both native and custom WordPress taxonomy sources for missing child categories.
 on:
   push:
     branches: [main]
