@@ -63,9 +63,9 @@ const run=async()=>{
     {waitUntil:'domcontentloaded',timeout:45000});
   const html=await page.content();
   let nonce='';
-  const nonceData=html.match(/wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;/s);
+  const nonceData=html.match(/wpApiSettings\s*=\s*(\{.*?\})\s*;/s);
   if(nonceData){try{nonce=JSON.parse(nonceData[1]).nonce||''}catch{}}
-  if(!nonce)nonce=html.match(/"nonce"\\s*:\\s*"([A-Za-z0-9]+)"/)?.[1]||'';
+  if(!nonce)nonce=html.match(/"nonce"\s*:\s*"([A-Za-z0-9]+)"/)?.[1]||'';
   assert(nonce,'Cannot verify WordPress REST nonce on Product editor');
   for(const product of matched){
     const detail=await page.request.get(url('/wp-json/wp/v2/product/'+product.id+'?context=edit'),
