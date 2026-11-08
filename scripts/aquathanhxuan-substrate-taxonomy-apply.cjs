@@ -82,24 +82,28 @@ const sleep=ms=>new Promise(done=>setTimeout(done,ms));
    if(JSON.stringify([...before].sort((a,b)=>a-b))===JSON.stringify(desired)) {
     changes.unchanged.push('product:'+id);continue;
    }
-   await page.goto(ORIGIN+'/wp-admin/post.php?post='+id+'&action=edit',
-    {waitUntil:'domcontentloaded',timeout:60000});
-   const root=page.locator('#product_catdiv');
-   await root.waitFor({state:'attached',timeout:15000});
-   const check=async termId=>{
-    const selector='#in-product_cat-'+termId;
-    const checkbox=root.locator(selector).first();
-    await checkbox.waitFor({state:'attached',timeout:12000});
-    if(!await checkbox.isChecked())await checkbox.check({force:true});
-   };
-   await check(PARENT.id);
-   await check(spec.id);
-   const uncategorized=root.locator('#in-product_cat-16').first();
-   if(await uncategorized.count()&&await uncategorized.isChecked())
-    await uncategorized.uncheck({force:true});
-   const publish=page.locator('#publish');
-   await publish.waitFor({state:'visible',timeout:15000});
-   await publish.click();
+   // Core REST write is scoped to product_cat alone. WordPress Classic
+   // product editor may not mount a full hierarchical checkbox checklist,
+   // so never simulate a broader "Update Product" save just for taxonomy.
+   const nonceResult=await page.evaluate(async()=>{
+     const response=await fetch('/wp-admin/admin-ajax.php?action=rest-nonce',
+       {credentials:'same-origin',cache:'no-store'});
+     return {status:response.status,nonce:(await response.text()).trim()};
+   });
+   assert.equal(nonceResult.status,200,'Could not acquire authenticated wp_rest nonce');
+   assert.match(nonceResult.nonce,/^[a-zA-Z0-9]{10,}$/,'Invalid WordPress REST nonce');
+   const mutation=await page.evaluate(async ({id,desired,nonce})=>{
+     const response=await fetch('/wp-json/wp/v2/product/'+id,{
+       method:'POST',credentials:'same-origin',
+       headers:{'Content-Type':'application/json','X-WP-Nonce':nonce},
+       body:JSON.stringify({product_cat:desired})
+     });
+     const data=await response.json();
+     return {status:response.status,message:data?.message||'',
+       product_cat:data?.product_cat};
+   },{id,desired,nonce:nonceResult.nonce});
+   assert.equal(mutation.status,200,
+     'Scoped Product taxonomy REST update failed for '+id+': '+mutation.message);
    let after;
    for(let attempt=0;attempt<25;attempt++){
     await sleep(400);
