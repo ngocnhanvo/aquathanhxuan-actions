@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='432b60ad9f537e87ec23f0603b104df50f6695b4';
+const expectedSha='22ed25954be504233328880c6d086f85189cc678';
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const expectedHome=[
   'Nhập khẩu và phân phối chính hãng, được chọn lọc và kiểm tra kỹ trước khi giao tới tay khách hàng.',
