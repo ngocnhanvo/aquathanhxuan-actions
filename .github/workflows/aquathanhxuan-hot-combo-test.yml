@@ -16,6 +16,7 @@ jobs:
         with:
           repository: ngocnhanvo/aquathanhxuan-astro
           ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
           path: source
           persist-credentials: false
       - uses: pnpm/action-setup@v4
