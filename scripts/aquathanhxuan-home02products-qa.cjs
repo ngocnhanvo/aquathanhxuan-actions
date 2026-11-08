@@ -166,7 +166,20 @@ const request=async u=>{
     const inspector=page.locator('#esc-vb-item-panel');
     await inspector.waitFor({state:'visible',timeout:18000});
     const selectionStatus=page.locator('#esc-vb-item-status');
-    await selectionStatus.getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i).waitFor({timeout:18000});
+    await page.waitForTimeout(1800);
+    report.builderClickProbe={
+      context:await page.locator('#esc-vb-item-context').textContent(),
+      status:await selectionStatus.textContent(),
+      selectedCardId:await firstCard.getAttribute('data-esc-builder-product-id'),
+      selectedRow:await firstCard.getAttribute('data-esc-builder-row'),
+      panelVisible:await inspector.isVisible(),
+      frameElement:await firstCard.evaluate(el=>({tag:el.tagName,
+        parentTable:el.closest('[data-esc-source-table]')?.getAttribute('data-esc-source-table'),
+        state:el.getAttribute('data-esc-vb-region-state'),
+        builderRow:el.getAttribute('data-esc-builder-row')})),
+    };
+    console.log('BUILDER_CLICK_PROBE='+JSON.stringify(report.builderClickProbe));
+    await selectionStatus.getByText(/Đã chọn sản phẩm|đã chọn sản phẩm/i).waitFor({timeout:10000});
     const selectText=await selectionStatus.textContent();
     assert(selectText.includes(expected[0]),'Clicked Product ID did not map to WordPress row');
     assert.equal(await page.locator('#esc-vb-item-duplicate').isEnabled(),false,
