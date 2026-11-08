@@ -134,6 +134,20 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
      'BUILDER_FOOTER_GLOBAL_VERSION_OR_CELL_MAPPING_MISSING');
    const footerLabel=footer.locator('[data-esc-source-table="pub_aquafooterlinks"] [data-esc-builder-cell-field="label"]').first();
    await footerLabel.click();
+   console.log('FOOTER_CLICK_STATE='+JSON.stringify({
+     admin:await admin.evaluate(()=>({
+       caption:document.querySelector('#esc-vb-edit-caption')?.textContent,
+       options:[...document.querySelectorAll('#esc-vb-edit-row option')].map(x=>x.value).slice(0,45),
+       status:document.querySelector('#esc-vb-edit-status')?.textContent,
+       itemContext:document.querySelector('#esc-vb-item-context')?.textContent
+     })),
+     iframe:await footerGroup.evaluate(el=>({
+       selected:el.hasAttribute('data-esc-builder-selected'),
+       renderedVersion:el.getAttribute('data-esc-rendered-version'),
+       sourceTable:el.getAttribute('data-esc-source-table')
+     }))
+   }));
+   await admin.screenshot({path:'artifacts/footer-consultation-home05/footer-click-debug.png'});
    await admin.waitForFunction(()=>
      (document.querySelector('#esc-vb-edit-caption')?.textContent||'').includes('pub_aquafooterlinks') &&
      Boolean(document.querySelector('#esc-vb-edit-row option[value$=":label"]')),
