@@ -138,6 +138,7 @@ const run=async()=>{
   if(!original.includes(shortcode)){
    await page.locator('#content-html').click();
    await page.waitForFunction(()=>window.tinymce?.get('content')?.isHidden()===true,null,{timeout:20000});
+   const nativeBaseline=await page.locator('#content').inputValue();
    const insertButton=page.locator('#qt_content_tablepress_quicktags_button');
    await insertButton.waitFor({state:'visible',timeout:15000});
    await page.evaluate(()=>{const el=document.getElementById('content');el.focus();el.setSelectionRange(el.value.length,el.value.length);window.wpActiveEditor='content';});
@@ -148,7 +149,18 @@ const run=async()=>{
    await page.waitForFunction(s=>document.getElementById('content')?.value.includes(s),shortcode,{timeout:30000});
    const modified=await page.locator('#content').inputValue();
    assert.equal(modified.split(shortcode).length-1,1,'Duplicate shortcode');
-   assert.equal(modified.replace(shortcode,'').trim(),original.trim(),'Unexpected homepage content changes');
+   const afterWithout=modified.replace(shortcode,'').trim();
+   const beforeOriginal=original.trim();
+   const beforeNative=nativeBaseline.trim();
+   const firstDiff=(a,b)=>{let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;return i;};
+   const report=(a,b)=>{const i=firstDiff(a,b);return {aLength:a.length,bLength:b.length,index:i,
+     original:a.slice(Math.max(0,i-90),i+160),modified:b.slice(Math.max(0,i-90),i+160)};};
+   console.log('HOME02_NATIVE_INSERT_COMPARE='+JSON.stringify({
+     preModeVsTextMode:report(beforeOriginal,beforeNative),
+     textModeVsInsert:report(beforeNative,afterWithout),
+     preModeVsInsert:report(beforeOriginal,afterWithout)}));
+   assert.equal(afterWithout,beforeNative,'Native Insert Code modified pre-insertion Text mode content');
+   assert.equal(beforeNative,beforeOriginal,'Switching editor modes unexpectedly altered homepage content');
    await page.locator('#publish').click();
    await page.waitForLoadState('domcontentloaded');
   }
