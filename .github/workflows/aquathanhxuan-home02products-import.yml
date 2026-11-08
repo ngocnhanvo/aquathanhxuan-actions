@@ -1,10 +1,6 @@
 name: Aqua import 10 verified Home 02 products and create ESC Table
 # Rerun after confirming ACF product_lang is an object with value=vi.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/aquathanhxuan-home02products-import.yml'
   workflow_dispatch:
 permissions:
   contents: write
