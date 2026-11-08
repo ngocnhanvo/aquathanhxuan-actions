@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "5211812e8ec8a20c28afa3371c6949d5662e0d2b",
+  "intent": "Allow selection of Product ESC Table source and target rows from website cards; preserve indexed fallback and reorder hydrated cards only after versioned WordPress swap is saved. PHP only."
+}
