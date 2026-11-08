@@ -139,7 +139,13 @@ try {
     await page.evaluate(() => {
       const root=document.createElement('section');
       root.dataset.tablepressPreview='home_01';
-      root.innerHTML='<div data-sale-track><article id="product-82499" data-sale-card data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
+      root.innerHTML='<div data-sale-track>'+
+        '<template data-esc-builder-product-template><article data-sale-card data-esc-vb-product-readonly="true">'+
+        '<a class="aqua-sale__image-link" href="#"><span class="aqua-sale__discount"></span><img src="/placeholders/product.webp"></a>'+
+        '<a class="aqua-sale__name-link" href="#"><h3></h3></a>'+
+        '<div class="aqua-sale__prices"><strong></strong><del></del></div>'+
+        '<button data-sale-add data-esc-builder-preview-block="cart-mutation"></button></article></template>'+
+        '<article id="product-82499" data-sale-card data-esc-builder-product-id="82499"><a href="/product/a">Product A</a></article>'+
         '<article id="product-82481" data-sale-card data-esc-builder-product-id="82481"><a href="/product/b">Product B</a></article></div>';
       document.querySelector('main').append(root);
       window.__productMessages=[];
@@ -200,6 +206,44 @@ try {
       'Other Product cards must be preserved');
     assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
       'Confirmed deletion must acknowledge the exact rendered Product card');
+    // A newly saved WooCommerce Product is inserted into the actual Sale
+    // carousel without reloading iframe and without synthesizing WP data.
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-added',tableId:'home_01',row:1,requestId:38,
+        productOrder:['82481','82485'],product:{
+          id:'82485',name:'Product 82485',url:'https://admin.example.test/product/82485',
+          image:'https://admin.example.test/product-82485.webp',
+          currentPrice:700000,regularPrice:1000000,currency:'VND',
+          eligible:true,discountPercent:30
+        }}
+    })));
+    assert.equal(await page.locator('[data-sale-card][data-esc-builder-product-id="82485"]').count(),1,
+      'Newly inserted Product must render without iframe reload');
+    assert.equal(await page.locator('[data-sale-track] > [data-sale-card]').count(),2,
+      'Only two Sale Product cards should exist after delete and insert');
+    assert.equal(await page.locator('[data-sale-track] > [data-sale-card]').nth(1)
+      .getAttribute('data-esc-builder-product-id'),'82485',
+      'Inserted Product follows WordPress reference order');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82485"] .aqua-sale__name-link h3')
+      .textContent(),'Product 82485','WooCommerce name should appear instantly');
+    assert.equal(await page.locator('[data-esc-builder-product-id="82485"] .aqua-sale__discount')
+      .textContent(),'-30%','Server-sourced Sale price controls the discount badge');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),true,
+      'Inserted Product preview must be acknowledged');
+    await page.evaluate(() => window.dispatchEvent(new MessageEvent('message',{
+      origin:'https://admin.example.test',source:window,
+      data:{type:'esc-vb-product-item-added',tableId:'home_01',row:1,requestId:39,
+        productOrder:['82481','82485'],product:{
+          id:'82485',name:'Duplicate',eligible:true,currentPrice:700000,
+          regularPrice:1000000
+        }}
+    })));
+    assert.equal(await page.locator('[data-esc-builder-product-id="82485"]').count(),1,
+      'Repeated preview message must not duplicate a Product card');
+    assert.equal(await page.evaluate(() => window.__productMessages.at(-1)?.matched),false,
+      'Repeated insert is rejected');
+
 
     await page.evaluate(() => {
       window.__productDispose();
