@@ -92,19 +92,30 @@ const request=async u=>{
       }
       console.log('HOME02_ARCHIVE_ROUTES='+JSON.stringify(report.routes));
     }
-    assert.equal(await menu.count(),9,'Sidebar should contain nine real children of Nền');
+    const nativeSlugs=(report.category_native?.nodes||[])
+      .filter(c=>c.parent===1775).map(c=>c.slug).sort();
+    const links=await menu.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href')));
+    const renderedSlugs=links.map(link=>new URL(link,ROOT).searchParams.get('cat')).sort();
+    assert.equal(nativeSlugs.length,7,'Native Nền terms unexpectedly changed');
+    assert.deepEqual(renderedSlugs,nativeSlugs,'Sidebar must match real Nền child terms');
     assert.equal(await section.locator('[data-substrate-filter]').count(),0,'Obsolete filter button still exists');
     assert.equal(await section.getByText('Tất cả sản phẩm',{exact:true}).count(),0);
     assert.equal(await section.locator('.aqua-substrate-catalog__feature').count(),0,'Old sidebar image still exists');
-    const links=await menu.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href')));
-    assert(links.every(x=>x&&x!=='#'&&!x.startsWith('javascript:')),'Invalid child category URL');
+    assert(links.every(x=>x&&x!=='#'&&!x.startsWith('javascript:')),'Invalid category link');
     if(width===1440){
       for(const href of links){
-        const url=new URL(href,ROOT);
-        assert.equal(url.origin,ROOT,'Subcategory navigation leaves current frontend origin');
-        const navResponse=await page.request.get(url.href,{timeout:25000});
-        assert.equal(navResponse.status(),200,'Category listing route missing: '+url.pathname);
+        const uri=new URL(href,ROOT);
+        assert.equal(uri.origin,ROOT,'Category navigation leaves frontend');
+        assert.equal(uri.pathname,'/san-pham','Category must link to existing Product listing');
+        const response=await page.request.get(uri.href,{timeout:25000});
+        assert.equal(response.status(),200,'Product listing route unavailable: '+uri.href);
       }
+      const archive=await ctx.newPage();
+      await archive.goto(ROOT+'/san-pham?cat=chihiros',{waitUntil:'domcontentloaded',timeout:45000});
+      await archive.waitForFunction(()=>document.getElementById('product-page-title')?.textContent?.trim()==='Chihiros',null,{timeout:15000});
+      assert.equal(await archive.locator('#product-grid').count(),1,'Product listing grid missing');
+      report.archive={url:archive.url(),heading:await archive.locator('#product-page-title').textContent()};
+      await archive.close();
     }
     const dimensions=await page.evaluate(()=>({w:innerWidth,doc:document.documentElement.scrollWidth}));
     assert(dimensions.doc<=dimensions.w+1,'Horizontal overflow at '+width+'px');
