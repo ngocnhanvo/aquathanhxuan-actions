@@ -306,6 +306,20 @@ async function assertHealthyImage(locator, caption) {
       const secondSlide = heroBuilder.locator('[data-home-slide][data-active="true"]').first();
       const secondRow = await secondSlide.getAttribute('data-esc-builder-row');
       assert(secondRow !== slideBefore, 'Builder next click did not change slide');
+      // The overlay may stay visible, but must not mask the underlying image cell.
+      // Use real pointer hit-testing rather than dispatching a synthetic click.
+      const imageHit = await secondSlide.evaluate(slide => {
+        const media = slide.querySelector('[data-esc-builder-image-field="image"]');
+        const rect = slide.getBoundingClientRect();
+        const point = {x: rect.left + rect.width * 0.83, y: rect.top + rect.height * 0.45};
+        const hit = document.elementFromPoint(point.x, point.y);
+        return {isImage: Boolean(media && hit && (media === hit || media.contains(hit))),
+          row: media?.getAttribute('data-esc-builder-image-row') || null,
+          hitClass: hit?.className?.baseVal || hit?.className || hit?.tagName || 'none'};
+      });
+      assert(imageHit.isImage, 'Hero slide 2 overlay intercepts image pointer: ' + JSON.stringify(imageHit));
+      assert.equal(imageHit.row, secondRow, 'Hero slide 2 image maps to wrong native ESC row');
+      console.log('HOMEPAGE_BUILDER_SECOND_IMAGE_HIT=PASS row=' + secondRow);
       const secondToggle = secondSlide.locator('[data-esc-builder-cell-field="show_text"]');
       await secondToggle.click();
       await admin.waitForFunction(expected =>
