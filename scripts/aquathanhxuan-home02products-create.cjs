@@ -37,16 +37,6 @@ const run=async()=>{
    await page.locator('#wp-submit').click();
   }
   await page.waitForURL(u=>u.pathname.startsWith('/wp-admin/'),{timeout:45000});
-  // WordPress REST nonce is exposed on the authenticated Page editor,
-  // not reliably on the generic /wp-admin/ dashboard.
-  await page.goto(url('/wp-admin/post.php?post=82454&action=edit&esc_full_admin=1'),
-    {waitUntil:'domcontentloaded',timeout:45000});
-  const html=await page.content();
-  let nonce='';
-  const match=html.match(/wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;/s);
-  if(match){try{nonce=JSON.parse(match[1]).nonce||''}catch{}}
-  if(!nonce)nonce=html.match(/"nonce"\\s*:\\s*"([A-Za-z0-9]+)"/)?.[1]||'';
-  assert(nonce,'Cannot verify WordPress REST nonce');
   const matched=[], missing=[];
   for(const name of legacyNames){
    let found=null;
@@ -63,17 +53,32 @@ const run=async()=>{
    }
    if(!found){missing.push(name);continue;}
    assert(Number.isInteger(Number(found.id))&&Number(found.id)>0,'Invalid WooCommerce ID');
-   // Product language must be backed by its own WordPress record.
-   const detail=await page.request.get(url('/wp-json/wp/v2/product/'+found.id+'?context=edit'),{headers:{'X-WP-Nonce':nonce},timeout:25000});
-   assert.equal(detail.status(),200,'Cannot verify WP product record '+found.id);
-   const raw=await detail.json();
-   assert.equal(String(raw.status),'publish','Nonpublished product: '+name);
-   assert.equal(normalize(raw.title?.raw||raw.title?.rendered),normalize(name),'Wrong product identity: '+name);
-   assert.equal(String(raw.acf?.product_lang?.value||raw.acf?.product_lang||''),'vi','Missing or wrong product_lang for '+name);
    matched.push({id:String(found.id),name});
   }
   console.log('HOME02PRODUCTS_SOURCE_MATCH='+JSON.stringify({matched,missing}));
   assert.equal(matched.length,legacyNames.length,'Missing verified products; refusing incomplete table');
+  // ACF exposes the REST nonce on a native Product editor, not the generic
+  // Page editor. Resolve that editor from the verified list (no hardcoded ID).
+  await page.goto(url('/wp-admin/post.php?post='+matched[0].id+'&action=edit&esc_full_admin=1'),
+    {waitUntil:'domcontentloaded',timeout:45000});
+  const html=await page.content();
+  let nonce='';
+  const nonceData=html.match(/wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;/s);
+  if(nonceData){try{nonce=JSON.parse(nonceData[1]).nonce||''}catch{}}
+  if(!nonce)nonce=html.match(/"nonce"\\s*:\\s*"([A-Za-z0-9]+)"/)?.[1]||'';
+  assert(nonce,'Cannot verify WordPress REST nonce on Product editor');
+  for(const product of matched){
+    const detail=await page.request.get(url('/wp-json/wp/v2/product/'+product.id+'?context=edit'),
+      {headers:{'X-WP-Nonce':nonce},timeout:25000});
+    assert.equal(detail.status(),200,'Cannot verify WP product record '+product.id);
+    const raw=await detail.json();
+    assert.equal(String(raw.status),'publish','Nonpublished product: '+product.name);
+    assert.equal(normalize(raw.title?.raw||raw.title?.rendered),normalize(product.name),
+      'Wrong product identity: '+product.name);
+    assert.equal(String(raw.acf?.product_lang?.value||raw.acf?.product_lang||''),'vi',
+      'Missing or wrong product_lang for '+product.name);
+  }
+
   const rows=[['key'],['Sản phẩm'],...matched.map(item=>[item.id])];
   const tableURL=url('/wp-admin/admin.php?page=tablepress&action=edit&table_id='+ID);
   const tablePublic=await page.request.get(url('/wp-json/tablepress/v1/table/'+ID));
