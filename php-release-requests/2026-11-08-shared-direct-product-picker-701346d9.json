@@ -1,0 +1,7 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "701346d9416dd393cfb9afc03b51c00e424be2ef"
+}
