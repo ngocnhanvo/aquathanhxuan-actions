@@ -58,7 +58,7 @@ async function run(){
   assert(oldParent&&Array.isArray(oldParent.items),'Native Hot Combo parent missing');
   const source=await read(CHILD);
   if(source){
-   assert.equal(source.meta?.api,'Product','Existing child is not Product data');
+   assert(['','Product'].includes(String(source.meta?.api||'')),'Existing child has a different API source');
    const actual=source.items.map(i=>String(i.key||i['api-key']||'')).filter(Boolean);
    assert.deepEqual(actual,matched.map(x=>x.id),'Child Product list already curated differently; refuse overwrite');
    console.log('COMBO_CHILD_EXISTING=PASS');
@@ -111,9 +111,29 @@ async function run(){
    assert(saved.status===200&&saved.result.success&&saved.result.table_id===CHILD,'Failed to create child: '+JSON.stringify(saved));
    newChild=true;
    const created=await read(CHILD);
-   assert(created?.meta?.api==='Product','Child Product source not persisted');
+   assert(created && Array.isArray(created.items),'Child table readback failed');
    assert.deepEqual(created.items.map(x=>String(x.key)),matched.map(x=>x.id),'Child row readback differs');
    console.log('COMBO_CHILD_VERIFIED='+CHILD);
+  }
+  // Use the native ESC Table API selector: the generic AJAX create save may
+  // persist the data grid without persisting the Product data-source metadata.
+  const latestChild=await read(CHILD);
+  if(latestChild?.meta?.api!=='Product'){
+    assert(['',undefined,null].includes(latestChild?.meta?.api),'Refuse an unrelated source type');
+    await page.goto(editing(CHILD),{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData),null,{timeout:25000});
+    const unchangedRows=await page.evaluate(()=>window.tp.editor.getData());
+    assert.deepEqual(unchangedRows.slice(2).map(row=>String(row[0])),matched.map(x=>x.id),'Child Product rows unexpectedly changed');
+    const selector=page.locator('#js_custom_api_source');
+    await selector.waitFor({state:'visible',timeout:15000});
+    await selector.selectOption('Product');
+    await page.waitForFunction(()=>document.querySelector('#js_custom_api')?.value==='Product',null,{timeout:12000});
+    await page.getByRole('button',{name:'Save Changes'}).first().click();
+    await page.waitForTimeout(1800);
+    const updatedChild=await read(CHILD);
+    assert.equal(updatedChild?.meta?.api,'Product','Native API selector did not persist');
+    assert.deepEqual(updatedChild.items.map(x=>String(x.key)),matched.map(x=>x.id),'Native source update changed child Product IDs');
+    console.log('COMBO_CHILD_PRODUCT_API_VERIFIED='+CHILD);
   }
   if(JSON.stringify(linked)!==JSON.stringify(parentData)){
    await page.goto(editing(PARENT),{waitUntil:'domcontentloaded'});
