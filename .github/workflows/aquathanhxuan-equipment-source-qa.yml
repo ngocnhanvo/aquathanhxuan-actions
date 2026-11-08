@@ -1,0 +1,35 @@
+name: Aqua equipment source-only contract tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-equipment-source-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: pnpm install --frozen-lockfile
+        working-directory: source
+      - run: pnpm exec vitest run src/lib/wordpress/tablepress/home02Catalog.test.ts src/lib/wordpress/tablepress/home02Products.test.ts src/lib/wordpress/tablepress/home02.test.ts
+        working-directory: source
+      - run: git rev-parse HEAD
+        working-directory: source
