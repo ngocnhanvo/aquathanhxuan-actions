@@ -62,3 +62,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - Tổng **270/389 Product IDs đã qua independent source-target parity**, không chỉ qua write confirmations. Trong report `AQUA_REMAINING_TARGET_PAGING` id-ascending không có slug/ID collision.
 - Import workflow #42663313074: **9/13 lô PASS** (0..8), batches 9/10 in progress, 11/12 queued, verify full chưa chạy tại mốc này.
 - No production route/build/36-case browser QA fired. Still PARTIAL.
+
+## QA 299/389 và tăng coverage submenu
+
+- [Early QA batch 9 #42678118188](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42678118188) **PASS**: thêm 29 Product IDs xác minh giá hiện tại/gốc, tồn kho, source category, short/long descriptions và 29 Yoast SEO title; không có source SEO metadesc. Tổng **299/389 source Products** đã QA độc lập tính cả các batch 0..9, còn 90 Product ở các batch 10..12 chưa chạy xong.
+- [Import workflow #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074): 10/13 batch PASS (0..9), 10/11 in progress, 12 queued tại mốc này. Không có batch failed trong 10 batch PASS.
+- `scripts/aqua-remaining-catalog-production-qa.cjs` đã tăng từ 36 lên **134 browser cases**: 9 danh mục gốc + 9 source detail + 3 exact verified special details (2 Gebo UV + 1 Cây Bonsai) + **46 danh mục con nguồn** trên desktop/mobile. QA source taxonomy được xác minh bằng source ID và Product card Woo ID, không chỉ HTTP 200.
+- `scripts/aqua-remaining-product-routes.cjs` và UV route script chỉ xem rule đã published/enabled là "covered", không tái dùng draft/disabled rule. **Chưa trigger URL writers**, vẫn chờ import + verify PASS.
+- Trạng thái: PARTIAL — chưa hoàn tất.
