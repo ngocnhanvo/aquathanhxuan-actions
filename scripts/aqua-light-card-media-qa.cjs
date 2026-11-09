@@ -59,7 +59,7 @@ const samples=[
    }
    // A missing cover must be represented as a truthful neutral state, never
    // a fabricated image or an unrelated default product placeholder.
-   for(const missing of [{slug:'odyssea',count:3},{slug:'xuanmailong',count:10}]){
+   for(const missing of [{slug:'den-weekaqua',count:3},{slug:'den-chihiros',count:4},{slug:'xuanmailong',count:6}]){
      const route='/san-pham/'+missing.slug;
      const res=await page.goto(url+route,{waitUntil:'domcontentloaded',timeout:60000});
      assert.equal(res?.status(),200,'Missing media category route '+route);
