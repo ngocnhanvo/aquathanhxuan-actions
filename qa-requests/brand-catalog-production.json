@@ -28,8 +28,26 @@
     ]
   },
   "notes": "Prod only; fail-fast if deployed source marker differs; source original photos for 184 and 3178 remain HTTP 404 and must show local placeholder",
-  "runAttempt": 2,
+  "runAttempt": 3,
   "priorQaRun": 42595915988,
   "galleryValidation": "Compare each distinct source image src and original filename, excluding duplicate Woo Store API gallery entries; no asset parity relaxation",
-  "auditEvidenceRun": 42596581622
+  "auditEvidenceRun": 42596581622,
+  "rebuildRun": 42599850218,
+  "galleryRepairRun": 42598203773,
+  "galleryAuditRun": 42598746988,
+  "qaRevision": "Verify all 157 brand source-target identities, each public product detail, 6 repaired galleries in live frontend, source media exceptions, responsive category UI",
+  "previousQaRuns": [
+    42595915988,
+    42596794623
+  ],
+  "expected": {
+    "sourceProductMemberships": 157,
+    "missing": 0,
+    "galleryUnresolved": 0,
+    "repairedProductGalleries": 6,
+    "viewports": [
+      1440,
+      390
+    ]
+  }
 }
