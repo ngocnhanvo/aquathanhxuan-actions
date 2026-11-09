@@ -3,25 +3,26 @@
 Date: 2026-11-09 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
 Knowledge: ngocnhanvo/knowledge main
-Astro: ngocnhanvo/aquathanhxuan-astro master @ e3ce52aca18627028b3ad8b45847be3f30b0be7c
+Astro: ngocnhanvo/aquathanhxuan-astro master @ cebdd48dd73a41ba130cbbeddda8ae5252621730
 PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
 Actions: ngocnhanvo/aquathanhxuan-actions main
-Checkpoint: docs/checkpoints/2026-11-09-footer-consultation-home05.md
+Checkpoint: docs/checkpoints/2026-11-09-header-submenus-consultation.md
 
-## Latest completed task — decorative Footer waves
-- User approved a reference image with smooth white/cyan/purple waves above the dark purple copyright bar; preserve all content and centering.
-- Implemented as self-contained decorative SVG in src/astro/components/Layout/Footer.astro, with no CMS data alterations, no image requests, aria-hidden and pointer-events-none.
-- Astro source commit e3ce52aca18627028b3ad8b45847be3f30b0be7c.
-- Added Footer source regression test; Actions CI run 42536578128: all 4 jobs PASS.
-- WordPress-controlled production build run 42536688194 SUCCESS.
-- Astro production deployment run 42536756427 SUCCESS.
-- Playwright QA run 42536899413 SUCCESS, five viewport wave assertions and all existing Footer, Home05, consultation launcher and Visual Builder inspector checks PASS.
-- No WordPress/CMS data written. No follow-up build required for this completed request.
+## Latest task completed — consultation floating controls and WP Header children
+- Increased Back to Top vs Tư vấn button gap; popup now overlays the arrow, maintains adaptive placement.
+- Replaced phone and Messenger emoji with modern SVG circular icons, Zalo SVG badge; retained existing AI avatar and agent.
+- Desktop and mobile menu parent now has distinct usable link and click-to-open child chevron. WordPress Header Menu Manager remains the only source.
+- Parsed legacy owner-supplied Aqua menu: 11 parents / 75 submenu items.
+- WordPress Header VI menu id 1778: 66 missing product categories created, 9 reused, all 75 submenu items created natively and verified by REST (no replacement or deletion of 11 parents).
+- Astro production source SHA cebdd48dd73a41ba130cbbeddda8ae5252621730.
+- CMS sync run 42538691882 SUCCESS; source CI 42538938980 4/4 PASS.
+- WordPress build 42539210197 SUCCESS, Astro deploy 42539285414 SUCCESS.
+- Production Playwright 42539445503 SUCCESS: full menu tree 20/7/8/5/8/4/6/4/7/4/2, desktop/mobile submenu clicks, 5 responsive viewport consultation overlay/icons and existing Footer/Home05/Visual Builder QA PASS.
+- QA no CMS writes; 66 new product_cat categories may be empty until WooCommerce products are assigned. Product classification not requested.
 
 ## Carry-forward
-- Do not redo Footer wave, Home02/Home05/06/07 or Visual Builder work that already passed.
-- Production native inspector click is working. The explicit save/readback/rollback editing test is still distinct and unverified; do not claim a CMS write-roundtrip test passed.
-- For any new task, recheck HEAD, live runs, and checkpoint before modifying.
+- Do not redo this implemented and deployed Header/consultation work. Use checkpoint and check latest HEAD for new tasks.
+- CMS write/readback/rollback for Visual Builder cells remains separate and unverified. Read-only inspector click PASS is not equivalent to live Save.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
