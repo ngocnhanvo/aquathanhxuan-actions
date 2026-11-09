@@ -25,6 +25,7 @@ FILES = (
     "wp-content/mu-plugins/esc-seo-files.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.js",
+    "wp-content/themes/vibe-code-theme/inc/products/product_endpoint.php",
     "wp-content/plugins/esc-visual-builder/includes/site-config.php",
     "wp-content/plugins/esc-visual-builder/includes/change-index.php",
     "wp-content/plugins/esc-visual-builder/includes/text-editor.php",
