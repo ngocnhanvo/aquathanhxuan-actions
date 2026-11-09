@@ -1,10 +1,10 @@
 {
-  "task": "Final independent post-migration source-target parity audit after batch C and D rescue success",
+  "task": "Read-only all-brand gallery unique filename parity audit after production QA detected a real Chihiros gallery gap",
   "source": "aquathanhxuan.com",
   "target": "admin.aquathanhxuan.io.vn",
   "request": "2026-11-09-brand-menu",
   "followupRunId": 42579994450,
-  "snapshot": 4,
+  "snapshot": 5,
   "recoveryRun": 42585734376,
   "collisionRun": 42588322749,
   "batchDRun": 42586832096,
@@ -15,5 +15,7 @@
     "category_memberships": 157,
     "missing": 0,
     "price_mismatches": 0
-  }
+  },
+  "priorProdQa": 42596794623,
+  "check": "galleryMismatches for all 157 memberships; exclude only source known 404 and JECOD store-only image conflicts"
 }
