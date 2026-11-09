@@ -1,0 +1,23 @@
+name: Aqua light source missing media provenance audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'audit-requests/light-missing-media-last-resort.json'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-missing-media-last-resort-audit.py
+      - run: python3 scripts/aqua-light-missing-media-last-resort-audit.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-missing-media-source-provenance
+          path: artifacts/aqua-light-last-resort/result.json
+          if-no-files-found: ignore
+          retention-days: 14
