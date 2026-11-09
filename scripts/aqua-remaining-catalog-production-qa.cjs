@@ -61,7 +61,12 @@ async function paged(get,url,limit=100){
  }
  throw Error('Pagination too large: '+url);
 }
-const norm=value=>String(value||'').normalize('NFC').replace(/\s+/g,' ').trim().toLocaleLowerCase('vi');
+const norm=value=>String(value||'').replace(/<[^>]*>/g,' ')
+ .replace(/&(?:amp|#38);/gi,'&').replace(/&(?:nbsp|#160);/gi,' ')
+ .replace(/&(?:quot|#34);/gi,'"').replace(/&(?:apos|#39);/gi,"'")
+ .replace(/&lt;/gi,'<').replace(/&gt;/gi,'>')
+ .replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n)))
+ .normalize('NFC').replace(/\s+/g,' ').trim().toLocaleLowerCase('vi');
 async function main(){
  if(!DATA_ONLY){
   let actual='';
