@@ -2,5 +2,6 @@
   "task": "Verify original media and WordPress filename collision for source product 3178 and 15280",
   "reason": "Fixed relative WordPress media source URLs",
   "source": "aquathanhxuan.com",
-  "target": "admin.aquathanhxuan.io.vn"
+  "target": "admin.aquathanhxuan.io.vn",
+  "patch": "fix Response.ok property access"
 }
