@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aqua-brand-atman-content-audit.yml'
+      - 'qa-requests/atman-gallery-check.json'
 permissions:
   contents: read
 jobs:
