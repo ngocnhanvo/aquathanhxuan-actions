@@ -15,7 +15,7 @@ async function sourceJson(url){
  for(let i=0;i<4;i++){
   try{
    const r=await fetch(url,{signal:AbortSignal.timeout(30000)});
-   if(!r.ok)throw Error('SOURCE HTTP '+r.status());
+   if(!r.ok)throw Error('SOURCE HTTP '+r.status);
    return await r.json();
   }catch(e){if(i===3)throw e;await pause(1000*(i+1))}
  }
@@ -60,13 +60,16 @@ async function pagedTarget(page,url,headers){
   ['cay-va-ca-thuy-sinh',618,1777],
  ];
  const byId=new Map();
- for(const [slug,id] of roots){
+ const verifiedRootMembership=new Map();
+ for(const [slug,id,targetRootId] of roots){
   assert(sourceCats.some(x=>x.slug===slug&&Number(x.id)===id&&Number(x.parent||0)===0),'Source root changed '+slug);
   for(const item of await pagedSource(SOURCE+'/wp-json/wc/store/v1/products?category='+id)){
    assert(item.type==='simple'&&item.name&&item.slug,'Unsupported original Product '+item.id);
    const previous=byId.get(Number(item.id));
    if(previous)assert.equal(previous.slug,item.slug,'Original Product ID/slug changed');
    byId.set(Number(item.id),item);
+   if(!verifiedRootMembership.has(Number(item.id)))verifiedRootMembership.set(Number(item.id),new Set());
+   verifiedRootMembership.get(Number(item.id)).add(targetRootId);
   }
  }
  const sourceProducts=[...byId.values()];
@@ -104,8 +107,8 @@ async function pagedTarget(page,url,headers){
    assert(target,'Imported Product missing '+src.slug);
    const oid=(target.meta_data||[]).find(m=>m.key==='_esc_origin_product_id');
    assert.equal(String(oid?.value||''),String(src.id),'Source Product ID mismatch '+src.slug);
-   const sourceTermIds=new Set((src.categories||[]).map(c=>Number(c.id)));
-   assert(roots.some(([,sourceTerm,targetTerm])=>sourceTermIds.has(sourceTerm)&&(target.categories||[]).some(c=>Number(c.id)===targetTerm)),
+   const validTargets=verifiedRootMembership.get(Number(src.id));
+   assert(validTargets&&[...(target.categories||[])].some(c=>validTargets.has(Number(c.id))),
     'Product missing source-matched root category '+src.slug);
   }
   console.log('AQUA_REMAINING_ROUTE_TARGET_PRODUCTS_PASS='+allSlugs.length);
