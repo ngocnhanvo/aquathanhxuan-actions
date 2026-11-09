@@ -61,11 +61,16 @@ jobs:
         working-directory: source-astro
         run: |
           set -euo pipefail
-          pnpm exec astro check --js-only
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
           import fs from 'node:fs';
+          import {createRequire} from 'node:module';
+          const require=createRequire(import.meta.url);
+          const compilerPath=require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]});
+          const {transform}=await import(compilerPath);
           const file=fs.readFileSync('src/astro/pages/ProductDetailsPage.astro','utf8');
+          const compiled=await transform(file,{filename:'src/astro/pages/ProductDetailsPage.astro'});
+          assert(compiled.code,'Astro page compilation failed');
           const early=file.indexOf('id="product-purchase-actions"');
           const detail=file.indexOf('class="product-description prose prose-lg');
           assert(early>=0&&detail>early,'Primary purchase CTA must precede long description');
