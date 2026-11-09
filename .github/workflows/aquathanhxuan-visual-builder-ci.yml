@@ -1,6 +1,6 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
 # Verify direct red/blue Product item pick in nested source with no duplicate ID-list UI.
-# Also guard support overlay and parent-only Header toggles with editable All submenu links.
+# Guard Header toggles and dedicated CMS-driven Home 00 mobile banner mapping.
 on:
   push:
     branches: [main]
