@@ -33,7 +33,7 @@ for(const id of ids){
  console.log('BRAND_ASSET_ORIGINAL='+JSON.stringify({id,slug,name:product.name,images:imgs.map(x=>({id:x.id,src:x.src,thumbnail:x.thumbnail,srcset:x.srcset,alt:x.alt}))}).slice(0,16000));
  const html=await fetch(SOURCE+'/san-pham/'+slug+'/',{signal:AbortSignal.timeout(20000)});
  const text=await html.text();
- const sourceUrls=[...new Set([...text.matchAll(/https?:\\/\\/aquathanhxuan\\.com\\/wp-content\\/uploads\\/[^"\\s<>]+/gi)].map(m=>m[0]))].slice(0,30);
+ const sourceUrls=[...new Set(text.match(/https?:\/\/aquathanhxuan\.com\/wp-content\/uploads\/[^"'\s<>]+/gi)||[])].slice(0,30);
  console.log('BRAND_ASSET_HTML='+JSON.stringify({id,status:html.status,slug,mediaUrls:sourceUrls}).slice(0,16000));
  for(const img of imgs){
    for(const [key,url] of [['src',img.src],['thumbnail',img.thumbnail]]){
