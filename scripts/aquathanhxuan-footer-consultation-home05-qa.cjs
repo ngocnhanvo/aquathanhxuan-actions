@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='e3ce52aca18627028b3ad8b45847be3f30b0be7c';
+const expectedSha='cebdd48dd73a41ba130cbbeddda8ae5252621730';
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const expectedHome=[
   'Nhập khẩu và phân phối chính hãng, được chọn lọc và kiểm tra kỹ trước khi giao tới tay khách hàng.',
@@ -16,11 +16,22 @@ const expectedFeatured=[
   'Vi sinh biodigest Probidio','Phân nước Tropica'
 ];
 const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đại Lý','Khiếu nại','Liên hệ'];
+const expectedSubmenuCounts=[20,7,8,5,8,4,6,4,7,4,2];
 (async()=>{
  const markerResponse=await fetch(site+'/aquathanhxuan-staging-build.json?footerconsult='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
  assert.equal(markerResponse.status,200,'MISSING_DEPLOY_MARKER');
  const marker=await markerResponse.json();
  assert.equal(marker.commit,expectedSha,'PRODUCTION_SHA_MISMATCH');
+ const menuResponse=await fetch(wp+'/wp-json/esc-api/v1/menus?menuqa='+Date.now(),{signal:AbortSignal.timeout(20000)});
+ assert.equal(menuResponse.status,200,'WORDPRESS_HEADER_REST_UNAVAILABLE');
+ const menuSource=(await menuResponse.json())?.menus?.Header?.vi?.items;
+ assert(Array.isArray(menuSource)&&menuSource.length===11,'WORDPRESS_HEADER_ROOT_MISMATCH');
+ for(let i=0;i<11;i++){
+   assert((menuSource[i]?.children||[]).length>=expectedSubmenuCounts[i],
+     'WORDPRESS_MENU_CHILD_MISSING_'+i+' expected='+expectedSubmenuCounts[i]);
+ }
+ console.log('HEADER_WORDPRESS_MENU_CHILDREN_PASS='+menuSource.map(i=>(i.children||[]).length).join(','));
+
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  fs.mkdirSync('artifacts/footer-consultation-home05',{recursive:true});
  try{
@@ -32,6 +43,36 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    const descriptions=await home.locator('article p').allTextContents();
    assert.deepEqual(descriptions.map(s=>s.trim()),expectedHome,'HOME05_PARITY');
    assert.equal(await home.locator('article').count(),4,'HOME05_CARD_COUNT');
+   if(width===1440){
+     const roots=page.locator('#desktop-menu > ul > li');
+     assert.equal(await roots.count(),11,'DESKTOP_HEADER_ROOT_COUNT');
+     const first=roots.first();
+     assert.match(await first.locator(':scope > div > a[href]').getAttribute('href'),/\/san-pham\/thuong-hieu/,'DESKTOP_PARENT_URL_MISSING');
+     const toggle=first.locator(':scope > div > button[data-menu-trigger]');
+     await toggle.click();
+     assert.equal(await toggle.getAttribute('aria-expanded'),'true','DESKTOP_SUBMENU_NOT_OPEN');
+     assert((await first.locator('[data-menu-panel] a[href]').count())>=20,'DESKTOP_SUBMENU_LINKS_MISSING');
+     await page.screenshot({path:'artifacts/footer-consultation-home05/header-desktop-submenu.png'});
+     await toggle.click();
+     assert.equal(await toggle.getAttribute('aria-expanded'),'false','DESKTOP_SUBMENU_NOT_CLOSED');
+     console.log('HEADER_DESKTOP_SUBMENU_PASS');
+   }
+   if(width===390){
+     await page.locator('#hamburger-btn').click();
+     const roots=page.locator('#mobile-menu-container nav > ul > li');
+     assert.equal(await roots.count(),11,'MOBILE_HEADER_ROOT_COUNT');
+     const first=roots.first();
+     assert.match(await first.locator(':scope > div > a[href]').getAttribute('href'),/\/san-pham\/thuong-hieu/,'MOBILE_PARENT_URL_MISSING');
+     const toggle=first.locator(':scope > div > button[data-menu-toggle]');
+     await toggle.click();
+     assert.equal(await toggle.getAttribute('aria-expanded'),'true','MOBILE_SUBMENU_NOT_OPEN');
+     assert((await first.locator('div[id^="mobile-branch-"] a[href]').count())>=20,'MOBILE_SUBMENU_LINKS_MISSING');
+     await page.screenshot({path:'artifacts/footer-consultation-home05/header-mobile-submenu.png'});
+     await toggle.click();
+     assert.equal(await toggle.getAttribute('aria-expanded'),'false','MOBILE_SUBMENU_NOT_CLOSED');
+     await page.locator('[data-mobile-menu-close]').click();
+     console.log('HEADER_MOBILE_SUBMENU_PASS');
+   }
    const footer=page.locator('#footer-contact');
    await footer.scrollIntoViewIfNeeded();
    const waveLayout=await footer.evaluate(root=>{
@@ -86,9 +127,38 @@ const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đạ
    const widget=page.locator('#contact-widget');
    const launcher=page.locator('#ai-agent-btn');
    assert.equal(await launcher.count(),1,'ONLY_ONE_CONSULTATION_LAUNCHER');
+   await page.waitForFunction(()=>document.querySelector('#back-to-top-btn')?.getAttribute('aria-hidden')==='false',null,{timeout:12000});
+   const floating=await page.evaluate(()=>{
+     const arrow=document.querySelector('#back-to-top-btn');
+     const launcher=document.querySelector('#ai-agent-btn');
+     const widget=document.querySelector('#contact-widget');
+     const a=arrow.getBoundingClientRect(),l=launcher.getBoundingClientRect();
+     return {gap:l.top-a.bottom,widgetZ:Number(getComputedStyle(widget).zIndex),
+       arrowZ:Number(getComputedStyle(arrow).zIndex)};
+   });
+   assert(floating.gap>=8,'FLOATING_BUTTONS_OVERLAP_'+width+' '+JSON.stringify(floating));
+   assert(floating.widgetZ>floating.arrowZ,'CONSULTATION_PANEL_NOT_ABOVE_ARROW_'+width);
+
    await launcher.click();
    const menu=page.locator('#consultation-menu');
    assert.equal(await launcher.getAttribute('aria-expanded'),'true','PANEL_OPEN');
+   await page.waitForTimeout(260);
+   const panelStack=await page.evaluate(()=>{
+     const menu=document.querySelector('#consultation-menu');
+     const arrow=document.querySelector('#back-to-top-btn');
+     const r=arrow.getBoundingClientRect(),p=menu.getBoundingClientRect();
+     const cx=r.x+r.width/2,cy=r.y+r.height/2;
+     return {overlaps:p.left<=cx&&cx<=p.right&&p.top<=cy&&cy<=p.bottom,
+       hit:menu.contains(document.elementFromPoint(cx,cy))};
+   });
+   assert(panelStack.overlaps&&panelStack.hit,'CONSULTATION_PANEL_DOES_NOT_COVER_ARROW_'+width+' '+JSON.stringify(panelStack));
+   assert.equal(await menu.locator('a[href^="tel:"] svg').count(),1,'PHONE_SVG_MISSING');
+   assert.equal(await menu.locator('a[href*="m.me/"] svg').count(),1,'MESSENGER_SVG_MISSING');
+   assert.equal(await menu.locator('a[href*="zalo.me/"] svg').count(),1,'ZALO_SVG_MISSING');
+   const menuText=await menu.innerText();
+   assert(!menuText.includes('☎️')&&!menuText.includes('💬'),'EMOJI_ICON_NOT_REPLACED');
+   console.log('CONSULTATION_OVERLAY_ICONS_PASS='+width+'x'+height);
+
    await menu.locator('a[href^="tel:"]').first().waitFor({state:'visible'});
    console.log('CONSULTATION_CHANNEL_DIAGNOSTIC='+JSON.stringify(await menu.locator('a').evaluateAll(nodes=>nodes.map(x=>({href:x.getAttribute('href'),label:x.textContent.trim()})))));
    if (width === 1440) {
