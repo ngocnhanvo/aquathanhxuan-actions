@@ -1,0 +1,33 @@
+name: Aqua verified light Product native Rewrites
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/light-product-routes.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-light-catalog-writes
+  cancel-in-progress: false
+jobs:
+  routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-light-product-routes-create.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aqua-light-product-routes-create.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-product-routes
+          path: artifacts/light-product-routes
+          if-no-files-found: ignore
+          retention-days: 14
