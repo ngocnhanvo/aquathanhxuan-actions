@@ -119,3 +119,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - [Full data QA #42684232514](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42684232514) in_progress; kiểm soát toàn bộ 389 source Product + 2 UV/Bonsai; không phải browser/production QA.
 - Chưa build production hoặc tạo `qa-requests/remaining-catalog-production.json` vì full QA chưa PASS. Khi data QA PASS, tạo build request duy nhất nguồn Astro `master` @ `40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d` qua pipeline hiện hữu rồi chạy browser QA 134 checks.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## Tiếp tục 2026-11-10 — QA full PASS, production build started
+
+- [Full data QA #42684232514](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42684232514) **COMPLETED SUCCESS**: 389/389 Product parity, 2 exact UV + Bonsai mapping PASS, 46 original child categories verified. `AQUA_REMAINING_WOO_PARITY_PASS={unique:389,mediaDeferred:19}`; `AQUA_REMAINING_SEO_PARITY_PASS={total:391,seoTitles:391,seoDescriptions:0,missingDescriptions:391}`, `AQUA_REMAINING_DATA_QA_PASS=391` includes 2 UV.
+- [Production build request commit 65648a62](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/65648a62dc698580d719cf51a46b5ebe89146033) adds **only** `build-requests/2026-11-10-nine-menu-products-40d900b.json`; Astro master HEAD verified `40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d`, environment production, frontend host `aquathanhxuan.io.vn`, no active duplicate build before trigger.
+- [WordPress production trigger #42685510505](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42685510505) initially queued; need wait for wrapper run SUCCESS and matching downstream `repository_dispatch:wp_trigger_build` deploy run SUCCESS, marker on https://aquathanhxuan.io.vn/aquathanhxuan-staging-build.json SHA pinned.
+- Then create QA `qa-requests/remaining-catalog-production.json` to run browser checks (expected 134) and verify 9 category root listings, 9 details, 46 child categories, 3 special details × desktop/mobile. Do not announce production QA PASS until real job concludes.
+- Trạng thái: PARTIAL — chưa hoàn tất.
