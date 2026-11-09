@@ -1,9 +1,9 @@
 {
-  "source_sha": "cebdd48dd73a41ba130cbbeddda8ae5252621730",
-  "purpose": "Nghiệm thu 75 menu con WordPress Header, khoảng cách nút lên đầu trang / Tư vấn, panel đè lên mũi tên, icon SVG không emoji và Footer/Home05 cũ",
+  "source_sha": "282aac0a62bf4dd2d860faaa927e5a55bab8aed5",
+  "purpose": "Nghiệm thu 11 menu cha chỉ mở submenu, 11 mục Tất cả trỏ URL menu cha, giữ 75 mục cũ, Footer/Home05 và nút Tư vấn",
   "expected_site": "aquathanhxuan.io.vn",
-  "iteration": 5,
-  "note": "Source cebdd48, menu CMS 11 parents / 75 children; test desktop/mobile anchors and toggles",
-  "diagnostic": "Readonly 5 viewport screenshots, arrow overlay, contact channels and WordPress Header menu; no Save",
-  "attempt": 13
+  "iteration": 6,
+  "note": "Production 282aac0a: WP Menu Manager 11 roots, 86 children; parent label toggles only, All first child",
+  "diagnostic": "Read-only 5 viewport Playwright, no navigations on parent click, verify native custom All routes and footer widgets; no Save",
+  "attempt": 14
 }
