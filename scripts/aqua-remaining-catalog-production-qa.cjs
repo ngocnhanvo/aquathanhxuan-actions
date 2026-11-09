@@ -157,6 +157,22 @@ async function main(){
    console.log('AQUA_REMAINING_CATEGORY_SOURCE_PASS='+JSON.stringify({slug,count:rows.length}));
   }
   assert.equal(originalById.size,389,'Original nine-menu product scope changed');
+  const rootIds=new Set(roots.map(([, ,sourceId])=>sourceId));
+  const childCases=[];
+  for(const cat of sourceTerms){
+   if(!rootIds.has(Number(cat.parent||0)))continue;
+   const targetId=sourceTermToTarget.get(Number(cat.id));
+   assert(targetId,'Source child category is not mapped '+cat.slug);
+   const target=targetTerms.find(item=>Number(item.id)===targetId);
+   assert(target,'Verified destination child category unavailable '+cat.slug);
+   const descendants=[...originalById.values()].filter(product=>
+    (product.categories||[]).some(c=>Number(c.id)===Number(cat.id)));
+   childCases.push({sourceId:Number(cat.id),sourceSlug:cat.slug,targetId,targetSlug:target.slug,
+    sourceCount:descendants.length,expectedIds:descendants.map(product=>Number(targetBySlug.get(product.slug)?.id))});
+  }
+  assert.equal(childCases.length,46,'Original nine menu child taxonomy count changed');
+  console.log('AQUA_REMAINING_CHILD_CATEGORY_SCOPE_PASS='+JSON.stringify({children:childCases.length,
+    withProducts:childCases.filter(c=>c.sourceCount>0).length}));
   const selectedBatches=process.env.AQUA_QA_BATCHES?.trim()
    ?new Set(process.env.AQUA_QA_BATCHES.split(',').map(value=>Number(value.trim()))):null;
   if(selectedBatches){
@@ -301,6 +317,27 @@ async function main(){
     console.log('AQUA_REMAINING_DETAIL_UI_PASS='+JSON.stringify({slug:product.slug,width,sourceId:product.id}));
     save();
    }
+   // Every original child category exposed beneath the nine header menus
+   // must resolve as a real listing after the source Product import.
+   for(const child of childCases){
+    const childPath='/san-pham/'+child.targetSlug;
+    const childResponse=await tab.goto(PUBLIC+childPath,{waitUntil:'domcontentloaded',timeout:60000});
+    assert.equal(childResponse?.status(),200,'Mapped original child Product category URL '+childPath);
+    const childNodes=tab.locator('article[data-catalog-product]');
+    const displayed=await childNodes.count();
+    if(child.sourceCount>0)assert(displayed>0,'Original child category has source Products but no cards '+child.targetSlug);
+    const targetIds=await childNodes.evaluateAll(nodes=>nodes.map(n=>Number(n.getAttribute('data-catalog-product'))));
+    const expected=new Set(child.expectedIds);
+    assert(targetIds.every(id=>Number.isInteger(id)&&id>0&&expected.has(id)),
+      'Unverified Product card in child category '+child.targetSlug);
+    assert.equal(new Set(targetIds).size,targetIds.length,'Repeated Product card in child category '+child.targetSlug);
+    const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
+    assert(overflow<=3,'Original child category horizontal overflow '+child.targetSlug+' '+width);
+    report.checks.push({type:'child-category',slug:child.targetSlug,sourceId:child.sourceId,
+      sourceCount:child.sourceCount,width,cardCount:displayed,overflow,http:childResponse.status()});
+    console.log('AQUA_REMAINING_CHILD_CATEGORY_UI_PASS='+JSON.stringify({slug:child.targetSlug,width,cardCount:displayed,sourceCount:child.sourceCount}));
+    save();
+   }
    // Explicit source-backed UV items and Cây Bonsai belong to menu child
    // categories; verify their real public detail links as well.
    for(const spec of [...specialProducts,{id:3321,slug:'cay-bonsai-to'}]){
@@ -320,7 +357,7 @@ async function main(){
    assert.deepEqual(errors,[],'Browser Javascript errors '+width);
    await ctx.close();
   }
-  assert.equal(report.checks.length,42,'Expected nine roots, nine root Products and three verified special Products across two viewports');
+  assert.equal(report.checks.length,134,'Expected 9 roots, 9 representative Products, 3 special Products and 46 original child menus at desktop/mobile');
   report.status='PASS';
   save();
   console.log('AQUA_REMAINING_PRODUCTION_QA_PASS='+JSON.stringify({products:originalById.size,checks:report.checks.length,seoTitles,seoDescriptions,mediaDeferred:deferred}));
