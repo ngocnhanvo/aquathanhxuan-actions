@@ -1,0 +1,12 @@
+{
+  "source_product_ids": [
+    3178,
+    15280
+  ],
+  "failure": [
+    "source original media HTTP 404",
+    "destination media same filename but different SHA256"
+  ],
+  "run": 42579994450,
+  "mode": "read-only"
+}
