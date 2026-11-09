@@ -1,0 +1,30 @@
+name: Aqua recover two verified brand products with source media exceptions
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-two-deferred-recovery.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-two-deferred-products-recover.py
+      - run: python3 scripts/aqua-brand-two-deferred-products-recover.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-two-media-deferred-recovery
+          path: artifacts/aqua-brand-media-recovery
+          if-no-files-found: ignore
+          retention-days: 15
