@@ -24,6 +24,7 @@ FILES = (
     "wp-content/mu-plugins/esc-github-trigger-config.php",
     "wp-content/mu-plugins/esc-seo-files.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.php",
+    "wp-content/plugins/github-trigger/products/endpoint.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.js",
     "wp-content/themes/vibe-code-theme/inc/products/product_endpoint.php",
     "wp-content/plugins/esc-visual-builder/includes/site-config.php",
