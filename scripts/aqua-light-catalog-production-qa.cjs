@@ -6,7 +6,8 @@ const fs=require('node:fs');
 const SOURCE='https://aquathanhxuan.com';
 const DEST='https://admin.aquathanhxuan.io.vn';
 const PUBLIC='https://aquathanhxuan.io.vn';
-const CONFIG=JSON.parse(fs.readFileSync('qa-requests/light-catalog-production.json','utf8'));
+const CONFIG=JSON.parse(fs.readFileSync(process.env.LIGHT_QA_REQUEST_PATH||'qa-requests/light-catalog-production.json','utf8'));
+const dataOnly=process.env.LIGHT_QA_DATA_ONLY==='1';
 assert(/^[0-9a-f]{40}$/.test(CONFIG.sha),'Must verify exact production commit');
 const dir='artifacts/light-catalog-production';
 fs.mkdirSync(dir,{recursive:true});
@@ -41,7 +42,7 @@ async function deployMarker(){
  throw Error('LIGHT_DEPLOY_NOT_READY expected='+CONFIG.sha+' actual='+actual);
 }
 async function run(){
- await deployMarker();console.log('LIGHT_DEPLOY_READY='+CONFIG.sha);
+ if(!dataOnly){await deployMarker();console.log('LIGHT_DEPLOY_READY='+CONFIG.sha)}
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
   const page=await browser.newPage();
@@ -149,6 +150,11 @@ async function run(){
   console.log('LIGHT_SEO_SOURCE_TARGET_PASS='+JSON.stringify({total:seen.size,seoTitleChecked,seoDescriptionChecked,seoTitleMissing,seoDescriptionMissing}));
   assert.equal(seen.size,59,'Root + children unique total changed');
   console.log('LIGHT_WOO_PARITY_PASS='+JSON.stringify({unique:seen.size,categories:report.categories.length,mediaDeferred:[...observedDeferred]}));
+  if(dataOnly){
+    report.status='DATA_PASS';report.finished=new Date().toISOString();save();
+    console.log('LIGHT_PREDEPLOY_DATA_PASS='+JSON.stringify({unique:seen.size,categories:report.categories.length,seoChecked:true,mediaDeferred:[...observedDeferred]}));
+    return;
+  }
   for(const width of [1440,390]){
    const context=await browser.newContext({viewport:{width,height:width===1440?900:844}});
    const tab=await context.newPage();
