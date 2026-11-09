@@ -79,8 +79,10 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - WordPress native product Regex Rewrite writer [42594217244](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42594217244) **PASS**: 148 source occurrences = 148 distinct product slugs, đã preflight từng sản phẩm đích, tạo 4 quy tắc `chuyen-huong-link` ID `83150` (A33), `83151` (B36), `83152` (C41), `83153` (D38). Regex chỉ match danh sách sản phẩm nguồn chính xác, target `/ssr/products/$1/detail`; không ảnh hưởng category/Atman URL.
 - Source Astro `master` `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d`; unit QA [42593709890](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42593709890) PASS.
 - Trigger `cms-requests/brand-catalog-build.json` → [dispatch 42595061526](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595061526) PASS, đã kích **duy nhất** existing `aquathanhxuan-production-deploy.yml` qua `wp_trigger_build`.
-- Lượt production [42595077807](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595077807) đang chạy; **chưa tuyên bố BUILD_SUCCESS / DEPLOY_READY**, phải kiểm tra run outcome và SHA marker đích.
+- **BUILD_SUCCESS + PRODUCTION_ACTIVATION_PASS:** run [42595077807](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595077807) `completed/success`; compile, package, FTPS upload và signed PHP staging activation đều success. `DEPLOY_READY` theo public marker/SHA sẽ được bộ QA xác nhận riêng.
 - QA sau deploy bằng `scripts/aqua-brand-catalog-production-qa.cjs`: 20 brand category routes, 157 nguồn, Media, Yoast, tất cả public Product permalinks có **Product detail markup** (không chỉ 200), sorting, banner, recently-viewed, title, overflow, source/target screenshots 1440x900 và 390x844; ghi exceptions cho ảnh source missing 184/3178 và JECOD 15280. Khởi chạy sau production PASS, không trộn trigger với kết quả.
+
+- Production browser QA đang chạy run [42595915988](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595915988), riêng desktop/mobile/URL/SEO; chưa đánh dấu QA_PASS trước kết quả.
 
 ## Chốt tiến độ
 
@@ -88,5 +90,5 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - `DATA_PARITY_PASS`: Có — inventory 42593789909.
 - `NAV_PARITY_PASS`: Cần kiểm thử lại sau import (menu WordPress cũ đã đúng).
 - `VISUAL_PARITY_PASS`: Chưa, chờ QA production.
-- `DEPLOYED_PRODUCTION`: Chưa áp dụng cho dữ liệu mới.
+- `DEPLOYED_PRODUCTION`: Có — build/deploy run 42595077807 success, chờ public marker QA.
 - `QA_PASS`: Chưa.
