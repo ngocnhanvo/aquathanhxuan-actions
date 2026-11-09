@@ -16,6 +16,17 @@ fs.mkdirSync(OUTPUT,{recursive:true});
 const report={source:SOURCE,target:WP,sourceRootId:2019,targetRootId:1767,expectedTotal:148,results:[],status:'STARTED'};
 const save=()=>fs.writeFileSync(OUTPUT+'/result.json',JSON.stringify(report,null,2)+'\n');
 save();
+async function wpGet(page,url,headers){
+ let error;
+ for(let i=0;i<4;i++){
+   try{
+      const r=await page.request.get(url,{headers,timeout:35000});
+      if(r.status()>=500 || r.status()===429)throw Error('Transient WP HTTP '+r.status());
+      return r;
+   }catch(e){error=e;if(i<3)await new Promise(resolve=>setTimeout(resolve,700*(i+1)))}
+ }
+ throw error;
+}
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase().replace(/[^a-z0-9]/g,'');
 async function sourceGet(url){
  let err;
@@ -58,7 +69,7 @@ async function sourcePages(endpoint,category){
   assert.equal(n.status(),200);
   const nonce=(await n.text()).trim();
   const headers={'X-WP-Nonce':nonce};
-  const catR=await page.request.get(WP+'/wp-json/wc/v3/products/categories?per_page=100',{headers,timeout:45000});
+  const catR=await wpGet(page,WP+'/wp-json/wc/v3/products/categories?per_page=100',headers);
   assert.equal(catR.status(),200);
   const targetCats=await catR.json();
   const allDestSlugs=new Set(targetCats.map(x=>x.slug));
@@ -92,13 +103,13 @@ async function sourcePages(endpoint,category){
   for(const scope of scopes){
     const slugs=scope.from.slice('^/san-pham/('.length,-')/?$'.length).split('|');
     for(const slug of slugs){
-      const r=await page.request.get(WP+'/wp-json/wc/v3/products?status=publish&slug='+encodeURIComponent(slug),{headers,timeout:35000});
+      const r=await wpGet(page,WP+'/wp-json/wc/v3/products?status=publish&slug='+encodeURIComponent(slug),headers);
       assert.equal(r.status(),200,'Cannot verify target Product '+slug);
       const list=await r.json();
       assert.equal(list.length,1,'Product not ready for Rewrite '+slug);
     }
   }
-  const rulesR=await page.request.get(WP+'/wp-json/wp/v2/chuyen-huong-link?context=edit&status=any&per_page=100',{headers,timeout:35000});
+  const rulesR=await wpGet(page,WP+'/wp-json/wp/v2/chuyen-huong-link?context=edit&status=any&per_page=100',headers);
   assert.equal(rulesR.status(),200);
   const previous=await rulesR.json();
   assert(Array.isArray(previous));
@@ -128,7 +139,7 @@ async function sourcePages(endpoint,category){
     await page.waitForURL(u=>u.pathname.endsWith('/post.php')&&u.searchParams.has('post'),{timeout:45000});
     const id=Number(new URL(page.url()).searchParams.get('post'));
     assert(id>0,'Cannot determine new WordPress Rewrite ID');
-    const readback=await page.request.get(WP+'/wp-json/wp/v2/chuyen-huong-link/'+id+'?context=edit',{headers,timeout:35000});
+    const readback=await wpGet(page,WP+'/wp-json/wp/v2/chuyen-huong-link/'+id+'?context=edit',headers);
     assert.equal(readback.status(),200);
     const stored=await readback.json();
     assert.equal(stored.acf?.from_link,rule.from,'WordPress truncated persisted Rewrite');
