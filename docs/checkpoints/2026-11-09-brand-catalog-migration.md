@@ -22,6 +22,10 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 
 ## Nhập sản phẩm — action đang chạy
 
+- **Batch A PASS** (job `brand-a` trong run 42579994450): `expected=33, created=24, reused=9, category_linked=9, failed=0`. Chihiros 14, Continuum Aquatics 5, Dennerle 13, Eheim 1 đã đủ trong WordPress; 9 reused là sản phẩm có sẵn ở danh mục khác, không tạo trùng.
+- **Batch B đang chạy** (GEX/ISTA/JEBAO/JECOD); batch C/D được workflow `needs` kích hoạt lần lượt sau B PASS.
+- Đã có snapshot đối chiếu độc lập run [42581260357](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42581260357) PASS tại 07:47 UTC: Chihiros đủ 14, Continuum đủ 5, Dennerle đang 8/13.
+
 - Script: `scripts/aqua-brand-catalog-migrate.py` (độc lập, idempotent), workflow `.github/workflows/aqua-brand-catalog-migrate.yml` với 4 job nối tiếp.
 - Run ban đầu [42579877867](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42579877867) fail tại `python -m py_compile` do typo; **không có ghi WordPress** ở run đầu.
 - Run tiếp theo [42579994450](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42579994450) chạy batch A rồi tự chuyển batch B/C/D nếu tất cả PASS.
