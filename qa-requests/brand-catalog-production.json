@@ -1,0 +1,31 @@
+{
+  "sha": "bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d",
+  "deploymentRun": 42595077807,
+  "sourceInventoryRun": 42593789909,
+  "routingRun": 42594217244,
+  "site": "https://aquathanhxuan.io.vn",
+  "source": "https://aquathanhxuan.com",
+  "scope": {
+    "categories": 20,
+    "sourceCategoryProductOccurrences": 157,
+    "viewports": [
+      1440,
+      390
+    ],
+    "permalinks": "every exact source product slug",
+    "behavior": [
+      "category banner",
+      "sort",
+      "recently viewed",
+      "Product detail",
+      "WooCommerce price",
+      "no horizontal overflow"
+    ],
+    "mediaExceptions": [
+      184,
+      3178,
+      15280
+    ]
+  },
+  "notes": "Prod only; fail-fast if deployed source marker differs; source original photos for 184 and 3178 remain HTTP 404 and must show local placeholder"
+}
