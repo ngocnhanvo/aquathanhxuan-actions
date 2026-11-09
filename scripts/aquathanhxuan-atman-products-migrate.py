@@ -98,21 +98,35 @@ assert int(atman['id'])==TARGET_CATEGORY_ID and int(atman.get('parent') or 0)==T
 assert normalize(atman.get('name')) == normalize('ATMAN'),'Atman category label changed'
 print('ATMAN_TARGET_CATEGORY_VERIFIED='+json.dumps({'id':TARGET_CATEGORY_ID,'parent':TARGET_PARENT_ID}),flush=True)
 
+from html.parser import HTMLParser
+
+class SEOHeadParser(HTMLParser):
+  def __init__(self):
+    super().__init__()
+    self.title_parts=[]
+    self.in_title=False
+    self.description=''
+  def handle_starttag(self,tag,attrs):
+    if tag=='title': self.in_title=True
+    if tag=='meta':
+      values=dict(attrs)
+      if str(values.get('name','')).lower()=='description':
+        self.description=str(values.get('content') or '').strip()
+  def handle_endtag(self,tag):
+    if tag=='title': self.in_title=False
+  def handle_data(self,data):
+    if self.in_title: self.title_parts.append(data)
+
 def source_seo(slug):
   url = SOURCE + '/san-pham/' + urllib.parse.quote(slug) + '/'
   with request(url,headers={'Cache-Control':'no-cache'}) as response:
     document=response.read(400000).decode('utf-8','replace')
-  head=document.split('</head>',1)[0]
-  title_match=re.search(r'<title[^>]*>(.*?)</title>',head,re.I|re.S)
-  title=html.unescape(re.sub('<[^>]+>','',title_match.group(1))).strip() if title_match else ''
-  description=''
-  match=re.search(r'<meta\\s+name=["\\\']description["\\\'][^>]*>',head,re.I)
-  if match:
-    cm=re.search(r'content=["\\\']([^"\\\']*)["\\\']',match.group(0),re.I|re.S)
-    description=html.unescape(cm.group(1)).strip() if cm else ''
+  parser=SEOHeadParser()
+  parser.feed(document.split('</head>',1)[0])
+  title=html.unescape(' '.join(parser.title_parts).strip())
+  description=html.unescape(parser.description)
   print('ATMAN_SOURCE_SEO='+json.dumps({'slug':slug,'title':title or 'SEO_SOURCE_MISSING','description':description or 'SEO_SOURCE_MISSING'},ensure_ascii=False),flush=True)
   return title,description
-
 
 def retrieve_bytes(url):
   error=None
