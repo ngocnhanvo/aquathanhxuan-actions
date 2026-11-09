@@ -78,3 +78,12 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - Cộng kết quả QA độc lập không trùng: batches 0..6 **210** + batches 7..8 **60** + batch 9 **29** = **299/389**. Còn batches 10,11,12 chưa nghiệm thu.
 - Sau import 13/13 + `verify` PASS: tạo `cms-requests/remaining-product-routes.json`, rồi `cms-requests/special-menu-products.json` cho 2 UV + Bonsai, tiếp `qa-requests/remaining-catalog-data.json`, production Astro build theo pipeline hiện có và `qa-requests/remaining-catalog-production.json`.
 - Không nhập lại lô thành công, không thay ảnh giả cho nguồn 404. Trạng thái **PARTIAL — chưa hoàn tất**.
+
+## Tiếp nối 2026-11-10 — batch 10 PASS, 329 Product đã xử lý
+
+- [Import #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074): **11/13 batches PASS (0..10)**, batch 11 và 12 `in_progress`, toàn bộ `verify` chưa bắt đầu. Không có batch nào FAILED trong các batch đã xong.
+- Batch 10: `AQUA_REMAINING_MIGRATION_RESULT` PASS, expected **30**, created **21**, reused **9**, category_linked **8**, failed **0**. Một số ảnh URL nguồn HTTP 404 đã được ghi ASSET_DEFERRED, không thay hình giả.
+- Tổng đã đi qua 11 batch PASS: **329/389** source Product ID (0..10). Tổng đã QA độc lập: **299/389** (batches 0..9). Chưa được coi là full DATA_PASS.
+- [Checkpoint commit](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/3a26f03e5c22d340596c5494be2e64c534e5e4a9) đã lưu tình trạng 10/13; cập nhật này ghi bổ sung 11/13 và media deferred.
+- Các bước chưa thực hiện: verify 389 → tạo native Rewrites → 2 UV + Bonsai → QA 389 → production Astro pipeline → browser QA.
+- Trạng thái: PARTIAL — chưa hoàn tất.
