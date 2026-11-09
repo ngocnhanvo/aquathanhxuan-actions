@@ -1,34 +1,45 @@
 # Phản hồi mới nhất — Aqua Thanh Xuân
 
-- Ngày: 2026-11-09 (Asia/Ho_Chi_Minh)
-- Công việc: mở phiên mới, kiểm tra commit/log/checkpoint hiện hành và tiếp tục nhiệm vụ gần nhất nếu chưa hoàn tất.
-- Knowledge: `ngocnhanvo/knowledge` `main` @ `60fb7759787e696f909e11da04a26404cb300b73`
-- Astro: `ngocnhanvo/aquathanhxuan-astro` `master` @ `b6856c2ff4abaaa7d227e7f6e1d8737f3f414ddd`
-- PHP: `ngocnhanvo/aquathanhxuan-php` `master` @ `4a65e0cab7864a44dbce83f01bf15723a7a5f589`
-- Checkpoint công việc cuối: `docs/checkpoints/2026-11-09-product-detail-commerce-fields.md`
-- Chế độ code: auto-build; Cổng ghi source: bypass.
+- Ngày: 2026-11-09 (Asia/Ho_Chi_Minh).
+- Project: aquathanhxuan.com
+- Repository ghi: `ngocnhanvo/aquathanhxuan-actions` branch `main`.
+- Source Astro `ngocnhanvo/aquathanhxuan-astro` `master` @ `5f158c4ea8d214f2f83f94dc2285032a81e983f8`.
+- Checkpoint: `docs/checkpoints/2026-11-09-product-sticky-purchase.md`
+- Trạng thái xác minh: DONE — production build/deploy và Playwright QA PASS.
 
-## Đối chiếu mới nhất
+## Nội dung phản hồi gửi người dùng
 
-- `chatgpt/latest-response.md` bản trước và checkpoint đều xác nhận nhiệm vụ 4 trường Product **DONE**.
-- WordPress REST: `regular_price`, `stock_status`; Astro `Products` → `getData.ts` → cache migration 182 Products → `ProductDetailsPage.astro`; mô tả ngắn + giá gốc gạch ngang + phần trăm giảm thật + tình trạng tồn kho.
-- Unit QA [42609931588](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42609931588) = completed/success (Astro 10 tests + PHP mock).
-- PHP deploy [42610071417](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610071417) = completed/success; REST readback [42610409904](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610409904) = completed/success.
-- WordPress build wrapper [42610626409](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610626409) và production pipeline [42610738651](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610738651) = completed/success; đúng Astro SHA nêu trên.
-- Product frontend live browser QA [42611391976](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42611391976) = completed/success, 4 mẫu x desktop 1440/mobile 390; 12 screenshot; Dennerle 4L 259.000/375.000/-31%, trạng thái `instock` khớp WooCommerce.
-- Lượt kiểm tra này thấy 12 runs gần nhất của Actions không có run đang chờ; HEAD Astro và PHP không đổi. Vì không có diff nguồn hay task đang chạy, **không chạy lại production build hoặc QA**.
-- Đối chiếu brand catalog checkpoint `2026-11-09-brand-catalog-migration.md` cho thấy 157/157 Products, 20/20 brand categories, QA [42600653497](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42600653497) completed/success; các ảnh 404 từ chính nguồn được ghi exception.
+## Định hướng bố trí nút mua hàng
 
-## Ranh giới phạm vi
+Mình chọn phương án **hai vị trí thao tác, cùng một giỏ hàng**:
 
-- **DONE cho bốn trường yêu cầu gần nhất**, không đồng nghĩa với tuyên bố toàn bộ Product detail đã đạt parity tuyệt đối.
-- Audit trước `docs/checkpoints/2026-11-09-product-detail-content-parity.md` còn ghi nhận khác biệt CTA (Mua ngay / Gọi tư vấn / coupon), SEO source title/description và 2 video chưa xác minh byte; các phần đó **không thuộc 4 mục owner vừa chỉ định**, chưa tự sửa/chạy migration hoặc tạo dữ liệu giả.
-- Test live 4 mẫu đều `instock`; `outofstock/onbackorder` kiểm thử logic/unit, chưa có live sample thật để khẳng định ba nhánh production.
-- Browser web mở public host trong phiên này báo DisabledError; không biến kết quả đó thành kết luận site lỗi vì Actions production browser QA mới nhất PASS.
+- **Khi mới vào trang:** đặt “Thêm vào giỏ hàng” nổi bật ngay bên dưới giá bán và thông tin tồn kho, bên cạnh là “Xem giỏ hàng”.
+- **Khi cuộn xuống đọc chi tiết:** xuất hiện thanh mua hàng cố định ở cạnh dưới màn hình, có giá hiện tại và hai nút thao tác.
+- **Trên mobile:** thanh cố định gọn hơn, nút đủ lớn để chạm, không che nội dung hoặc bong bóng tư vấn.
+- **Khi cuộn lên:** thanh cố định tự ẩn lúc cụm nút mua hàng chính đã hiện trên màn hình, tránh trùng lặp.
 
-## Kết luận
+Thiết kế này giúp khách không phải cuộn ngược lên đầu trang sau khi đọc mô tả, đồng thời giữ trải nghiệm mua hàng quen thuộc.
 
-Phần việc gần nhất có checkpoint **DONE**, không có bước dở cần lặp lại; giữ nguyên source và production sau đối chiếu. Chờ yêu cầu bổ sung cụ thể đối với các hạng mục parity khác thay vì tự thay đổi luồng mua hàng/coupon/SEO.
+## Đã cập nhật source Astro
+
+Mình đã ghi thay đổi lên `ngocnhanvo/aquathanhxuan-astro`, nhánh `master`:
+
+- `c9364b20df9c`: chuyển cụm mua hàng lên trước mô tả dài; thêm thanh cố định, nút xem giỏ và xử lý responsive.
+- `5f158c4ea8d`: bổ sung thông báo đang thêm và đã thêm vào giỏ hàng.
+
+Thanh cố định gọi lại nút mua chính, nên vẫn dùng API giỏ hàng và trạng thái sản phẩm hiện có. Sản phẩm hết hàng được khóa thao tác thêm giỏ; sản phẩm có biến thể sẽ cập nhật giá trên thanh cố định khi chọn biến thể.
+
+Đây mới là phần **source đã cập nhật**; cần tiếp tục kiểm thử, build và nghiệm thu trên website thật trước khi xác nhận hoàn tất.
+
+## Kết quả nghiệm thu production
+
+**Đã hoàn tất triển khai.** Bản mới đã xuất bản lên [Aqua Thanh Xuân](https://aquathanhxuan.io.vn/san-pham/phan-nen-dennerle-scapers-soil-4lit), đúng Astro commit `5f158c4ea8d214f2f83f94dc2285032a81e983f8`.
+
+[QA Playwright #42616766306](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42616766306) **PASS cả 8 trường hợp** (4 sản phẩm × desktop 1440px/mobile 390px). Kiểm thử xác nhận thanh mua xuất hiện khi cuộn xuống mô tả, ẩn khi thấy nút chính hoặc đến footer, không che bong bóng tư vấn, và nút thêm giỏ cố định gọi đúng chức năng hiện tại. Không có lỗi JavaScript hoặc tràn ngang. [20 ảnh QA](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42616766306/artifacts/13671854052) đã được lưu.
+
+Production build và deploy đều PASS: [WordPress trigger #42616310341](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42616310341), [Astro deploy #42616446692](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42616446692). QA không thêm giỏ hàng thật để tránh tạo giao dịch/dữ liệu thử trên production.
+
+Checkpoint đã lưu tại [product-sticky-purchase.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-product-sticky-purchase.md), để phiên sau không lặp lại việc đã hoàn tất.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
