@@ -56,6 +56,7 @@ jobs:
           const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
           for(const file of [
             'src/astro/components/Product/ProductCardCartButton.astro',
+            'src/astro/components/Product/MissingProductImage.astro',
             'src/astroutils/RelatedProducts.astro',
             'src/astro/pages/ProductsSSRPage.astro',
             'src/astro/pages/ProductsPage.astro',
@@ -76,6 +77,16 @@ jobs:
           assert(card.includes('data-product-id={id}')&&card.includes('outOfStock')&&card.includes('needsSelection'));
           assert(cart.includes('addCartItem(')&&cart.includes('cartToProducts(')&&cart.includes('cart:updated'));
           console.log('PRODUCT_CARD_CTA_BINDING_PASS');
+          const detail=fs.readFileSync('src/astro/pages/ProductDetailsPage.astro','utf8');
+          const missing=fs.readFileSync('src/astro/components/Product/MissingProductImage.astro','utf8');
+          assert(missing.includes('data-product-image-unavailable'),'Missing image status needs test locator');
+          assert(missing.includes('Chưa có ảnh sản phẩm'),'Missing image label must be honest');
+          assert(ssr.includes('hasRealImage ?')&&ssr.includes('<MissingProductImage'),'SSR product cards must show missing image explicitly');
+          assert(related.includes('imgSrc &&')&&related.includes('<MissingProductImage'),'Related cards need missing image state');
+          assert(detail.includes('<MissingProductImage'),'Product detail needs missing image state');
+          assert(legacy.includes('productImageHTML')&&legacy.includes('data-product-image-unavailable'),'Legacy list needs honest image missing state');
+          assert(!detail.includes('src="/placeholders/product.webp"'),'Detail must not substitute an unrelated cover');
+          console.log('PRODUCT_CARD_SOURCE_MEDIA_MISSING_STATE_PASS');
           JS
       - name: Unit-test cart API state synchronization and duplicate prevention
         working-directory: source-astro
