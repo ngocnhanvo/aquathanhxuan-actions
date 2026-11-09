@@ -1,0 +1,14 @@
+{
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "reason": "Batch C partial due to source Media collisions; D must migrate independently",
+  "sourceBrands": [
+    "PRODIBIO",
+    "SEACHEM",
+    "SERA",
+    "SOBO",
+    "WEEK AQUA"
+  ],
+  "expectedMemberships": 38,
+  "writeScope": "only original missing Product and Media under existing brand categories"
+}
