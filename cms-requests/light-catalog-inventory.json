@@ -13,5 +13,7 @@
     "Phụ kiện đèn"
   ],
   "scope": "READ_ONLY",
-  "requestedAt": "2026-11-09"
+  "requestedAt": "2026-11-09",
+  "attempt": 2,
+  "reason": "Corrected WordPress nonce parsing, read-only inventory"
 }
