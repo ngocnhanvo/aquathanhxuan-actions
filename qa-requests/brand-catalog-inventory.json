@@ -1,8 +1,11 @@
 {
-  "task": "Independent mid-import price and brand membership parity snapshot",
+  "task": "Independent read-only progress audit after A/B and during D/C rescue",
   "source": "aquathanhxuan.com",
   "target": "admin.aquathanhxuan.io.vn",
   "request": "2026-11-09-brand-menu",
   "followupRunId": 42579994450,
-  "snapshot": 3
+  "snapshot": 3,
+  "recoveryRun": 42585734376,
+  "collisionRun": 42588322749,
+  "batchDRun": 42586832096
 }
