@@ -1,0 +1,12 @@
+{
+  "scope": "Migrate missing 148 source WooCommerce simple Products under 19 existing brand categories excluding ATMAN/FKSC",
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "inventoryRunId": 42579127519,
+  "sourceCount": 157,
+  "existingCount": 9,
+  "missing": 148,
+  "workflow": "aqua-brand-catalog-migrate.yml",
+  "batch": 4,
+  "reason": "Syntax check fixed; rerun idempotent write with scoped journal"
+}
