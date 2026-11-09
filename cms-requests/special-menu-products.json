@@ -1,0 +1,22 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "verifiedCatalogRun": 42663313074,
+  "verifiedRouteRun": 42682739649,
+  "sourceMenuLeafAuditRun": 42666557375,
+  "scope": {
+    "uvSourceIds": [
+      5054,
+      4355
+    ],
+    "uvSlugs": [
+      "den-uv-30w",
+      "den-uv-40w"
+    ],
+    "bonsaiSourceId": 3321,
+    "bonsaiTargetCategoryId": 1841
+  },
+  "mode": "apply",
+  "intent": "Import only original two category-less Gebo UV source Products into verified target Den UV taxonomy and add verified Cây Bonsai menu category while retaining original Đá category; create native UV Rewrites without touching unrelated Products"
+}
