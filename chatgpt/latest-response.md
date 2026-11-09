@@ -3,31 +3,30 @@
 - Ngày: 2026-11-09 (Asia/Ho_Chi_Minh).
 - Dự án: aquathanhxuan.com.
 - Actions: ngocnhanvo/aquathanhxuan-actions main.
-- Frontend: ngocnhanvo/aquathanhxuan-astro master @ c5edf8c0513c96f8e5a13ab23c25a33c9294c2f3.
-- PHP: không thay đổi.
-- Checkpoint: docs/checkpoints/2026-11-09-light-catalog-import.md.
-- Deferred manifest: docs/checkpoints/2026-11-09-light-media-deferred.json.
-- Source media audit: 42645287337 (3 Product with no owned image + 2 shared missing attachments, no CDN/Wayback cache).
-- Source taxonomy audit: 42648269372 (13 Product IDs exactly mapped).
-- Astro source QA: 42646542447 completed/success.
-- WordPress build: 42646713129 completed/success.
-- Astro production deploy: 42646881625 completed/success.
-- Product image UI QA: 42648594682 completed/success, 22/22.
-- Full production regression: 42649059962 completed/success, 59 Product Woo/SEO parity, 24/24 browser.
-- Trạng thái toàn nhiệm vụ: PARTIAL do 13 ảnh cover gốc thực sự không còn khả dụng. Phần dữ liệu/website/deploy/UI đã DONE.
+- Astro: ngocnhanvo/aquathanhxuan-astro master @ 6785500c81cc2846297e8ffd4b180c7f9f733531.
+- PHP: không đổi.
+- Checkpoint: docs/checkpoints/2026-11-09-header-search-centered.md.
+- WordPress build wrapper/Playwright: #42653754660 completed/success.
+- Astro production deploy: #42653912341 completed/success.
+- QA: centered 0px at desktop 900/1024/1440/1920, mobile 390 unchanged, account/cart/logo/menu unchanged.
+- Trạng thái của yêu cầu hiện tại: DONE — hoàn tất.
+- Ghi chú nhiệm vụ khác: 13 ảnh gốc sản phẩm Đèn vẫn ASSET_DEFERRED theo checkpoint riêng, không thuộc phạm vi yêu cầu sửa header.
 
 ## Nội dung phản hồi gửi người dùng
 
-## Tiếp tục phục hồi ảnh nguồn cho nhóm Đèn
+**Đã chỉnh xong và đưa lên production rồi nhé.** Chỉ thay đổi vị trí ô tìm kiếm, còn logo, Tài khoản, Giỏ hàng và menu tím đều giữ nguyên.
 
-Mình đã thử thêm các nguồn có thể xác minh: ảnh nhúng/attachment WordPress của 3 sản phẩm T5HO, CDN WordPress, domain `www` và Wayback. **Không tìm được file gốc hợp lệ** cho 13 sản phẩm; không tạo ảnh thay thế hoặc dùng ảnh sản phẩm khác.
+Website: https://aquathanhxuan.io.vn/
 
-Trong lúc chờ nguồn, mình đã sửa giao diện production: sản phẩm thiếu ảnh hiển thị **“Chưa có ảnh sản phẩm”**, không dùng ảnh giả, vẫn giữ tên, giá, nút mua. [Playwright ảnh #42648594682](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42648594682) **PASS 22/22**. [Hồi quy 59 sản phẩm #42649059962](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42649059962) **PASS 24/24**, toàn bộ danh mục, SEO nguồn và URL vẫn đúng.
+Build và deploy PASS. Astro commit `6785500c81cc2846297e8ffd4b180c7f9f733531`.
 
-Đã triển khai Astro commit [c5edf8c](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/c5edf8c0513c96f8e5a13ab23c25a33c9294c2f3) qua [WordPress Build #42646713129](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42646713129) và [deploy #42646881625](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42646881625), đều PASS.
+Playwright xác minh ô tìm kiếm đúng tâm `0px` tại desktop 900, 1024, 1440 và 1920px. Không chạm logo hay Tài khoản/Giỏ hàng; mobile 390px PASS và menu tím không đổi.
 
-Đã lưu [checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-light-catalog-import.md) và [danh sách chính xác 13 ảnh thiếu](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-light-media-deferred.json) theo source ID, slug, danh mục. Để khôi phục đủ ảnh, cần file gốc/backup hosting của website cũ hoặc ảnh sản phẩm được xác minh đúng mẫu.
+[Production Build & QA #42653754660](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42653754660)
+[Astro Deploy #42653912341](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42653912341)
+[Ảnh chụp nghiệm thu](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42653754660/artifacts/13690893017)
+[Checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-header-search-centered.md)
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất
