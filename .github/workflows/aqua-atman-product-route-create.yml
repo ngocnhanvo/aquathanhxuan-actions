@@ -1,0 +1,31 @@
+name: Aqua scoped Atman product redirects CMS writer
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-atman-product-route-create.yml'
+      - 'cms-requests/atman-route.json'
+permissions:
+  contents: read
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-atman-product-route-create.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aqua-atman-product-route-create.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-atman-product-redirect
+          path: artifacts/atman-route
+          if-no-files-found: ignore
+          retention-days: 7
