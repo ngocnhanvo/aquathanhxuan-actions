@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aqua-brand-asset-diagnostics.yml'
+      - 'qa-requests/brand-asset-diagnostics.json'
 permissions:
   contents: read
 jobs:
