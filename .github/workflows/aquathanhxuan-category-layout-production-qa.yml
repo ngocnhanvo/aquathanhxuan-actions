@@ -1,0 +1,30 @@
+name: Aqua Atman category production browser QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-category-layout-production-qa.yml'
+      - 'qa-requests/category-layout-production.json'
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aquathanhxuan-category-layout-production-qa.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aquathanhxuan-category-layout-production-qa.cjs
+        env:
+          EXPECTED_ASTRO_SHA: ${{ fromJson(github.event.head_commit.message == '' && '{}' || '{}').sha || '29fc579c7c2a6041b14ac2f576032c62d4ec89dd' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-atman-category-production
+          path: artifacts/category-layout-production
+          if-no-files-found: ignore
+          retention-days: 7
