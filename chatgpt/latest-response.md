@@ -2,33 +2,39 @@
 
 Date: 2026-11-09 (Asia/Ho_Chi_Minh)
 Project: aquathanhxuan.com
-Actions repository: ngocnhanvo/aquathanhxuan-actions (main)
-Astro repository: ngocnhanvo/aquathanhxuan-astro (master)
-Astro source commit: 29bee66d86918943d79da74af91355cf19065e64
-PHP repository: ngocnhanvo/aquathanhxuan-php (master; unchanged)
+Repository: ngocnhanvo/aquathanhxuan-actions
+Branch: main
+Astro: ngocnhanvo/aquathanhxuan-astro master @ 29bee66d86918943d79da74af91355cf19065e64
+PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
 Checkpoint: docs/checkpoints/2026-11-09-support-pages-production.md
-Outcome: DONE. Five CMS-owned support Pages, five native ESC Tables, five footer links; production deploy PASS; 10-viewport QA PASS.
+Status: DONE (latest confirmed work; no open issues, PRs or pending workflow runs)
+Live browser fetch: unavailable in this chat; existing production QA run 42563351997 SUCCESS.
 
 ## Full intended user-visible reply
 
-Đã tạo đủ 5 trang trong WordPress, mỗi trang có Page ACF `SupportPage` cùng ESC Table riêng và nội dung biên tập mới, thống nhất thiết kế trang chủ:
-- Chính sách đổi trả hàng: https://aquathanhxuan.io.vn/chinh-sach-doi-tra-hang (Page 82710; support_policy)
-- Giới thiệu: https://aquathanhxuan.io.vn/gioi-thieu (Page 82712; support_about)
-- Đại lý: https://aquathanhxuan.io.vn/dai-ly (Page 82714; support_dealer)
-- Khiếu nại: https://aquathanhxuan.io.vn/khieu-nai (Page 82716; support_complaint)
-- Liên hệ: https://aquathanhxuan.io.vn/lien-he (Page 82718; support_contact)
+## Đã khôi phục checkpoint mới nhất
 
-Đã cập nhật 5 URL ở mục Hỗ trợ footer qua ESC Table `pub_aquafooterlinks`, không hard-code đường dẫn. Khung trang Astro dùng tông tím #332B8E, xanh #1BB4DF, responsive hero/breadcrumb, các card/step/FAQ và contact sidebar lấy dữ liệu WordPress. Nội dung chỉnh sửa bằng ESC Table / Visual Builder.
+Mình đã đọc quy tắc Knowledge và đối chiếu trạng thái GitHub của dự án Aqua Thanh Xuân.
 
-Astro commit: https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/29bee66d86918943d79da74af91355cf19065e64
-WordPress writer PASS: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42562870596
-Production build PASS: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42563116978
-Production deploy PASS: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42563204071
+| Repository | Branch | HEAD |
+|---|---|---|
+| `aquathanhxuan-astro` | `master` | `29bee66d` |
+| `aquathanhxuan-php` | `master` | `dcec014a` |
+| `aquathanhxuan-actions` | `main` | `cd96b669` |
+| `knowledge` | `main` | `60fb7759` |
 
-QA production PASS: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42563351997
-- 5 trang x desktop 1440px + mobile 390px = 10 lần thử và screenshot đầy đủ.
-- HTTP 200, H1 đúng, ESC Table đúng, 5 footer links, SEO meta description có nội dung, FAQ mở được, không tràn ngang/JS errors.
-- Checkpoint: https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-support-pages-production.md
+Các hạng mục gần nhất đều có checkpoint hoàn tất:
+
+- **Accessibility và Agentic Browsing:** Lighthouse đạt 100/100 cho cả desktop và mobile.
+- **Mobile LCP:** giảm từ 2,639 giây xuống 2,092 giây trong lần đo Lighthouse đã lưu; không tải chéo banner desktop/mobile.
+- **5 trang Hỗ trợ:** đã tạo bằng WordPress Page + ESC Table, triển khai production và kiểm thử 10 viewport.
+- **Màu giá Sale và lỗi Lighthouse:** đã sửa, kiểm thử production PASS.
+
+Checkpoint cuối: [Support Pages Production](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-support-pages-production.md).
+
+**Kiểm tra bổ sung:** không có issue/PR mở và không có GitHub Actions đang chạy hoặc chờ. Production build, deploy và QA của nhóm trang Hỗ trợ đã có run **SUCCESS**. Công cụ truy cập trực tiếp website trong lượt này gặp lỗi, nên chưa xác minh live độc lập lần nữa; không chạy lại các test đã PASS.
+
+**Kết luận:** Chưa phát hiện đầu việc dang dở sau checkpoint mới nhất. Mình không sửa source, CMS hoặc kích hoạt build khi chưa có thay đổi cần xử lý. Nếu có yêu cầu mới, có thể tiếp tục từ chính HEAD nêu trên mà không làm lại các bước cũ.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
