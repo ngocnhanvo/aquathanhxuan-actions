@@ -3,7 +3,7 @@ const { chromium }=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const origin='https://aquathanhxuan.io.vn';
-const expectedSha='80e87a245d0ca4d2d44d422eba86f1f2637f9a39';
+const expectedSha='29bee66d86918943d79da74af91355cf19065e64';
 const pages=[
  {slug:'chinh-sach-doi-tra-hang',title:'Chính sách đổi trả hàng',table:'support_policy',key:'support-policy'},
  {slug:'gioi-thieu',title:'Giới thiệu',table:'support_about',key:'support-about'},
