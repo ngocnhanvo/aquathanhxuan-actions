@@ -21,7 +21,7 @@ jobs:
       - name: Check exact Astro source commit
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = 7d8ee2f15d5375a50432a0e329f05ec7a31a8422
+          test "$(git rev-parse HEAD)" = bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d
           echo "AQUA_BRAND_SOURCE_SHA=$(git rev-parse HEAD)"
       - uses: pnpm/action-setup@v4
         with:
