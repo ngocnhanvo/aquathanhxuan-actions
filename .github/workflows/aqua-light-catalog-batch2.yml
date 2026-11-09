@@ -1,0 +1,35 @@
+name: Aqua light catalog independent batch 2
+on:
+  push:
+    branches: [main]
+    paths:
+      - cms-requests/light-catalog-batch2.json
+permissions:
+  contents: read
+concurrency:
+  group: aqua-light-catalog-writes
+  cancel-in-progress: false
+jobs:
+  batch-2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      LIGHT_TARGET_SLUGS: den-weekaqua,den-chihiros,neo-helios,xuanmailong,kaokui,odyssea,den-phu-kien
+      LIGHT_BATCH_COUNT: "3"
+      LIGHT_BATCH: "light-2"
+      LIGHT_BATCH_INDEX: "2"
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-catalog-migrate.py
+      - name: Import only missing independent light products batch 2
+        run: python3 scripts/aqua-light-catalog-migrate.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-import-batch-2
+          path: artifacts/aqua-light-migration/light-2.json
+          if-no-files-found: ignore
+          retention-days: 14
