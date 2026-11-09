@@ -87,3 +87,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - [Checkpoint commit](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/3a26f03e5c22d340596c5494be2e64c534e5e4a9) đã lưu tình trạng 10/13; cập nhật này ghi bổ sung 11/13 và media deferred.
 - Các bước chưa thực hiện: verify 389 → tạo native Rewrites → 2 UV + Bonsai → QA 389 → production Astro pipeline → browser QA.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## Tiếp tục 2026-11-10 — 12/13 batch PASS, 356/389 QA
+
+- Import [#42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074): **12/13 batches 0..11 PASS**; batch 12 vẫn chạy, `verify` chưa được queued. Không lặp batch đã PASS.
+- Batch 11 `AQUA_REMAINING_MIGRATION_RESULT`: expected 27, created 18, reused 9, category_linked 8, failed 0. Batches 0..11 đã nhập/xử lý **356/389** Product IDs.
+- QA independent [#42679696661](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42679696661) **PASS 30/30** của batch 10, source SEO title 30/30, metadesc không có nguồn; [#42680375081](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42680375081) **PASS 27/27** của batch 11, SEO title 27/27. Tổng QA không trùng batch 0..11: **356/389** Product IDs.
+- Tiếp tục gate: job batch 12 SUCCESS -> verify 389 unique source ID/category SUCCESS -> Native Rewrites -> special 2 UV + Bonsai -> full DATA_ONLY QA -> production Build Website -> 134 browser checks. Chưa trigger CMS writers/production trong mốc này.
+- Trạng thái: PARTIAL — chưa hoàn tất.
