@@ -18,7 +18,7 @@
     "Đèn"
   ],
   "requestedAt": "2026-11-09",
-  "attempt": 3,
+  "attempt": 4,
   "mode": "FULL",
-  "reason": "Exact nine source and target root slugs verified by taxonomy-only run 42660517291; compare child product types and existing slugs"
+  "reason": "Four exact Woo category terms created and read back in run 42661708486; require inventory taxonomy PASS and 389 original source Products"
 }
