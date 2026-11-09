@@ -1,0 +1,28 @@
+{
+  "project": "aquathanhxuan.com",
+  "sha": "beb08cf9c402b53c0ffe603dd540f98ab6082e04",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "verify": "59 original Product source parity, 8 category frontend pages at desktop/mobile, 4 representative product details at desktop/mobile",
+  "dataQaRun": 42639768313,
+  "wordpressBuildRun": 42640498372,
+  "astroDeployRun": 42640656902,
+  "routeRun": 42639822903,
+  "mediaDeferredSourceIds": [
+    1814,
+    1815,
+    1816,
+    3052,
+    3054,
+    3056,
+    3057,
+    3058,
+    3059,
+    3060,
+    3061,
+    3062,
+    3063
+  ],
+  "attempt": 1
+}
