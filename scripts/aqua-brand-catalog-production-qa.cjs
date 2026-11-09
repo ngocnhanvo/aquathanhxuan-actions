@@ -179,6 +179,9 @@ async function categoryPages(root,slug){
         if(attempt===0)await pause(700);
       }
       assert.equal(response.status(),200,'Broken public Product permalink '+href);
+      const html=await response.text();
+      assert(html.includes('id="data-content-wrapper"'),
+        'Product permalink resolved to a category or error template instead of Product detail '+href);
     }
   };
   try{await Promise.all(Array.from({length:3},()=>routeWorker()))}
