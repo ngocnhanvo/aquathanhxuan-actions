@@ -1,0 +1,19 @@
+name: Aqua Atman route and WordPress Rewrite inspection
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-atman-route-inspect.yml'
+      - 'qa-requests/atman-route.json'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/aqua-atman-route-inspect.mjs
