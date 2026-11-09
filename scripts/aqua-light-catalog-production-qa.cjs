@@ -61,7 +61,13 @@ async function run(){
    return r.json();
   }
   const sourceCategories=await sourcePaged('/wp-json/wc/store/v1/products/categories');
-  const targetCategories=await wc('/wp-json/wc/v3/products/categories?per_page=100');
+  const targetCategories=[];
+  for(let p=1;p<=20;p++){
+   const rows=await wc('/wp-json/wc/v3/products/categories?per_page=100&page='+p);
+   assert(Array.isArray(rows));
+   targetCategories.push(...rows);
+   if(rows.length<100)break;
+  }
   const expected=[
     ['Đèn','den',1546,1768,59],
     ['WeekAqua','den-weekaqua',1525,1813,4],
