@@ -1,0 +1,11 @@
+{
+  "astroSha": "7d8ee2f15d5375a50432a0e329f05ec7a31a8422",
+  "tests": [
+    "catalogSort.test.ts",
+    "listingTitles.test.ts",
+    "detailPrice.test.ts",
+    "atman-redirect-rule.test.mjs"
+  ],
+  "scope": "brand and real WooCommerce detail price",
+  "reason": "Physical-product detail previously rendered domain price field (-1) rather than WooCommerce price"
+}
