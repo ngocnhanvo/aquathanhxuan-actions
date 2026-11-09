@@ -6,6 +6,6 @@
   "slug": "den-kaokui-70w-pro-2",
   "write_scope": "Verify/remove only 2026-11-09 failed-run renamed orphan if source byte hash matches, then import exact Product with original basename/year-month; no other Product writes",
   "sourceRun": 42632639554,
-  "attempt": 3,
-  "retry_reason": "Corrected Python regex quote syntax; previous job failed at py_compile before any CMS operation"
+  "attempt": 4,
+  "retry_reason": "The source original full file kaokui2.jpg and inline 300x300 variant belong to verified attachment 350146; use same-attachment image instead of wrong renamed upload"
 }
