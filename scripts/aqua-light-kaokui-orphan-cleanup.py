@@ -32,7 +32,7 @@ assert int(src['id'])==PRODUCT_ID and src['slug']==SLUG and src['type']=='simple
 import re,html
 image_urls=[str(x.get('src') or '') for x in src.get('images') or []]
 for content in (src.get('description') or '',src.get('short_description') or ''):
-    image_urls+=re.findall(r'https?://aquathanhxuan\\.com/wp-content/uploads/[^\\s"\\'<>]+',html.unescape(str(content)))
+    image_urls+=re.findall(r"https?://aquathanhxuan\.com/wp-content/uploads/[^\s\"'<>]+",html.unescape(str(content)))
 source_original=sorted({x.split('?',1)[0] for x in image_urls if urllib.parse.urlparse(x).path.endswith('/'+ORIGINAL)
                         and x.startswith(SOURCE+'/wp-content/uploads/')})
 assert len(source_original)==1,'Exact Product legacy media URL missing or ambiguous'
