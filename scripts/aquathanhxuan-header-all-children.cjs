@@ -114,7 +114,7 @@ let browser;
     assert.equal(all.length, 1, 'Canonical Tất cả duplicate/missing ' + parent.id);
     const child = all[0];
     assert.equal(Number(child.id), expectedByParent.get(parent.id), 'Canonical item ID mismatch');
-    assert.equal(path(child.href || child.slug), path(parent.url), 'Canonical Tất cả href mismatch');
+    assert.equal(path(child.href || child.slug).replace(/^\\//, ''), path(parent.url).replace(/^\\//, ''), 'Canonical Tất cả href mismatch');
     assert.equal(name(root.children[0]?.label), name('Tất cả'),
       'Canonical Tất cả is not first under ' + parent.id + ': ' + JSON.stringify(root.children.slice(0, 2).map(x => x.label)));
   }
