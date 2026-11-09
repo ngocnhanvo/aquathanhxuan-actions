@@ -10,5 +10,11 @@
     "Cá thủy sinh"
   ],
   "inventoryRun": 42662410500,
-  "attempt": 1
+  "attempt": 2,
+  "special_exact_source_ids": [
+    5054,
+    4355,
+    3321
+  ],
+  "reason": "Verify source ID/slug, Stock, Woo price, image counts, original taxonomy before controlled import of UV and exact Bonsai category linking"
 }
