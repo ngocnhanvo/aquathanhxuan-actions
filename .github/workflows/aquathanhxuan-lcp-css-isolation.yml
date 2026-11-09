@@ -1,0 +1,72 @@
+name: Aqua LCP CSS isolation
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-lcp-css-isolation.yml'
+permissions:
+  contents: read
+jobs:
+  isolate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Compare CSS groups and print computed hero visibility
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright';
+          import fs from 'node:fs';
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+          const tests=[
+            {name:'baseline'},
+            {name:'external-styles-off',external:false},
+            {name:'inline-styles-off',inline:false},
+            {name:'all-styles-off',external:false,inline:false},
+            {name:'force-visibility',css:'*{opacity:1!important;visibility:visible!important;content-visibility:visible!important;animation:none!important;transition:none!important;transform:none!important;clip-path:none!important;filter:none!important}'},
+            {name:'force-visibility-only',css:'*{opacity:1!important;visibility:visible!important;content-visibility:visible!important}'},
+            {name:'force-transform-only',css:'*{transform:none!important;filter:none!important;clip-path:none!important;animation:none!important;transition:none!important}'},
+          ];
+          for(const test of tests){
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true});
+            const page=await context.newPage();
+            await page.addInitScript(()=>{
+              window.__lcp=[];window.__paint=[];
+              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__lcp.push({t:e.startTime,size:e.size,url:e.url,tag:e.element?.tagName}))).observe({type:'largest-contentful-paint',buffered:true})}catch(e){window.__lcpError=e.message}
+              try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__paint.push({t:e.startTime,name:e.name}))).observe({type:'paint',buffered:true})}catch{}
+            });
+            if(test.external===false){
+              await page.route('**/*',route=>route.request().resourceType()==='stylesheet'?route.abort():route.continue());
+            }
+            if(test.inline===false||test.css){
+              await page.route('https://aquathanhxuan.io.vn/**',async route=>{
+                if(route.request().resourceType()!=='document')return route.continue();
+                const r=await route.fetch();let html=await r.text();
+                if(test.inline===false)html=html.replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi,'');
+                if(test.css)html=html.replace('</body>','<style>'+test.css+'</style></body>');
+                await route.fulfill({response:r,body:html,headers:{...r.headers(),'content-type':'text/html; charset=utf-8'}});
+              });
+            }
+            try{
+              const res=await page.goto('https://aquathanhxuan.io.vn/',{waitUntil:'domcontentloaded',timeout:45000});
+              await page.waitForTimeout(3000);
+              const a=await page.evaluate(()=>{
+                const el=document.querySelector('.aqua-hero__slide[data-active="true"] img')||document.querySelector('.aqua-hero__slide img');
+                let node=el;let chain=[];
+                while(node&&chain.length<15){
+                  let cs=getComputedStyle(node);
+                  chain.push({tag:node.tagName,cls:(node.className?.toString()||'').slice(0,90),id:node.id,display:cs.display,opacity:cs.opacity,visibility:cs.visibility,contentVisibility:cs.contentVisibility,transform:cs.transform?.slice(0,80),filter:cs.filter,position:cs.position});
+                  node=node.parentElement;
+                }
+                const styles=[...document.querySelectorAll('link[rel=stylesheet]')].map(e=>e.href);
+                return{ready:document.readyState,lcp:window.__lcp,paint:window.__paint,bodyText:document.body?.innerText?.length,styleLinks:styles,styleBlocks:document.querySelectorAll('style').length,chain}
+              });
+              console.log('CSS_ISOLATION '+JSON.stringify({name:test.name,status:res?.status(),...a}));
+            }catch(e){console.log('CSS_ISOLATION_ERROR '+test.name+' '+e.message)}
+            await context.close();
+          }
+          await browser.close();
+          NODE
