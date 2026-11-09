@@ -89,8 +89,11 @@ async function sourceImage(url){
       await page.goto(WP+'/wp-admin/admin.php?page=tablepress&action=edit&table_id=157',{waitUntil:'domcontentloaded',timeout:45000});
       await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData),null,{timeout:30000});
       const old=await page.evaluate(()=>window.tp.editor.getData());
-      assert.deepEqual(old.slice(0,2),records.slice(0,2),'Recovery Table 157 unexpected schema');
       assert.equal(old.length,4,'Recovery Table 157 unexpected rows');
+      assert(old.every(row=>Array.isArray(row)&&row.length===2),'Recovery Table 157 has unexpected columns');
+      assert(old.every((row,i)=>row.every((cell,col)=>!String(cell||'').trim()||String(cell)===String(records[i][col]))),'Recovery Table 157 contains user-authored data');
+      await page.evaluate(rows=>{window.tp.editor.setData(rows);window.tp.helpers.unsaved_changes.set()},records);
+      console.log('CATALOG_RECOVERY_ORIGINAL_GRID='+JSON.stringify(old));
       await page.locator('#table-id').fill(tableId);
       await page.locator('#table-id').press('Tab');
       console.log('CATALOG_TABLE_RECOVERING=157');
