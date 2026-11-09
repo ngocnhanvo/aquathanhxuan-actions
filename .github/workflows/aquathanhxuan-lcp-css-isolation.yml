@@ -45,7 +45,7 @@ jobs:
               await page.route('https://aquathanhxuan.io.vn/**',async route=>{
                 if(route.request().resourceType()!=='document')return route.continue();
                 const r=await route.fetch();let html=await r.text();
-                if(test.inline===false)html=html.replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi,'');
+                if(test.inline===false){while(html.includes('<style')){const s=html.indexOf('<style'),open=html.indexOf('>',s),end=html.indexOf('</style>',open);if(end<0)break;html=html.slice(0,s)+html.slice(end+8)}}
                 if(test.css)html=html.replace('</body>','<style>'+test.css+'</style></body>');
                 await route.fulfill({response:r,body:html,headers:{...r.headers(),'content-type':'text/html; charset=utf-8'}});
               });
