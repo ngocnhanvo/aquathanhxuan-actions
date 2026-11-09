@@ -1,0 +1,7 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "04425828497f5f6c3ec0f30b49f1d808d473f238",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Hide sticky purchase buttons until visitors scroll past original purchase actions"
+}
