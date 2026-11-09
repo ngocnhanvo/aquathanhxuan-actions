@@ -1,0 +1,15 @@
+{
+  "project": "aquathanhxuan.com",
+  "target": "https://aquathanhxuan.io.vn",
+  "sourceRepository": "ngocnhanvo/aquathanhxuan-astro",
+  "branch": "master",
+  "sha": "bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d",
+  "cmsWriter": {
+    "sourceParity": 42593789909,
+    "rewrites": 42594217244
+  },
+  "execution": "Trigger the existing Aqua Thanh Xuân Astro production deployment by wp_trigger_build repository_dispatch only",
+  "sourceProducts": 157,
+  "sourceCategoryCount": 20,
+  "verifyAfter": "Published build marker matches pinned Astro SHA, brand catalogue QA"
+}
