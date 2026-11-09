@@ -235,6 +235,12 @@ async function categoryPages(root,slug){
     assert(link&&link.startsWith('/san-pham/'),'Chihiros public product route absent');
     const detail=await page.goto(FRONT+link,{waitUntil:'domcontentloaded'});
     assert.equal(detail.status(),200,'Chihiros detail redirect must work');
+    const detailSlug=link.split('/').filter(Boolean).at(-1);
+    const expectedDetailPrice=oracle['thuong-hieu-chihiros']?.get(detailSlug);
+    assert(Number.isFinite(expectedDetailPrice) && expectedDetailPrice>0,'Chihiros source price unavailable');
+    const renderedPrice=await page.locator('#data-content-wrapper h3.text-signal-red').first().innerText();
+    assert(renderedPrice.includes(new Intl.NumberFormat('vi-VN').format(expectedDetailPrice)),
+      'WooCommerce detail must display true current price, not domain registration price: '+link);
     await page.waitForFunction(()=>Object.keys(localStorage).some(key=>key.includes('recent-products')),{timeout:8000});
     await page.goto(FRONT+'/san-pham/thuong-hieu-chihiros',{waitUntil:'domcontentloaded'});
     await page.locator('#recently-viewed-list a').first().waitFor({state:'attached',timeout:12000});
@@ -244,6 +250,12 @@ async function categoryPages(root,slug){
     await page.goto(FRONT+'/san-pham/thuong-hieu-dennerle?sort=price-desc',{waitUntil:'domcontentloaded'});
     const descending=await page.locator('[data-catalog-product-price]').evaluateAll(nodes=>nodes.map(x=>Number(x.getAttribute('data-catalog-product-price'))));
     assert.deepEqual(descending,[...descending].sort((a,b)=>b-a),'Dennerle sorting descending');
+    for(const missingImageSlug of ['su-ista-active-bio-pearl','seachem-matrix-0-5']){
+      const detailResponse=await page.goto(FRONT+'/san-pham/'+missingImageSlug,{waitUntil:'domcontentloaded',timeout:60000});
+      assert.equal(detailResponse.status(),200,'Source image-deferred Product permalink '+missingImageSlug);
+      assert.equal(await page.locator('#product-main-image').getAttribute('src'),'/placeholders/product.webp',
+        'Render deliberate local placeholder for 404 legacy media '+missingImageSlug);
+    }
     assert.equal(errors.length,0,'JavaScript browser errors '+JSON.stringify(errors));
     await context.close();
     console.log('BRAND_QA_VIEWPORT_PASS='+width);
