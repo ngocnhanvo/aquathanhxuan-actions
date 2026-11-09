@@ -80,6 +80,51 @@ jobs:
           }
           await browser.close();
           NODE
+      - name: Isolate hero fade and LCP eligibility (browser-only A/B)
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+          const combos=[
+            ['mobile','control',''],
+            ['mobile','no-slide-fades','.aqua-hero__slide,.aqua-hero__media img{transition:none!important;animation:none!important}'],
+            ['mobile','nonzero-hidden-slide','.aqua-hero__slide:not([data-active="true"]){opacity:.0001!important;visibility:visible!important}'],
+            ['mobile','static-text-probe',''],
+            ['desktop','control',''],
+            ['desktop','no-slide-fades','.aqua-hero__slide,.aqua-hero__media img{transition:none!important;animation:none!important}'],
+            ['desktop','static-text-probe',''],
+          ];
+          for(const [device,variant,css] of combos){
+            const context=await browser.newContext({viewport:device==='mobile'?{width:390,height:844}:{width:1440,height:900},isMobile:device==='mobile',deviceScaleFactor:1});
+            const page=await context.newPage();
+            await page.addInitScript(()=>{window.__lcp=[];new PerformanceObserver(list=>list.getEntries().forEach(e=>window.__lcp.push({t:e.startTime,size:e.size,url:e.url,tag:e.element?.tagName,cls:e.element?.className?.toString().slice(0,100)}))).observe({type:'largest-contentful-paint',buffered:true})});
+            if(variant!=='control'){
+              await page.route('https://aquathanhxuan.io.vn/**',async route=>{
+                if(route.request().resourceType()!=='document')return route.continue();
+                const response=await route.fetch();let html=await response.text();
+                html=html.replace('</head>','<style id="lcp-ab-css">'+css+'</style></head>');
+                if(variant==='static-text-probe')html=html.replace(/<body([^>]*)>/i,'<body$1><h1 style="position:absolute;top:160px;left:20px;z-index:99999;font:bold 52px/1.2 Arial;background:white;color:black">VISIBLE LCP TEST PROBE</h1>');
+                return route.fulfill({response,body:html,headers:{...response.headers(),'content-type':'text/html; charset=utf-8'}});
+              });
+            }
+            try{
+              await page.goto('https://aquathanhxuan.io.vn/',{waitUntil:'domcontentloaded',timeout:45000});
+              await page.waitForTimeout(4200);
+              const result=await page.evaluate(()=>({
+                lcp:window.__lcp,ready:document.readyState,
+                saleColor: (()=>{const e=document.querySelector('.aqua-sale__prices strong');return e?getComputedStyle(e).color:null})(),
+                slides:[...document.querySelectorAll('.aqua-hero__slide')].slice(0,4).map(e=>({active:e.dataset.active,audience:e.dataset.audience,opacity:getComputedStyle(e).opacity,visibility:getComputedStyle(e).visibility,rect:{w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height},img:{src:e.querySelector('img')?.currentSrc?.slice(0,180),complete:e.querySelector('img')?.complete,naturalWidth:e.querySelector('img')?.naturalWidth}})),
+              }));
+              console.log('LCP_AB '+JSON.stringify({device,variant,...result}));
+              fs.writeFileSync('artifacts/lighthouse/ab-'+device+'-'+variant+'.json',JSON.stringify(result,null,2));
+            }catch(e){console.log('LCP_AB_ERROR '+device+' '+variant+' '+e.message)}
+            await context.close();
+          }
+          await browser.close();
+          NODE
       - name: Report errors, LCP, screenshots, and key performance metrics
         shell: bash
         run: |
