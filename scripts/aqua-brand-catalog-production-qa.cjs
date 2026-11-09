@@ -85,6 +85,14 @@ async function categoryPages(root,slug){
     }
     return items;
   }
+  const tempQuery=WP+'/wp-json/wp/v2/posts?context=edit&status=draft&per_page=100&search='+encodeURIComponent('TEMP AQUA MEDIA');
+  const tempResp=await cms.request.get(tempQuery,{headers,timeout:35000});
+  assert.equal(tempResp.status(),200,'Cannot inspect temporary media migration drafts');
+  const drafts=await tempResp.json();
+  assert(Array.isArray(drafts));
+  const orphanDrafts=drafts.filter(p=>String(p.title?.raw||p.title?.rendered||'').includes('[TEMP AQUA MEDIA]'));
+  assert.equal(orphanDrafts.length,0,'Temporary WordPress media drafts were not cleaned after migration: '+orphanDrafts.map(p=>p.id).join(','));
+  console.log('BRAND_QA_TEMP_DRAFT_CLEANUP_PASS');
   const srcCats=await categoryPages('/wp-json/wc/store/v1/products/categories');
   const dstCats=await allTarget('/wp-json/wc/v3/products/categories');
   const sourceParents=srcCats.filter(x=>x.slug==='thuong-hieu');
