@@ -34,7 +34,7 @@ const expectedSubmenuCounts=[21,8,9,6,9,5,7,5,8,5,3];
    const pathOf=value=>{
      const link=String(value||'');
      const parsed=/^https?:\/\//i.test(link)?new URL(link).pathname:link;
-     return parsed.replace(/\/+$/,'');
+     return parsed.replace(/^[/]+|[/]+$/g,'');
    };
    assert.equal(pathOf(children[0]?.href||children[0]?.slug),
      pathOf(root?.href||root?.slug),'WORDPRESS_ALL_TARGET_MISMATCH_'+i);
