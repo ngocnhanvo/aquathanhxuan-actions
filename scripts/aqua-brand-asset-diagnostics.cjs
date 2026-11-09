@@ -73,7 +73,7 @@ async function fetchAsset(url){
       }
       const pageR=await fetch(SRC+'/san-pham/'+product.slug+'/',{signal:AbortSignal.timeout(25000)});
       rec.legacyProductPage={status:pageR.status};
-      if(pageR.ok()){
+      if(pageR.ok){
         const html=await pageR.text();
         const imgs=[...html.matchAll(/<img\b[^>]*>/g)].map(x=>x[0]).filter(x=>/src=|srcset=/.test(x)).slice(0,30);
         rec.legacyProductPage.imageHtml=imgs.filter(x=>/ista|jecod|thiet-ke|placeholder/i.test(x)).slice(0,14);
