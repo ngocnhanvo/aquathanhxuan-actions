@@ -42,3 +42,15 @@ Run [42627591343](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/ru
 7. Record final result and overwrite `chatgpt/latest-response.md`.
 
 Current status: **PARTIAL — import in progress; not production QA PASS**.
+
+
+## Tiến độ tiếp tục từ 21:11 (Asia/Ho_Chi_Minh)
+
+- Batch 2 chạy độc lập [42632639554](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42632639554): 19 source IDs; **created 7, reused 7, linked 5, deferred 5**, log complete. Không nhập lại 14 bản ghi thành công.
+- 5 ngoại lệ batch 2: source ID `1814` (không có ảnh), `3056,3059,3062` (2 file gốc HTTP 404), `350144` Kaokui (WordPress tự đổi basename `kaokui2-300x300.jpg` → `-1.jpg`, phải phục hồi đúng filename).
+- Như vậy source-media missing riêng biệt từ cả ba batch là **13 Product IDs**: `1814,1815,1816,3052,3054,3056,3057,3058,3059,3060,3061,3062,3063`. Không lấy ảnh gợi ý sản phẩm khác làm ảnh sản phẩm. Chỉ ghi `_esc_source_media_deferred` khi chứng cứ 404/không có cover đã xác minh.
+- Recovery 9 records batch 0/1: [42632797438](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42632797438), đã được gửi và đang chạy khi cập nhật.
+- Recovery 4 records batch 2: [42634349942](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42634349942), đã gửi và đang đợi lock ghi WordPress.
+- Sửa importer `aa590238`: nhánh upload đổi tên sẽ dọn attachment vừa tạo, có fallback upload đúng year/month và checksum; thêm điều kiện cho phép tái chạy chỉ source ID `350144`, bảo vệ các source ID khác. Workflow `aqua-light-kaokui-repair.yml` và `aqua-light-kaokui-orphan-cleanup.py` đã chuẩn bị nhưng CHƯA kích khi hai recovery còn chờ.
+- QA `scripts/aqua-light-catalog-production-qa.cjs` bổ sung đối chiếu SEO title, description, short/full product description từ HTML legacy và meta Yoast đích trên toàn bộ 59 sản phẩm. Chưa thể chạy trước đủ 59 records.
+- Trạng thái: **PARTIAL — chưa hoàn tất**. Sau recovery 13, chạy Kaokui 350144, inventory 0 missing, native Rewrites, build Astro production và QA live 8 danh mục trên desktop/mobile.
