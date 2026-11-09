@@ -58,6 +58,15 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - Astro `master` `7d8ee2f15d5375a50432a0e329f05ec7a31a8422` đã sửa chi tiết WooCommerce lấy giá hiện hành thay vì trường domain registration; unit QA [42590655716](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42590655716) PASS.
 - **Chưa deploy production**; chờ D, inventory lại, Rewrite scope, production build, Playwright desktop/mobile cùng permalink QA. Không coi Unit QA/Writer PASS là QA production.
 
+## Hoàn tất import sản phẩm batch A/B/C/D
+
+- Batch C phục hồi 10/10: [run 42591540748](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42591540748), tất cả 10 source Product đã tạo, 0 lỗi, giữ nguyên tên file/thư mục tháng nguồn, cleanup nháp tạm PASS.
+- Batch D phục hồi 5/5: [run 42591602696](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42591602696), tạo tất cả `265594,265379,265293,265292,265290`, 0 lỗi; cộng với 32 bản ghi trước đó và Product `184` `83068` từ run 42589893222 → **38/38**.
+- Cộng các batch và Atman dự kiến `9+33+36+41+38=157` lần hiện diện danh mục thương hiệu. Phải dựa vào inventory độc lập, **không coi cộng số importer là DATA_PARITY_PASS**.
+- Astro `master` hiện `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d` đã sửa thêm label vật lý `Giá` (thay `Giá đăng ký`) cùng giá thực. Unit workflow [42593709890](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42593709890) PASS.
+- Đã kích inventory cuối [42593789909](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42593789909): cần kết luận `source=157,target=157,missing=0,priceMismatchCount=0` trước khi ghi Rewrite và build.
+- Các ảnh nguồn mất thật `3178` ISTA và `184` Seachem vẫn phải `SOURCE_MEDIA_DEFERRED` dù có đủ Product bản ghi. JECOD `15280` dùng đúng 3 ảnh đang hiển thị trên trang nguồn, không đổi file phụ trùng hash khác.
+
 ## Link chi tiết, build và QA — tiếp theo
 
 - Atman đã có một WordPress Rewrite scoped (post ID 82743). Các sản phẩm brand mới cũng cần Rewrite có giới hạn slug, nếu không `/san-pham/<product-slug>` bị route nhầm category và lỗi 500.
