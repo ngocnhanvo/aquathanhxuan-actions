@@ -125,15 +125,15 @@ async function run(){
       signal:AbortSignal.timeout(45000),headers:{'cache-control':'no-cache'},
     });
     assert.equal(response.status,200,'Source SEO HTML '+slug);
-    const head=(await response.text()).split(/<\\/head>/i)[0];
+    const head=(await response.text()).split('</head>')[0];
     const sourceSeo=await page.evaluate(head=>{
       const doc=new DOMParser().parseFromString(head+'</head>','text/html');
       return {
-        title:String(doc.querySelector('title')?.textContent||'').replace(/\\s+/g,' ').trim(),
-        description:String(doc.querySelector('meta[name="description"]')?.getAttribute('content')||'').replace(/\\s+/g,' ').trim(),
+        title:String(doc.querySelector('title')?.textContent||'').replace(/\s+/g,' ').trim(),
+        description:String(doc.querySelector('meta[name="description"]')?.getAttribute('content')||'').replace(/\s+/g,' ').trim(),
       };
     },head);
-    const metaValue=key=>String((target.meta_data||[]).find(x=>x.key===key)?.value||'').replace(/\\s+/g,' ').trim();
+    const metaValue=key=>String((target.meta_data||[]).find(x=>x.key===key)?.value||'').replace(/\s+/g,' ').trim();
     if(sourceSeo.title){
       assert.equal(metaValue('_yoast_wpseo_title'),sourceSeo.title,'SEO title source mismatch '+slug);
       seoTitleChecked++;
