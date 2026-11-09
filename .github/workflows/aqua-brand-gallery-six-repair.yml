@@ -1,0 +1,33 @@
+name: Aqua repair six verified Chihiros and Dennerle product galleries
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-gallery-six-repair.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: brand-gallery-six
+      BRAND_RECOVERY_PROFILE: brand-gallery-six
+      BRAND_TARGET_SLUGS: thuong-hieu-chihiros,thuong-hieu-dennerle
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-catalog-collision-rescue.py
+      - run: python3 scripts/aqua-brand-catalog-collision-rescue.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-gallery-six-repair
+          path: artifacts/aqua-brand-migration/brand-gallery-six.json
+          if-no-files-found: ignore
+          retention-days: 15
