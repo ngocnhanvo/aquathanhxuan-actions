@@ -111,3 +111,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - [Special UV + Bonsai workflow #42683571067](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42683571067) triggered after Rewrite PASS, in_progress. Created request commit `1c502504`; waits on exact two Gebo UV source IDs 5054,4355 and Bonsai source 3321.
 - Still NOT DONE: special writer+UV route PASS; full data-only QA 389 + 2 UV + Bonsai PASS; production Astro Build Website and deploy marker; 134 browser QA.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## Tiếp tục 2026-11-10 — hai UV, Bonsai PASS; full QA running
+
+- [Special #42683571067](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42683571067) **COMPLETED SUCCESS**: hai Product chính xác source 5054 (Đèn UV Gebo 30W) và 4355 (40W) tạo target IDs 83796, 83799, liên kết Product Bonsai source 3321 / target 83526 với category 1841, giữ category Đá gốc. Native Rewrite UV rule ID 83800 bao phủ cả hai URL.
+- Đã sửa bug early QA `AQUA_QA_BATCHES: '11'` bị hardcode. Script đọc `CONFIG.batches` (commit 4207cac8), workflow không gán cứng (commit db9320b3). [QA rerun #42683429503](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42683429503) **PASS batch12 33/33**, source SEO title 33/33; tổng independent Product QA 389/389 các batches 0..12.
+- [Full data QA #42684232514](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42684232514) in_progress; kiểm soát toàn bộ 389 source Product + 2 UV/Bonsai; không phải browser/production QA.
+- Chưa build production hoặc tạo `qa-requests/remaining-catalog-production.json` vì full QA chưa PASS. Khi data QA PASS, tạo build request duy nhất nguồn Astro `master` @ `40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d` qua pipeline hiện hữu rồi chạy browser QA 134 checks.
+- Trạng thái: PARTIAL — chưa hoàn tất.
