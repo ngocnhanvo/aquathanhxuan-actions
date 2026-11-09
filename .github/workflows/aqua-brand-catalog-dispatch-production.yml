@@ -31,6 +31,10 @@ jobs:
       - name: Dispatch only the existing production workflow
         uses: actions/github-script@v7
         with:
+          # Repository-owned token, not the synthetic workflow GITHUB_TOKEN:
+          # the preceding two GITHUB_TOKEN dispatches returned HTTP 204 but
+          # did not generate a repository_dispatch production run.
+          github-token: ${{ secrets.SOURCE_REPO_PAT }}
           script: |
             const {owner,repo}=context.repo;
             const found=await github.rest.actions.listWorkflowRuns({
@@ -41,6 +45,6 @@ jobs:
             if(active.length)throw Error('Existing production deploy still active: '+active.map(x=>x.id).join(','));
             await github.rest.repos.createDispatchEvent({
               owner,repo,event_type:'wp_trigger_build',
-              client_payload:{site_domain:'aquathanhxuan.io.vn'}
+              client_payload:{site_domain:'aquathanhxuan.io.vn',request_id:context.sha}
             });
             core.info('Production workflow dispatched; verify deploy run and QA separately.');
