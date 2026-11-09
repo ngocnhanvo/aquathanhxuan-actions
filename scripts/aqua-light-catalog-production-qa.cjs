@@ -81,6 +81,7 @@ async function run(){
   const allowedDeferred=new Set(CONFIG.mediaDeferredSourceIds||[]);
   const observedDeferred=new Set();
   const seen=new Map();
+  const seenDest=new Map();
   for(const [name,dslug,srcId,dstId,count] of expected){
    const sc=sourceCategories.find(x=>Number(x.id)===srcId);
    const dc=targetCategories.find(x=>Number(x.id)===dstId);
@@ -108,11 +109,44 @@ async function run(){
       observedDeferred.add(Number(item.id));
     }
     seen.set(item.slug,item);
+    seenDest.set(item.slug,dst);
    }
    const item={name,sourceCount:count,targetCount:targetRows.length,sourceCategory:srcId,targetCategory:dstId,slug:dslug,missing:0};
    report.categories.push(item);
    console.log('LIGHT_CATEGORY_DATA_PASS='+JSON.stringify(item));save();
   }
+  // Check real legacy HTML SEO metadata, not Product H1 or body-derived guesses.
+  let seoTitleChecked=0,seoDescriptionChecked=0,seoTitleMissing=0,seoDescriptionMissing=0;
+  for(const [slug,sourceProduct] of seen){
+    const target=seenDest.get(slug);
+    assert(target,'No destination to verify SEO '+slug);
+    const response=await fetch(SOURCE+'/san-pham/'+encodeURIComponent(slug)+'/',{
+      signal:AbortSignal.timeout(45000),headers:{'cache-control':'no-cache'},
+    });
+    assert.equal(response.status,200,'Source SEO HTML '+slug);
+    const head=(await response.text()).split(/<\\/head>/i)[0];
+    const sourceSeo=await page.evaluate(head=>{
+      const doc=new DOMParser().parseFromString(head+'</head>','text/html');
+      return {
+        title:String(doc.querySelector('title')?.textContent||'').replace(/\\s+/g,' ').trim(),
+        description:String(doc.querySelector('meta[name="description"]')?.getAttribute('content')||'').replace(/\\s+/g,' ').trim(),
+      };
+    },head);
+    const metaValue=key=>String((target.meta_data||[]).find(x=>x.key===key)?.value||'').replace(/\\s+/g,' ').trim();
+    if(sourceSeo.title){
+      assert.equal(metaValue('_yoast_wpseo_title'),sourceSeo.title,'SEO title source mismatch '+slug);
+      seoTitleChecked++;
+    }else seoTitleMissing++;
+    if(sourceSeo.description){
+      assert.equal(metaValue('_yoast_wpseo_metadesc'),sourceSeo.description,'SEO description source mismatch '+slug);
+      seoDescriptionChecked++;
+    }else seoDescriptionMissing++;
+    if(String(sourceProduct.description||'').trim())
+      assert(String(target.description||'').trim(),'Source long description absent '+slug);
+    if(String(sourceProduct.short_description||'').trim())
+      assert(String(target.short_description||'').trim(),'Source short description absent '+slug);
+  }
+  console.log('LIGHT_SEO_SOURCE_TARGET_PASS='+JSON.stringify({total:seen.size,seoTitleChecked,seoDescriptionChecked,seoTitleMissing,seoDescriptionMissing}));
   assert.equal(seen.size,59,'Root + children unique total changed');
   console.log('LIGHT_WOO_PARITY_PASS='+JSON.stringify({unique:seen.size,categories:report.categories.length,mediaDeferred:[...observedDeferred]}));
   for(const width of [1440,390]){
