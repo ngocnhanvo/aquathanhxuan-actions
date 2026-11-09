@@ -1,7 +1,7 @@
 {
   "project": "aquathanhxuan.com",
-  "astro_sha": "b6856c2ff4abaaa7d227e7f6e1d8737f3f414ddd",
+  "astro_sha": "5f158c4ea8d214f2f83f94dc2285032a81e983f8",
   "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
-  "scope": "Woo detail regular price, discount, stock, excerpt and cached migration",
-  "attempt": 2
+  "scope": "Product detail sticky purchase bar and cart CTA + prior Woo price/stock integration",
+  "attempt": 3
 }
