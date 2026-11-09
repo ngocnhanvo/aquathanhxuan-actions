@@ -1,9 +1,9 @@
 {
-  "task": "Resume native TablePress 157 after prior unsaved schema, insert two real Media and shortcode into Page 82457",
-  "sourceSha": "4c0aaa2d20d58d03063c81bde2cb96e1bbd9155b",
-  "writeScope": [
+  "task": "Recover catalog_banner in Table 157, move native inserted images into correct grid cells, publish shortcode on Page 82457",
+  "sourceSha": "90d10f165908d8bebd054640fe8457546b5c801a",
+  "scope": [
     "tablepress 157",
-    "page 82457",
-    "media 82721 and 82722"
+    "Page 82457",
+    "existing Media 82721,82722"
   ]
 }
