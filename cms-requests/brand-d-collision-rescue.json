@@ -13,5 +13,7 @@
     "seachem"
   ],
   "mode": "verified-source-image-variants",
-  "rule": "never overwrite different bytes under same filename; use original source WP media_details sizes"
+  "rule": "never overwrite different bytes under same filename; use original source WP media_details sizes",
+  "retry": "Use authentic original media in source year/month via backdated temporary draft; original bytes and filename validated, cleanup mandatory",
+  "previousFailedRun": 42589466504
 }
