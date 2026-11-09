@@ -79,6 +79,8 @@ jobs:
           php source-php/tests/aquathanhxuan-image-delta.php
           php source-php/tests/aquathanhxuan-static-delta.php
           php -l source-php/wp-content/plugins/github-trigger/vcs-build-trigger.php
+          php -l source-php/wp-content/plugins/github-trigger/products/endpoint.php
+          php source-php/wp-content/plugins/github-trigger/tests/product-log-pagination.test.php
           php -l source-php/wp-content/themes/vibe-code-theme/inc/products/product_endpoint.php
           php source-php/wp-content/themes/vibe-code-theme/tests/product-detail-rest-fields.test.php
           php -l source-php/wp-content/plugins/esc-visual-builder/includes/site-config.php
