@@ -142,9 +142,45 @@ try {
     throw new Error(`QA_FAILED check=navBackground expected=rgb(51, 43, 142) actual=${navBackground}`);
   }
 
+  // The white header search must be centered relative to the entire header,
+  // not to the remaining flex space between differently sized side controls.
+  const verifySearchPosition = async (width) => {
+    await page.setViewportSize({ width, height: 900 });
+    const metrics = await page.evaluate(() => {
+      const bounds = (selector) => document.querySelector(selector)?.getBoundingClientRect();
+      const brand = bounds('#header-brandbar > div');
+      const search = bounds('#header-desktop-search');
+      const logo = bounds('#header-brandbar a[aria-label="Về trang chủ"]');
+      const account = [...document.querySelectorAll('#header-brandbar a')].find((a) => a.textContent?.trim() === 'Tài khoản')?.getBoundingClientRect();
+      const cart = [...document.querySelectorAll('#header-brandbar a')].find((a) => a.textContent?.trim() === 'Giỏ hàng')?.getBoundingClientRect();
+      const menu = document.querySelector('#header-navrow');
+      if (!brand || !search || !logo || !account || !cart || !menu) return { missingElement: true };
+      return {
+        centerDeltaPx: Math.abs((search.left + search.right) / 2 - (brand.left + brand.right) / 2),
+        logoClearancePx: search.left - logo.right,
+        accountClearancePx: account.left - search.right,
+        searchWidth: search.width,
+        menuBackground: getComputedStyle(menu).backgroundColor,
+      };
+    });
+    if (metrics.missingElement || metrics.centerDeltaPx > 2 || metrics.logoClearancePx < 8 || metrics.accountClearancePx < 8 || metrics.searchWidth < 180 || metrics.menuBackground !== 'rgb(51, 43, 142)') {
+      throw new Error('QA_FAILED check=headerSearchTrueCenter viewport=' + width + ' measurements=' + JSON.stringify(metrics));
+    }
+    console.log('HEADER_SEARCH_CENTER_PASS=' + JSON.stringify({ width, ...metrics }));
+  };
+  for (const width of [900, 1024, 1440, 1920]) await verifySearchPosition(width);
+  await page.setViewportSize({ width: 390, height: 844 });
+  if (await page.locator('#header-desktop-search').isVisible()) {
+    throw new Error('QA_FAILED check=mobileSearchVisibility expected=false actual=true');
+  }
+  const mobileOverflow = await page.evaluate(() => Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth);
+  if (mobileOverflow > 2) throw new Error('QA_FAILED check=mobileHeaderOverflow actual=' + mobileOverflow);
+  console.log('HEADER_SEARCH_MOBILE_UNCHANGED_PASS=390');
+  await page.setViewportSize({ width: 1440, height: 900 });
+
   await mkdir('artifacts', { recursive: true });
   await page.screenshot({ path: 'artifacts/aquathanhxuan-header-production.png', fullPage: false });
-  console.log('QA_PASS header_search=visible account=visible cart=visible contacts=hidden nav=purple logo=visible');
+  console.log('QA_PASS header_search=centered account=visible cart=visible contacts=hidden nav=purple logo=visible');
 } finally {
   await browser?.close().catch(() => {});
 }
