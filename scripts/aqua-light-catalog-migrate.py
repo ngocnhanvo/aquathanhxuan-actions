@@ -196,6 +196,7 @@ for src,target,rows in brand_pairs:
 for info in source_product_groups.values():
     info['brands']=sorted(set(info['brands']+[TARGET_LIGHT_ROOT]))
 total_source_unique=len(source_product_groups)
+assert total_source_unique == 59, 'Source light product set changed since read-only inventory'
 source_product_groups={
   sid: info for sid,info in sorted(source_product_groups.items())
   if sid % BATCH_COUNT == BATCH_INDEX
@@ -260,7 +261,7 @@ def retrieve_asset(uri,filename,source_id):
         time.sleep(attempt)
     raise AssertionError('unreachable')
 
-def ensure_media(src,alt,source_id):
+def ensure_media_exact(src,alt,source_id):
     uri,filename=image_uri(src,source_id)
     if uri in image_cache: return image_cache[uri]
     content=retrieve_asset(uri,filename,source_id)
@@ -302,8 +303,148 @@ def ensure_media(src,alt,source_id):
     print('LIGHT_MEDIA_CREATED='+json.dumps({'id':media_id,'filename':filename,'source_id':source_id}),flush=True)
     return media_id,path
 
+def ensure_media_in_original_month(src,alt,source_id):
+    """Keep original filename and full-resolution bytes in its source year/month.
+
+    WP REST core accepts a backdated non-Page parent post's date as the upload
+    month. Create a scoped temporary draft and always remove it after upload.
+    """
+    uri,filename=image_uri(src,source_id)
+    parsed=urllib.parse.urlparse(uri)
+    match=re.fullmatch(r'/wp-content/uploads/([0-9]{4})/([0-9]{2})/([^/]+)',parsed.path)
+    if not match or match.group(3)!=filename:
+        raise AssetDeferred(uri,filename,source_id,0,'Unverified original media path')
+    year,month=match.group(1),match.group(2)
+    if not (2015<=int(year)<=2026 and 1<=int(month)<=12):
+        raise AssetDeferred(uri,filename,source_id,0,'Invalid year/month source path')
+    original_bytes=retrieve_asset(uri,filename,source_id)
+    digest=hashlib.sha256(original_bytes).hexdigest()
+    expected_path=f'/wp-content/uploads/{year}/{month}/{filename}'
+    # Idempotent: reusable only if BOTH path and SHA256 match the source.
+    found=api('/wp-json/wp/v2/media?context=edit&per_page=100&search='+urllib.parse.quote(os.path.splitext(filename)[0]))
+    assert isinstance(found,list),'Media query invalid'
+    for existing in found:
+        target_path=urllib.parse.urlparse(str(existing.get('source_url') or '')).path
+        if target_path!=expected_path:
+            continue
+        actual=retrieve_asset(urllib.parse.urljoin(DEST+'/',target_path),filename,source_id)
+        if hashlib.sha256(actual).hexdigest()!=digest:
+            raise AssetDeferred(uri,filename,source_id,1,'Existing same-path Media has different bytes; never overwrite')
+        mid=int(existing['id'])
+        image_cache[uri]=(mid,target_path)
+        print('LIGHT_MEDIA_ORIGINAL_MONTH_REUSED='+json.dumps({'source_id':source_id,
+              'target_media_id':mid,'target_path':target_path}),flush=True)
+        return mid,target_path
+    temp_id=None
+    media_id=None
+    succeeded=False
+    try:
+        temp=api('/wp-json/wp/v2/posts',method='POST',obj={
+            'title':'[TEMP AQUA MEDIA] '+year+'-'+month+' '+str(source_id),
+            'slug':'temp-aqua-media-'+year+month+'-'+str(source_id),
+            'date':year+'-'+month+'-01T12:00:00',
+            'status':'draft',
+            'acf':{'key':'ssr-post','action':'PostDetails'},
+        })
+        temp_id=int(temp['id'])
+        assert temp_id>0 and temp.get('status')=='draft','Temporary post was not saved as draft'
+        confirmed=api('/wp-json/wp/v2/posts/'+str(temp_id)+'?context=edit')
+        assert str(confirmed.get('date','')).startswith(year+'-'+month+'-01'), 'Backdated temporary post date did not persist'
+        upload=api('/wp-json/wp/v2/media?post='+str(temp_id),method='POST',
+            raw=original_bytes,headers={
+              'Content-Type':mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+              'Content-Disposition':'attachment; filename="'+filename+'"',
+              'Content-MD5':hashlib.md5(original_bytes).hexdigest()
+            })
+        media_id=int(upload['id'])
+        actual_path=urllib.parse.urlparse(str(upload.get('source_url') or '')).path
+        if actual_path!=expected_path:
+            # Remove only the attachment just created by this task, not existing media.
+            api('/wp-json/wp/v2/media/'+str(media_id)+'?force=true',method='DELETE')
+            media_id=None
+            raise AssetDeferred(uri,filename,source_id,1,
+                'WordPress changed original filename/path: '+actual_path)
+        uploaded=retrieve_asset(urllib.parse.urljoin(DEST+'/',actual_path),filename,source_id)
+        if hashlib.sha256(uploaded).hexdigest()!=digest:
+            api('/wp-json/wp/v2/media/'+str(media_id)+'?force=true',method='DELETE')
+            media_id=None
+            raise AssetDeferred(uri,filename,source_id,1,'Uploaded media SHA256 differs; deleted own upload')
+        api('/wp-json/wp/v2/media/'+str(media_id),method='POST',obj={'post':0,'alt_text':alt or ''})
+        detached=api('/wp-json/wp/v2/media/'+str(media_id)+'?context=edit')
+        assert int(detached.get('post') or 0)==0, 'Uploaded media still attached to temporary draft'
+        image_cache[uri]=(media_id,actual_path)
+        journal.setdefault('source_media_original_month',[]).append({
+          'source_id':source_id,'source_url':uri,'source_sha256':digest,
+          'target_media_id':media_id,'target_path':actual_path,
+          'temporary_post_id':temp_id,'mode':'PRESERVED_SOURCE_FILENAME_AND_BYTES'})
+        save()
+        succeeded=True
+        print('LIGHT_MEDIA_SOURCE_MONTH_UPLOADED='+json.dumps({
+          'source_id':source_id,'source_file':filename,'source_month':year+'-'+month,
+          'target_media_id':media_id,'target_path':actual_path}),flush=True)
+        return media_id,actual_path
+    finally:
+        if temp_id is not None:
+            try:
+                deleted=api('/wp-json/wp/v2/posts/'+str(temp_id)+'?force=true',method='DELETE')
+                assert bool(deleted.get('deleted')), 'Temporary draft delete was not acknowledged'
+                print('LIGHT_TEMP_POST_CLEANUP_PASS='+str(temp_id),flush=True)
+            except Exception as cleanup_error:
+                journal.setdefault('temp_cleanup_pending',[]).append({
+                  'post_id':temp_id,'source_id':source_id,'error':str(cleanup_error)[:250]})
+                save()
+                raise RuntimeError('TEMP_POST_CLEANUP_FAILED id='+str(temp_id)) from cleanup_error
+
 source_media_regex=re.compile(r'https?://aquathanhxuan\.com/wp-content/uploads/[^\s"\'<>]+',re.I)
-def localize_html(value,source_id):
+# Use an actual resized file created and publicly hosted by original WordPress
+# only when the source full filename collides with a *different* target asset.
+# We do not rename, overwrite, hash-rename or misattribute another product photo.
+def ensure_media(src,alt,source_id,source_media_id=None):
+    try:
+        return ensure_media_exact(src,alt,source_id)
+    except AssetDeferred as original_error:
+        if 'different' not in str(original_error).lower():
+            raise
+        # The original media filename collides globally in the destination,
+        # but the historical year/month folder may be free. Try exact bytes
+        # there before substituting the original site's resized variants.
+        try:
+            return ensure_media_in_original_month(src,alt,source_id)
+        except AssetDeferred as month_error:
+            print('LIGHT_MEDIA_MONTH_DEFERRED='+json.dumps({
+              'source_id':source_id,'url':src,'error':str(month_error)[:240]},ensure_ascii=False),flush=True)
+        if source_media_id is None:
+            raise original_error
+        media=get_json(SOURCE+'/wp-json/wp/v2/media/'+str(source_media_id))
+        assert int(media.get('id',0))==int(source_media_id), 'Source attachment identity changed'
+        if not str(media.get('source_url','')).startswith(SOURCE+'/wp-content/uploads/'):
+            raise original_error
+        sizes=media.get('media_details',{}).get('sizes') or {}
+        variants=[]
+        for name in ('large','woocommerce_single','medium_large','medium','woocommerce_thumbnail'):
+            info=sizes.get(name) or {}
+            url=str(info.get('source_url') or '')
+            if url.startswith(SOURCE+'/wp-content/uploads/') and url!=src and url not in variants:
+                variants.append(url)
+        print('LIGHT_ORIGINAL_FILENAME_COLLISION='+json.dumps({'source_id':source_id,'attachment_id':source_media_id,
+            'source_url':src,'variants':variants},ensure_ascii=False),flush=True)
+        for url in variants:
+            try:
+                mid,path=ensure_media_exact(url,alt,source_id)
+                print('LIGHT_MEDIA_SOURCE_VARIANT_USED='+json.dumps({'source_id':source_id,
+                     'source_media_id':source_media_id,'variant_url':url,'saved_as':path,'target_media_id':mid},ensure_ascii=False),flush=True)
+                journal.setdefault('source_media_variants',[]).append({
+                    'source_id':source_id,'source_media_id':source_media_id,
+                    'original_full_url':src,'actual_source_variant_url':url,
+                    'target_media_id':mid,'target_path':path,
+                    'original_full_image_status':'DEFERRED_ORIGINAL_FILENAME_CONFLICT'})
+                save()
+                return mid,path
+            except AssetDeferred:
+                continue
+        raise original_error
+
+def localize_html(value,source_id,source_media_by_url=None):
     content=str(value or '')
     matches=list(dict.fromkeys(source_media_regex.findall(content)))
     for uri in matches:
@@ -311,7 +452,8 @@ def localize_html(value,source_id):
         original_uri=html.unescape(uri)
         parsed=urllib.parse.urlparse(original_uri)
         canonical=parsed._replace(query='',fragment='').geturl()
-        media_id,path=ensure_media(canonical,'',source_id)
+        original_attachment_id=(source_media_by_url or {}).get(canonical)
+        media_id,path=ensure_media(canonical,'',source_id,original_attachment_id)
         content=content.replace(uri,path)
     return content
 
@@ -334,6 +476,8 @@ def ensure_locale(target_id):
 
 def migrate_one(source_id, info):
     src=get_json(SOURCE+'/wp-json/wc/store/v1/products/'+str(source_id))
+    source_media_by_url={str(item.get('src') or ''):item.get('id')
+      for item in (src.get('images') or []) if item.get('src') and item.get('id')}
     assert int(src.get('id') or 0)==source_id and src.get('slug')==info['slug'], 'Source product identity changed'
     assert normalize(src.get('name'))==normalize(info['name']), 'Source Product title changed'
     assert src.get('type')=='simple','Product source type changed'
@@ -368,9 +512,9 @@ def migrate_one(source_id, info):
         # Existing products may have been imported before source content/gallery
         # migration was introduced. Only fill genuinely absent content.
         if not str(existing.get('description') or '').strip() and str(src.get('description') or '').strip():
-            updates['description']=localize_html(src['description'],source_id)
+            updates['description']=localize_html(src['description'],source_id,source_media_by_url)
         if not str(existing.get('short_description') or '').strip() and str(src.get('short_description') or '').strip():
-            updates['short_description']=localize_html(src['short_description'],source_id)
+            updates['short_description']=localize_html(src['short_description'],source_id,source_media_by_url)
         existing_images=existing.get('images') or []
         existing_media_names=set()
         for item in existing_images:
@@ -383,7 +527,7 @@ def migrate_one(source_id, info):
             if not uri: continue
             source_name=os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(uri).path))
             if source_name in existing_media_names:continue
-            media_id,_=ensure_media(uri,item.get('alt') or name,source_id)
+            media_id,_=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
             append_images.append({'id':media_id,'alt':item.get('alt') or name})
             existing_media_names.add(source_name)
         if append_images:
@@ -409,11 +553,11 @@ def migrate_one(source_id, info):
         for item in original_images:
             uri=item.get('src') or ''
             if not uri: continue
-            mid,path=ensure_media(uri,item.get('alt') or name,source_id)
+            mid,path=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
             images.append({'id':mid,'alt':item.get('alt') or name})
         assert images,'Cannot import without original product media'
-        description=localize_html(src.get('description') or '',source_id)
-        short_description=localize_html(src.get('short_description') or '',source_id)
+        description=localize_html(src.get('description') or '',source_id,source_media_by_url)
+        short_description=localize_html(src.get('short_description') or '',source_id,source_media_by_url)
         metadata=[{'key':'_esc_origin_product_id','value':str(source_id)},
                   {'key':'product_lang','value':'vi'}]
         if seo_title:metadata.append({'key':'_yoast_wpseo_title','value':seo_title})
