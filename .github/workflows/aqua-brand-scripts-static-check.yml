@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aqua-brand-scripts-static-check.yml'
+      - 'qa-requests/brand-static-check.json'
 permissions:
   contents: read
 jobs:
