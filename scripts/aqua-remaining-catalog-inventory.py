@@ -42,6 +42,7 @@ def pages(base,max_pages=100):
     if len(rows)<100:return out
   raise RuntimeError("Pagination cap reached "+base)
 source_cats=pages("/wp-json/wc/store/v1/products/categories",30)
+print("AQUA_SOURCE_ROOT_TERMS="+json.dumps([{"id":x["id"],"name":x.get("name"),"slug":x.get("slug")} for x in source_cats if not int(x.get("parent") or 0)],ensure_ascii=False),flush=True)
 assert all(isinstance(c.get("id"),int) and c.get("slug") for c in source_cats),"Bad source taxonomy"
 request(DEST+"/wp-login.php")
 body=urllib.parse.urlencode({"log":os.environ["WP_ADMIN_USERNAME"],"pwd":os.environ["WP_ADMIN_PASSWORD"],
@@ -66,6 +67,11 @@ for pg in range(1,60):
 else:raise RuntimeError("Target category page cap")
 assert len({c["id"] for c in source_cats})==len(source_cats)
 assert len({c["id"] for c in target_cats})==len(target_cats)
+print("AQUA_TARGET_ROOT_TERMS="+json.dumps([{"id":x["id"],"name":x.get("name"),"slug":x.get("slug")} for x in target_cats if not int(x.get("parent") or 0)],ensure_ascii=False),flush=True)
+if json.loads(Path("cms-requests/remaining-catalog-inventory.json").read_text(encoding="utf-8")).get("mode")=="TAXONOMY_ONLY":
+ result["state"]="TAXONOMY_ONLY_PASS";save()
+ print("AQUA_REMAINING_TAXONOMY_ONLY_PASS="+str(len(source_cats)),flush=True)
+ raise SystemExit(0)
 print("AQUA_REMAINING_TAXONOMY_LOADED="+json.dumps({"source":len(source_cats),"target":len(target_cats)}),flush=True)
 source_by_id={int(x["id"]):x for x in source_cats}
 target_by_id={int(x["id"]):x for x in target_cats}
