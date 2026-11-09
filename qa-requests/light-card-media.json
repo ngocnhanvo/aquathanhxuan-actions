@@ -13,9 +13,9 @@
     83166,
     82539
   ],
-  "scope": "Read-only investigate actual card image URL and missing-cover state per Product in Odyssea/Xuanmailong; no CMS write or rebuild",
+  "scope": "Verify missing product covers at exact legacy WP categories: WeekAqua 3, Chihiros 4, Xuanmailong 6, plus detail Odyssea Dual Pro; preserve real media 4 sample cards",
   "productionQaRun": 42641456578,
-  "attempt": 3,
+  "attempt": 4,
   "astroDeployRun": 42646881625,
-  "reason": "Missing image count unexpectedly zero; collect per-card URL/provenance diagnostics"
+  "reason": "Corrected category assumptions using explicit Source Store Product category IDs from run 42648269372"
 }
