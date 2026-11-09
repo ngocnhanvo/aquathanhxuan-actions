@@ -1,0 +1,23 @@
+name: Aqua light source media exception read-only verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'audit-requests/light-source-media.json'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-missing-media-diagnostic.py
+      - run: python3 scripts/aqua-light-missing-media-diagnostic.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-source-media
+          path: artifacts/aqua-light-media-diagnostic
+          if-no-files-found: ignore
+          retention-days: 14
