@@ -1,29 +1,24 @@
 # Phản hồi ChatGPT mới nhất — Aqua Thanh Xuân
 
-- Ngày: 2026-11-09 (Asia/Ho_Chi_Minh).
-- Dự án: aquathanhxuan.com.
-- Source Astro: `ngocnhanvo/aquathanhxuan-astro` `master` @ `40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d`.
-- Source PHP: không đổi.
-- Actions: `ngocnhanvo/aquathanhxuan-actions` `main`.
-- Checkpoint: `docs/checkpoints/2026-11-09-logo-water-bubbles.md`.
-- Production WordPress wrapper + Playwright: #42656742113 completed/success.
-- Production Astro deploy: #42656892157 completed/success.
-- Screenshot QA artifact: #13692956597.
-- Trạng thái hiện tại: DONE — hoàn tất cho yêu cầu bong bóng nước quanh logo.
+- Dự án: aquathanhxuan.com
+- Ngày: 2026-11-09 (Asia/Ho_Chi_Minh)
+- Scope: Đồng bộ Products thực từ website gốc cho chín menu Máy lọc, Vật liệu lọc, Phụ kiện, Đá/Lũa/Cát, Hóa chất, Bể kính, Nền, CO2, Sinh vật.
+- Không nhập lại menu Đèn (đã QA 59/59).
+- Repo source: ngocnhanvo/aquathanhxuan-actions main; Astro master hiện giữ nguyên (không cần sửa code để nhập Products).
+- Checkpoint: docs/checkpoints/2026-11-09-nine-menu-products.md
+- Inventory: #42662410500 PASSED, 389 sản phẩm nguồn, 146 đã có, 243 còn thiếu, 9 taxonomy roots verified, 0 identity conflict.
+- Taxonomy setup: #42661708486 PASSED, 4 category terms bổ sung theo source 2184/2204/2307/2323.
+- Migration: #42663313074 đang chạy. Preflight PASS, pilot 3/3 PASS. 13 batch đang chạy sau pilot theo 2 job song song; CHƯA có kết luận toàn bộ.
+- Future gates: import all batches PASS + verify 389, Product native Rewrite source ID/slug verification, Woo parity price/stock/descriptions/Yoast, existing Astro production build, deploy marker, desktop/mobile Playwright 36 checks.
+- Workflow import: .github/workflows/aqua-remaining-catalog-migration.yml
+- Read-only parity script: scripts/aqua-remaining-catalog-production-qa.cjs
+- Routing script prepared: scripts/aqua-remaining-product-routes.cjs (CHƯA kích).
+- Status: PARTIAL — chưa hoàn tất.
 
 ## Nội dung phản hồi gửi người dùng
 
-**Đã thêm hiệu ứng bong bóng nước quanh logo và đưa lên production thành công rồi nhé!**
-
-Website: https://aquathanhxuan.io.vn/
-
-Mình chọn kiểu nhẹ: 5 bong bóng nước nhỏ, mờ, nổi chậm quanh logo, thời lượng khác nhau 5.4–7 giây. Vẫn giữ nguyên logo, ô tìm kiếm căn giữa, Tài khoản, Giỏ hàng và menu tím. Bong bóng không chặn click; tắt trên mobile và khi bật reduced-motion.
-
-**Build và QA Playwright PASS**: [WordPress trigger + QA #42656742113](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42656742113), [Astro production #42656892157](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42656892157). Kiểm thử xác minh 5 bong bóng hoạt động, không tràn ngang, tìm kiếm vẫn lệch tâm 0px ở desktop 900/1024/1440/1920px, mobile 390px ẩn hiệu ứng.
-
-[Xem ảnh nghiệm thu](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42656742113/artifacts/13692956597)
-[Checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-logo-water-bubbles.md)
+Đã kiểm kê 389 sản phẩm nguồn thuộc 9 menu, 146 đã có và 243 còn thiếu. Bốn danh mục con thiếu ở WordPress đích đã được tạo đúng source, không chỉnh menu header. Lô nhập thử 3/3 sản phẩm thành công, bao gồm một trường hợp ảnh nguồn không có được đánh dấu ngoại lệ an toàn. Workflow #42663313074 đã tự động chạy 13 lô nhập còn lại; chưa có đủ kết quả để báo đồng bộ hoàn tất hoặc production PASS. Sau khi nhập xong sẽ kiểm tra 389 source ID và dữ liệu gốc, tạo Rewrite cho URL sản phẩm mới, chạy Woo + Yoast parity rồi mới build/deploy theo pipeline production hiện có.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: DONE — hoàn tất
+Trạng thái: PARTIAL — chưa hoàn tất
