@@ -1,0 +1,9 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "c5edf8c0513c96f8e5a13ab23c25a33c9294c2f3",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Show a truthful image-unavailable state rather than an unrelated placeholder for products with missing source media; preserve real image and cart behavior",
+  "sourceQaRun": 42646542447,
+  "sourceMediaAuditRun": 42645287337
+}
