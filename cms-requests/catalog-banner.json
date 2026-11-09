@@ -1,9 +1,9 @@
 {
-  "task": "Recover catalog_banner in Table 157, move native inserted images into correct grid cells, publish shortcode on Page 82457",
-  "sourceSha": "90d10f165908d8bebd054640fe8457546b5c801a",
+  "task": "Resume TablePress 157 with two distinct native Media inserted banner slides and Page 82457 shortcode",
+  "sourceSha": "59afb075153338fc110d932bafeeffa155c23f4f",
   "scope": [
-    "tablepress 157",
+    "TablePress 157",
     "Page 82457",
-    "existing Media 82721,82722"
+    "Media 82721,82722"
   ]
 }
