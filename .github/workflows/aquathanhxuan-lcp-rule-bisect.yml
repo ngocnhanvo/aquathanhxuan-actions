@@ -30,9 +30,9 @@ jobs:
           console.log('CSS_SOURCE '+JSON.stringify({url:styleUrl,length:raw.length,rules:nodes.length,first:nodes.slice(0,3).map(n=>n.toString().slice(0,90)),last:nodes.slice(-3).map(n=>n.toString().slice(0,90))}));
           const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
           let attempt=0;
-          async function test(label,a,b){
+          async function test(label,a,b,override=null){
             attempt++;
-            const body = a<0?raw:postcss.root({nodes:nodes.filter((_,i)=>i<a||i>=b).map(n=>n.clone())}).toString();
+            const body = override || (a<0?raw:postcss.root({nodes:nodes.filter((_,i)=>i<a||i>=b).map(n=>n.clone())}).toString());
             const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
             const page=await ctx.newPage();
             await page.addInitScript(()=>{window.__lcp=[];new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__lcp.push({size:e.size,url:e.url,tag:e.element?.tagName,t:e.startTime}))).observe({type:'largest-contentful-paint',buffered:true})});
@@ -56,7 +56,17 @@ jobs:
             finally{await ctx.close()}
           }
           await test('control',-1,-1);
-          for(let i=57;i<=61;i++)await test('remove-rule-'+i,i,i+1);
-          console.log('CSS_BISECT_RULES '+JSON.stringify(nodes.slice(55,64).map((n,i)=>({i:55+i,selector:n.selector||n.name,css:n.toString().slice(0,600)}))));
+          await test('baseline',-1,-1);
+          for(const [index,property] of [
+            [58,'overscroll-behavior-inline'],[58,'scroll-snap-type'],
+            [58,'scroll-behavior'],[58,'scrollbar-width'],
+            [58,'gap'],[58,'padding'],[58,'display'],[58,'overflow-x'],
+            [60,'scroll-snap-align'],[60,'flex'],[60,'min-width'],
+            [60,'overflow'],[60,'transition'],
+          ]){
+            const modified=root.clone();
+            modified.nodes[index].walkDecls(property,decl=>decl.remove());
+            await test('remove-'+index+'-'+property,-1,-1,modified.toString());
+          }
           await browser.close();
           NODE
