@@ -102,6 +102,22 @@ for mid,path,dimensions in ORIGINALS:
  REPORT["attachments"].append(item)
  print("LIGHT_EXACT_ATTACHMENT_ALTERNATIVES="+json.dumps(item,ensure_ascii=False),flush=True)
  save()
+deferred_ids={1814,1815,1816,3052,3054,3056,3057,3058,3059,3060,3061,3062,3063}
+catalog=fetch(SOURCE+"/wp-json/wc/store/v1/products?per_page=100&category=1546",timeout=40,maxbytes=6000000)
+assert catalog.get("status")==200,"Source full light catalog unavailable"
+root_products=json.loads(catalog["payload"])
+assert isinstance(root_products,list) and len(root_products)==59,"Source root product count changed"
+by_id={int(row["id"]):row for row in root_products}
+assert deferred_ids.issubset(by_id),"Missing deferred Product from source root"
+REPORT["deferred_product_taxonomy"]=[]
+for sid in sorted(deferred_ids):
+ row=by_id[sid]
+ item={"source_id":sid,"slug":row.get("slug"),"name":row.get("name"),
+ "categories":[{"id":c.get("id"),"name":c.get("name"),"slug":c.get("slug")} for c in row.get("categories") or []],
+ "store_image_count":len(row.get("images") or [])}
+ REPORT["deferred_product_taxonomy"].append(item)
+ print("LIGHT_DEFERRED_SOURCE_TAXONOMY="+json.dumps(item,ensure_ascii=False),flush=True)
+save()
 REPORT["status"]="AUDIT_PASS"
 save()
 print("LIGHT_LAST_RESORT_READ_ONLY_PASS="+json.dumps({"products":len(REPORT["products"]),"attachments":len(REPORT["attachments"])}),flush=True)
