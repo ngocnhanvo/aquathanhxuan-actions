@@ -116,9 +116,27 @@ async function categoryPages(root,slug){
       assert.equal(String(orig?.value||''),String(product.id),'Legacy source ID mismatch '+product.slug);
       const srcPrice=String(product.prices?.price||'');
       assert.equal(String(target.price),srcPrice,'Price mismatch '+product.slug);
-      assert(target.images.length>0,'Missing target media '+product.slug);
-      assert(target.images.length>=(product.images||[]).filter(x=>x.src).length,
-        'Missing source image/gallery media '+product.slug);
+      // Two source problems independently confirmed in read-only run 42584424951:
+      // ISTA Product 3178: the sole WordPress original plus every srcset size
+      // returns HTTP 404 on the legacy site (verified attachment 266663).
+      // JECOD Product 15280: Woo Store API includes one extra image whose basename
+      // collides with unrelated target image; the legacy public detail itself
+      // displays only the other three original images.
+      if(Number(product.id)===3178){
+        assert.equal(product.slug,'su-ista-active-bio-pearl','ISTA source asset exception identity changed');
+        assert.equal(target.images.length,0,'Do not fabricate missing ISTA image');
+        summary.sourceMediaDeferred=(summary.sourceMediaDeferred||[]).concat([{sourceId:3178,slug:product.slug,missing:'legacy-original-404'}]);
+      }else if(Number(product.id)===15280){
+        assert.equal(product.slug,'bom-jecod-fa-1000','JECOD source asset exception identity changed');
+        const filenames=['62.png','Thiet-ke-chua-co-ten-2024-05-18T153204.687.png','Thiet-ke-chua-co-ten-2024-05-18T153852.528.png'];
+        assert.equal(target.images.length,3,'Only legacy public JECOD three-item gallery may be copied');
+        assert.deepEqual(target.images.map(x=>decodeURIComponent(String(x.src||'').split('/').pop())),filenames,'JECOD page gallery image identity');
+        summary.sourceMediaDeferred=(summary.sourceMediaDeferred||[]).concat([{sourceId:15280,slug:product.slug,missing:'source-store-only-extra-image-filename-conflict'}]);
+      }else{
+        assert(target.images.length>0,'Missing target media '+product.slug);
+        assert(target.images.length>=(product.images||[]).filter(x=>x.src).length,
+          'Missing source image/gallery media '+product.slug);
+      }
       assert(target.images.every(image=>String(image.src||'').includes('/wp-content/uploads/')&&!String(image.src||'').startsWith(SOURCE)),
         'Media hotlink or missing original asset '+product.slug);
       if(String(product.description||'').trim())assert(String(target.description||'').trim(),'Original description missing '+product.slug);
@@ -200,11 +218,11 @@ async function categoryPages(root,slug){
     await context.close();
     console.log('BRAND_QA_VIEWPORT_PASS='+width);
   }
-  summary.status='PASS';persist();
-  console.log('BRAND_CATALOG_PRODUCTION_PARITY_PASS='+JSON.stringify({
+  summary.status='PASS_WITH_SOURCE_MEDIA_DEFERRED';persist();
+  console.log('BRAND_CATALOG_PRODUCTION_PARITY_PARTIAL_MEDIA='+JSON.stringify({
     sourceProducts:summary.categories.reduce((v,x)=>v+x.sourceCount,0),
     categories:summary.categories.length,viewports:[1440,390],screenshots:summary.screenshots.length,
-    deployedSha:cfg.sha
+    sourceMediaDeferred:[3178,15280],deployedSha:cfg.sha
   }));
  }finally{await browser.close()}
 })().catch(e=>{
