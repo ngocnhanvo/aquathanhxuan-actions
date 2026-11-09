@@ -1,0 +1,17 @@
+name: Aqua brand catalog recovery script static checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-brand-scripts-static-check.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-two-deferred-products-recover.py scripts/aqua-brand-catalog-migrate.py
+      - run: node --check scripts/aqua-brand-product-routes-create.cjs
+      - run: node --check scripts/aqua-brand-catalog-production-qa.cjs
