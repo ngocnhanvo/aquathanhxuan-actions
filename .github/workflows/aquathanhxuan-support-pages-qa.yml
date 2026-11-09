@@ -1,0 +1,27 @@
+name: Aqua support five Pages production QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/support-pages-20261109.json'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aquathanhxuan-support-pages-qa.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: mkdir -p artifacts/support && node scripts/aquathanhxuan-support-pages-qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aquathanhxuan-support-pages-production
+          path: artifacts/support
+          if-no-files-found: ignore
+          retention-days: 7
