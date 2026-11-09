@@ -1,0 +1,12 @@
+{
+  "scope": "READ_ONLY",
+  "source": "aquathanhxuan.com",
+  "productIDs": [
+    1815,
+    3054,
+    3057,
+    3060,
+    3063
+  ],
+  "reason": "Batch-0 source media absent or HTTP404; verify original image variants before any source-accurate record recovery"
+}
