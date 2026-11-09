@@ -1,0 +1,31 @@
+name: Aqua light source product recovery for unavailable original media
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/light-source-media-recovery.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-light-catalog-writes
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-source-media-recover.py
+      - name: Read-after-write verified Product without original working image
+        run: python3 scripts/aqua-light-source-media-recover.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-source-media-recovery
+          path: artifacts/aqua-light-media-recovery/result.json
+          if-no-files-found: ignore
+          retention-days: 14
