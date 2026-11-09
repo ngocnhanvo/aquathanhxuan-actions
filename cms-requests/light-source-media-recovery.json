@@ -1,0 +1,22 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "write_scope": "Only nine verified Đèn Products with unavailable legacy cover media; use truthful fields and structured ASSET_DEFERRED, no substitute images",
+  "source_ids": [
+    1815,
+    1816,
+    3052,
+    3054,
+    3057,
+    3058,
+    3060,
+    3061,
+    3063
+  ],
+  "initial_runs": [
+    42628551840,
+    42630053730
+  ],
+  "attempt": 1
+}
