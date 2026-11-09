@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "beb08cf9c402b53c0ffe603dd540f98ab6082e04",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Publish verified source import of 59 products in Đèn and seven child categories; native Product Rewrites ready",
+  "dataQaRun": 42639768313,
+  "routeRun": 42639822903,
+  "sourceInventoryRun": 42636196189
+}
