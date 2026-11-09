@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "scope": "Only source Woo product IDs from 59-product Đèn root matching source_id modulo 3 equals 2; no retry of other batches",
+  "source": "https://aquathanhxuan.com",
+  "destination": "https://admin.aquathanhxuan.io.vn",
+  "inventory_run": 42627591343,
+  "batches": 3,
+  "index": 2,
+  "attempt": 1
+}
