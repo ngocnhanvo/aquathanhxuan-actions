@@ -8,5 +8,9 @@
   "targetSlug": "may-loc-loc-treo",
   "productionQaFailedRun": 42692639227,
   "pinnedAstroSha": "ed8bd633bb5447efb74ffa161d93277166d2c88d",
-  "scope": "Inspect original source taxonomy, verified Woo Product IDs, target category assignments and public category card IDs without writing CMS"
+  "scope": "READ_ONLY: audit all 46 original Woo child category pages against original 389 Product IDs, existing target categories and visible public Product cards; report additional memberships without changing CMS",
+  "attempt": 2,
+  "previousDiagnosticRun": 42694599187,
+  "qaFailedRun": 42692639227,
+  "expectedOriginalChildren": 46
 }
