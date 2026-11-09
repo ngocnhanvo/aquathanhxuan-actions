@@ -2,7 +2,7 @@ name: Aqua verify Product REST pricing and stock mapping
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/aqua-product-rest-fields-audit.yml']
+    paths: ['qa-requests/product-rest-live.json']
 permissions:
   contents: read
 jobs:
