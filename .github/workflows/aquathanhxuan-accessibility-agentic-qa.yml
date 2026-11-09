@@ -1,0 +1,123 @@
+name: Aqua Accessibility and Agentic Browsing production QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/accessibility-agentic-20261109.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      SITE: https://aquathanhxuan.io.vn
+      EXPECTED_ASTRO_SHA: 48ff075e2fbc2f1ce880a984017ffe4e3541c271
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Lighthouse 13.5 and Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome
+          google-chrome --version
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund lighthouse@13.5.0 playwright@1.64.0
+          mkdir -p artifacts/a11y
+      - name: Confirm exact production SHA and browser interactions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          import assert from 'node:assert/strict';
+          const origin=process.env.SITE;
+          const response=await fetch(origin+'/aquathanhxuan-staging-build.json?qa='+Date.now(),{headers:{'cache-control':'no-cache'}});
+          assert.equal(response.status,200,'Production marker must be accessible');
+          const build=await response.json();
+          assert.equal(build.commit,process.env.EXPECTED_ASTRO_SHA,'Production must deploy this exact source SHA');
+          const browser=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox','--disable-dev-shm-usage']});
+          try {
+            for(const viewport of [{width:1440,height:900},{width:390,height:844}]) {
+              const page=await browser.newPage({viewport});
+              await page.goto(origin+'/?a11y_qa='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+              const menu=page.locator('#consultation-menu');
+              await menu.waitFor({state:'attached'});
+              assert.equal(await menu.getAttribute('aria-hidden'),'true','Closed consultation panel aria-hidden');
+              assert.equal(await menu.evaluate(el=>el.inert),true,'Closed consultation panel must be inert');
+              await page.locator('#ai-agent-btn').click();
+              assert.equal(await menu.getAttribute('aria-hidden'),'false','Open consultation panel exposed');
+              assert.equal(await menu.evaluate(el=>el.inert),false,'Open panel must not be inert');
+              assert.equal(await page.evaluate(()=>document.activeElement?.id),'close-consultation','Panel initial focus');
+              await page.keyboard.press('Escape');
+              assert.equal(await menu.getAttribute('aria-hidden'),'true','Escape closes panel');
+              assert.equal(await menu.evaluate(el=>el.inert),true,'Escape restores inert');
+              assert.equal(await page.evaluate(()=>document.activeElement?.id),'ai-agent-btn','Escape restores launcher focus');
+              await page.locator('#ai-agent-btn').click();
+              await page.locator('#open-agent-from-consultation').click();
+              await page.waitForFunction(()=>document.querySelector('#ai-chat-box')?.classList.contains('scale-100')===true,null,{timeout:15000});
+              assert.equal(await menu.evaluate(el=>el.inert),true,'Switching to AI chat closes consultation');
+              await page.locator('#close-chat-btn').click();
+              const cards=page.locator('[data-aqua-home-sale] .aqua-sale__card');
+              const count=await cards.count();
+              assert(count>0,'Sale card count');
+              for(let i=0;i<count;i++) {
+                const card=cards.nth(i);
+                const badge=(await card.locator('.aqua-sale__discount').innerText()).trim();
+                const accessibleName=await card.locator('.aqua-sale__image-link').getAttribute('aria-label');
+                assert(accessibleName?.includes(badge),'Sale link accessible name must include visible badge '+i);
+              }
+              const priceColor=await cards.first().locator('.aqua-sale__prices del').evaluate(el=>getComputedStyle(el).color);
+              assert.equal(priceColor,'rgb(100, 106, 124)','Old price must use readable contrast');
+              const label=String(viewport.width)+'x'+String(viewport.height);
+              await page.screenshot({path:'artifacts/a11y/'+label+'.png'});
+              console.log('A11Y_BROWSER=PASS viewport='+label+' cards='+count+' oldPriceColor='+priceColor);
+              await page.close();
+            }
+          } finally {await browser.close()}
+          NODE
+      - name: Audit both categories on desktop and mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          for device in desktop mobile; do
+            flags=""
+            if [ "$device" = desktop ]; then flags="--preset=desktop"; fi
+            node_modules/.bin/lighthouse "$SITE/" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" $flags --only-categories=accessibility,agentic-browsing --output=json --output-path="artifacts/a11y/$device.json" --quiet --max-wait-for-load=60000
+            DEVICE="$device" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const device=process.env.DEVICE;
+          const report=JSON.parse(fs.readFileSync('artifacts/a11y/'+device+'.json','utf8'));
+          const summary={device,version:report.lighthouseVersion,scores:{},audits:{}};
+          assert.equal(report.runtimeError,undefined,'Lighthouse runtime error');
+          for(const category of ['accessibility','agentic-browsing']){
+            const result=report.categories?.[category];
+            assert(result,'Missing category '+category);
+            summary.scores[category]=result.score;
+          }
+          for(const id of ['aria-hidden-focus','color-contrast','label-content-name-mismatch','agent-accessibility-tree']){
+            const item=report.audits?.[id];
+            summary.audits[id]={score:item?.score,mode:item?.scoreDisplayMode,items:item?.details?.items?.length??0};
+            assert.equal(item?.score,1,'Audit '+id+' must pass on '+device);
+          }
+          console.log('A11Y_LIGHTHOUSE='+JSON.stringify(summary));
+          fs.writeFileSync('artifacts/a11y/'+device+'-summary.json',JSON.stringify(summary,null,2)+'\n');
+          assert.equal(summary.scores.accessibility,1,'Accessibility 100 expected on '+device);
+          assert.equal(summary.scores['agentic-browsing'],1,'Agentic Browsing 100 expected on '+device);
+          NODE
+          done
+      - name: Upload QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-accessibility-agentic-qa
+          path: artifacts/a11y
+          if-no-files-found: warn
+          retention-days: 7
