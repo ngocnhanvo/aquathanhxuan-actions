@@ -1,0 +1,32 @@
+name: Aqua light missing source images final batch recovery
+on:
+  push:
+    branches: [main]
+    paths:
+      - cms-requests/light-source-media-recovery-batch2.json
+permissions:
+  contents: read
+concurrency:
+  group: aqua-light-catalog-writes
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      LIGHT_RECOVERY_ONLY_SOURCE_IDS: "1814,3056,3059,3062"
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-source-media-recover.py
+      - name: Recover final exact Product IDs with missing legacy images
+        run: python3 scripts/aqua-light-source-media-recover.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-source-media-recovery-batch2
+          path: artifacts/aqua-light-media-recovery/result.json
+          if-no-files-found: ignore
+          retention-days: 14
