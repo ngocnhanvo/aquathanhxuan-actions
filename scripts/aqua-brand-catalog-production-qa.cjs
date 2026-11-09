@@ -209,6 +209,16 @@ async function categoryPages(root,slug){
         const response=await page.goto(FRONT+url,{waitUntil:'domcontentloaded',timeout:60000});
         assert.equal(response.status(),200,'Brand listing public HTTP 200 '+url);
         assert.equal(await page.locator('h1#product-page-title').count(),1,'Missing category H1 '+url);
+        if(n===1){
+          const banner=page.locator('.catalog-page-banners');
+          assert.equal(await banner.count(),1,'Missing source-inspired category banner '+url);
+          const bannerHeight=await banner.evaluate(el=>el.getBoundingClientRect().height);
+          assert(bannerHeight>32,'Collapsed category banner '+url+' actualHeight='+bannerHeight);
+          assert.equal(await page.locator('#catalog-sort').count(),1,'Category sorting control absent '+url);
+          assert.deepEqual(await page.locator('#catalog-sort option').evaluateAll(items=>items.map(x=>x.value)),
+            ['default','price-asc','price-desc','newest'],'Category sorting options incomplete '+url);
+          assert.equal(await page.locator('#recently-viewed-title').count(),1,'Recently viewed section absent '+url);
+        }
         const products=await page.locator('[data-catalog-product]').evaluateAll(nodes=>nodes.map(card=>{
           const link=card.querySelector('a[href^="/san-pham/"]')?.getAttribute('href')||'';
           return {slug:link.split('/').filter(Boolean).pop(),price:Number(card.getAttribute('data-catalog-product-price')||0),link};
