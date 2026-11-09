@@ -107,6 +107,9 @@ let browser;
   const canonical = await request('/wp-json/esc-api/v1/menus?header_all=' + Date.now());
   const roots = canonical?.menus?.Header?.vi?.items;
   assert(Array.isArray(roots) && roots.length === expectedParents, 'Canonical Header roots mismatched');
+  const byId = new Map(items.map(item => [Number(item.id), item]));
+  journal.reordered = [];
+  journal.expectedOrder = {};
   for (const parent of parents) {
     const root = roots.find(item => Number(item.id) === parent.id);
     assert(root && Array.isArray(root.children), 'Canonical parent missing ' + parent.id);
@@ -115,16 +118,40 @@ let browser;
     const child = all[0];
     assert.equal(Number(child.id), expectedByParent.get(parent.id), 'Canonical item ID mismatch');
     assert.equal(path(child.href || child.slug).replace(/^[/]/, ''), path(parent.url).replace(/^[/]/, ''), 'Canonical Tất cả href mismatch');
-    assert.equal(name(root.children[0]?.label), name('Tất cả'),
-      'Canonical Tất cả is not first under ' + parent.id + ': ' + JSON.stringify(root.children.slice(0, 2).map(x => x.label)));
+    const desired = [child, ...root.children.filter(item => Number(item.id) !== Number(child.id))];
+    journal.expectedOrder[parent.id] = desired.map(item => Number(item.id));
+    for (let index = 0; index < desired.length; index++) {
+      const id = Number(desired[index].id);
+      const original = byId.get(id);
+      assert(original && Number(original.parent) === parent.id, 'Order scope parent mismatch ' + id);
+      const targetOrder = index + 1;
+      if (Number(original.menu_order) === targetOrder) continue;
+      const updated = await request('/wp-json/wp/v2/menu-items/' + id, {menu_order: targetOrder});
+      assert.equal(Number(updated.id), id, 'Menu order update ID mismatch');
+      assert.equal(Number(updated.parent), parent.id, 'Menu order update parent mismatch');
+      assert.equal(Number(updated.menu_order), targetOrder, 'Menu order update value mismatch');
+      byId.set(id, updated);
+      journal.reordered.push({id, parentId: parent.id, previousOrder: Number(original.menu_order), targetOrder});
+      persist();
+    }
+  }
+  const verified = await request('/wp-json/esc-api/v1/menus?header_all_verified=' + Date.now());
+  const finalRoots = verified?.menus?.Header?.vi?.items;
+  assert(Array.isArray(finalRoots) && finalRoots.length === expectedParents, 'Final Header roots changed');
+  for (const parent of parents) {
+    const root = finalRoots.find(item => Number(item.id) === parent.id);
+    assert(root && Array.isArray(root.children), 'Final root missing ' + parent.id);
+    assert.deepEqual(root.children.map(item => Number(item.id)), journal.expectedOrder[parent.id],
+      'Tất cả must be first and prior child order preserved under ' + parent.id);
+    assert.equal(name(root.children[0].label), name('Tất cả'));
   }
   journal.status = 'PASS';
   journal.finishedAt = new Date().toISOString();
-  journal.childCounts = roots.map(root => root.children.length);
+  journal.childCounts = finalRoots.map(root => root.children.length);
   persist();
   console.log('HEADER_ALL_CMS_PASS=' + JSON.stringify({
     parents: expectedParents, added: journal.changed.length,
-    reused: journal.reused.length, firstChild: 'Tất cả', childCounts: journal.childCounts
+    reused: journal.reused.length, reordered: journal.reordered.length, firstChild: 'Tất cả', childCounts: journal.childCounts
   }));
 })().catch(error => {
   journal.status = 'FAILED';
