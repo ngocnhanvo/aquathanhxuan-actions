@@ -111,6 +111,14 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - Sửa đúng `.github/workflows/aqua-brand-catalog-dispatch-production.yml` để dùng secret token `SOURCE_REPO_PAT` đã có thay token mặc định `GITHUB_TOKEN`, thêm `request_id` (không thay production workflow, SHA, target, rollback hay lock); dispatcher [42599830507](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599830507) PASS, sản sinh **production run thật** [42599850218](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599850218).
 - Astro nguồn đúng SHA `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d`; prod run 42599850218 đang chạy tại thời điểm ghi. Tiếp theo: verify build/FTPS/activation status PASS, rồi chạy lại `scripts/aqua-brand-catalog-production-qa.cjs` (update `qa-requests/brand-catalog-production.json`) và khắc phục fail thật đến PASS.
 
+## Production phát hành đủ gallery và QA cuối — 09/11/2026
+
+- Writer gallery [42598203773](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42598203773) **PASS 6/6**; inventory [42598746988](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42598746988) **PASS:** 157/157 sản phẩm, `galleryUnresolved=[]`.
+- Trigger build bằng GITHUB_TOKEN (2 lượt 42599186749 / 42599487661) nhận HTTP success nhưng GitHub không tạo production run; chẩn đoán bằng danh sách `repository_dispatch` jobs. Sửa `aqua-brand-catalog-dispatch-production.yml` dùng secret `SOURCE_REPO_PAT` của chính repo Actions và payload thêm `request_id=context.sha`. Dispatcher [42599830507](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599830507) **PASS** và tạo production run thật.
+- Rebuild nguyên pipeline production cũ [42599850218](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599850218) **PASS**; log `Products.ts xong (157 changed, logs)`, gồm compile, FTPS, signed activation. Astro SHA giữ `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d`; mã frontend không cần thay.
+- Browser QA [42600653497](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42600653497) **IN_PROGRESS** tại lúc ghi; kiểm tra tất cả public Product links, 157 CMS identities, 20 category pages, gallery sửa của 6 Product ở frontend, banner/sort/recently viewed, source/target 1440/390 và ngoại lệ source image 184/3178/15280.
+- **Không báo DONE nếu QA chưa PASS.** Nếu QA fail, đọc `BRAND_CATALOG_PRODUCTION_PARITY_FAIL`, khắc phục đúng lỗi, rerun QA; không build lại nếu chỉ thay script QA.
+
 ## Chốt tiến độ
 
 - `SOURCE_INVENTORY_PASS`: Có.
