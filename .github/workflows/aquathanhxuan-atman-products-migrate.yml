@@ -1,0 +1,28 @@
+name: Aqua migrate verified Atman products
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-atman-products-migrate.yml'
+      - 'cms-requests/atman-products.json'
+permissions:
+  contents: read
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aquathanhxuan-atman-products-migrate.py
+      - run: python3 scripts/aquathanhxuan-atman-products-migrate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-atman-products-cms
+          path: artifacts/atman-products-migration.json
+          if-no-files-found: ignore
+          retention-days: 7
