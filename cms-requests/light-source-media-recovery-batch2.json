@@ -1,0 +1,14 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "destination": "https://admin.aquathanhxuan.io.vn",
+  "write_scope": "Only verified source IDs 1814, 3056, 3059, 3062 with inaccessible original Woo media; ASSET_DEFERRED evidence mandatory",
+  "ids": [
+    1814,
+    3056,
+    3059,
+    3062
+  ],
+  "source_job": 42632639554,
+  "attempt": 1
+}
