@@ -1,4 +1,5 @@
 {
-  "task": "inspect public 500 html response and existing routing",
-  "sourceSha": "e33e8865bec6b06e01d8e47651e8e4cf9565b19e"
+  "task": "recheck live product URL rewrite and current markup after deploy",
+  "sourceSha": "a9540b252236099fb6b1e2e1d007559c27fec9b1",
+  "deployRun": 42569898224
 }
