@@ -208,10 +208,16 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
    assert.equal((html.match(/\[table id=/g)||[]).length,1,'Unexpected shortcode count '+d.slug);
    // Old WordPress meta-box SEO inputs may be absent when Yoast uses the React panel.
    // Only write the native field when it is actually present.
-   const seoTitle=page.locator('#yoast_wpseo_title');
-   const seoDesc=page.locator('#yoast_wpseo_metadesc');
-   if(await seoTitle.count())await seoTitle.fill(d.title+' | Aqua Thanh Xuân');
-   if(await seoDesc.count())await seoDesc.fill(d.description);
+   await page.evaluate(({title,description})=>{
+     const inputTitle=document.querySelector('#yoast_wpseo_title');
+     const inputDesc=document.querySelector('#yoast_wpseo_metadesc');
+     for(const [node,value] of [[inputTitle,title],[inputDesc,description]]){
+       if(!(node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement))continue;
+       node.value=value;
+       node.dispatchEvent(new Event('input',{bubbles:true}));
+       node.dispatchEvent(new Event('change',{bubbles:true}));
+     }
+   },{title:d.title+' | Aqua Thanh Xuân',description:d.description});
    await page.locator('#publish').click();
    await page.waitForTimeout(2000);
    let published=null;
