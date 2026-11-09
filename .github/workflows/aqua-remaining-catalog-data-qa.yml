@@ -1,0 +1,33 @@
+name: Aqua nine remaining menu Products source parity
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/remaining-catalog-data.json'
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      AQUA_QA_DATA_ONLY: '1'
+      AQUA_QA_REQUEST_PATH: qa-requests/remaining-catalog-data.json
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-remaining-catalog-production-qa.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Read-only parity of original 389 Woo Products, taxonomy, prices, stock, long/short text and SEO
+        run: node scripts/aqua-remaining-catalog-production-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-catalog-data-parity
+          path: artifacts/aqua-remaining-catalog-production
+          if-no-files-found: ignore
+          retention-days: 14
