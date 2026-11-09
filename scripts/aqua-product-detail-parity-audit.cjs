@@ -114,6 +114,8 @@ async function audit(){
    };
    return items.map(item=>({
     slug:item.slug,
+    srcName:clean(item.src.name),
+    dstName:clean(item.dst.name),
     srcFull:clean(item.src.description),
     dstFull:clean(item.dst.description),
     srcShort:clean(item.src.short_description),
@@ -129,7 +131,7 @@ async function audit(){
    const sourceAttrs=(src.attributes||[]).map(x=>String(x.name||x.taxonomy||x.id||'')+':'+(x.terms||x.options||[]).map(t=>typeof t==='string'?t:t.name).sort().join(',')).sort().join('|');
    const targetAttrs=(dst.attributes||[]).map(x=>String(x.name||x.slug||x.id||'')+':'+(x.options||[]).slice().sort().join(',')).sort().join('|');
    const fields={
-    name:[String(src.name||''),String(dst.name||'')],
+    name:[c.srcName,c.dstName],
     price:[String(src.prices?.price||''),String(dst.price||'')],
     regularPrice:[String(src.prices?.regular_price||''),String(dst.regular_price||'')],
     stock:[String(src.is_in_stock),String(dst.stock_status==='instock')],
@@ -144,8 +146,14 @@ async function audit(){
     if(left&&!right)counts[name].targetEmpty++;
     const match=left===right;
     counts[name][match?'pass':'mismatch']++;
-    if(!match) flags.push({field:name,sourceLength:left.length,targetLength:right.length,
-       sourceSnippet:left.slice(0,110),targetSnippet:right.slice(0,110)});
+    if(!match){
+     let at=0;
+     while(at<Math.min(left.length,right.length)&&left[at]===right[at])at++;
+     flags.push({field:name,sourceLength:left.length,targetLength:right.length,
+       firstDifferenceIndex:at,
+       sourceAround:left.slice(Math.max(0,at-70),at+150),
+       targetAround:right.slice(Math.max(0,at-70),at+150)});
+    }
    }
    const srcHasDiscount=Number(src.prices?.price)<Number(src.prices?.regular_price);
    const dstHasDiscount=Number(dst.sale_price||0)>0;
