@@ -283,6 +283,21 @@ async function categoryPages(root,slug){
     await page.goto(FRONT+'/san-pham/thuong-hieu-dennerle?sort=price-desc',{waitUntil:'domcontentloaded'});
     const descending=await page.locator('[data-catalog-product-price]').evaluateAll(nodes=>nodes.map(x=>Number(x.getAttribute('data-catalog-product-price'))));
     assert.deepEqual(descending,[...descending].sort((a,b)=>b-a),'Dennerle sorting descending');
+    const rebuiltGalleries=[
+      ['hanging-kits-bo-kit-treo-den-wrgb2-pro-chihiros',3],
+      ['hanging-kits-bo-kit-treo-den-wrgb2-slim-chihiros',3],
+      ['phan-nen-dennerle-scapers-soil-4lit',2],
+      ['phan-nen-dennerle-scapers-soil-8lit',3],
+      ['phan-nen-chuyen-nghiep-cho-be-nuoi-va-sinh-san-tep-canh-shrimp-king-active-soil-loai-8l',2],
+      ['phan-nen-chuyen-nghiep-cho-be-nuoi-va-sinh-san-tep-canh-shrimp-king-active-soil-loai-4l',2],
+    ];
+    for(const [slug,expectedUniqueImages] of rebuiltGalleries){
+      const response=await page.goto(FRONT+'/san-pham/'+slug,{waitUntil:'domcontentloaded',timeout:60000});
+      assert.equal(response.status(),200,'Rebuilt Product detail gallery HTTP '+slug);
+      const actual=await page.locator('.product-gallery-thumb').count();
+      assert.equal(actual,expectedUniqueImages,'Build snapshot did not include every authentic gallery image '+slug);
+    }
+    console.log('BRAND_QA_REBUILT_GALLERIES_PASS='+JSON.stringify({count:rebuiltGalleries.length,width}));
     for(const missingImageSlug of ['su-ista-active-bio-pearl','seachem-matrix-0-5']){
       const detailResponse=await page.goto(FRONT+'/san-pham/'+missingImageSlug,{waitUntil:'domcontentloaded',timeout:60000});
       assert.equal(detailResponse.status(),200,'Source image-deferred Product permalink '+missingImageSlug);
