@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
+  "check": [
+    "regular_price",
+    "stock_status"
+  ],
+  "source": "WordPress wp/v2/product",
+  "expected": "WooCommerce wc/v3/products"
+}
