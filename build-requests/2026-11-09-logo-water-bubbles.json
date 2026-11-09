@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Add five subtle CSS-only water bubbles around the WordPress sourced logo on desktop; reduced-motion and mobile disabled; preserve search, account, cart, menu and layout",
+  "qa": "Desktop visual smoke/logo 5 decorative bubbles, no click interception; mobile 390 and reduced motion disabled; existing search-center QA"
+}
