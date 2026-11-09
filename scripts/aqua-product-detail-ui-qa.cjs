@@ -119,6 +119,58 @@ async function run(){
       report.screenshots.push(name);
       await source.close();
     }
+    // Read-only purchase UX QA: no WooCommerce cart mutation or test checkout.
+    const primary=page.locator('#product-purchase-actions');
+    const sticky=page.locator('#product-sticky-purchase');
+    assert.equal(await primary.count(),1,'Primary purchase actions '+slug+' '+width);
+    assert.equal(await sticky.count(),1,'Missing sticky purchase actions '+slug+' '+width);
+    assert.equal(await page.locator('#product-view-cart').getAttribute('href'),await page.locator('#data-content-wrapper').getAttribute('data-cart-slug'),'View cart URL must reuse real CMS route');
+    const order=await page.evaluate(()=>{
+      const buy=document.getElementById('product-purchase-actions');
+      const description=document.querySelector('.product-description');
+      return !!buy&&!!description&&Boolean(buy.compareDocumentPosition(description)&Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    assert(order,'Buy actions must precede long description '+slug+' '+width);
+    await page.evaluate(()=>{
+      const detail=document.querySelector('.product-description');
+      if(!detail)throw Error('Missing long description');
+      window.scrollTo(0,window.scrollY+detail.getBoundingClientRect().top+160);
+    });
+    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.classList.contains('is-visible'),{timeout:5000});
+    assert.equal(await sticky.getAttribute('aria-hidden'),'false','Sticky purchase accessible on detail scroll');
+    const cartLinks=await sticky.locator('a[href]').count();
+    assert.equal(cartLinks,1,'Sticky view-cart link '+slug);
+    const buyActions=await sticky.locator('#sticky-add-to-cart').count();
+    assert.equal(buyActions,1,'Sticky add-cart CTA '+slug);
+    const edges=await page.evaluate(()=>{
+       const bar=document.getElementById('product-sticky-purchase').getBoundingClientRect();
+       const widget=document.getElementById('contact-widget')?.getBoundingClientRect();
+       return {top:bar.top,bottom:bar.bottom,widgetBottom:widget?.bottom??null,viewport:innerHeight};
+    });
+    assert(edges.top>0 && edges.bottom<=edges.viewport+2,'Sticky bar must remain inside viewport '+slug+' '+width+' '+JSON.stringify(edges));
+    if(edges.widgetBottom!==null){
+      assert(edges.widgetBottom<=edges.top+8,'Consultation bubble overlaps sticky CTA '+slug+' '+width+' '+JSON.stringify(edges));
+    }
+    // Intercept the delegated click during capture to prove routing without posting /api/cart/add.
+    await page.evaluate(()=>{
+      window.__aquaStickyCtaSeen=false;
+      const intercept=(event)=>{
+        if(event.target instanceof Element && event.target.closest('#main-action-btn')){
+          window.__aquaStickyCtaSeen=true;
+          event.stopImmediatePropagation();
+          document.removeEventListener('click',intercept,true);
+        }
+      };
+      document.addEventListener('click',intercept,true);
+    });
+    await page.locator('#sticky-add-to-cart').click();
+    assert.equal(await page.evaluate(()=>window.__aquaStickyCtaSeen),true,'Sticky CTA must delegate to real primary button');
+    const stickyShot='sticky-'+slug+'-'+width+'.png';
+    await page.screenshot({path:DIR+'/'+stickyShot,fullPage:false});
+    report.screenshots.push(stickyShot);
+    await page.locator('footer').scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='true',{timeout:5000});
+    console.log('PRODUCT_PURCHASE_STICKY_PASS='+JSON.stringify({slug,width,stickyVisibleOnDescription:true,footerHidden:true,delegatedClick:true}));
     assert.deepEqual(errors,[],'Browser errors '+slug);
     await ctx.close();
     row.screenshots.push(screenshot);
