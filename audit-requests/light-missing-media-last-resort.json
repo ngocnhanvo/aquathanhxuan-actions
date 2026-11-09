@@ -1,0 +1,17 @@
+{
+  "project": "aquathanhxuan.com",
+  "mode": "READ_ONLY",
+  "source": "https://aquathanhxuan.com",
+  "source_product_ids": [
+    1814,
+    1815,
+    1816
+  ],
+  "original_source_media_ids": [
+    266690,
+    266681
+  ],
+  "scope": "Verify Product-owned description/gallery images and original path cached copies or archive snapshots. No target CMS writes; no unrelated images.",
+  "previous_artifact_run": 42643781321,
+  "attempt": 1
+}
