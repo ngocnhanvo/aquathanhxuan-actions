@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "6785500c81cc2846297e8ffd4b180c7f9f733531",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Center only the desktop header search field within the whole white header; keep logo, account, cart, purple menu unchanged",
+  "qa": "Header search centered at 900/1024/1440/1920; no overlap; mobile unchanged"
+}
