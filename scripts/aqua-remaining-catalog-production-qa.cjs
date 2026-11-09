@@ -142,9 +142,19 @@ async function main(){
    console.log('AQUA_REMAINING_CATEGORY_SOURCE_PASS='+JSON.stringify({slug,count:rows.length}));
   }
   assert.equal(originalById.size,389,'Original nine-menu product scope changed');
+  const selectedBatches=process.env.AQUA_QA_BATCHES?.trim()
+   ?new Set(process.env.AQUA_QA_BATCHES.split(',').map(value=>Number(value.trim()))):null;
+  if(selectedBatches){
+   assert(DATA_ONLY,'A partial-batch audit must never be called production QA');
+   assert([...selectedBatches].every(n=>Number.isInteger(n)&&n>=0&&n<13),'Invalid QA batch scope');
+  }
+  const auditProducts=[...originalById.values()].filter(src=>
+   !selectedBatches||selectedBatches.has(Number(src.id)%13));
+  assert(auditProducts.length>0,'No source Product selected for QA');
+  console.log('AQUA_REMAINING_AUDIT_SOURCE_SCOPE='+JSON.stringify({all:originalById.size,auditing:auditProducts.length,batches:selectedBatches?[...selectedBatches]:null}));
   const originalBySlug=new Map();
   let deferred=0;
-  for(const src of originalById.values()){
+  for(const src of auditProducts){
    assert(src.type==='simple'&&src.slug&&src.name,'Invalid original source Product');
    assert(!originalBySlug.has(src.slug),'Original Product slug collision '+src.slug);
    originalBySlug.set(src.slug,src);
@@ -168,9 +178,9 @@ async function main(){
    if(src.description?.trim())assert(dst.description?.trim(),'Missing long description '+src.slug);
    if(src.short_description?.trim())assert(dst.short_description?.trim(),'Missing short description '+src.slug);
   }
-  console.log('AQUA_REMAINING_WOO_PARITY_PASS='+JSON.stringify({unique:originalById.size,roots:roots.length,mediaDeferred:deferred}));
-  // HTML head remains an independent SEO source. Validate the entire set in controlled batches.
-  const all=[...originalById.values()];
+  console.log('AQUA_REMAINING_WOO_PARITY_PASS='+JSON.stringify({unique:auditProducts.length,scopeTotal:originalById.size,roots:roots.length,mediaDeferred:deferred}));
+  // HTML head remains an independent SEO source. Validate the selected set in controlled batches.
+  const all=auditProducts;
   let seoTitles=0,seoDescriptions=0,missingTitles=0,missingDescriptions=0;
   for(let i=0;i<all.length;i+=5){
    const chunk=all.slice(i,i+5);
@@ -197,7 +207,7 @@ async function main(){
   save();
   if(DATA_ONLY){
    report.status='DATA_PASS';save();
-   console.log('AQUA_REMAINING_DATA_QA_PASS=389');
+   console.log('AQUA_REMAINING_DATA_QA_PASS='+all.length);
    return;
   }
   for(const width of [1440,390]){
