@@ -12,12 +12,27 @@ const date=new Date().toISOString();
 const output='artifacts/brand-catalog';
 fs.mkdirSync(output,{recursive:true});
 const auth={};
+async function retry(label, fn){
+ let failure;
+ for(let attempt=0;attempt<4;attempt++){
+  try{return await fn()}catch(e){
+   failure=e;
+   const temporary=/ECONNRESET|ETIMEDOUT|socket hang up|timeout|HTTP (429|50[0-9]|52[0-9])/i.test(String(e));
+   if(!temporary||attempt===3)break;
+   console.log('BRAND_NETWORK_RETRY='+JSON.stringify({label,attempt:attempt+1,error:String(e).slice(0,120)}));
+   await new Promise(resolve=>setTimeout(resolve,750*(attempt+1)));
+  }
+ }
+ throw failure;
+}
 async function get(url,opts={}){
- const res=await fetch(url,{signal:AbortSignal.timeout(25000),headers:{Accept:'application/json',...opts.headers}});
- let data;
- try{data=await res.json()}catch(e){throw Error('JSON '+res.status+' '+url+' '+e)}
- if(!res.ok)throw Error('HTTP '+res.status+' '+url+' '+JSON.stringify(data).slice(0,150));
- return {data,total:Number(res.headers.get('x-wp-total')||0),pages:Number(res.headers.get('x-wp-totalpages')||1)};
+ return retry(url,async()=>{
+  const res=await fetch(url,{signal:AbortSignal.timeout(25000),headers:{Accept:'application/json',...opts.headers}});
+  let data;
+  try{data=await res.json()}catch(e){throw Error('JSON '+res.status+' '+url+' '+e)}
+  if(!res.ok)throw Error('HTTP '+res.status+' '+url+' '+JSON.stringify(data).slice(0,150));
+  return {data,total:Number(res.headers.get('x-wp-total')||0),pages:Number(res.headers.get('x-wp-totalpages')||1)};
+ });
 }
 async function allPages(base,perPage=100,maxPages=30){
  let out=[];
@@ -49,7 +64,7 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
   // Target WC REST v3 must read unpublished category data with WordPress nonce
   const targetCats=[];
   for(let p=1;p<=30;p++){
-   const r=await page.request.get(target+'/wp-json/wc/v3/products/categories?per_page=100&page='+p,{headers:auth.headers,timeout:40000});
+   const r=await retry('target categories '+p,()=>page.request.get(target+'/wp-json/wc/v3/products/categories?per_page=100&page='+p,{headers:auth.headers,timeout:40000}));
    if(r.status()===400)break;
    assert.equal(r.status(),200,'Target WC category API '+p);
    let arr=await r.json(); assert(Array.isArray(arr),'Invalid target category list');
@@ -64,14 +79,27 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
   const sourceBrands=srcCats.filter(x=>Number(x.parent)===Number(srcParent.id));
   const targetBrands=targetCats.filter(x=>Number(x.parent)===Number(tgtParent.id));
   console.log('BRAND_CATEGORY_TOPOLOGY='+JSON.stringify({sourceCount:srcCats.length,targetCount:targetCats.length,sourceParent:{id:srcParent.id,slug:srcParent.slug,name:srcParent.name},targetParent:{id:tgtParent.id,slug:tgtParent.slug,name:tgtParent.name},sourceBrands:sourceBrands.map(x=>({id:x.id,name:x.name,slug:x.slug,count:x.count})),targetBrands:targetBrands.map(x=>({id:x.id,name:x.name,slug:x.slug,count:x.count}))}));
+  const sourceByNorm=new Map(srcCats.map(cat=>[norm(cat.name),cat]));
+  const inspected=targetBrands.map(targetCategory=>{
+    let sourceCategory=sourceBrands.find(c=>norm(c.name)===norm(targetCategory.name));
+    if(!sourceCategory&&targetCategory.slug==='may-loc-fksc'){
+       // FKSC is a source equipment taxonomy rather than a direct source brand.
+       const candidates=srcCats.filter(c=>norm(c.name)==='fksc'||c.slug==='may-loc-fksc');
+       if(candidates.length===1)sourceCategory=candidates[0];
+    }
+    return {targetCategory,sourceCategory};
+  });
+  console.log('BRAND_CATALOG_MATCHES='+JSON.stringify(inspected.map(x=>({
+    target:{id:x.targetCategory.id,slug:x.targetCategory.slug,name:x.targetCategory.name},
+    source:x.sourceCategory?{id:x.sourceCategory.id,slug:x.sourceCategory.slug,name:x.sourceCategory.name}:null
+  }))));
   const results=[];
-  for(const cat of sourceBrands){
-   const identity=norm(cat.name);
-   const matches=targetBrands.filter(x=>norm(x.name)===identity);
-   let match=matches.length===1?matches[0]:null;
-   if(!match){
-    const bySlug=targetBrands.filter(x=>x.slug===cat.slug||x.slug==='thuong-hieu-'+cat.slug);
-    if(bySlug.length===1)match=bySlug[0];
+  for(const {sourceCategory:cat,targetCategory:match} of inspected){
+   if(!cat){
+      results.push({source:null,target:{id:match.id,name:match.name,slug:match.slug,count:0},
+        status:'SOURCE_CATEGORY_NOT_FOUND',srcProducts:[],tgtProducts:[],missing:[]});
+      console.log('BRAND_SOURCE_CATEGORY_NOT_FOUND='+match.name);
+      continue;
    }
    const srcList=await allPages(source+'/wp-json/wc/store/v1/products?category='+cat.id,100,40);
    const srcIds=srcList.map(x=>Number(x.id));
@@ -79,7 +107,7 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
    const targetList=[];
    if(match){
     for(let p=1;p<=20;p++){
-      const resp=await page.request.get(target+'/wp-json/wc/v3/products?per_page=100&page='+p+'&category='+match.id+'&status=any',{headers:auth.headers,timeout:40000});
+      const resp=await retry('target products '+match.id+' page '+p,()=>page.request.get(target+'/wp-json/wc/v3/products?per_page=100&page='+p+'&category='+match.id+'&status=any',{headers:auth.headers,timeout:40000}));
       if(resp.status()===400)break;
       assert.equal(resp.status(),200,'Target WC brand products status '+cat.name+' page '+p);
       const arr=await resp.json();assert(Array.isArray(arr));
