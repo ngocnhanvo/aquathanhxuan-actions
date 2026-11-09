@@ -13,6 +13,6 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-      - run: python3 -m py_compile scripts/aqua-brand-two-deferred-products-recover.py scripts/aqua-brand-catalog-migrate.py
+      - run: python3 -m py_compile scripts/aqua-brand-two-deferred-products-recover.py scripts/aqua-brand-catalog-migrate.py scripts/aqua-brand-catalog-collision-rescue.py
       - run: node --check scripts/aqua-brand-product-routes-create.cjs
       - run: node --check scripts/aqua-brand-catalog-production-qa.cjs
