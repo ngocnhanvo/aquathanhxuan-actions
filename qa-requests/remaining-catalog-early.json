@@ -3,18 +3,19 @@
   "source": "https://aquathanhxuan.com",
   "target": "https://admin.aquathanhxuan.io.vn",
   "sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
-  "scope": "Read-only independent original Product parity for final completed import batch 12",
+  "scope": "Read-only final 33 source-verified Product parity batch 12, scope from request JSON not workflow constant",
   "sourceMigrationRun": 42663313074,
   "batches": [
     12
   ],
-  "attempt": 7,
-  "reason": "All 13 import batches and full 389 inventory verify succeeded; final independent source-HTML/Yoast check for last 33",
+  "attempt": 8,
+  "reason": "Correct hardcoded batch-selector bug, using request batches [12], after verified migration 389/389 and source HTML SEO parity",
   "verifiedRuns": [
     42676337353,
     42677338267,
     42678118188,
     42679696661,
     42680375081
-  ]
+  ],
+  "replacesRun": 42682795344
 }
