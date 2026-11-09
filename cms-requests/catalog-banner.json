@@ -1,0 +1,9 @@
+{
+  "task": "recover existing native TablePress 157, insert two previously imported Media images and shortcode on Page 82457",
+  "sourceSha": "aadca6a94559f67bfdf3aba13268c9849e532c9b",
+  "writeScope": [
+    "tablepress 157",
+    "page 82457",
+    "media 82721 and 82722"
+  ]
+}
