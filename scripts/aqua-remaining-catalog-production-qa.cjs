@@ -5,6 +5,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const {verifyChildCards}=require('./aqua-remaining-verified-curated-child.js');
 const SOURCE='https://aquathanhxuan.com';
 const TARGET='https://admin.aquathanhxuan.io.vn';
 const PUBLIC='https://aquathanhxuan.io.vn';
@@ -125,6 +126,7 @@ async function main(){
      'Different target Product IDs own same slug '+p.slug+': '+previous?.id+' vs '+p.id);
    targetBySlug.set(p.slug,p);
   }
+  const targetById=new Map([...targetBySlug.values()].map(p=>[Number(p.id),p]));
   console.log('AQUA_REMAINING_TARGET_PAGING='+JSON.stringify({
     fetched:targetProducts.length,uniqueIds:seenTargetIds.size,duplicatesAcrossPages:repeatedPageRows,
   }));
@@ -180,7 +182,7 @@ async function main(){
    assert(target,'Verified destination child category unavailable '+cat.slug);
    const descendants=[...originalById.values()].filter(product=>
     (product.categories||[]).some(c=>Number(c.id)===Number(cat.id)));
-   childCases.push({sourceId:Number(cat.id),sourceSlug:cat.slug,targetId,targetSlug:target.slug,
+   childCases.push({sourceId:Number(cat.id),sourceRootId:Number(cat.parent||0),sourceSlug:cat.slug,targetId,targetSlug:target.slug,
     sourceCount:descendants.length,expectedIds:descendants.map(product=>Number(targetBySlug.get(product.slug)?.id))});
   }
   assert.equal(childCases.length,46,'Original nine menu child taxonomy count changed');
@@ -353,9 +355,16 @@ async function main(){
     const displayed=await childNodes.count();
     if(child.sourceCount>0)assert(displayed>0,'Original child category has source Products but no cards '+child.targetSlug);
     const targetIds=await childNodes.evaluateAll(nodes=>nodes.map(n=>Number(n.getAttribute('data-catalog-product'))));
-    const expected=new Set(child.expectedIds);
-    assert(targetIds.every(id=>Number.isInteger(id)&&id>0&&expected.has(id)),
-      'Unverified Product card in child category '+child.targetSlug);
+    const membership=verifyChildCards({
+      targetCategoryId:child.targetId,sourceRootId:child.sourceRootId,
+      expectedIds:child.expectedIds,renderedIds:targetIds,
+      targetById,sourceById:originalById,
+    });
+    assert.equal(membership.invalid.length,0,
+      'Unverified Product card in child category '+child.targetSlug+': '+JSON.stringify(membership.invalid.slice(0,6)));
+    if(membership.curated.length)console.log('AQUA_REMAINING_CHILD_VERIFIED_CURATION='+JSON.stringify({
+      slug:child.targetSlug,width,verifiedReferences:membership.curated,
+    }));
     assert.equal(new Set(targetIds).size,targetIds.length,'Repeated Product card in child category '+child.targetSlug);
     const validCartActions=await childNodes.evaluateAll(nodes=>nodes.every(card=>
       !!card.querySelector('button[data-product-card-add], button:disabled')));
@@ -363,7 +372,8 @@ async function main(){
     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
     assert(overflow<=3,'Original child category horizontal overflow '+child.targetSlug+' '+width);
     report.checks.push({type:'child-category',slug:child.targetSlug,sourceId:child.sourceId,
-      sourceCount:child.sourceCount,width,cardCount:displayed,overflow,http:childResponse.status()});
+      sourceCount:child.sourceCount,width,cardCount:displayed,curatedReferences:membership.curated,
+      overflow,http:childResponse.status()});
     console.log('AQUA_REMAINING_CHILD_CATEGORY_UI_PASS='+JSON.stringify({slug:child.targetSlug,width,cardCount:displayed,sourceCount:child.sourceCount}));
     save();
    }
