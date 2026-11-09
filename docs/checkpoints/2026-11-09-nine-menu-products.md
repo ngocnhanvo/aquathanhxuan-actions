@@ -145,3 +145,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - [New WordPress production build trigger #42689011262](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42689011262) from Actions commit `c37c4757` pinned Astro master `ed8bd633bb5447efb74ffa161d93277166d2c88d`. At checkpoint trigger was in_progress; must check downstream deploy run ID, output hash marker and 134 browser QA before DONE.
 - Previous build [#42685676271](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42685676271) FAILED from timeout; do not misreport success, do not rerun old SHA.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## 2026-11-10 — production deploy PASS, browser QA đang chạy
+
+- [WordPress build trigger #42689011262](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42689011262) **SUCCESS**, log `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS` for Astro `master` source SHA `ed8bd633bb5447efb74ffa161d93277166d2c88d`; Header QA PASS.
+- [Downstream deployment #42689171599](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42689171599) **SUCCESS**, source SHA confirmed, generated SEO files/package/ZIP staging verified, signed unzip successful and PM2 reload notified. Previous #42685676271 failed due unpaged product logs timeout, and is superseded by successful paged endpoint/PHP release and new Astro source; do not rerun old build.
+- [Production browser QA #42692639227](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42692639227) triggered by Actions commit `49ec8a0a87fe66c992811505420bb28bc7cc6cdd` using `qa-requests/remaining-catalog-production.json`, pinned exact deployed SHA. Scope now **146 browser checks**: (9 original roots + 9 representative product details + 46 source child taxonomy + 6 menu-only categories + 3 special product details) × desktop/mobile.
+- Await browser QA verdict and artifact; if failure, read exact check and fix source/CMS within approved scope, test again and only then declare DONE. Data source-target parity #42684232514 remains PASS for 389 root + 2 UV.
+- Trạng thái: PARTIAL — chưa hoàn tất.
