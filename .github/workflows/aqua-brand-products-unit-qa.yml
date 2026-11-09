@@ -1,0 +1,36 @@
+name: Aqua brand listing and WooCommerce detail price unit QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-brand-products-unit-qa.yml'
+      - 'qa-requests/brand-products-unit.json'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - name: Check exact Astro source commit
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 7d8ee2f15d5375a50432a0e329f05ec7a31a8422
+          echo "AQUA_BRAND_SOURCE_SHA=$(git rev-parse HEAD)"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run src/lib/wordpress/products/catalogSort.test.ts src/lib/seo/listingTitles.test.ts src/lib/wordpress/products/detailPrice.test.ts
+      - run: node --test scripts/atman-redirect-rule.test.mjs
