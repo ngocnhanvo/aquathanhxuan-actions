@@ -1,0 +1,17 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
+  "scope": "Read-only verify source Product IDs modulo 13 belonging only to successful import batches 0-6, Woo price, stock, category, descriptions, SEO title/metadesc",
+  "sourceMigrationRun": 42663313074,
+  "batches": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ]
+}
