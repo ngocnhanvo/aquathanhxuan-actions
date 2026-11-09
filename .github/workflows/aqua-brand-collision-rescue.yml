@@ -1,0 +1,32 @@
+name: Aqua rescue 10 source products using authentic media size variants
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-collision-rescue.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 78
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: brand-c-10-collision-rescue
+      BRAND_TARGET_SLUGS: moutaintree,neo,prodac-italia
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-catalog-collision-rescue.py
+      - run: python3 scripts/aqua-brand-catalog-collision-rescue.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-c-10-recovered
+          path: artifacts/aqua-brand-migration/brand-c-10-collision-rescue.json
+          if-no-files-found: ignore
+          retention-days: 14
