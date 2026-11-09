@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: aqua-brand-catalog-writes
+  group: aqua-brand-only-records-3178-15280
   cancel-in-progress: false
 jobs:
   recover:
