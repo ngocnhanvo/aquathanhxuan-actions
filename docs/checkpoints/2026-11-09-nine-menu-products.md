@@ -70,3 +70,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - `scripts/aqua-remaining-catalog-production-qa.cjs` đã tăng từ 36 lên **134 browser cases**: 9 danh mục gốc + 9 source detail + 3 exact verified special details (2 Gebo UV + 1 Cây Bonsai) + **46 danh mục con nguồn** trên desktop/mobile. QA source taxonomy được xác minh bằng source ID và Product card Woo ID, không chỉ HTTP 200.
 - `scripts/aqua-remaining-product-routes.cjs` và UV route script chỉ xem rule đã published/enabled là "covered", không tái dùng draft/disabled rule. **Chưa trigger URL writers**, vẫn chờ import + verify PASS.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## Tiếp nối 2026-11-10 — mười lô PASS và QA 299/389
+
+- [Import #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074): batches **0..9 / 13 PASS**, không batch FAILED; batches 10, 11 còn `in_progress`, 12 `queued`. Chưa có job `verify` toàn bộ, không tạo Rewrite/UV khi thiếu gate.
+- [Read-only QA #42678118188](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42678118188) **SUCCESS**: batch 9 **29/29** parity Product price, regular price, stock, category, mô tả dài/ngắn, SEO source title → Yoast 29/29; source không có metadesc 29 item.
+- Cộng kết quả QA độc lập không trùng: batches 0..6 **210** + batches 7..8 **60** + batch 9 **29** = **299/389**. Còn batches 10,11,12 chưa nghiệm thu.
+- Sau import 13/13 + `verify` PASS: tạo `cms-requests/remaining-product-routes.json`, rồi `cms-requests/special-menu-products.json` cho 2 UV + Bonsai, tiếp `qa-requests/remaining-catalog-data.json`, production Astro build theo pipeline hiện có và `qa-requests/remaining-catalog-production.json`.
+- Không nhập lại lô thành công, không thay ảnh giả cho nguồn 404. Trạng thái **PARTIAL — chưa hoàn tất**.
