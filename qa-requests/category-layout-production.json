@@ -2,5 +2,6 @@
   "source_sha": "a9540b252236099fb6b1e2e1d007559c27fec9b1",
   "deploy_run_id": 42569898224,
   "scope": "Two native CMS banners, 9 Atman products, all 9 detail routes, sorting, recent views, SEO, desktop and mobile",
-  "expected_products": 9
+  "expected_products": 9,
+  "diagnostic": "log remaining shortcode metadata source"
 }
