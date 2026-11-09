@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strict read-after-write recovery of five source-light Products with no usable source cover.
+"""Strict read-after-write recovery of nine source-light Products with no usable source cover.
 Only exact, independently observed source Product IDs are allowed. Images are never fabricated.
 """
 import html, http.cookiejar, json, os, re, urllib.error, urllib.parse, urllib.request
@@ -10,9 +10,13 @@ SRC='https://aquathanhxuan.com'
 WP='https://admin.aquathanhxuan.io.vn'
 EXPECTED={
   1815:None,
+  1816:None,
+  3052:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
   3054:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
   3057:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
+  3058:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
   3060:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
+  3061:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
   3063:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
 }
 MAP={1546:1768,1525:1813,1482:1814,1545:1815,1526:1816,2175:1817,2176:1818,1524:1792}
@@ -121,7 +125,7 @@ if m:
   try:nonce=json.loads(m.group(1)).get('nonce','')
   except json.JSONDecodeError:pass
 if not nonce:
-m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',dash)
+  m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',dash)
   nonce=m.group(1) if m else ''
 assert nonce,'Missing WP REST nonce'
 def api(path,method='GET',obj=None):
