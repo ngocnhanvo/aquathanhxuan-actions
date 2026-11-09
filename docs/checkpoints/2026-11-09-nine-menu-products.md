@@ -102,3 +102,12 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - QA độc lập đã PASS 356/389 Product (batches 0..11): #42676337353 (210), #42677338267 (60), #42678118188 (29), #42679696661 (30), #42680375081 (27). Batch 12 chưa có QA độc lập; job `verify` đang đọc nguồn/đích.
 - Chỉ khi `verify` job SUCCESS và toàn bộ run SUCCESS mới tạo request `cms-requests/remaining-product-routes.json`; tiếp theo 2 UV + Bonsai, full QA, production build, 134 browser cases. `ASSET_DEFERRED` tiếp tục giữ nguyên chứng cứ media gốc HTTP 404.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## Tiếp tục 2026-11-10 — import + Rewrite + QA 389 PASS
+
+- [Migration #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074) **COMPLETED SUCCESS**; preflight/pilot/13 batches/verify PASS. Final verification `AQUA_REMAINING_INVENTORY`: `unique_count=389`, `unique_missing=0`, `identity_conflicts=0`, `missing_target_category_count=0`, `target_scanned_count=460`.
+- [Native Rewrites #42682739649](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42682739649) **COMPLETED SUCCESS**: 130 Product paths previously covered; created 11 new published-enabled Rewrite rules grouping 259 source slug paths. Writer created only source-verified WordPress rules, no modification to existing published rules.
+- Read-only QA batches 0..11 PASS 356/356; [final batch 12 QA #42683429503](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42683429503) **SUCCESS 33/33** (`AQUA_REMAINING_AUDIT_SOURCE_SCOPE` `[12]`, source title → Yoast 33/33). Total independent **389/389** Products parity PASS; source HTML metadesc absent all checked. Prior [#42682795344](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42682795344) accidentally re-audited batch11 due hardcoded workflow env. Fixed in commits `4207cac8` and `db9320b3`; final rerun is accurate.
+- [Special UV + Bonsai workflow #42683571067](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42683571067) triggered after Rewrite PASS, in_progress. Created request commit `1c502504`; waits on exact two Gebo UV source IDs 5054,4355 and Bonsai source 3321.
+- Still NOT DONE: special writer+UV route PASS; full data-only QA 389 + 2 UV + Bonsai PASS; production Astro Build Website and deploy marker; 134 browser QA.
+- Trạng thái: PARTIAL — chưa hoàn tất.
