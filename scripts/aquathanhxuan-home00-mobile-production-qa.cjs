@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='1a835b579a239ea6dc87ce4cf02018c4ec62c4c9';
+const expectedSha='88a501b95e7063434defc701658a9438837bf23c';
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844],[320,700]];
 const output='artifacts/home00-mobile-production';
 fs.mkdirSync(output,{recursive:true});
@@ -62,6 +62,33 @@ const sameOptimizedAsset=(url,original)=>String(url||'').includes(original.repla
    const docWidth=await page.evaluate(()=>document.documentElement.scrollWidth);
    assert(docWidth<=width+1,'Horizontal overflow '+width);
    await hero.screenshot({path:output+'/hero-'+width+'x'+height+'.png'});
+   // Verify the three approved section icons against actual deployed HTML.
+   // Headings remain editable ESC Table text; icons are decorative Astro SVGs.
+   for(const [tableId,title,shape] of [
+     ['home_06','Máy lọc','filter'],
+     ['home_07','Đèn','bulb'],
+   ]){
+     const heading=page.locator('[data-aqua-home-substrate][data-esc-source-table="'+tableId+'"] .aqua-substrate-catalog__heading');
+     await heading.waitFor({state:'visible',timeout:20000});
+     assert.equal((await heading.textContent()).trim(),title,tableId+' title no longer comes from native table');
+     const svg=heading.locator('svg');
+     assert.equal(await svg.count(),1,tableId+' missing icon');
+     const selected=shape==='filter'?'rect[x="2.5"][width="19"]':'path[d^="M9 17.5h6"]';
+     assert.equal(await svg.locator(selected).count(),1,tableId+' icon shape mismatch');
+     assert((await heading.evaluate(node=>getComputedStyle(node).backgroundImage)).includes('linear-gradient'),
+       tableId+' heading gradient missing');
+     await heading.screenshot({path:output+'/heading-'+tableId+'-'+width+'x'+height+'.png'});
+     console.log('HOME_SECTION_ICON_PASS='+tableId+' '+title+' '+width+'x'+height);
+   }
+   const comboHeading=page.locator('[data-aqua-home-combo] .aqua-hot-combo__header h2');
+   await comboHeading.waitFor({state:'visible',timeout:20000});
+   assert.equal((await comboHeading.textContent()).trim(),'Hot combo','Native Hot combo title changed');
+   assert.equal(await comboHeading.locator('svg path[d^="M3 10h18"]').count(),1,'Hot combo gift icon missing');
+   assert((await comboHeading.evaluate(node=>getComputedStyle(node).backgroundImage)).includes('linear-gradient'),
+     'Hot combo gradient missing');
+   await comboHeading.screenshot({path:output+'/heading-home_03-'+width+'x'+height+'.png'});
+   console.log('HOME_SECTION_ICON_PASS=home_03 Hot combo '+width+'x'+height);
+
    await page.close();
   }
   if(process.env.WP_ADMIN_USERNAME&&process.env.WP_ADMIN_PASSWORD){
