@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strict read-after-write recovery of nine source-light Products with no usable source cover.
+"""Strict read-after-write recovery of exact source-light Products with no usable source cover.
 Only exact, independently observed source Product IDs are allowed. Images are never fabricated.
 """
 import html, http.cookiejar, json, os, re, urllib.error, urllib.parse, urllib.request
@@ -9,16 +9,29 @@ from html.parser import HTMLParser
 SRC='https://aquathanhxuan.com'
 WP='https://admin.aquathanhxuan.io.vn'
 EXPECTED={
+  1814:None,
   1815:None,
   1816:None,
   3052:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
   3054:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
+  3056:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
   3057:'Thiet-ke-chua-co-ten-2024-05-19T124426.236.png',
   3058:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
+  3059:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
   3060:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
   3061:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
+  3062:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
   3063:'Thiet-ke-chua-co-ten-2024-05-19T123505.164.png',
 }
+# A scoped follow-up can run only the still-missing source IDs; never use
+# loose category or name matching to extend the write scope.
+requested=os.environ.get('LIGHT_RECOVERY_ONLY_SOURCE_IDS','').strip()
+if requested:
+  values=requested.split(',')
+  assert all(x.isdigit() for x in values) and len(set(values))==len(values), 'Invalid recovery source ID scope'
+  ids={int(x) for x in values}
+  assert ids and ids.issubset(EXPECTED), 'Requested Product outside exact verified recovery set'
+  EXPECTED={sid:filename for sid,filename in EXPECTED.items() if sid in ids}
 MAP={1546:1768,1525:1813,1482:1814,1545:1815,1526:1816,2175:1817,2176:1818,1524:1792}
 out=Path('artifacts/aqua-light-media-recovery')
 out.mkdir(parents=True,exist_ok=True)
