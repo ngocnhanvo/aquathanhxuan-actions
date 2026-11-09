@@ -86,8 +86,14 @@ const sameOptimizedAsset=(url,original)=>String(url||'').includes(original.repla
    assert(rows[4][imageCol].includes('alt='),'Mobile source alt missing');
    assert.equal(rows[4][rows[0].indexOf('show_text')],'0','Mobile image overlay text must be off');
    console.log('HOME00_NATIVE_CMS_READBACK_PASS=desktop:2,mobile:1,row:2');
-   const resp=await admin.request.get(wp+'/wp-json/wp/v2/media/82696?context=edit');
-   assert.equal(resp.status(),200,'Mobile asset not in Media Library');
+   const nonceResponse=await admin.request.get(wp+'/wp-admin/admin-ajax.php?action=rest-nonce');
+   assert.equal(nonceResponse.status(),200,'Cannot fetch authenticated WordPress REST nonce');
+   const nonce=(await nonceResponse.text()).trim();
+   assert(nonce,'Empty WordPress REST nonce');
+   const resp=await admin.request.get(wp+'/wp-json/wp/v2/media/82696?context=edit',{
+     headers:{'X-WP-Nonce':nonce,Accept:'application/json'}
+   });
+   assert.equal(resp.status(),200,'Mobile asset REST readback failed status='+resp.status());
    const media=await resp.json();
    assert(media.source_url?.includes('aqua-thanh-xuan-mobile-hero.webp'),'Media URL mismatch');
    assert(String(media.alt_text||'').length>12,'Mobile ALT missing');
