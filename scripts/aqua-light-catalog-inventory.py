@@ -17,10 +17,10 @@ def get(url,headers=None):
         return r.read().decode('utf-8','replace')
 def source(path):return json.loads(get(SOURCE+path))
 def normal(s):return ''.join(html.unescape(re.sub('<[^>]*>',' ',str(s or ''))).casefold().split())
-def pages(url,max_pages=30):
+def pages(url,max_pages=30,headers=None):
     result=[]
     for p in range(1,max_pages+1):
-        rows=json.loads(get(url+('&' if '?' in url else '?')+'per_page=100&page='+str(p)))
+        rows=json.loads(get(url+('&' if '?' in url else '?')+'per_page=100&page='+str(p),headers))
         assert isinstance(rows,list),'Invalid pagination: '+url
         result.extend(rows)
         if len(rows)<100:break
@@ -40,7 +40,7 @@ if not nonce:
 assert nonce,'Missing authorized WP REST nonce'
 def target(path):return json.loads(get(DEST+path,{'X-WP-Nonce':nonce}))
 src_cats=pages(SOURCE+'/wp-json/wc/store/v1/products/categories')
-dst_cats=pages(DEST+'/wp-json/wc/v3/products/categories') # public Woo endpoint may require auth
+dst_cats=pages(DEST+'/wp-json/wc/v3/products/categories',headers={'X-WP-Nonce':nonce})
 src_roots=[c for c in src_cats if c.get('slug')=='den' and not int(c.get('parent') or 0)]
 dst_roots=[c for c in dst_cats if c.get('slug')=='den' and not int(c.get('parent') or 0)]
 assert len(src_roots)==len(dst_roots)==1,'Missing or ambiguous light root'
