@@ -1,0 +1,721 @@
+{
+  "runId": 42603746430,
+  "commit": "1c8901f664be85e779df0337973d1dc1fe0c66e7",
+  "startedAt": "2026-11-09T10:48:00.586Z",
+  "status": "GAPS_FOUND",
+  "scope": "20 brand categories, storefront products; source wc/store/v1 vs authenticated target wc/v3; 4 public detail samples",
+  "distinctProducts": 157,
+  "mismatchedProducts": 28,
+  "comparisons": {
+    "name": {
+      "pass": 130,
+      "mismatch": 27,
+      "sourceNonEmpty": 157,
+      "targetEmpty": 0
+    },
+    "price": {
+      "pass": 157,
+      "mismatch": 0,
+      "sourceNonEmpty": 157,
+      "targetEmpty": 0
+    },
+    "regularPrice": {
+      "pass": 157,
+      "mismatch": 0,
+      "sourceNonEmpty": 157,
+      "targetEmpty": 0
+    },
+    "stock": {
+      "pass": 157,
+      "mismatch": 0,
+      "sourceNonEmpty": 157,
+      "targetEmpty": 0
+    },
+    "full": {
+      "pass": 154,
+      "mismatch": 3,
+      "sourceNonEmpty": 157,
+      "targetEmpty": 0
+    },
+    "short": {
+      "pass": 157,
+      "mismatch": 0,
+      "sourceNonEmpty": 153,
+      "targetEmpty": 0
+    },
+    "attributes": {
+      "pass": 157,
+      "mismatch": 0,
+      "sourceNonEmpty": 0,
+      "targetEmpty": 0
+    },
+    "sku": {
+      "pass": 157,
+      "mismatch": 0,
+      "sourceNonEmpty": 0,
+      "targetEmpty": 0
+    }
+  },
+  "categories": [
+    {
+      "name": "ATMAN",
+      "sourceCount": 9,
+      "targetCount": 9
+    },
+    {
+      "name": "CHIHIROS",
+      "sourceCount": 14,
+      "targetCount": 14
+    },
+    {
+      "name": "CONTINUUM AQUATICS",
+      "sourceCount": 5,
+      "targetCount": 5
+    },
+    {
+      "name": "DENNERLE",
+      "sourceCount": 13,
+      "targetCount": 13
+    },
+    {
+      "name": "EHEIM",
+      "sourceCount": 1,
+      "targetCount": 1
+    },
+    {
+      "name": "FKSC",
+      "sourceCount": 0,
+      "targetCount": 0,
+      "exception": "FKSC source category empty"
+    },
+    {
+      "name": "GEX",
+      "sourceCount": 7,
+      "targetCount": 7
+    },
+    {
+      "name": "ISTA",
+      "sourceCount": 4,
+      "targetCount": 4
+    },
+    {
+      "name": "JEBAO",
+      "sourceCount": 15,
+      "targetCount": 15
+    },
+    {
+      "name": "JECOD",
+      "sourceCount": 10,
+      "targetCount": 10
+    },
+    {
+      "name": "MOUTAIN TREE",
+      "sourceCount": 5,
+      "targetCount": 5
+    },
+    {
+      "name": "MUFAN",
+      "sourceCount": 6,
+      "targetCount": 6
+    },
+    {
+      "name": "NEO",
+      "sourceCount": 6,
+      "targetCount": 6
+    },
+    {
+      "name": "NUPHAR",
+      "sourceCount": 6,
+      "targetCount": 6
+    },
+    {
+      "name": "PRODAC ITALIA",
+      "sourceCount": 18,
+      "targetCount": 18
+    },
+    {
+      "name": "PRODIBIO",
+      "sourceCount": 5,
+      "targetCount": 5
+    },
+    {
+      "name": "SEACHEM",
+      "sourceCount": 25,
+      "targetCount": 25
+    },
+    {
+      "name": "SERA",
+      "sourceCount": 5,
+      "targetCount": 5
+    },
+    {
+      "name": "SOBO",
+      "sourceCount": 2,
+      "targetCount": 2
+    },
+    {
+      "name": "WEEK AQUA",
+      "sourceCount": 1,
+      "targetCount": 1
+    }
+  ],
+  "differences": [
+    {
+      "slug": "shade-tam-chan-sang-chihiros-vivid-2",
+      "sourceId": 267091,
+      "targetId": 82746,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 44,
+          "targetLength": 38,
+          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Vivid 2",
+          "targetSnippet": "Shade – tấm chắn sáng Chihiros Vivid 2"
+        }
+      ]
+    },
+    {
+      "slug": "shape-tam-chan-sang-chihiros-wrgb2-60-pro",
+      "sourceId": 267089,
+      "targetId": 82748,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 49,
+          "targetLength": 43,
+          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Wrgb2 60 pro",
+          "targetSnippet": "Shade – tấm chắn sáng Chihiros Wrgb2 60 pro"
+        }
+      ]
+    },
+    {
+      "slug": "shape-tam-chan-sang-chihiros-wrgb2-60",
+      "sourceId": 267088,
+      "targetId": 82750,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 45,
+          "targetLength": 39,
+          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Wrgb2 60",
+          "targetSnippet": "Shade – tấm chắn sáng Chihiros Wrgb2 60"
+        }
+      ]
+    },
+    {
+      "slug": "shade-tam-chan-sang-chihiros-wrgb-60",
+      "sourceId": 267086,
+      "targetId": 82751,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 44,
+          "targetLength": 38,
+          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Wrgb 45",
+          "targetSnippet": "Shade – tấm chắn sáng Chihiros Wrgb 45"
+        }
+      ]
+    },
+    {
+      "slug": "shape-tam-chan-sang-chihiros-wrgb2-30",
+      "sourceId": 267078,
+      "targetId": 82753,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 45,
+          "targetLength": 39,
+          "sourceSnippet": "Shape &#8211; tấm chắn sáng Chihiros Wrgb2 30",
+          "targetSnippet": "Shape – tấm chắn sáng Chihiros Wrgb2 30"
+        }
+      ]
+    },
+    {
+      "slug": "den-led-chihiros-a2-series-a120",
+      "sourceId": 265842,
+      "targetId": 82760,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 39,
+          "targetLength": 33,
+          "sourceSnippet": "Đèn LED Chihiros A2 series &#8211; A120",
+          "targetSnippet": "Đèn LED Chihiros A2 series – A120"
+        }
+      ]
+    },
+    {
+      "slug": "phan-nen-dennerle-scapers-soil-4lit",
+      "sourceId": 234252,
+      "targetId": 82481,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 50,
+          "targetLength": 44,
+          "sourceSnippet": "Phân nền thủy sinh Dennerle Scaper&#8217;s Soil 4L",
+          "targetSnippet": "Phân nền thủy sinh Dennerle Scaper’s Soil 4L"
+        }
+      ]
+    },
+    {
+      "slug": "dennerle-carbo-elixier-bio-500ml-phan-nuoc-bo-sung-co2-uc-che-reu-hai-chlb-duc",
+      "sourceId": 19885,
+      "targetId": 82781,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 50,
+          "targetLength": 44,
+          "sourceSnippet": "Phân nước dennerle &#8211; Carbo Elixier Bio 500ml",
+          "targetSnippet": "Phân nước dennerle – Carbo Elixier Bio 500ml"
+        }
+      ]
+    },
+    {
+      "slug": "dennerle-carbo-elixier-bio-250ml-phan-nuoc-bo-sung-co2-uc-che-reu-hai-chlb-duc",
+      "sourceId": 19882,
+      "targetId": 82783,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 50,
+          "targetLength": 44,
+          "sourceSnippet": "Phân nước dennerle &#8211; Carbo Elixier Bio 250ml",
+          "targetSnippet": "Phân nước dennerle – Carbo Elixier Bio 250ml"
+        }
+      ]
+    },
+    {
+      "slug": "phan-nhet-giup-phat-trien-re-cay-thuy-sinh-dennerle-power-tabs-30-vien",
+      "sourceId": 15622,
+      "targetId": 82788,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 45,
+          "targetLength": 39,
+          "sourceSnippet": "Phân nhét Dennerle &#8211; Power Tabs 30 viên",
+          "targetSnippet": "Phân nhét Dennerle – Power Tabs 30 viên"
+        }
+      ]
+    },
+    {
+      "slug": "phan-nhet-giup-phat-trien-re-cay-thuy-sinh-dennerle-power-tabs-10-vien",
+      "sourceId": 15618,
+      "targetId": 82789,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 45,
+          "targetLength": 39,
+          "sourceSnippet": "Phân nhét Dennerle &#8211; Power Tabs 10 viên",
+          "targetSnippet": "Phân nhét Dennerle – Power Tabs 10 viên"
+        }
+      ]
+    },
+    {
+      "slug": "phan-nen-chuyen-nghiep-cho-be-nuoi-va-sinh-san-tep-canh-shrimp-king-active-soil-loai-4l",
+      "sourceId": 15117,
+      "targetId": 82491,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 59,
+          "targetLength": 53,
+          "sourceSnippet": "Phân nền cho bể tép &#8211; Shrimp King Active Soil Loại 4L",
+          "targetSnippet": "Phân nền cho bể tép – Shrimp King Active Soil Loại 4L"
+        }
+      ]
+    },
+    {
+      "slug": "van-co-co2-mufan",
+      "sourceId": 18456,
+      "targetId": 82894,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 24,
+          "targetLength": 18,
+          "sourceSnippet": "Van cơ CO2 &#8211; Mufan",
+          "targetSnippet": "Van cơ CO2 – Mufan"
+        }
+      ]
+    },
+    {
+      "slug": "dung-dich-khu-doc-giam-stress-cho-ca-30ml-prodac-aquasana",
+      "sourceId": 269092,
+      "targetId": 82926,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 69,
+          "targetLength": 68,
+          "sourceSnippet": "Dung dịch khử độc &#038; giảm stress cho cá 30ml Prodac Aquasana",
+          "targetSnippet": "Dung dịch khử độc &amp; giảm stress cho cá 30ml Prodac Aquasana"
+        }
+      ]
+    },
+    {
+      "slug": "dung-dich-khu-doc-giam-stress-cho-ca-100ml-prodac-aquasana",
+      "sourceId": 269091,
+      "targetId": 82927,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 70,
+          "targetLength": 69,
+          "sourceSnippet": "Dung dịch khử độc &#038; giảm stress cho cá 100ml Prodac Aquasana",
+          "targetSnippet": "Dung dịch khử độc &amp; giảm stress cho cá 100ml Prodac Aquasana"
+        }
+      ]
+    },
+    {
+      "slug": "dung-dich-khu-doc-giam-stress-cho-ca-250ml-prodac-aquasana",
+      "sourceId": 269089,
+      "targetId": 82928,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 70,
+          "targetLength": 69,
+          "sourceSnippet": "Dung dịch khử độc &#038; giảm stress cho cá 250ml Prodac Aquasana",
+          "targetSnippet": "Dung dịch khử độc &amp; giảm stress cho cá 250ml Prodac Aquasana"
+        }
+      ]
+    },
+    {
+      "slug": "thuc-an-dang-hat-cho-ca-dia-probits-100g-prodac",
+      "sourceId": 268934,
+      "targetId": 82930,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 55,
+          "targetLength": 49,
+          "sourceSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 100g &#8211; Prodac",
+          "targetSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 100g – Prodac"
+        }
+      ]
+    },
+    {
+      "slug": "thuc-an-ca-canh-dang-hat-color-granules-100gram-prodac",
+      "sourceId": 268931,
+      "targetId": 82932,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 62,
+          "targetLength": 56,
+          "sourceSnippet": "Thức ăn cá cảnh dạng hạt Color Granules 100gram &#8211; Prodac",
+          "targetSnippet": "Thức ăn cá cảnh dạng hạt Color Granules 100gram – Prodac"
+        }
+      ]
+    },
+    {
+      "slug": "thuc-an-dang-hat-cho-ca-dia-probits-500g-prodac",
+      "sourceId": 267235,
+      "targetId": 82934,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 55,
+          "targetLength": 49,
+          "sourceSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 500g &#8211; Prodac",
+          "targetSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 500g – Prodac"
+        }
+      ]
+    },
+    {
+      "slug": "thuc-an-color-dang-hat-500g",
+      "sourceId": 265568,
+      "targetId": 82938,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 54,
+          "targetLength": 48,
+          "sourceSnippet": "Thức ăn cá cảnh dạng hạt Color Granules &#8211; Prodac",
+          "targetSnippet": "Thức ăn cá cảnh dạng hạt Color Granules – Prodac"
+        }
+      ]
+    },
+    {
+      "slug": "bo-test-kit-gh-prodac-italia",
+      "sourceId": 265409,
+      "targetId": 82940,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 36,
+          "targetLength": 30,
+          "sourceSnippet": "Bộ test kit GH &#8211; Prodac Italia",
+          "targetSnippet": "Bộ test kit GH – Prodac Italia"
+        }
+      ]
+    },
+    {
+      "slug": "bo-test-kit-kh-prodac-italia",
+      "sourceId": 265405,
+      "targetId": 83124,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 36,
+          "targetLength": 30,
+          "sourceSnippet": "Bộ Test Kit KH &#8211; Prodac Italia",
+          "targetSnippet": "Bộ Test Kit KH – Prodac Italia"
+        },
+        {
+          "field": "full",
+          "sourceLength": 1047,
+          "targetLength": 1022,
+          "sourceSnippet": "Thử nước để đo độ cứng KH (độ Đức) trong bể cá nước ngọt và nước biển. Giá trị tối ưu trong bể cá nước ngọt là",
+          "targetSnippet": "Thử nước để đo độ cứng KH (độ Đức) trong bể cá nước ngọt và nước biển. Giá trị tối ưu trong bể cá nước ngọt là"
+        }
+      ]
+    },
+    {
+      "slug": "bo-test-kit-ph-prodac-italia",
+      "sourceId": 265403,
+      "targetId": 83129,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 36,
+          "targetLength": 30,
+          "sourceSnippet": "Bộ test kit PH &#8211; Prodac italia",
+          "targetSnippet": "Bộ test kit PH – Prodac italia"
+        },
+        {
+          "field": "full",
+          "sourceLength": 1328,
+          "targetLength": 1303,
+          "sourceSnippet": "Kiểm tra nước để đo độ pH của nước trong bể cá nước ngọt, biển và ao. Cách dùng: 1. Tráng ống nghiệm mẫu nước ",
+          "targetSnippet": "Kiểm tra nước để đo độ pH của nước trong bể cá nước ngọt, biển và ao. Cách dùng: 1. Tráng ống nghiệm mẫu nước "
+        }
+      ]
+    },
+    {
+      "slug": "thuc-an-dang-hat-danh-cho-ca-vang-coldwater-granules-prodac-italia",
+      "sourceId": 265398,
+      "targetId": 83135,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 65,
+          "targetLength": 59,
+          "sourceSnippet": "Thức ăn dạng hạt cho cá vàng &#8211; Coldwater granules mini 145g",
+          "targetSnippet": "Thức ăn dạng hạt cho cá vàng – Coldwater granules mini 145g"
+        }
+      ]
+    },
+    {
+      "slug": "thuc-an-dang-vien-danh-cho-cac-loai-ca-an-thuy-sinh-algae-wafers-lo-50g-prodac-italia",
+      "sourceId": 265393,
+      "targetId": 82949,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 65,
+          "targetLength": 59,
+          "sourceSnippet": "Thức ăn dạng viên cho cá tầng đáy Algae wafer 50gr &#8211; Prodac",
+          "targetSnippet": "Thức ăn dạng viên cho cá tầng đáy Algae wafer 50gr – Prodac"
+        }
+      ]
+    },
+    {
+      "slug": "dong-ho-canh-bao-alert-combo12-thang",
+      "sourceId": 265379,
+      "targetId": 83143,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 75,
+          "targetLength": 68,
+          "sourceSnippet": "Bộ theo dõi nồng độ NH3 &#038; PH Seachem &#8211; Combo Alert Seachem 1 năm",
+          "targetSnippet": "Bộ theo dõi nồng độ NH3 &amp; PH Seachem – Combo Alert Seachem 1 năm"
+        }
+      ]
+    },
+    {
+      "slug": "dong-ho-canh-bao-alert-combo",
+      "sourceId": 2953,
+      "targetId": 82997,
+      "flags": [
+        {
+          "field": "name",
+          "sourceLength": 71,
+          "targetLength": 70,
+          "sourceSnippet": "Bộ theo dõi nồng độ NH3 &#038; PH Seachem – Combo Alert Seachem 6 tháng",
+          "targetSnippet": "Bộ theo dõi nồng độ NH3 &amp; PH Seachem – Combo Alert Seachem 6 tháng"
+        }
+      ]
+    },
+    {
+      "slug": "seachem-purigen",
+      "sourceId": 178,
+      "targetId": 83010,
+      "flags": [
+        {
+          "field": "full",
+          "sourceLength": 1615,
+          "targetLength": 1614,
+          "sourceSnippet": "Seachem Purigen là vật liệu lọc hấp thụ đặc biệt không giống các loại vật liệu lọc khác. Các hạt nhựa polymer ",
+          "targetSnippet": "Seachem Purigen là vật liệu lọc hấp thụ đặc biệt không giống các loại vật liệu lọc khác. Các hạt nhựa polymer "
+        }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "slug": "hanging-kits-bo-kit-treo-den-wrgb2-pro-chihiros",
+      "sourceUrl": "https://aquathanhxuan.com/san-pham/hanging-kits-bo-kit-treo-den-wrgb2-pro-chihiros/",
+      "targetUrl": "https://aquathanhxuan.io.vn/san-pham/hanging-kits-bo-kit-treo-den-wrgb2-pro-chihiros",
+      "sourceHttp": 200,
+      "targetHttp": 200,
+      "source": {
+        "title": "Hanging Kits Bộ kit treo đèn Wrgb2 Pro Chihiros – AQua Thanh Xuân",
+        "seoDescription": "",
+        "h1": "",
+        "hasStockLabel": true,
+        "hasDiscountCoupon": true,
+        "hasBuyNow": true,
+        "hasConsultation": true,
+        "hasDetailedInfo": true,
+        "containsShortDescription": true,
+        "bodyLength": 2767,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 0,
+        "detailWrapper": false
+      },
+      "target": {
+        "title": "Hanging Kits Bộ kit treo đèn Wrgb2 Pro Chihiros",
+        "seoDescription": "Bộ Kit treo đèn Chihiros WRGB II Pro 2 Miếng bát gắn vào đèn Ốc rút cáp + Siếp cáp + Dây cáp. Thông tin sản phẩm Hàng chính hãng chihiros kit treo tuyệt đẹp – thẩm mỹ – chất lượng Chất liệu kim loại hoàn thiện cao – Bộ sản phẩm “CHƯA KÈM GIÁ TREO”",
+        "h1": "Hanging Kits Bộ kit treo đèn Wrgb2 Pro Chihiros",
+        "hasStockLabel": false,
+        "hasDiscountCoupon": false,
+        "hasBuyNow": false,
+        "hasConsultation": false,
+        "hasDetailedInfo": false,
+        "containsShortDescription": true,
+        "bodyLength": 1455,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 251,
+        "detailWrapper": true
+      }
+    },
+    {
+      "slug": "phan-nen-dennerle-scapers-soil-4lit",
+      "sourceUrl": "https://aquathanhxuan.com/san-pham/phan-nen-dennerle-scapers-soil-4lit/",
+      "targetUrl": "https://aquathanhxuan.io.vn/san-pham/phan-nen-dennerle-scapers-soil-4lit",
+      "sourceHttp": 200,
+      "targetHttp": 200,
+      "source": {
+        "title": "Phân nền thủy sinh Dennerle Scaper’s Soil 4L – AQua Thanh Xuân",
+        "seoDescription": "",
+        "h1": "",
+        "hasStockLabel": true,
+        "hasDiscountCoupon": true,
+        "hasBuyNow": true,
+        "hasConsultation": true,
+        "hasDetailedInfo": true,
+        "containsShortDescription": true,
+        "bodyLength": 4508,
+        "oldPriceDisplayed": true,
+        "descriptionLength": 0,
+        "detailWrapper": false
+      },
+      "target": {
+        "title": "Phân nền thủy sinh Dennerle Scaper’s Soil 4L",
+        "seoDescription": "Phân nền đẳng cấp của Dennerle (CHLB Đức) sản xuất tại Nhật Bản, đất nền thủy sinh được phát triển đặc biệt để trồng cây thủy sinh.Scaper’s Soil giúp làm giảm pH trong hồ cá và do đó tạo ra một môi trường có tính axit nhẹ, đồng thời Scaper’s Soil còn có thể hấp thụ các chất dinh dưỡng dư thừa trong nước hồ thủy sinh và giải phóng ngược trở lại cho cây trồng. Đặc điểm: PH 6-6,5 và KH 0-2 Phân nền được cấu tạo 100% tự nhiên từ đất núi lửa màu mỡ, với chức năng lọc sinh học cho nước trong, sạch và không có mùi tanh hay mùi hôi. Lý tưởng khi kết hợp với bón phân CO2, tạo ra axit humic và axit fulvic có giá trị, môi trường phù hợp các loại thực vật, cá và tôm cảnh, tép cảnh … Công thức dinh dưỡng đặc biệt – không thúc đẩy tảo Các hạt có hình dạng bất thường với đường kính từ 1 đến 4mm tạo cho lớp nền một hiệu ứng đặc biệt tự nhiên. Cấu trúc của nó cho phép dòng chảy tối ưu qua chất nền và cây có thể bén rễ tốt. Scaper’s Soil cung cấp cơ sở hoàn hảo để cây phát triển khỏe mạnh, mạnh mẽ và có màu sắc rực rỡ. Màu đen đậm mang đến sự tương phản mạnh mẽ, sống động với màu xanh tươi của cây cỏ. Hướng dẫn sử dụng Phân Nền Dennerle Scaper’s Soil 1-4mm 8L – Một bao nền 4L phù hợp cho 1 bể chứa 30L nước; 8L nền cho bể 50L nước – Sử dụng trực tiếp, không cần ngâm rửa trước khi dùng",
+        "h1": "Phân nền thủy sinh Dennerle Scaper’s Soil 4L",
+        "hasStockLabel": false,
+        "hasDiscountCoupon": false,
+        "hasBuyNow": false,
+        "hasConsultation": false,
+        "hasDetailedInfo": false,
+        "containsShortDescription": true,
+        "bodyLength": 2538,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 1291,
+        "detailWrapper": true
+      }
+    },
+    {
+      "slug": "may-sui-khi-atman-hp-12000",
+      "sourceUrl": "https://aquathanhxuan.com/san-pham/may-sui-khi-atman-hp-12000/",
+      "targetUrl": "https://aquathanhxuan.io.vn/san-pham/may-sui-khi-atman-hp-12000",
+      "sourceHttp": 200,
+      "targetHttp": 200,
+      "source": {
+        "title": "Máy sủi Oxy công suất lớn HP 12000 Atman – AQua Thanh Xuân",
+        "seoDescription": "",
+        "h1": "",
+        "hasStockLabel": true,
+        "hasDiscountCoupon": true,
+        "hasBuyNow": true,
+        "hasConsultation": true,
+        "hasDetailedInfo": true,
+        "containsShortDescription": true,
+        "bodyLength": 4788,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 0,
+        "detailWrapper": false
+      },
+      "target": {
+        "title": "Máy sủi Oxy công suất lớn HP 12000 Atman",
+        "seoDescription": "Máy Sủi Oxy Atman là sản phẩm máy bơm cao cấp của hãng Atman, thích hợp cho những ai đang sở hữu hồ cá cảnh, hồ thủy sinh. Oxy đóng vai trò quan trọng trong việc phát triển, sinh trưởng của tất cả các loài sinh vật. Đặc Điểm Máy Oxy Công Suất Lớn Atman: Là dòng máy sục khí bể cá chất lượng cao. Chuyên dành cho hồ cá, đặc biệt là hồ cá Koi, hồ cá rồng…. Có chân làm bằng cao su giúp giảm độ rung và tiếng ồn cho máy oxy. Thích hợp sử dụng cho nhiều bể cá khác nhau. Công dụng hạn chế tiếng ồn,tiết kiệm điện và lọc bụi hiệu quả. Dễ sử dụng, thuận lợi khi tháo ráp để vệ sinh bụi bẩn. Độ bền cao, dù máy chạy 24/24 vẫn giữ độ êm và không gây tiếng ồn. Thiết kế toàn bộ vỏ khung bao bên ngoài bằng nhựa cao cấp. Tuy nhiên để sản phẩm chạy hiệu quả thì tốt nhất bạn nên tháo phần lọc khí ra và lau bụi thường xuyên bởi máy có công suất tương đối lớn do đó việc hút khí kèm theo bụi bặm bám vào bên trong bộ tạo hơi là điều không thể tránh khỏi HP 8000 Công suất: 47W siêu tiết kiệm điện Lưu lượng khí 70L/phút Số Lượng Đầu vòi: 10 Cung cấp khí oxy cho bể cá. Chân đế cao làm giảm độ rung, tiếng ồn cho máy sủi. Thích hợp sử dụng sủi cho bể cá trong nhà và ngoài trời Kỹ thuật tiên tiến của Nhật Bản với tiếng ồn thấp, tiết kiệm điện và có bộ lọc KT: 20x15x14cm Model: HP-4000 Xuất xứ: Trung Quốc Kích thước: 22 x 14 x 15 cm. Điện áp: 220 ~ 240V / 50Hz. Công suất: 20W. Lưu lượng: 35 lít / phút. Số lượng đầu chia: 10. Model: HP-8000 Xuất xứ: Trung Quốc Điện áp: AC220~240/110~120V ; 50/60H Công suất: 48W Lưu lượng: 70L/ phút Số lượng đầu chia: 10 Kích thước: 24 x 17 x 18 cm Model: HP-12000 Xuất xứ: Trung Quốc Công suất: 60W. Lưu lượng: 110l khí/1 phút. Đường ống khí ra phi 21. Số lượng đầu chia: 10. Kích thước: 28 x 18 x 19 cm",
+        "h1": "Máy sủi Oxy công suất lớn HP 12000 Atman",
+        "hasStockLabel": false,
+        "hasDiscountCoupon": false,
+        "hasBuyNow": false,
+        "hasConsultation": false,
+        "hasDetailedInfo": false,
+        "containsShortDescription": true,
+        "bodyLength": 2885,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 1741,
+        "detailWrapper": true
+      }
+    },
+    {
+      "slug": "seachem-matrix-0-5",
+      "sourceUrl": "https://aquathanhxuan.com/san-pham/seachem-matrix-0-5/",
+      "targetUrl": "https://aquathanhxuan.io.vn/san-pham/seachem-matrix-0-5",
+      "sourceHttp": 200,
+      "targetHttp": 200,
+      "source": {
+        "title": "Seachem Matrix 1lit (lẻ) – AQua Thanh Xuân",
+        "seoDescription": "",
+        "h1": "",
+        "hasStockLabel": true,
+        "hasDiscountCoupon": true,
+        "hasBuyNow": true,
+        "hasConsultation": true,
+        "hasDetailedInfo": true,
+        "containsShortDescription": true,
+        "bodyLength": 4072,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 0,
+        "detailWrapper": false
+      },
+      "target": {
+        "title": "Seachem Matrix 1lit (lẻ)",
+        "seoDescription": "Matrix là 1 loại vật liệu lọc sinh học của hãng SEACHEM đến từ Mỹ. Matrix là một chất rắn vô cơ xốp có đường kính khoảng 10mm. Mỗi một lít matrix cung cấp hơn 1 lượng diện tích nhám xốp ngoài bề mặt và cả bên trong nên có khả năng giữ được lượng vi sinh cực lớn. Chỉ với 1 lít Matrix nó có thể chứa lượng vi sinh tương đương 170l quả bóng nhựa bio, 200l đá nham thạch, sứ lọc Không chỉ dừng lại ở mức như vậy, Matrix có thể đồng thời loại bỏ nitrat cùng với ammonia và nitrit ( khí độc có trong nước ) cùng một lúc trong bộ lọc của bạn. Matrix hoàn toàn trơ, không bị hỏng và gần như không bị mòn nên nó không phải thay thế vì phần lớn vi khuẩn nằm trong hạt Matrix, Matrix có thể mang đi rửa sạch khi cần thiết mà không làm ảnh hưởng đến bộ lọc Matrix tương thích với tất các các hệ thống lọc. Về tính năng sử dụng, Matrix có thể dùng cho bất cứ loại lọc nào và thậm chỉ, chỉ cần thả thẳng xuống bể nó cũng đã mang lại sự hiệu quả khác biệt khá rõ rệt so với những loại vật liệu lọc thông thường. Khi bể của bạn cá đang khỏe bỗng dưng lăn ra ngáp ngáp rồi chết, khi đàn tép của bạn cứ mỗi ngày lai rai vài chú ra đi, hãy nghĩ đến ngay việc xử lý nước, và nếu có thể hãy lựa chọn Matrix. Matrix tăng khả năng lọc nước khi được sử dụng kèm các loại vi sinh tốt.",
+        "h1": "Seachem Matrix 1lit (lẻ)",
+        "hasStockLabel": false,
+        "hasDiscountCoupon": false,
+        "hasBuyNow": false,
+        "hasConsultation": false,
+        "hasDetailedInfo": false,
+        "containsShortDescription": true,
+        "bodyLength": 2349,
+        "oldPriceDisplayed": false,
+        "descriptionLength": 1261,
+        "detailWrapper": true
+      }
+    }
+  ],
+  "errors": []
+}
