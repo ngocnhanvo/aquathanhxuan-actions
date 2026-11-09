@@ -182,9 +182,24 @@ for src,target,rows in brand_pairs:
         assert row['slug']==x['slug'] and normalize(row['name'])==normalize(x['name']), 'Source identity contradiction'
         x['brands'].append(int(target['id']))
 print('BRAND_SOURCE_SCOPE_PASS='+json.dumps({'brands':len(brand_pairs),'unique_source_products':len(source_product_groups)}),flush=True)
-# Only recover the 10 source IDs that did not migrate in the first C batch.
-RESCUE_IDS=[267204,265771,265770,265769,265768,265767,265762,265405,265403,265398]
-assert len(set(RESCUE_IDS))==10 and set(RESCUE_IDS).issubset(set(source_product_groups)), 'Source Product recovery scope changed'
+# Closed, preverified write scopes: preserve old C recovery profile unchanged,
+# and add the six published Products with proven distinct gallery omissions.
+RECOVERY_PROFILE=os.environ.get('BRAND_RECOVERY_PROFILE','brand-c-10')
+RECOVERY_PROFILES={
+    'brand-c-10': {
+        'ids':[267204,265771,265770,265769,265768,265767,265762,265405,265403,265398],
+        'categories':{'moutaintree','neo','prodac-italia'},
+    },
+    'brand-gallery-six': {
+        'ids':[267097,267093,234252,36878,15166,15117],
+        'categories':{'thuong-hieu-chihiros','thuong-hieu-dennerle'},
+    },
+}
+assert RECOVERY_PROFILE in RECOVERY_PROFILES, 'Unapproved Product recovery profile'
+profile=RECOVERY_PROFILES[RECOVERY_PROFILE]
+assert set(TARGET_SLUGS)==profile['categories'], 'Recovery profile categories changed'
+RESCUE_IDS=profile['ids']
+assert len(set(RESCUE_IDS))==len(RESCUE_IDS) and set(RESCUE_IDS).issubset(set(source_product_groups)), 'Source Product recovery scope changed'
 source_product_groups={sid:info for sid,info in source_product_groups.items() if sid in RESCUE_IDS}
 print('BRAND_RECOVERY_ID_SCOPE='+json.dumps(RESCUE_IDS),flush=True)
 
