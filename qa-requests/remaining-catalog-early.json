@@ -13,5 +13,10 @@
     4,
     5,
     6
+  ],
+  "attempt": 2,
+  "reason": "Corrected target product pagination by ID ascending; previous QA failed due duplicate published slug in unstable pagination while imports were running, not proof of duplicate Woo Product",
+  "verifiedRuns": [
+    42675861683
   ]
 }
