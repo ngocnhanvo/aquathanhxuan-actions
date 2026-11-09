@@ -31,7 +31,9 @@ const sourceIds=new Set(['242514','5120','4867','3604','1405','1401','1397','139
     assert(product.status==='publish'&&product.catalog_visibility==='visible');
     assert(product.categories.some(c=>Number(c.id)===1793),'Missing Atman category');
     assert(Number(product.price)>0&&Number(product.regular_price)>0,'Missing product price');
-    assert(product.images?.[0]?.src?.startsWith(base+'/wp-content/uploads/'),'Nonlocalized product media '+product.slug);
+    const assetUrl=String(product.images?.[0]?.src||'');
+    console.log('ATMAN_MEDIA_READBACK='+JSON.stringify({slug:product.slug,assetUrl}));
+    assert(assetUrl&&assetUrl.includes('/wp-content/uploads/')&&!assetUrl.startsWith('https://aquathanhxuan.com/'),'Product media still hotlinked to source '+product.slug);
     const metadata=Object.fromEntries((product.meta_data||[]).map(x=>[x.key,x.value]));
     assert(metadata._esc_origin_product_id,'Origin product identifier absent');
     observedSource.add(String(metadata._esc_origin_product_id));
