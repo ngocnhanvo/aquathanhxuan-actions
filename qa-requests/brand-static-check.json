@@ -1,0 +1,9 @@
+{
+  "task": "Syntax validate product recovery, public Rewrite, all-brand production parity QA",
+  "notes": "After adding all public product permalink checks",
+  "scope": [
+    "scripts/aqua-brand-two-deferred-products-recover.py",
+    "scripts/aqua-brand-product-routes-create.cjs",
+    "scripts/aqua-brand-catalog-production-qa.cjs"
+  ]
+}
