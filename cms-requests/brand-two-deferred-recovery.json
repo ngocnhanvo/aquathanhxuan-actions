@@ -1,0 +1,20 @@
+{
+  "writeScope": [
+    {
+      "sourceId": 3178,
+      "targetCategory": 1798,
+      "slug": "su-ista-active-bio-pearl",
+      "mediaException": "source asset+every image size HTTP 404; do not create fake photo"
+    },
+    {
+      "sourceId": 15280,
+      "targetCategory": 1806,
+      "slug": "bom-jecod-fa-1000",
+      "mediaException": "Store API first image basename collision; use exact three on-page gallery images with SHA256 parity"
+    }
+  ],
+  "oracleRunId": 42584424951,
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "recordStatus": "PRODUCT_DATA_RECOVERY_WITH_SOURCE_MEDIA_DEFERRED"
+}
