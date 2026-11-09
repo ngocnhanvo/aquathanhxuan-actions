@@ -1,8 +1,8 @@
 {
-  "task": "Read-only progress snapshot while brand-a importer is in progress",
+  "task": "Independent mid-import price and brand membership parity snapshot",
   "source": "aquathanhxuan.com",
   "target": "admin.aquathanhxuan.io.vn",
   "request": "2026-11-09-brand-menu",
   "followupRunId": 42579994450,
-  "snapshot": 2
+  "snapshot": 3
 }
