@@ -106,13 +106,28 @@ async function main(){
   const [sourceTerms,targetTerms,targetProducts]=await Promise.all([
    paged(original,'/wp-json/wc/store/v1/products/categories',30),
    paged(woo,'/wp-json/wc/v3/products/categories',30),
-   paged(woo,'/wp-json/wc/v3/products?status=publish',150),
+   paged(woo,'/wp-json/wc/v3/products?status=publish&orderby=id&order=asc',150),
   ]);
   const targetBySlug=new Map();
+  const seenTargetIds=new Set();
+  let repeatedPageRows=0;
   for(const p of targetProducts){
-   assert(!targetBySlug.has(p.slug),'Duplicate published destination Product slug '+p.slug);
+   assert(Number.isInteger(Number(p.id))&&p.slug,'Invalid target Product ID or slug');
+   if(seenTargetIds.has(Number(p.id))){
+    const previous=targetBySlug.get(p.slug);
+    assert(previous&&Number(previous.id)===Number(p.id),'Conflicting target Product slug '+p.slug);
+    repeatedPageRows++;
+    continue;
+   }
+   seenTargetIds.add(Number(p.id));
+   const previous=targetBySlug.get(p.slug);
+   assert(!previous || Number(previous.id)===Number(p.id),
+     'Different target Product IDs own same slug '+p.slug+': '+previous?.id+' vs '+p.id);
    targetBySlug.set(p.slug,p);
   }
+  console.log('AQUA_REMAINING_TARGET_PAGING='+JSON.stringify({
+    fetched:targetProducts.length,uniqueIds:seenTargetIds.size,duplicatesAcrossPages:repeatedPageRows,
+  }));
   const sourceTermToTarget=new Map();
   for(const [,targetSlug,sourceId,targetId] of roots){
    assert(sourceTerms.some(c=>Number(c.id)===sourceId&&Number(c.parent||0)===0),'Original root changed '+sourceId);
