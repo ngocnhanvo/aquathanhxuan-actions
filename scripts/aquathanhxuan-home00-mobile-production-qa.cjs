@@ -8,6 +8,7 @@ const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844],[320,700]];
 const output='artifacts/home00-mobile-production';
 fs.mkdirSync(output,{recursive:true});
 const expectedDesktop=['cropped-banner-8-1.png','cropped-banner-6.png'];
+const sameOptimizedAsset=(url,original)=>String(url||'').includes(original.replace(/\.[^.]+$/,''));
 (async()=>{
  const markerResponse=await fetch(site+'/aquathanhxuan-staging-build.json?mobile_hero='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
  assert.equal(markerResponse.status,200,'Missing production source marker');
@@ -44,18 +45,18 @@ const expectedDesktop=['cropped-banner-8-1.png','cropped-banner-6.png'];
     assert.equal(new URL(href,site).pathname,'/san-pham','Mobile CTA has wrong target');
     assert.equal(await hero.locator('[data-hero-dot]:visible').count(),0,'One mobile slide should hide dot picker');
     assert.equal(await hero.locator('[data-hero-next]:visible').count(),0,'One mobile slide should hide redundant arrow');
-    assert(src&&!expectedDesktop.some(name=>src.includes(name)),'Mobile is displaying desktop image');
+    assert(src&&!expectedDesktop.some(name=>sameOptimizedAsset(src,name)),'Mobile is displaying desktop image');
     const rect=await currentImg.boundingBox();
     assert(rect&&rect.height>=width*1.15,'Portrait image should keep its aspect ratio');
     console.log('HOME00_MOBILE_VIEWPORT_PASS='+width+'x'+height+' '+src);
    } else {
-    assert(expectedDesktop.some(name=>src.includes(name)),'Desktop image changed');
+    assert(expectedDesktop.some(name=>sameOptimizedAsset(src,name)),'Desktop image changed: '+src);
     const button=hero.locator('[data-hero-next]');
     await button.click();
     const second=slides.nth(1);
     assert.equal(await second.getAttribute('data-active'),'true','Desktop second banner switching failed');
     const secondImgSrc=await second.locator('img').getAttribute('src');
-    assert(secondImgSrc&&secondImgSrc.includes(expectedDesktop[1]),'Desktop second original image changed');
+    assert(secondImgSrc&&sameOptimizedAsset(secondImgSrc,expectedDesktop[1]),'Desktop second original image changed: '+secondImgSrc);
     console.log('HOME00_DESKTOP_VIEWPORT_PASS='+width+'x'+height);
    }
    const docWidth=await page.evaluate(()=>document.documentElement.scrollWidth);
