@@ -1,0 +1,7 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "beb08cf9c402b53c0ffe603dd540f98ab6082e04",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Product card add-to-cart buttons in related products and SSR/legacy category listings"
+}
