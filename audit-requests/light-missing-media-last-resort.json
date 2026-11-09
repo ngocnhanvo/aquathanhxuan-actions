@@ -11,7 +11,7 @@
     266690,
     266681
   ],
-  "scope": "Verify Product-owned description/gallery images and original path cached copies or archive snapshots. No target CMS writes; no unrelated images.",
+  "scope": "READ_ONLY map all 13 deferred original Product IDs to exact Source Store slugs and categories, no CMS writes",
   "previous_artifact_run": 42643781321,
-  "attempt": 1
+  "attempt": 2
 }
