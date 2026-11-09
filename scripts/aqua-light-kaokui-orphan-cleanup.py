@@ -27,9 +27,15 @@ def raw(url,method='GET',data=None,headers=None):
     with opener.open(urllib.request.Request(url,data=data,method=method,headers=headers or {}),timeout=70) as r:return r.read()
 src=json.loads(raw(SOURCE+'/wp-json/wc/store/v1/products/'+str(PRODUCT_ID)))
 assert int(src['id'])==PRODUCT_ID and src['slug']==SLUG and src['type']=='simple'
+# The renamed asset can originate from either a Woo image or an embedded
+# source Product description image. Confirm exact legacy origin + basename.
+import re,html
 image_urls=[str(x.get('src') or '') for x in src.get('images') or []]
-source_original=sorted({x for x in image_urls if urllib.parse.urlparse(x).path.endswith('/'+ORIGINAL)})
-assert len(source_original)==1,'Source product original image not unique'
+for content in (src.get('description') or '',src.get('short_description') or ''):
+    image_urls+=re.findall(r'https?://aquathanhxuan\\.com/wp-content/uploads/[^\\s"\\'<>]+',html.unescape(str(content)))
+source_original=sorted({x.split('?',1)[0] for x in image_urls if urllib.parse.urlparse(x).path.endswith('/'+ORIGINAL)
+                        and x.startswith(SOURCE+'/wp-content/uploads/')})
+assert len(source_original)==1,'Exact Product legacy media URL missing or ambiguous'
 source_sha=hashlib.sha256(raw(source_original[0])).hexdigest()
 raw(TARGET+'/wp-login.php')
 username=os.environ['WP_ADMIN_USERNAME'];password=os.environ['WP_ADMIN_PASSWORD']
