@@ -1,0 +1,10 @@
+{
+  "sourceProductId": 184,
+  "slug": "seachem-matrix-0-5",
+  "sourceCategory": 193,
+  "targetCategory": 1804,
+  "originalAssetId": 266903,
+  "sourceMediaMissing": true,
+  "verifiedRun": 42589471431,
+  "rule": "No fabricated or reused image; publish verified product facts and mark _esc_source_media_deferred after HTTP 404 across original/derivatives"
+}
