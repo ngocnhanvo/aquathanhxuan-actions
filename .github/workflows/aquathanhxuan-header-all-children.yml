@@ -1,0 +1,39 @@
+name: Aqua Header insert editable Tất cả menu children
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-header-all-children.yml'
+      - 'scripts/aquathanhxuan-header-all-children.cjs'
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-header-submenus-cms
+  cancel-in-progress: false
+jobs:
+  insert-all-links:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aquathanhxuan-header-all-children.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Insert only missing editable All menu children
+        run: node scripts/aquathanhxuan-header-all-children.cjs
+      - name: Preserve scoped WordPress readback evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-header-all-children
+          path: artifacts/header-all-link
+          if-no-files-found: ignore
+          retention-days: 7
