@@ -1,8 +1,8 @@
 {
-  "source_sha": "88a501b95e7063434defc701658a9438837bf23c",
+  "source_sha": "dfa0ca0db2b12d0a9c0c6c6e5825fc411d8532d8",
   "page": "/",
-  "purpose": "Nghiệm thu 3 icon tiêu đề Hot combo/Máy lọc/Đèn và hồi quy banner Home00 trên 6 viewport",
-  "attempt": 4,
-  "previous_run": 42548911873,
-  "note": "Source deployed via Actions 42550308260; assert SVG shape, gradient and section text without CMS writes"
+  "purpose": "Nghiệm thu ảnh hero đúng viewport, không tải chéo desktop/mobile, slide switching và icon trên 6 viewport",
+  "attempt": 5,
+  "previous_run": 42557882690,
+  "note": "Build 42557808129 and deploy 42557882690 passed; verify responsive picture and lazy deferred slide network"
 }
