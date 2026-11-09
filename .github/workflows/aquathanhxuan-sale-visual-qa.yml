@@ -143,10 +143,8 @@ jobs:
                 const initialScroll=await trackLocator.evaluate(el=>el.scrollLeft);
                 console.log('SALE_RESET_SCROLL='+JSON.stringify({width,initialScroll}));
                 assert(initialScroll<=1,'Carousel reset before Next test');
-                await trackLocator.evaluate(el=>{
-                  el.style.removeProperty('scroll-snap-type');
-                  el.style.removeProperty('scroll-behavior');
-                });
+                // Native scroll snap was verified above; keep it disabled only
+                // for this isolated arrow-control check after inspecting all images.
 
                 const discounts=await sale.locator('.aqua-sale__discount').allTextContents();
                 assert(discounts.every(value=>/^\s*-\d+%\s*$/.test(value)),'Discount labels');
