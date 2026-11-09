@@ -1,0 +1,91 @@
+name: Aqua Lighthouse and PSI diagnostic (read-only)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-lighthouse-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      URL: https://aquathanhxuan.io.vn/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Lighthouse CLI and inspect Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome
+          google-chrome --version
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund lighthouse@13.0.1
+          mkdir -p artifacts/lighthouse
+      - name: Run independent mobile and desktop Lighthouse audits
+        shell: bash
+        run: |
+          set +e
+          for device in mobile desktop; do
+            echo "::group::Lighthouse $device"
+            flags=""
+            if [ "$device" = "desktop" ]; then flags="--preset=desktop"; fi
+            node_modules/.bin/lighthouse "$URL" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" $flags --only-categories=performance --output=json --output-path="artifacts/lighthouse/$device.json" --quiet --max-wait-for-load=60000
+            echo "LIGHTHOUSE_${device}_EXIT=$?"
+            echo "::endgroup::"
+          done
+          exit 0
+      - name: Compare Google PageSpeed API response (best effort)
+        shell: bash
+        run: |
+          set +e
+          curl --retry 1 --connect-timeout 15 --max-time 120 -sS -G 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed' --data-urlencode "url=$URL" --data-urlencode 'strategy=mobile' --data-urlencode 'category=PERFORMANCE' -o artifacts/lighthouse/psi-mobile.json -w 'PAGESPEED_HTTP=%{http_code}\n'
+          exit 0
+      - name: Report errors, LCP, screenshots, and key performance metrics
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          for(const device of ['mobile','desktop','psi-mobile']){
+            const p='artifacts/lighthouse/'+device+'.json';
+            if(!fs.existsSync(p)){console.log(device+' MISSING_REPORT');continue;}
+            let d;
+            try{d=JSON.parse(fs.readFileSync(p,'utf8'));}catch(e){console.log(device+' BAD_JSON '+e.message);continue;}
+            const lhr=d.lighthouseResult||d;
+            const x={
+              device,
+              apiError:d.error?.message||d.error?.status||null,
+              runtimeError:lhr.runtimeError||null,
+              requestedUrl:lhr.requestedUrl,
+              finalUrl:lhr.finalDisplayedUrl||lhr.finalUrl,
+              performanceScore:lhr.categories?.performance?.score,
+              metrics:Object.fromEntries(['first-contentful-paint','largest-contentful-paint','speed-index','total-blocking-time','cumulative-layout-shift','interactive'].map(id=>{
+                const a=lhr.audits?.[id]||{};
+                return [id,{score:a.score,value:a.numericValue,display:a.displayValue,error:a.errorMessage,explanation:a.explanation}];
+              })),
+              auditErrors:Object.entries(lhr.audits||{}).filter(([k,a])=>a.scoreDisplayMode==='error').map(([k,a])=>({id:k,error:a.errorMessage})).slice(0,20),
+              environment:{host:lhr.environment?.hostUserAgent,network:lhr.environment?.networkUserAgent},
+            };
+            console.log('AUDIT_DIAGNOSIS '+JSON.stringify(x));
+            fs.writeFileSync('artifacts/lighthouse/'+device+'-summary.json',JSON.stringify(x,null,2)+'\n');
+            const screenshot=lhr.audits?.['final-screenshot']?.details?.data;
+            if(typeof screenshot==='string'&&screenshot.startsWith('data:image/')){
+              fs.writeFileSync('artifacts/lighthouse/'+device+'-final.png',Buffer.from(screenshot.split(',')[1],'base64'));
+            }
+          }
+          NODE
+      - name: Upload diagnostic reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-lighthouse-diagnostics
+          path: artifacts/lighthouse
+          retention-days: 7
+          if-no-files-found: warn
