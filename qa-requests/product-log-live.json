@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "mode": "read-only",
+  "phpReleaseRun": 42688312773,
+  "phpSha": "54a305357893461b1fc8256e899a424b90840a88",
+  "purpose": "Verify full live paged Product logs with exact count, snapshot, item identity, per-page deadline before Astro build"
+}
