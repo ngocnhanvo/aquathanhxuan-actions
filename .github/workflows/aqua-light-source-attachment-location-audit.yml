@@ -1,0 +1,23 @@
+name: Aqua original light attachment actual file location audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - audit-requests/light-source-attachment-location.json
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-source-attachment-location-audit.py
+      - run: python3 scripts/aqua-light-source-attachment-location-audit.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-source-attachment-location
+          path: artifacts/aqua-light-source-attachment-audit
+          if-no-files-found: ignore
+          retention-days: 14
