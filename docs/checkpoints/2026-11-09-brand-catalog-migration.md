@@ -119,11 +119,22 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - Browser QA [42600653497](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42600653497) **IN_PROGRESS** tại lúc ghi; kiểm tra tất cả public Product links, 157 CMS identities, 20 category pages, gallery sửa của 6 Product ở frontend, banner/sort/recently viewed, source/target 1440/390 và ngoại lệ source image 184/3178/15280.
 - **Không báo DONE nếu QA chưa PASS.** Nếu QA fail, đọc `BRAND_CATALOG_PRODUCTION_PARITY_FAIL`, khắc phục đúng lỗi, rerun QA; không build lại nếu chỉ thay script QA.
 
+## Nghiệm thu cuối cùng — QA production PASS
+
+- [Run 42600653497](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42600653497) **completed/success**; log `BRAND_CATALOG_PRODUCTION_PARITY_PARTIAL_MEDIA`: `sourceProducts=157`, `categories=20`, `viewports=[1440,390]`, `screenshots=16`, `deployedSha=bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d`. Tên `PARTIAL_MEDIA` chỉ ba ngoại lệ media source đã được ghi nhận, không phải job QA fail.
+- Tất cả **20 category routes** (trong đó FKSC rỗng đúng theo site gốc) và **157/157 product permalinks** đều HTTP 200, với Product detail markup thật; so khớp CMS source/target tên, category, giá và gallery ảnh duy nhất.
+- **40/40 lượt category viewport PASS**, gồm desktop 1440px/mobile 390px: H1, banner, 4 tùy chọn sắp xếp, vùng "Sản phẩm đã xem", sản phẩm đúng slug/giá, SEO không rò shortcode và không tràn ngang.
+- **12/12 lượt gallery repaired trên frontend PASS** (6 sản phẩm x 2 viewport): số ảnh thumbnail đúng nguồn sau build lại, không chỉ trong CMS.
+- QA còn xác minh sorting tăng/giảm, lịch sử sản phẩm đã xem sau click detail, giá WooCommerce, placeholder khi source media mất, 0 lỗi JavaScript, temp media draft cleanup PASS.
+- Evidence: artifact `aqua-all-brands-parity-qa`, ID [13666375154](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42600653497/artifacts/13666375154), **16 screenshot** source/target cùng viewport.
+- Ngoại lệ được phép công khai ghi rõ: ảnh nguồn gốc HTTP 404 của ISTA Product 3178 và Seachem Product 184; JECOD Product 15280 storefront Store API dư 1 ảnh tên file xung đột nhưng trang chi tiết gốc chỉ có 3 ảnh thật, đã sao đúng 3 ảnh. Không hotlink, không thay ảnh sai. Nếu nguồn có ảnh phục hồi sau này thì nhập bổ sung theo quy tắc, **không cần giữ task hiện tại PARTIAL**.
+- **Trạng thái release: DONE — hoàn tất theo phạm vi dữ liệu thực tế trên nguồn**; không còn Action/QA đang chờ cho việc này.
+
 ## Chốt tiến độ
 
 - `SOURCE_INVENTORY_PASS`: Có.
 - `DATA_PARITY_PASS`: Có — inventory 42593789909.
-- `NAV_PARITY_PASS`: Cần kiểm thử lại sau import (menu WordPress cũ đã đúng).
-- `VISUAL_PARITY_PASS`: Chưa, chờ QA production.
-- `DEPLOYED_PRODUCTION`: Có — build/deploy run 42595077807 success, chờ public marker QA.
-- `QA_PASS`: Chưa.
+- `NAV_PARITY_PASS`: Có — QA 20/20 category routes và 157/157 permalink; menu dữ liệu thật WordPress giữ nguyên.
+- `VISUAL_PARITY_PASS`: Có với kiểm thử cấu trúc/landmark, sorting, recent, overflow và 16 source/target screenshots; chưa thực hiện pixel-diff tự động.
+- `DEPLOYED_PRODUCTION`: Có — full rebuild/deploy run 42599850218 success; browser QA xác minh đúng SHA public.
+- `QA_PASS`: Có — 42600653497 success / PASS_WITH_SOURCE_MEDIA_DEFERRED.
