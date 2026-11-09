@@ -123,6 +123,19 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
      const dst=targetBySlug.get(x.slug);
      return dst && String(dst.price)!==String(x.prices?.price||'');
    }).map(x=>({sourceId:x.id,slug:x.slug,sourcePrice:String(x.prices?.price||''),targetPrice:String(targetBySlug.get(x.slug)?.price||'')}));
+   const galleryMismatches=srcList.flatMap(original=>{
+     const saved=targetBySlug.get(original.slug);
+     if(!saved)return [];
+     const srcFiles=[...new Set((original.images||[]).filter(i=>i.src)
+       .map(i=>decodeURIComponent(new URL(i.src,source).pathname.split('/').pop())))];
+     const dstFiles=[...new Set((saved.images||[]).filter(i=>i.src)
+       .map(i=>decodeURIComponent(new URL(i.src,target).pathname.split('/').pop())))];
+     const missingFiles=srcFiles.filter(file=>!dstFiles.includes(file));
+     if(!missingFiles.length)return [];
+     return [{sourceId:original.id,slug:original.slug,sourceUnique:srcFiles,
+       targetUnique:dstFiles,missingFiles,
+       knownLegacyException:[184,3178,15280].includes(Number(original.id))}];
+   });
    const kinds=srcList.reduce((m,x)=>(m[x.type]=(m[x.type]||0)+1,m),{});
    const record={
       source:{id:cat.id,name:cat.name,slug:cat.slug,count:srcList.length},
@@ -137,18 +150,23 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
          sourceId:(x.meta_data||[]).find(z=>z.key==='_esc_origin_product_id')?.value||null,
          categories:(x.categories||[]).map(c=>c.id)})),
       missing:missing.map(x=>({id:x.id,slug:x.slug,name:x.name,type:x.type})),
-      priceMismatches
+      priceMismatches,galleryMismatches
    };
    results.push(record);
    console.log('BRAND_INVENTORY='+JSON.stringify({brand:cat.name,src:srcList.length,dst:targetList.length,missing:missing.length,
       srcId:cat.id,dstId:match?.id,srcSlug:cat.slug,dstSlug:match?.slug,types:kinds,
       priceMismatchCount:priceMismatches.length,priceMismatchSample:priceMismatches.slice(0,3),
+      galleryMismatchCount:galleryMismatches.length,galleryMismatches:galleryMismatches.slice(0,25),
       sampleMissing:record.missing.slice(0,5)}));
   }
   const manifest={source,target,date,srcParent:{id:srcParent.id,slug:srcParent.slug},tgtParent:{id:tgtParent.id,slug:tgtParent.slug},results};
   fs.writeFileSync(output+'/source-target-parity.json',JSON.stringify(manifest,null,2)+'\n');
   console.log('BRAND_INVENTORY_SUMMARY='+JSON.stringify({brands:results.length,mapped:results.filter(x=>x.target).length,
     sourceProducts:results.reduce((n,x)=>n+x.srcProducts.length,0),targetProducts:results.reduce((n,x)=>n+x.tgtProducts.length,0),
-    missing:results.reduce((n,x)=>n+x.missing.length,0),unmatched:results.filter(x=>!x.target).map(x=>x.source.name)}));
+    missing:results.reduce((n,x)=>n+x.missing.length,0),
+    galleryMismatches:results.reduce((n,x)=>n+(x.galleryMismatches||[]).length,0),
+    galleryUnresolved:results.flatMap(x=>(x.galleryMismatches||[])
+      .filter(z=>!z.knownLegacyException).map(z=>({brand:x.target?.name,sourceId:z.sourceId,slug:z.slug,missingFiles:z.missingFiles}))),
+    unmatched:results.filter(x=>!x.target).map(x=>x.source.name)}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('BRAND_INVENTORY_FAIL='+e.stack);process.exitCode=1});
