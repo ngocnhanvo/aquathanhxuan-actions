@@ -85,7 +85,7 @@ let browser;
     if (journal.reused.some(id => items.some(item => item.id === id && Number(item.parent) === parent.id))) continue;
     const created = await request('/wp-json/wp/v2/menu-items', {
       title: 'Tất cả', type: 'custom', url: parent.url,
-      menus: menuId, parent: parent.id, status: 'publish', menu_order: 0
+      menus: menuId, parent: parent.id, status: 'publish', menu_order: 1
     });
     assert(Number.isInteger(created.id) && Number(created.parent) === parent.id &&
       Number(created.menus) === menuId && name(title(created)) === name('Tất cả') &&
