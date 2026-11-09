@@ -1,0 +1,22 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "write_scope": "59 verified original simple Woo Products under Đèn + 7 native child categories; create missing Products; merge only missing categories/SEO/content/media on existing; preserve source filenames, original bytes and product_lang",
+  "inventory_run_id": 42627591343,
+  "expected_unique_products": 59,
+  "expected_missing_products": 35,
+  "root_source_id": 1546,
+  "root_destination_id": 1768,
+  "categories": {
+    "den-weekaqua": 1813,
+    "den-chihiros": 1814,
+    "neo-helios": 1815,
+    "xuanmailong": 1816,
+    "kaokui": 1817,
+    "odyssea": 1818,
+    "den-phu-kien": 1792
+  },
+  "batches": 3,
+  "attempt": 1
+}
