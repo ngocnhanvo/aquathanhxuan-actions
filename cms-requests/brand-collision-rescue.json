@@ -1,0 +1,21 @@
+{
+  "goal": "Recover the exact ten source WooCommerce products deferred in brand C without overwriting colliding target media",
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "sourceIds": [
+    267204,
+    265771,
+    265770,
+    265769,
+    265768,
+    265767,
+    265762,
+    265405,
+    265403,
+    265398
+  ],
+  "sourceFailureRun": 42583628239,
+  "sourceAuditRun": 42586934224,
+  "notes": "Source thumbnails from original WP attachment media_details are used if full-size file filename conflicts with different target SHA256. Preserve actual source variant filenames and record deferred originals; do not fabricate images. Serial CMS writer concurrency.",
+  "mode": "idempotent"
+}
