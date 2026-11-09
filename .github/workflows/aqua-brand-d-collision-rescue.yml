@@ -1,0 +1,32 @@
+name: Aqua rescue five brand D products with original media size variants
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-d-collision-rescue.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  rescue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: brand-d-five-collisions
+      BRAND_TARGET_SLUGS: prodibio,seachem
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-d-collision-rescue.py
+      - run: python3 scripts/aqua-brand-d-collision-rescue.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-d-five-collision-recovery
+          path: artifacts/aqua-brand-migration/brand-d-five-collisions.json
+          if-no-files-found: ignore
+          retention-days: 14
