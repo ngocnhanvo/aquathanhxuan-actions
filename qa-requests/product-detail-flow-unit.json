@@ -1,7 +1,7 @@
 {
   "project": "aquathanhxuan.com",
-  "astro_sha": "5f158c4ea8d214f2f83f94dc2285032a81e983f8",
+  "astro_sha": "04425828497f5f6c3ec0f30b49f1d808d473f238",
   "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
-  "scope": "Compile product purchase Astro template + Woo detail fields (scoped QA)",
-  "attempt": 4
+  "scope": "Sticky purchase bar visibility only after scrolling past original in-page purchase actions; scoped Astro syntax and prior detail fields",
+  "attempt": 5
 }
