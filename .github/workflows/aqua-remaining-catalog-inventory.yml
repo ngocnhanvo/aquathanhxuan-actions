@@ -1,0 +1,28 @@
+name: Aqua nine remaining menus source-target inventory
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/remaining-catalog-inventory.json'
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 52
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-remaining-catalog-inventory.py
+      - name: Inspect nine source menu roots, child terms and target products (read-only)
+        run: python3 scripts/aqua-remaining-catalog-inventory.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-catalog-inventory
+          path: artifacts/aqua-remaining-catalog/inventory.json
+          if-no-files-found: ignore
+          retention-days: 14
