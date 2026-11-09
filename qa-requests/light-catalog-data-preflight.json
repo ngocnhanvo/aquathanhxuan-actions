@@ -17,6 +17,7 @@
     3062,
     3063
   ],
-  "attempt": 2,
-  "retry_reason": "Fixed source HTML SEO regex parse syntax, previous run failed before QA"
+  "attempt": 3,
+  "retry_reason": "Fixed source HTML SEO regex parse syntax, previous run failed before QA",
+  "reason": "After Kaokui exact Source Product 350144 update completed success 42638590689 with category and verified source image parity"
 }
