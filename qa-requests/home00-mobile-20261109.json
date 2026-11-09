@@ -1,8 +1,8 @@
 {
-  "source_sha": "1a835b579a239ea6dc87ce4cf02018c4ec62c4c9",
+  "source_sha": "88a501b95e7063434defc701658a9438837bf23c",
   "page": "/",
-  "purpose": "Nghiệm thu banner mobile WordPress Media 82696, Home00 ba slide 2 desktop + 1 mobile",
-  "attempt": 3,
-  "previous_run": 42548722560,
-  "note": "Authenticated REST readback nonce; previous run PASS all 6 viewports and native TablePress rows"
+  "purpose": "Nghiệm thu 3 icon tiêu đề Hot combo/Máy lọc/Đèn và hồi quy banner Home00 trên 6 viewport",
+  "attempt": 4,
+  "previous_run": 42548911873,
+  "note": "Source deployed via Actions 42550308260; assert SVG shape, gradient and section text without CMS writes"
 }
