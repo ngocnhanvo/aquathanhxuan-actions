@@ -1,0 +1,18 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "production": "https://aquathanhxuan.io.vn",
+  "environment": "production",
+  "sha": "ed8bd633bb5447efb74ffa161d93277166d2c88d",
+  "verifiedMigrationRun": 42663313074,
+  "verifiedProductRoutesRun": 42682739649,
+  "verifiedSpecialMenuRun": 42683571067,
+  "fullDataParityRun": 42684232514,
+  "wordpressBuildRun": 42689011262,
+  "productionDeployRun": 42689171599,
+  "mode": "PRODUCTION_BROWSER_QA",
+  "expectedChecks": 146,
+  "scope": "Source oracle against nine top-level catalog roots, nine representative product details, 46 original child categories, six extra menu-only categories and three source-backed special product detail pages; desktop and mobile, no CMS writes",
+  "attempt": 1
+}
