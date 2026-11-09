@@ -3,6 +3,6 @@
   "environment": "production",
   "astro_sha": "04425828497f5f6c3ec0f30b49f1d808d473f238",
   "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
-  "scope": "Product sticky purchase must stay hidden on page entry and while original CTAs remain visible; appear only after crossing them",
-  "attempt": 3
+  "scope": "Regression: entry hidden; original CTA viewport hidden; after original CTA visible; wait CSS transition before geometry check",
+  "attempt": 4
 }
