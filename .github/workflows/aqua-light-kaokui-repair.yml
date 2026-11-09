@@ -1,0 +1,43 @@
+name: Aqua Kaokui original media and Product repair
+on:
+  push:
+    branches: [main]
+    paths:
+      - cms-requests/light-kaokui-repair.json
+permissions:
+  contents: read
+concurrency:
+  group: aqua-light-catalog-writes
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      LIGHT_TARGET_SLUGS: den-weekaqua,den-chihiros,neo-helios,xuanmailong,kaokui,odyssea,den-phu-kien
+      LIGHT_BATCH_COUNT: "3"
+      LIGHT_BATCH: "light-2"
+      LIGHT_BATCH_INDEX: "2"
+      LIGHT_ONLY_SOURCE_IDS: "350144"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check scoped scripts
+        run: |
+          python3 -m py_compile scripts/aqua-light-catalog-migrate.py
+          python3 -m py_compile scripts/aqua-light-kaokui-orphan-cleanup.py
+      - name: Verify and remove only confirmed orphan upload
+        run: python3 scripts/aqua-light-kaokui-orphan-cleanup.py
+      - name: Import exact source Product and original media without renaming
+        run: python3 scripts/aqua-light-catalog-migrate.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-kaokui-repair
+          path: |
+            artifacts/aqua-light-kaokui/cleanup.json
+            artifacts/aqua-light-migration/light-2.json
+          if-no-files-found: ignore
+          retention-days: 14
