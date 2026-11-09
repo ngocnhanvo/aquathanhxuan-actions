@@ -1,0 +1,62 @@
+name: Aqua product detail data flow unit QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/product-detail-flow-unit.json'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: actions-hub
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          path: source-astro
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          path: source-php
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - name: Lock source to requested HEADs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,subprocess
+          j=json.load(open('actions-hub/qa-requests/product-detail-flow-unit.json'))
+          for folder,key in [('source-astro','astro_sha'),('source-php','php_sha')]:
+            actual=subprocess.check_output(['git','-C',folder,'rev-parse','HEAD'],text=True).strip()
+            assert actual==j[key],f'{folder} HEAD differs from QA request: actual={actual}'
+          print('AQUA_DETAIL_UNIT_SOURCE_SHAS_PASS')
+          PY
+      - name: PHP REST field syntax and behavior
+        run: |
+          set -euo pipefail
+          php -l source-php/wp-content/themes/vibe-code-theme/inc/products/product_endpoint.php
+          php source-php/wp-content/themes/vibe-code-theme/tests/product-detail-rest-fields.test.php
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source-astro/pnpm-lock.yaml
+      - name: Install Astro dependencies
+        working-directory: source-astro
+        run: pnpm install --frozen-lockfile
+      - name: Test Woo detail price/stock mapping, cache upgrade, and discount
+        working-directory: source-astro
+        run: pnpm exec vitest run src/lib/wordpress/products/detailFields.test.ts src/lib/wordpress/products/detailPrice.test.ts
