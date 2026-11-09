@@ -2,27 +2,26 @@
 
 - Ngày: 2026-11-09 (Asia/Ho_Chi_Minh)
 - Project: aquathanhxuan.com
-- Yêu cầu gần nhất: kiểm tra thông tin trang chi tiết Product đã đầy đủ như web gốc hay chưa.
-- Astro: `ngocnhanvo/aquathanhxuan-astro` master `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d` (chưa sửa trong task audit)
-- PHP: `ngocnhanvo/aquathanhxuan-php` master `dcec014aec735061bcc8af1060a6cd5d64766243` (chưa sửa)
-- Report: `chatgpt/product-detail-parity-report.json`
-- Checkpoint: `docs/checkpoints/2026-11-09-product-detail-content-parity.md`
-- Run read-only QA: [42604260244](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42604260244) completed/success; report `GAPS_FOUND` vì frontend thiếu thành phần.
-- Migration Thương hiệu phiên trước vẫn **DONE**: 157/157 Product, 20 category; QA [42600653497](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42600653497).
+- Yêu cầu: bổ sung Mô tả ngắn, Giá gốc gạch ngang, % giảm và Trạng thái còn/hết hàng trên trang chi tiết WooCommerce từ REST → `getData.ts` → output Astro.
+- Astro: `ngocnhanvo/aquathanhxuan-astro` `master` @ `b6856c2ff4abaaa7d227e7f6e1d8737f3f414ddd`
+- PHP: `ngocnhanvo/aquathanhxuan-php` `master` @ `4a65e0cab7864a44dbce83f01bf15723a7a5f589`
+- Checkpoint: `docs/checkpoints/2026-11-09-product-detail-commerce-fields.md`
+- Chế độ code: auto-build; Cổng ghi source: bypass.
 
-## Kết quả kiểm tra
+## Kết quả đã hoàn tất
 
-- **157/157** tên khớp khi giải mã HTML entities; 27 mismatch từ QA thô là false positives, đã loại.
-- **157/157** giá bán, giá gốc, trạng thái tồn kho trong WC, mô tả ngắn lưu trong WC khớp nguồn (153 có nội dung). Không phải vấn đề thiếu dữ liệu trong CMS.
-- **154/157** mô tả dài bằng văn bản khớp hoàn toàn. **3 khác biệt đã phân tích rõ**: Product `bo-test-kit-kh-prodac-italia` và `bo-test-kit-ph-prodac-italia` chuyển URL video source sang Media đích; `seachem-purigen` bỏ 1 dấu `\\` dư. Chưa kiểm tra byte/HTTP video.
-- **4/4** Product detail mẫu đều HTTP 200 ở nguồn và đích: Chihiros Hanging Kits WRGB2 Pro, Dennerle Soil 4L, Atman HP-12000, Seachem Matrix 1L.
-- **Frontend chưa parity**: không render `itemDescriptionShort` ở vị trí riêng; không render giá gốc gạch ngang/% sale; không render trạng thái hàng; thiếu 'Mua ngay', 'Gọi tư vấn', mã coupon và tiêu đề 'Thông tin chi tiết' tương đương nguồn; SEO title và meta description frontend không ưu tiên Yoast source metadata đã lưu.
-- Scope QA chỉ 157 Products trong danh mục Thương hiệu; không tuyên bố kiểm tra tất cả sản phẩm ngoài scope. Bốn mẫu so sánh UI đã chụp screenshot trong artifact.
-- **Không sửa frontend/CMS và không tự kích hoạt build** trong task audit này. Có một build production khác chạy đồng thời do trigger khác, không phải do audit này.
+1. WordPress `wp/v2/product` bổ sung 2 field `regular_price` và `stock_status` lấy trực tiếp WooCommerce. Mô tả ngắn vẫn dùng `excerpt.rendered`. PHP release [42610071417](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610071417) PASS, FTPS readback SHA256 PASS; REST live readback [42610409904](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610409904) PASS.
+2. Astro `Products.ts`, `getData.ts`, `detailFields.ts`, `index.ts` bổ sung mapping giá gốc/tồn kho cùng xử lý cached Products không đủ schema. Build production đã nâng cấp **182 sản phẩm** theo REST mà không reprocess toàn bộ ảnh. Khi giá bán không nhỏ hơn giá gốc thì không hiện giá cũ hay % giảm.
+3. Trang chi tiết `src/astro/pages/ProductDetailsPage.astro` render mô tả ngắn, giá cũ có `<del>`, badge -%, tình trạng `instock/outofstock/onbackorder`; nhãn vi/en cấu hình tại `src/data/i18n/product.json`.
+4. Source unit QA [42609931588](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42609931588) PASS 10/10 tests Astro, PHP REST mock PASS.
+5. Production build [42610738651](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610738651) và WordPress build verification [42610626409](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610626409) `completed/success`, đúng Astro SHA `b6856c2...`.
+6. Browser QA [42611391976](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42611391976) `completed/success`: 4 Product live × 1440/390px, giá sale Dennerle 259000/375000 = -31%, 3 Product giá thường không có sale ảo, mô tả ngắn/status đúng WC, không JS errors/overflow. [12 screenshot artifact](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42611391976/artifacts/13669513851).
 
-## Bước triển khai tiếp theo (nếu được giao sửa)
+Trạng thái 4 yêu cầu: DONE. QA live đã xác minh trực tiếp trường hợp `instock`; nhánh `outofstock`/`onbackorder` xác minh qua test contract/logic do 4 mẫu live đều `instock`. Không tự thêm dữ liệu giả để tạo ca hết hàng.
 
-Sửa component `src/astro/pages/ProductDetailsPage.astro` và mapping `src/lib/wordpress/products/getData.ts` để thể hiện dữ liệu WooCommerce thật; lấy coupon/CTA và Yoast SEO từ nguồn quản lý hợp lệ, không hardcode; bổ sung kiểm thử parity, build/QA qua pipeline production hiện hữu. Tránh nhập lại 157 Product đã đúng.
+## Phản hồi gửi người dùng
+
+Đã triển khai xong và phát hành production bốn mục: **Mô tả ngắn; Giá gốc gạch ngang; phần trăm giảm; Trạng thái còn/hết hàng**. WooCommerce REST trả `regular_price`/`stock_status` thật, `getData.ts` và cache Astro đã truyền đủ đến giao diện, đã kiểm tra Dennerle 4L hiện giá **259.000đ**, giá cũ **375.000đ**, giảm **31%**. 10 unit tests PASS, 4 Product × 2 viewport QA PASS, 12 screenshot được lưu trong Actions.
 
 Chế độ code: auto-build  
 Cổng ghi source: bypass  
