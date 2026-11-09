@@ -1,5 +1,5 @@
 {
-  "task": "recheck live product URL rewrite and current markup after deploy",
+  "task": "compare internal product listing SSR vs public Atman SEO metadata",
   "sourceSha": "a9540b252236099fb6b1e2e1d007559c27fec9b1",
-  "deployRun": 42569898224
+  "diagnostics": 2
 }
