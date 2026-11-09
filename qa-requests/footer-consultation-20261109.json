@@ -1,9 +1,9 @@
 {
-  "source_sha": "e3ce52aca18627028b3ad8b45847be3f30b0be7c",
-  "purpose": "Nghiệm thu ba lớp sóng Footer, căn giữa logo/slogan/bản quyền và các chức năng cũ ở 5 viewport",
+  "source_sha": "cebdd48dd73a41ba130cbbeddda8ae5252621730",
+  "purpose": "Nghiệm thu 75 menu con WordPress Header, khoảng cách nút lên đầu trang / Tư vấn, panel đè lên mũi tên, icon SVG không emoji và Footer/Home05 cũ",
   "expected_site": "aquathanhxuan.io.vn",
-  "iteration": 4,
-  "note": "Footer wave source e3ce52a, do not write CMS; validate responsive SVG decoration",
-  "diagnostic": "5 viewport wave + footer links/consultation/Home05 and read-only Visual Builder inspection",
-  "attempt": 12
+  "iteration": 5,
+  "note": "Source cebdd48, menu CMS 11 parents / 75 children; test desktop/mobile anchors and toggles",
+  "diagnostic": "Readonly 5 viewport screenshots, arrow overlay, contact channels and WordPress Header menu; no Save",
+  "attempt": 13
 }
