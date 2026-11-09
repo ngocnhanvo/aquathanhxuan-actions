@@ -1,0 +1,23 @@
+{
+  "scope": "Repair only verified missing genuine source gallery images on existing products; preserve price, cover, descriptions and categories",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "profile": "brand-gallery-six",
+  "sourceIds": [
+    267097,
+    267093,
+    234252,
+    36878,
+    15166,
+    15117
+  ],
+  "brands": [
+    "CHIHIROS",
+    "DENNERLE"
+  ],
+  "expectedSourceDistinctMissing": 9,
+  "sourceAuditRun": 42597184215,
+  "targetWriter": "scripts/aqua-brand-catalog-collision-rescue.py",
+  "policy": "Original Media filenames, original byte hash and upload origin date; never overwrite unrelated media; no duplicate images; read-after-write; remove any temporary posts",
+  "productionBuildAlreadyPass": 42595077807
+}
