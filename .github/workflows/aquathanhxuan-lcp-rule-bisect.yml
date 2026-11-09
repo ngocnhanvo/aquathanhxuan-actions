@@ -56,23 +56,7 @@ jobs:
             finally{await ctx.close()}
           }
           await test('control',-1,-1);
-          const quarter=Math.ceil(nodes.length/4);
-          let passes=[];
-          for(let i=0;i<4;i++){
-            const a=i*quarter,b=Math.min(nodes.length,(i+1)*quarter);
-            if(a>=b)continue;
-            if(await test('remove-quarter-'+i,a,b))passes.push([a,b]);
-          }
-          if(passes.length===1){
-            let [a,b]=passes[0];
-            for(let depth=0;depth<6&&b-a>1;depth++){
-              const mid=Math.floor((a+b)/2);
-              if(await test('bisect-left-depth-'+depth,a,mid)){b=mid;continue}
-              if(await test('bisect-right-depth-'+depth,mid,b)){a=mid;continue}
-              console.log('CSS_BISECT_COMPOSITE '+JSON.stringify({a,b,depth}));
-              break;
-            }
-            console.log('CSS_BISECT_CANDIDATES '+JSON.stringify({range:[a,b],rules:nodes.slice(a,b).map((n,i)=>({index:a+i,selector:n.selector||n.name,preview:n.toString().slice(0,450)})).slice(0,35)}));
-          }else console.log('CSS_BISECT_QUARTER_RESULT '+JSON.stringify({passes}));
+          for(let i=57;i<=61;i++)await test('remove-rule-'+i,i,i+1);
+          console.log('CSS_BISECT_RULES '+JSON.stringify(nodes.slice(55,64).map((n,i)=>({i:55+i,selector:n.selector||n.name,css:n.toString().slice(0,600)}))));
           await browser.close();
           NODE
