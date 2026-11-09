@@ -1,0 +1,30 @@
+name: Aqua recover Seachem Matrix Product 184 with missing original media
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-seachem-184-recover.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-only-seachem-184
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-seachem-184-recover.py
+      - run: python3 scripts/aqua-brand-seachem-184-recover.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-seachem-184
+          path: artifacts/aqua-brand-seachem-184
+          if-no-files-found: ignore
+          retention-days: 14
