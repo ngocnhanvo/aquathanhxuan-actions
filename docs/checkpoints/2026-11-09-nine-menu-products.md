@@ -137,3 +137,11 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - [Read-only live paged API QA #42688545600](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42688545600) đang chạy, yêu cầu snapshot/total/pages và đọc hết log dưới deadline từng request, chưa có verdict.
 - Sau live QA PASS: kích production build mới qua `build-requests/*.json` pin **Astro master `ed8bd633bb5447efb74ffa161d93277166d2c88d`** (không rerun build SHA cũ), theo dõi WordPress trigger và downstream deploy `BUILD_SUCCESS`, marker `DEPLOY_READY`; rồi tạo `qa-requests/remaining-catalog-production.json` browser QA 134 cases và xử lý lỗi nếu có.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## 2026-11-10 — PHP endpoint deployed, live 383 logs PASS, build retry
+
+- Full live API QA [#42688545600](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42688545600) **PASS**: WordPress published PHP paged endpoint returned 383 pending Product logs across 20 pages, uniqueIds=383, snapshot/count stable, completed in 110119ms. Page times circa 3.7–6.5s, each below Astro per-request 30s. 383 is **pending log records**, not full 391 Product count.
+- [PHP release #42688312773](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42688312773) successfully installed `wp-content/plugins/github-trigger/products/endpoint.php` and hash readback verified, files_checked=15; protected FTPS release allowlist updated commit 2167ec7e; `no_astro_build=PASS`.
+- [New WordPress production build trigger #42689011262](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42689011262) from Actions commit `c37c4757` pinned Astro master `ed8bd633bb5447efb74ffa161d93277166d2c88d`. At checkpoint trigger was in_progress; must check downstream deploy run ID, output hash marker and 134 browser QA before DONE.
+- Previous build [#42685676271](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42685676271) FAILED from timeout; do not misreport success, do not rerun old SHA.
+- Trạng thái: PARTIAL — chưa hoàn tất.
