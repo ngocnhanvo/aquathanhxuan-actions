@@ -116,12 +116,12 @@ body=urllib.parse.urlencode({'log':username,'pwd':password,'wp-submit':'Log In',
 dash=raw(WP+'/wp-login.php','POST',body,{'Content-Type':'application/x-www-form-urlencoded'}).decode('utf-8','replace')
 assert 'wp-admin-bar-my-account' in dash,'WP login failed'
 nonce=''
-m=re.search(r'wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;',dash,re.S)
+m=re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;',dash,re.S)
 if m:
   try:nonce=json.loads(m.group(1)).get('nonce','')
   except json.JSONDecodeError:pass
 if not nonce:
-  m=re.search(r'"nonce"\\s*:\\s*"([A-Za-z0-9]+)"',dash)
+m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',dash)
   nonce=m.group(1) if m else ''
 assert nonce,'Missing WP REST nonce'
 def api(path,method='GET',obj=None):
