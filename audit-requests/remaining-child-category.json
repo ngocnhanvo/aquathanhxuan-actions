@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "mode": "read-only",
+  "public": "https://aquathanhxuan.io.vn",
+  "original": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "sourceCategoryRootId": 1809,
+  "targetSlug": "may-loc-loc-treo",
+  "productionQaFailedRun": 42692639227,
+  "pinnedAstroSha": "ed8bd633bb5447efb74ffa161d93277166d2c88d",
+  "scope": "Inspect original source taxonomy, verified Woo Product IDs, target category assignments and public category card IDs without writing CMS"
+}
