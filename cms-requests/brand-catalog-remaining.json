@@ -1,0 +1,11 @@
+{
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "reason": "A pass; B 34/36 with 2 isolated media conflicts, continue C/D independently",
+  "runBlocked": 42579994450,
+  "expected": {
+    "brand-c": 41,
+    "brand-d": 38
+  },
+  "writeScope": "only missing source Woo Products and media in target brand categories; no overwrites"
+}
