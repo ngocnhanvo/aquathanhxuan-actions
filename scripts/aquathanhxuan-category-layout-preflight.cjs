@@ -8,6 +8,18 @@ const urls = [
 (async()=>{
   fs.mkdirSync('artifacts/category-layout',{recursive:true});
   const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+  for(const endpoint of [
+    'https://admin.aquathanhxuan.io.vn/wp-json/astro/v1/get-product-categories',
+    'https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/product?per_page=5&search=atman&_fields=id,slug,title,product_categories,date,acf',
+    'https://admin.aquathanhxuan.io.vn/wp-json/wc/store/v1/products?per_page=5&search=atman'
+  ]){
+    try{
+      const r=await fetch(endpoint,{signal:AbortSignal.timeout(20000)});
+      const json=await r.json().catch(()=>({unreadable:true}));
+      const arr=Array.isArray(json)?json:[];
+      console.log('CATEGORY_CMS_API='+JSON.stringify({endpoint,status:r.status,total:r.headers.get('x-wp-total'),matches:arr.filter(x=>/atman/i.test(x?.name||x?.title?.rendered||x?.slug||'')).slice(0,10),length:arr.length,sample:arr.slice(0,3)}).slice(0,7000));
+    }catch(e){console.log('CATEGORY_CMS_API_ERROR='+String(e))}
+  }
   try{
     const report={};
     for(const vp of [{width:1440,height:900},{width:390,height:844}]){
@@ -31,12 +43,15 @@ const urls = [
             headings:take('h1,h2,h3'), images:take('main img,.page-wrapper img,.category-banner img'),
             controls:take('select,[class*="sort"],[class*="order"],[class*="breadcrumb"],[class*="banner"],[class*="recent"]'),
             productCards:take('.product-small,.product-card-img,.product-grid article,#product-grid article,main article'),
+            bannerImages:take('.banner_collection img,.banner_collection picture,.banner_collection [style*="background"],.banner_collection a'),
+            bannerHtml:document.querySelector('.banner_collection')?.innerHTML.slice(0,6000)||'',
+            bannerStyles:document.querySelector('.banner_collection')?.getAttribute('style')||'',
             links:take('main a[href*="san-pham/"],main a[href*="product/"]'),
             scrollWidth:document.documentElement.scrollWidth,innerWidth:window.innerWidth};
         });
         report[site.label+'-'+vp.width]={status:response?.status(),url:page.url(),...data,errors};
         await page.screenshot({path:'artifacts/category-layout/'+site.label+'-'+vp.width+'.png',fullPage:true});
-        console.log('CATEGORY_PREFLIGHT='+JSON.stringify({site:site.label,width:vp.width,status:response?.status(),title:data.title,headings:data.headings.slice(0,8),images:data.images.slice(0,7),controls:data.controls.slice(0,9),cards:data.productCards.slice(0,4),errors}).slice(0,13500));
+        console.log('CATEGORY_PREFLIGHT='+JSON.stringify({site:site.label,width:vp.width,status:response?.status(),title:data.title,headings:data.headings.slice(0,8),images:data.images.slice(0,7),controls:data.controls.slice(0,9),cards:data.productCards.slice(0,4),bannerImages:data.bannerImages, bannerHtml:data.bannerHtml?.slice(0,5000),errors}).slice(0,13500));
         await page.close();
       }
     }
