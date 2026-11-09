@@ -125,6 +125,56 @@ jobs:
           }
           await browser.close();
           NODE
+      - name: Determine whether site, CSS or native LCP API suppresses candidates
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright';
+          import fs from 'node:fs';
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+          const tests=[
+            {name:'other-aqua-route',url:'https://aquathanhxuan.io.vn/lien-he'},
+            {name:'plain-known-good',url:'https://example.com'},
+            {name:'aqua-js-disabled',url:'https://aquathanhxuan.io.vn/',jsDisabled:true},
+            {name:'aqua-css-disabled',url:'https://aquathanhxuan.io.vn/',cssDisabled:true},
+            {name:'aqua-reveal-disabled',url:'https://aquathanhxuan.io.vn/',css:'.esc-section-item,[data-scroll-reveal]{content-visibility:visible!important}html.home-scroll-reveal-ready [data-scroll-reveal]{opacity:1!important;transform:none!important;transition:none!important}'},
+            {name:'aqua-massive-lcp-h1',url:'https://aquathanhxuan.io.vn/',htmlInject:'<h1 id="probe-large-text" style="display:block;position:fixed;top:100px;left:20px;width:88vw;z-index:999999;font:bold 64px/1.2 Arial;color:#000;background:#fff">This is a very very very long headline that is visible and must qualify for largest contentful paint audit</h1>'},
+            {name:'aqua-clear-cache',url:'https://aquathanhxuan.io.vn/',css:'*{content-visibility:visible!important}html.home-scroll-reveal-ready [data-scroll-reveal]{opacity:1!important;transform:none!important;transition:none!important}'},
+          ];
+          for(const test of tests){
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,javaScriptEnabled:!test.jsDisabled});
+            const page=await context.newPage();
+            await page.addInitScript(()=>{window.__lcp=[];window.__paint=[];try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__lcp.push({t:e.startTime,size:e.size,url:e.url,tag:e.element?.tagName})) ).observe({type:'largest-contentful-paint',buffered:true});new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__paint.push({n:e.name,t:e.startTime}))).observe({type:'paint',buffered:true})}catch(e){window.__lcpError=e.message}});
+            if(test.cssDisabled)await page.route('**/*',r=>r.request().resourceType()==='stylesheet'?r.abort():r.continue());
+            if(test.css||test.htmlInject){
+              await page.route('https://aquathanhxuan.io.vn/**',async r=>{
+                if(r.request().resourceType()!=='document')return r.continue();
+                const response=await r.fetch();let html=await response.text();
+                if(test.css)html=html.replace('</head>','<style id="ab-test-overrides">'+test.css+'</style></head>');
+                if(test.htmlInject)html=html.replace(/<body([^>]*)>/i,'<body$1>'+test.htmlInject);
+                return r.fulfill({response,body:html,headers:{...response.headers(),'content-type':'text/html; charset=utf-8'}});
+              });
+            }
+            try{
+              const response=await page.goto(test.url,{waitUntil:'domcontentloaded',timeout:40000});
+              await page.waitForTimeout(4500);
+              const state=await page.evaluate(()=>({
+                support:PerformanceObserver.supportedEntryTypes,
+                lcp:window.__lcp||[],paint:window.__paint||[],lcpError:window.__lcpError,
+                ready:document.readyState,
+                probe:document.getElementById('probe-large-text')?.getBoundingClientRect().toJSON(),
+                bodyText:document.body?.innerText?.length,
+                hero:document.querySelector('.aqua-hero__slide[data-active="true"]')?.getBoundingClientRect().toJSON(),
+                reveals:[...document.querySelectorAll('[data-scroll-reveal]')].slice(0,3).map(e=>({cls:e.className,opacity:getComputedStyle(e).opacity,contentVisibility:getComputedStyle(e).contentVisibility}))
+              }));
+              console.log('LCP_ISOLATION '+JSON.stringify({name:test.name,status:response?.status(),...state}));
+              fs.writeFileSync('artifacts/lighthouse/isolate-'+test.name+'.json',JSON.stringify(state,null,2));
+            }catch(e){console.log('LCP_ISOLATION_ERROR '+test.name+' '+e.message)}
+            await context.close();
+          }
+          await browser.close();
+          NODE
       - name: Report errors, LCP, screenshots, and key performance metrics
         shell: bash
         run: |
