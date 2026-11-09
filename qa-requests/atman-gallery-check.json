@@ -1,0 +1,7 @@
+{
+  "purpose": "Compare all nine Atman original WooCommerce gallery image src URLs against exact target WC image filenames and unique-src counts; QA production failed on may-sui-khi-atman-hp-12000 count",
+  "failedQa": 42595915988,
+  "sourceCategory": 2162,
+  "targetCategory": 1793,
+  "mode": "read-only"
+}
