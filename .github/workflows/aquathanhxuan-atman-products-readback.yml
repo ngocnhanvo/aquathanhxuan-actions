@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aquathanhxuan-atman-products-readback.yml'
+      - 'qa-requests/atman-products-readback.json'
 permissions:
   contents: read
 jobs:
