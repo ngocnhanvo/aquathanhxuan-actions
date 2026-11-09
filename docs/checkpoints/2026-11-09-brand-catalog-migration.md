@@ -64,7 +64,7 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - Batch D phục hồi 5/5: [run 42591602696](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42591602696), tạo tất cả `265594,265379,265293,265292,265290`, 0 lỗi; cộng với 32 bản ghi trước đó và Product `184` `83068` từ run 42589893222 → **38/38**.
 - Cộng các batch và Atman dự kiến `9+33+36+41+38=157` lần hiện diện danh mục thương hiệu. Phải dựa vào inventory độc lập, **không coi cộng số importer là DATA_PARITY_PASS**.
 - Astro `master` hiện `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d` đã sửa thêm label vật lý `Giá` (thay `Giá đăng ký`) cùng giá thực. Unit workflow [42593709890](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42593709890) PASS.
-- Đã kích inventory cuối [42593789909](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42593789909): cần kết luận `source=157,target=157,missing=0,priceMismatchCount=0` trước khi ghi Rewrite và build.
+- **DATA_PARITY_PASS**: độc lập run [42593789909](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42593789909) `completed/success`. Đã đối chiếu 20 brand categories, `sourceProducts=157,targetProducts=157,missing=0`, mỗi brand có `priceMismatchCount=0`.
 - Các ảnh nguồn mất thật `3178` ISTA và `184` Seachem vẫn phải `SOURCE_MEDIA_DEFERRED` dù có đủ Product bản ghi. JECOD `15280` dùng đúng 3 ảnh đang hiển thị trên trang nguồn, không đổi file phụ trùng hash khác.
 
 ## Link chi tiết, build và QA — tiếp theo
@@ -77,7 +77,7 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 ## Chốt tiến độ
 
 - `SOURCE_INVENTORY_PASS`: Có.
-- `DATA_PARITY_PASS`: Đang chạy.
+- `DATA_PARITY_PASS`: Có — inventory 42593789909.
 - `NAV_PARITY_PASS`: Cần kiểm thử lại sau import (menu WordPress cũ đã đúng).
 - `VISUAL_PARITY_PASS`: Chưa, chờ QA production.
 - `DEPLOYED_PRODUCTION`: Chưa áp dụng cho dữ liệu mới.
