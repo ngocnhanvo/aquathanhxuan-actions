@@ -57,11 +57,23 @@ const time=()=>Date.now();
    assert.equal(await cards.count(),9,'Exact real Atman product count');
    const labels=await cards.locator('h2').allInnerTexts();
    assert.deepEqual(new Set(labels.map(x=>x.trim())),titles,'Legacy Product identity parity');
+   const seo=await page.evaluate(()=>({
+     description:document.querySelector('meta[name="description"]')?.getAttribute('content')||'',
+     schema:[...document.querySelectorAll('script[type="application/ld+json"]')].map(e=>e.textContent||'').join(' ')
+   }));
+   assert(!/\[table\s/i.test(seo.description+seo.schema),'WordPress TablePress shortcode leaked into SEO metadata');
    assert.equal(await page.locator('#catalog-sort option').count(),4,'Sort options');
    assert.equal(await page.locator('#recently-viewed-title').count(),1,'Recent history section');
    const dimensions=await page.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
    assert(dimensions.page<=dimensions.viewport+2,'Horizontal overflow '+viewport.width+' '+JSON.stringify(dimensions));
    await page.screenshot({path:'artifacts/category-layout-production/atman-'+viewport.width+'.png',fullPage:true});
+   const productUrls=await cards.locator('a[href]').evaluateAll(nodes=>[...new Set(nodes.map(n=>n.getAttribute('href')).filter(Boolean))]);
+   assert.equal(productUrls.length,9,'Product cards must link to nine distinct real products');
+   for(const href of productUrls){
+     assert(href.startsWith('/san-pham/'),'Unexpected product route '+href);
+     const response=await page.request.get(origin+href,{timeout:20000});
+     assert.equal(response.status(),200,'Public product detail HTTP status '+href+' status='+response.status());
+   }
    const productUrl=await cards.first().locator('a[href]').first().getAttribute('href');
    assert(productUrl&&productUrl.startsWith('/san-pham/'),'Product route unexpectedly changed');
    await go(productUrl);
@@ -70,6 +82,7 @@ const time=()=>Date.now();
    await go('/san-pham/atman?visit='+time());
    await page.locator('#recently-viewed-list a').first().waitFor({state:'attached',timeout:10000});
    assert((await page.locator('#recently-viewed-list a').count())>=1,'Recent history card missing');
+   await page.screenshot({path:'artifacts/category-layout-production/atman-recent-'+viewport.width+'.png',fullPage:true});
    for(const order of ['price-asc','price-desc']){
      await go('/san-pham/atman?sort='+order+'&t='+time());
      const values=await page.locator('[data-catalog-product-price]').evaluateAll(nodes=>nodes.map(x=>Number(x.getAttribute('data-catalog-product-price'))));
