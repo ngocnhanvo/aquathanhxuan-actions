@@ -1,0 +1,32 @@
+name: Aqua enrich nine existing Atman product descriptions and galleries
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-atman-enrich.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: brand-atman-enrich
+      BRAND_TARGET_SLUGS: atman
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-catalog-migrate.py
+      - run: python3 scripts/aqua-brand-catalog-migrate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-atman-enrichment
+          path: artifacts/aqua-brand-migration/brand-atman-enrich.json
+          if-no-files-found: ignore
+          retention-days: 12
