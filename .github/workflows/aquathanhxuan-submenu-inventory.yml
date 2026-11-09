@@ -1,0 +1,23 @@
+name: Aqua read-only Header submenu inventory
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-submenu-inventory.yml'
+      - 'scripts/aquathanhxuan-submenu-inventory.mjs'
+permissions:
+  contents: read
+jobs:
+  submenu-inventory:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Read published WordPress categories and Header menu (NO WRITE)
+        run: node scripts/aquathanhxuan-submenu-inventory.mjs
