@@ -28,7 +28,7 @@ def raw(url,method='GET',data=None,headers=None):
 src=json.loads(raw(SOURCE+'/wp-json/wc/store/v1/products/'+str(PRODUCT_ID)))
 assert int(src['id'])==PRODUCT_ID and src['slug']==SLUG and src['type']=='simple'
 image_urls=[str(x.get('src') or '') for x in src.get('images') or []]
-source_original=[x for x in image_urls if urllib.parse.urlparse(x).path.endswith('/'+ORIGINAL)]
+source_original=sorted({x for x in image_urls if urllib.parse.urlparse(x).path.endswith('/'+ORIGINAL)})
 assert len(source_original)==1,'Source product original image not unique'
 source_sha=hashlib.sha256(raw(source_original[0])).hexdigest()
 raw(TARGET+'/wp-login.php')
