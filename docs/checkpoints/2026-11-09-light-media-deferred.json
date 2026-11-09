@@ -1,0 +1,146 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "status": "ASSET_DEFERRED",
+  "reason": "Original Product media genuinely absent or HTTP404; no unrelated photos or synthetic placeholders may be imported",
+  "verified_on": "2026-11-09",
+  "source_inventory_run": 42636196189,
+  "source_media_diagnostic_run": 42630327380,
+  "target_media_recovery_runs": [
+    42632797438,
+    42634349942
+  ],
+  "records": [
+    {
+      "source_id": 1814,
+      "parent_record": 1814,
+      "source_url": null,
+      "source_filename": null,
+      "asset_type": "image",
+      "attempt_count": 0,
+      "error": "Source Woo Store Product has no image",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 1815,
+      "parent_record": 1815,
+      "source_url": null,
+      "source_filename": null,
+      "asset_type": "image",
+      "attempt_count": 0,
+      "error": "Source Woo Store Product has no image",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 1816,
+      "parent_record": 1816,
+      "source_url": null,
+      "source_filename": null,
+      "asset_type": "image",
+      "attempt_count": 0,
+      "error": "Source Woo Store Product has no image",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3052,
+      "parent_record": 3052,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3054,
+      "parent_record": 3054,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3056,
+      "parent_record": 3056,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3057,
+      "parent_record": 3057,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T124426.236.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3058,
+      "parent_record": 3058,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3059,
+      "parent_record": 3059,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3060,
+      "parent_record": 3060,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3061,
+      "parent_record": 3061,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3062,
+      "parent_record": 3062,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    },
+    {
+      "source_id": 3063,
+      "parent_record": 3063,
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T123505.164.png",
+      "asset_type": "image",
+      "attempt_count": 1,
+      "error": "HTTP 404 from original source, resized image unavailable",
+      "status": "ASSET_DEFERRED"
+    }
+  ]
+}
