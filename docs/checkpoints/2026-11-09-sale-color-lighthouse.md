@@ -20,12 +20,14 @@ Source write gate: bypass
 - Astro commit 7fe42e89648c13dc84d72db8d80bf77086c13306 removed only Sale track CSS `scroll-behavior: smooth`, leaving arrow smooth and snap intact.
 - Build request `build-requests/2026-11-09-lighthouse-lcp-7fe42e8.json` pinned to Astro SHA 7fe42e89648c13dc84d72db8d80bf77086c13306.
 
-## Latest status / continuation checkpoint
-- Production WordPress build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42555192451
-- Production deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42555268992
-- **IN_PROGRESS at writing:** confirm both actions completed successfully. Then rerun mobile+desktop Lighthouse independently against production and verify scores are numeric (not NO_LCP); run Playwright screenshot/interaction check: red price, scroll snap retained, arrow click scrolls, responsive viewport. Do not claim root-cause issue solved without post-deploy PASS.
-- If Lighthouse still emits NO_LCP, inspect current production marker SHA, CSS styles loaded, trace, and retry targeted A/B; do not blindly remove carousel functionality.
-- On passing QA update this checkpoint with the run IDs/results, set DONE and report to user. Keep last three status lines per CORE-08.
+## Final production verification — DONE
+- WordPress production build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42555192451 — SUCCESS; build source SHA verified `7fe42e89648c13dc84d72db8d80bf77086c13306`.
+- Production deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42555268992 — SUCCESS; signed ZIP upload and provenance verified.
+- Post-deploy independent Lighthouse (rerun attempt 2): https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42553553595 — SUCCESS. Mobile Performance 0.87; LCP 2.639 s; Desktop Performance 0.99; LCP 0.696 s; both have 0 audit errors and non-null LCP. Native PerformanceObserver captured LCP entries for hero images, no JS errors or request failures.
+- External PageSpeed Insights API returned 429 (Google daily quota) on the runner; independent Lighthouse run succeeded and is the acceptance oracle.
+- Read-only Playwright Sale UI regression: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42556424357 — SUCCESS. Five viewports 1440×900, 1024×768, 768×1024, 844×390 and 390×844. Assertions: production SHA; real homepage ESC Table source; seven current cards and valid images; computed price `rgb(227, 35, 53)`; computed CSS scroll-behavior auto and scroll-snap `x mandatory`; Next arrow scroll; no horizontal overflow. Screenshots available in run artifact.
+- QA-only script updated in Actions `aquathanhxuan-sale-visual-qa.yml` to avoid obsolete hardcoded 12-card assertion and isolate arrow test from test-induced snap state. No additional Astro/PHP changes, no CMS writes, no further deploy needed.
+- Status: **DONE**. Root cause fixed and post-deploy QA passed.
 
 ## Rollback
 - Revert CSS-only commit 7fe42e8 and redeploy via same production workflow if regression occurs; red price committed separately in cec62f8 and should remain.
