@@ -1,0 +1,23 @@
+name: Aqua Kaokui original media bytes read-only diagnostic
+on:
+  push:
+    branches: [main]
+    paths:
+      - audit-requests/light-kaokui-media.json
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-light-kaokui-media-diagnostic.py
+      - run: python3 scripts/aqua-light-kaokui-media-diagnostic.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-light-kaokui-media-diagnostic
+          path: artifacts/aqua-light-kaokui/diagnostic.json
+          if-no-files-found: ignore
+          retention-days: 14
