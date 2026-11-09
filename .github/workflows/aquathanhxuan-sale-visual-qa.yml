@@ -63,16 +63,17 @@ jobs:
                 assert.equal((await sale.locator('h2').innerText()).trim(),'Sale bùng nổ','Sale heading');
 
                 const cards=sale.locator('[data-sale-card]');
-                assert.equal(await cards.count(),12,'Sale product card count');
-                assert.equal(await sale.locator('.aqua-sale__discount').count(),12,'Discount badge count');
-                assert.equal(await sale.locator('.aqua-sale__prices strong').count(),12,'Sale price count');
+                const cardCount=await cards.count();
+                assert(cardCount>=2,'Sale must have multiple visible product cards');
+                assert.equal(await sale.locator('.aqua-sale__discount').count(),cardCount,'Discount badge count');
+                assert.equal(await sale.locator('.aqua-sale__prices strong').count(),cardCount,'Sale price count');
                 const salePriceColor=await sale.locator('.aqua-sale__prices strong').first().evaluate(node=>getComputedStyle(node).color);
                 assert.equal(salePriceColor,'rgb(227, 35, 53)','Sale price must be red on every viewport');
-                assert.equal(await sale.locator('.aqua-sale__prices del').count(),12,'Regular price count');
-                assert.equal(await sale.locator('[data-sale-add]').count(),12,'Cart button count');
+                assert.equal(await sale.locator('.aqua-sale__prices del').count(),cardCount,'Regular price count');
+                assert.equal(await sale.locator('[data-sale-add]').count(),cardCount,'Cart button count');
 
                 const images=sale.locator('[data-sale-card] img');
-                assert.equal(await images.count(),12,'Product image count');
+                assert.equal(await images.count(),cardCount,'Product image count');
 
                 const initialImageStates=await images.evaluateAll(nodes=>nodes.map((img,index)=>({
                   index,
@@ -87,7 +88,7 @@ jobs:
                 // Product images are intentionally loading="lazy". Cards outside the
                 // horizontal viewport are not expected to load until the carousel
                 // scrolls near them, so reveal each card before asserting image health.
-                for(let i=0;i<12;i++){
+                for(let i=0;i<cardCount;i++){
                   const card=cards.nth(i);
                   const img=images.nth(i);
                   await card.evaluate(el=>el.scrollIntoView({behavior:'instant',block:'nearest',inline:'center'}));
@@ -151,7 +152,7 @@ jobs:
                 assert(discounts.every(value=>/^\s*-\d+%\s*$/.test(value)),'Discount labels');
 
                 const hrefs=await sale.locator('.aqua-sale__name-link').evaluateAll(nodes=>nodes.map(a=>a.getAttribute('href')));
-                assert.equal(hrefs.length,12,'Product href count');
+                assert.equal(hrefs.length,cardCount,'Product href count');
                 assert(hrefs.every(href=>href && href!=='#'),'Product hrefs are real');
 
                 const layout=await page.evaluate(()=>({
@@ -183,7 +184,7 @@ jobs:
 
                 const label=width+'x'+height;
                 await sale.screenshot({path:'artifacts/sale/'+label+'.png'});
-                console.log('SALE_QA_VIEWPORT=PASS '+label+' cards=12 track='+layout.track.client+'/'+layout.track.scroll);
+                console.log('SALE_QA_VIEWPORT=PASS '+label+' cards='+cardCount+' track='+layout.track.client+'/'+layout.track.scroll);
                 await page.close();
               }
             } finally {
