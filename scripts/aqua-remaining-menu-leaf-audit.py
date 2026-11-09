@@ -75,6 +75,25 @@ for root,label,sid,tid in SUSPECT:
  report['candidates'].append(item)
  print('AQUA_MENU_SOURCE_GAP='+json.dumps(item,ensure_ascii=False),flush=True)
  save()
+report['verified_special_products']=[]
+for sid,slug,required_name,required_source_category in [
+ (5054,'den-uv-30w','Đèn UV Gebo 30W',None),
+ (4355,'den-uv-40w','Đèn UV Gebo 40W',None),
+ (3321,'cay-bonsai-to','Cây Bonsai',2058),
+]:
+ p=source('/wp-json/wc/store/v1/products/'+str(sid))
+ assert int(p['id'])==sid and p['slug']==slug and norm(p['name'])==norm(required_name) and p['type']=='simple','Source Product identity drift '+str(sid)
+ cats={int(c['id']) for c in p.get('categories') or []}
+ if required_source_category is None:assert not cats,'Original category-less UV Product was reclassified; review'
+ else:assert required_source_category in cats,'Bonsai no longer in original Đá category'
+ item={'source_id':sid,'slug':slug,'name':p['name'],'source_category_ids':sorted(cats),
+       'image_count':len(p.get('images') or []),'stock':p.get('is_in_stock'),
+       'price':(p.get('prices') or {}).get('price'),'regular_price':(p.get('prices') or {}).get('regular_price'),
+       'has_long_description':bool(str(p.get('description') or '').strip()),
+       'has_short_description':bool(str(p.get('short_description') or '').strip())}
+ report['verified_special_products'].append(item)
+ print('AQUA_VERIFIED_SPECIAL_PRODUCT='+json.dumps(item,ensure_ascii=False),flush=True)
+ save()
 report['status']='PASS'
 save()
 print('AQUA_MENU_SOURCE_GAP_AUDIT_PASS='+str(len(report['candidates'])),flush=True)
