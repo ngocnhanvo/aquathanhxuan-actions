@@ -1,5 +1,5 @@
 {
-  "task": "compare internal product listing SSR vs public Atman SEO metadata",
+  "task": "compare public vs internal SEO headers and cache controls",
   "sourceSha": "a9540b252236099fb6b1e2e1d007559c27fec9b1",
-  "diagnostics": 2
+  "diagnostics": 3
 }
