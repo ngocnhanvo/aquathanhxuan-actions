@@ -1,0 +1,14 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "write_scope": "Only four verified missing Woo product categories: source 2204,2184,2307,2323; preserve WordPress Menu Manager unchanged",
+  "source_ids": [
+    2204,
+    2184,
+    2307,
+    2323
+  ],
+  "inventoryRun": 42660766962,
+  "attempt": 1
+}
