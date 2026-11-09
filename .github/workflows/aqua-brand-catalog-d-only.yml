@@ -1,0 +1,32 @@
+name: Aqua import brand group D independently
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-catalog-d-only.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  brand-d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: brand-d-only
+      BRAND_TARGET_SLUGS: prodibio,seachem,sera,sobo,week-aqua
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-catalog-migrate.py
+      - run: python3 scripts/aqua-brand-catalog-migrate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-catalog-d-only
+          path: artifacts/aqua-brand-migration/brand-d-only.json
+          if-no-files-found: ignore
+          retention-days: 12
