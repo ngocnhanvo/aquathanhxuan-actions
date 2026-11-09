@@ -1,0 +1,30 @@
+name: Aqua publish verified brand product permalink Rewrites
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-product-routes.json'
+permissions:
+  contents: read
+jobs:
+  writer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-brand-product-routes-create.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aqua-brand-product-routes-create.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-product-rewrites
+          path: artifacts/brand-product-routes
+          if-no-files-found: ignore
+          retention-days: 12
