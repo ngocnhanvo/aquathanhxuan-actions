@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: node --check scripts/aqua-remaining-catalog-production-qa.cjs
+      - name: Verify exact source-backed legacy child taxonomy exceptions
+        run: |
+          node --check scripts/aqua-remaining-verified-curated-child.js
+          node --test scripts/aqua-remaining-verified-curated-child.test.js
       - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - name: Confirm deployment marker and audit nine categories + product detail at desktop/mobile
         run: node scripts/aqua-remaining-catalog-production-qa.cjs
