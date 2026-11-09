@@ -1,0 +1,78 @@
+name: Aqua LCP rule bisect (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-lcp-rule-bisect.yml'
+permissions:
+  contents: read
+jobs:
+  bisect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install diagnostic tools
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0 postcss@8.5.6
+      - name: Isolate CSS rules that prevent LCP
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright';
+          import postcss from 'postcss';
+          const url='https://aquathanhxuan.io.vn/';
+          const styleUrl=url+'_astro/Layout.CqAepo0p.css';
+          const response=await fetch(styleUrl);
+          if(!response.ok)throw Error('CSS fetch '+response.status);
+          const raw=await response.text();
+          const root=postcss.parse(raw);
+          const nodes=root.nodes;
+          console.log('CSS_SOURCE '+JSON.stringify({url:styleUrl,length:raw.length,rules:nodes.length,first:nodes.slice(0,3).map(n=>n.toString().slice(0,90)),last:nodes.slice(-3).map(n=>n.toString().slice(0,90))}));
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+          let attempt=0;
+          async function test(label,a,b){
+            attempt++;
+            const body = a<0?raw:postcss.root({nodes:nodes.filter((_,i)=>i<a||i>=b).map(n=>n.clone())}).toString();
+            const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
+            const page=await ctx.newPage();
+            await page.addInitScript(()=>{window.__lcp=[];new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__lcp.push({size:e.size,url:e.url,tag:e.element?.tagName,t:e.startTime}))).observe({type:'largest-contentful-paint',buffered:true})});
+            await page.route('**/*',async route=>{
+              if(route.request().url().startsWith(styleUrl)){
+                const response=await route.fetch();
+                return route.fulfill({response,body,headers:{...response.headers(),'content-type':'text/css; charset=utf-8'}});
+              }
+              return route.continue();
+            });
+            try{
+              const http=await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+              await page.waitForTimeout(2900);
+              const result=await page.evaluate(()=>({lcp:window.__lcp,bodyLength:document.body?.innerText.length,
+                hero:document.querySelector('.aqua-hero__slide[data-active="true"] img')?.getBoundingClientRect().toJSON(),
+                firstHeroStyle:(()=>{const e=document.querySelector('.aqua-hero__slide[data-active="true"]');return e?{position:getComputedStyle(e).position,opacity:getComputedStyle(e).opacity}:null})()}));
+              const pass=result.lcp?.length>0;
+              console.log('CSS_BISECT '+JSON.stringify({attempt,label,remove:[a,b],http:http?.status(),pass,...result}));
+              return pass;
+            }catch(e){console.log('CSS_BISECT_ERROR '+JSON.stringify({attempt,label,error:e.message}));return false}
+            finally{await ctx.close()}
+          }
+          await test('control',-1,-1);
+          const quarter=Math.ceil(nodes.length/4);
+          let passes=[];
+          for(let i=0;i<4;i++){
+            const a=i*quarter,b=Math.min(nodes.length,(i+1)*quarter);
+            if(a>=b)continue;
+            if(await test('remove-quarter-'+i,a,b))passes.push([a,b]);
+          }
+          if(passes.length===1){
+            let [a,b]=passes[0];
+            for(let depth=0;depth<6&&b-a>1;depth++){
+              const mid=Math.floor((a+b)/2);
+              if(await test('bisect-left-depth-'+depth,a,mid)){b=mid;continue}
+              if(await test('bisect-right-depth-'+depth,mid,b)){a=mid;continue}
+              console.log('CSS_BISECT_COMPOSITE '+JSON.stringify({a,b,depth}));
+              break;
+            }
+            console.log('CSS_BISECT_CANDIDATES '+JSON.stringify({range:[a,b],rules:nodes.slice(a,b).map((n,i)=>({index:a+i,selector:n.selector||n.name,preview:n.toString().slice(0,450)})).slice(0,35)}));
+          }else console.log('CSS_BISECT_QUARTER_RESULT '+JSON.stringify({passes}));
+          await browser.close();
+          NODE
