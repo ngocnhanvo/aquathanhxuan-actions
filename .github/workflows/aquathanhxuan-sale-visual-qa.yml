@@ -174,8 +174,12 @@ jobs:
 
                 if(width>=768){
                   const next=sale.locator('[data-sale-next]');
+                  // Restoring native snap after offscreen image checks may snap back
+                  // to the last card. Reset again with the original CSS in place.
+                  await trackLocator.evaluate(el=>el.scrollTo({left:0,behavior:'instant'}));
+                  await page.waitForTimeout(150);
                   const before=await trackLocator.evaluate(el=>el.scrollLeft);
-                  assert(before<=1,'Carousel reset before Next test');
+                  assert(before<=1,'Carousel must return to first card before Next test');
                   await next.click();
                   await page.waitForFunction(el=>el.scrollLeft>1,trackHandle,{timeout:2500});
                   const after=await trackLocator.evaluate(el=>el.scrollLeft);
