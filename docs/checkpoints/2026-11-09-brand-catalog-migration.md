@@ -50,6 +50,14 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - Lượt inventory độc lập [42588537709](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42588537709) PASS: `157` memberships nguồn, `138` đã có ở WordPress tính tại thời điểm đọc, `19` missing (C=10; D=9 tại lúc đang nhập), **0 price mismatches** trong từng category. Con số thay đổi khi D và recovery chạy, phải kiểm kê lại trước build.
 - Chưa đánh dấu QA/DATA_PARITY/DEPLOY_PASS cho toàn bộ thương hiệu cho tới khi cả 157 memberships và permalink/ảnh đại diện (ngoại lệ source 404) được xác minh.
 
+## Đã nghiệm thu phục hồi batch C — 09/11/2026
+
+- **C: PASS 10/10** [run 42591540748](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42591540748): `created=10, reused=0, failed=0, deferred_ids=[]`. Kết hợp batch C ban đầu `31/41` → đã đủ **41/41**.
+- Khi tên ảnh gốc đụng Media ở tháng upload hiện tại, batch C tạo **bản ghi nháp tạm**, chọn tháng/năm gốc, nạp *byte ảnh thật* vào thư mục lịch sử, xác minh SHA256, tách ảnh khỏi nháp và **xóa nháp tạm**. Log có `BRAND_MEDIA_SOURCE_MONTH_UPLOADED` và `BRAND_TEMP_POST_CLEANUP_PASS` cho mọi ảnh cần backdate; không ghi đè ảnh khác hash. Media `.mp4` đi cùng source cũng được nhập đúng loại file khi source có.
+- **D: đang chạy** bản sửa cùng cơ chế cho 5 Product [run 42591602696](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42591602696); trước đó batch D `32/38`, Seachem Product `184` đã được phục hồi riêng thành công vào WP `83068` qua [run 42589893222](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42589893222), với media `SOURCE_IMAGE_AND_ALL_DERIVATIVES_HTTP_404` và placeholder đúng.
+- Astro `master` `7d8ee2f15d5375a50432a0e329f05ec7a31a8422` đã sửa chi tiết WooCommerce lấy giá hiện hành thay vì trường domain registration; unit QA [42590655716](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42590655716) PASS.
+- **Chưa deploy production**; chờ D, inventory lại, Rewrite scope, production build, Playwright desktop/mobile cùng permalink QA. Không coi Unit QA/Writer PASS là QA production.
+
 ## Link chi tiết, build và QA — tiếp theo
 
 - Atman đã có một WordPress Rewrite scoped (post ID 82743). Các sản phẩm brand mới cũng cần Rewrite có giới hạn slug, nếu không `/san-pham/<product-slug>` bị route nhầm category và lỗi 500.
