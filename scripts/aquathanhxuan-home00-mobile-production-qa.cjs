@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='88a501b95e7063434defc701658a9438837bf23c';
+const expectedSha=require('../qa-requests/home00-mobile-20261109.json').source_sha;
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844],[320,700]];
 const output='artifacts/home00-mobile-production';
 fs.mkdirSync(output,{recursive:true});
@@ -18,6 +18,12 @@ const sameOptimizedAsset=(url,original)=>String(url||'').includes(original.repla
  try{
   for(const [width,height] of widths){
    const page=await browser.newPage({viewport:{width,height}});
+   const bannerRequests=[];
+   page.on('request',req=>{
+     if(req.resourceType()==='image'&&/cropped-banner-8-1|cropped-banner-6|aqua-thanh-xuan-mobile-hero/i.test(req.url())){
+       bannerRequests.push(req.url());
+     }
+   });
    await page.goto(site+'/?mobilehero='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
    const hero=page.locator('[data-aqua-home-hero]');
    await hero.waitFor({state:'visible',timeout:20000});
@@ -38,7 +44,17 @@ const sameOptimizedAsset=(url,original)=>String(url||'').includes(original.repla
    await currentImg.evaluate(img=>img.decode());
    assert(await currentImg.evaluate(img=>img.complete&&img.naturalWidth>0),'Hero image broken');
    const fit=await currentImg.evaluate(img=>getComputedStyle(img).objectFit);
-   const src=await currentImg.getAttribute('src');
+   const src=await currentImg.evaluate(img=>img.currentSrc);
+   assert(src&&!src.startsWith('data:'),'Active hero must resolve to a real responsive image');
+   await page.waitForTimeout(400);
+   if(isMobile){
+     assert(!bannerRequests.some(url=>expectedDesktop.some(name=>sameOptimizedAsset(url,name))),
+       'Mobile unnecessarily downloaded a desktop hero image: '+JSON.stringify(bannerRequests));
+   }else{
+     assert(!bannerRequests.some(url=>sameOptimizedAsset(url,'aqua-thanh-xuan-mobile-hero.webp')),
+       'Desktop unnecessarily downloaded the mobile hero image: '+JSON.stringify(bannerRequests));
+   }
+   console.log('HOME00_IMAGE_REQUESTS='+width+'x'+height+' '+JSON.stringify(bannerRequests));
    if(isMobile){
     assert.equal(fit,'contain','Portrait banner must not be cropped');
     const href=await active.locator('.aqua-hero__mobile-cta-link').getAttribute('href');
@@ -55,7 +71,9 @@ const sameOptimizedAsset=(url,original)=>String(url||'').includes(original.repla
     await button.click();
     const second=slides.nth(1);
     assert.equal(await second.getAttribute('data-active'),'true','Desktop second banner switching failed');
-    const secondImgSrc=await second.locator('img').getAttribute('src');
+    const secondImg=second.locator('img');
+    await secondImg.evaluate(img=>img.decode());
+    const secondImgSrc=await secondImg.evaluate(img=>img.currentSrc);
     assert(secondImgSrc&&sameOptimizedAsset(secondImgSrc,expectedDesktop[1]),'Desktop second original image changed: '+secondImgSrc);
     console.log('HOME00_DESKTOP_VIEWPORT_PASS='+width+'x'+height);
    }
