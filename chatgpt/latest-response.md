@@ -2,39 +2,43 @@
 
 Date: 2026-11-09 (Asia/Ho_Chi_Minh)
 Project: aquathanhxuan.com
-Repository: ngocnhanvo/aquathanhxuan-actions
-Branch: main
+Actions repository: ngocnhanvo/aquathanhxuan-actions (main)
 Astro: ngocnhanvo/aquathanhxuan-astro master @ 29bee66d86918943d79da74af91355cf19065e64
 PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
+Knowledge: ngocnhanvo/knowledge main @ 60fb7759787e696f909e11da04a26404cb300b73
 Checkpoint: docs/checkpoints/2026-11-09-support-pages-production.md
-Status: DONE (latest confirmed work; no open issues, PRs or pending workflow runs)
-Live browser fetch: unavailable in this chat; existing production QA run 42563351997 SUCCESS.
+Outcome: DONE — last outstanding five Pages completed in the preceding run; no redundant write/build/deploy.
 
 ## Full intended user-visible reply
 
-## Đã khôi phục checkpoint mới nhất
+## Đã khôi phục checkpoint mới nhất — 09/11/2026
 
-Mình đã đọc quy tắc Knowledge và đối chiếu trạng thái GitHub của dự án Aqua Thanh Xuân.
+Mình đã kết nối được GitHub và đối chiếu các commit mới nhất. Có một cập nhật quan trọng: **5 trang còn dang dở ở phiên trước đã được triển khai và có kết quả nghiệm thu thành công trên production.**
 
-| Repository | Branch | HEAD |
-|---|---|---|
-| `aquathanhxuan-astro` | `master` | `29bee66d` |
-| `aquathanhxuan-php` | `master` | `dcec014a` |
-| `aquathanhxuan-actions` | `main` | `cd96b669` |
-| `knowledge` | `main` | `60fb7759` |
+Các trang gồm:
 
-Các hạng mục gần nhất đều có checkpoint hoàn tất:
+- [Chính sách đổi trả hàng](https://aquathanhxuan.io.vn/chinh-sach-doi-tra-hang)
+- [Giới thiệu](https://aquathanhxuan.io.vn/gioi-thieu)
+- [Đại lý](https://aquathanhxuan.io.vn/dai-ly)
+- [Khiếu nại](https://aquathanhxuan.io.vn/khieu-nai)
+- [Liên hệ](https://aquathanhxuan.io.vn/lien-he)
 
-- **Accessibility và Agentic Browsing:** Lighthouse đạt 100/100 cho cả desktop và mobile.
-- **Mobile LCP:** giảm từ 2,639 giây xuống 2,092 giây trong lần đo Lighthouse đã lưu; không tải chéo banner desktop/mobile.
-- **5 trang Hỗ trợ:** đã tạo bằng WordPress Page + ESC Table, triển khai production và kiểm thử 10 viewport.
-- **Màu giá Sale và lỗi Lighthouse:** đã sửa, kiểm thử production PASS.
+Cả 5 trang đã có WordPress Page và ESC Table riêng để quản lý nội dung. Footer cũng đã cập nhật các liên kết tương ứng.
 
-Checkpoint cuối: [Support Pages Production](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-support-pages-production.md).
+Production build: PASS. Production deploy: PASS. Playwright desktop/mobile: 10/10 PASS.
 
-**Kiểm tra bổ sung:** không có issue/PR mở và không có GitHub Actions đang chạy hoặc chờ. Production build, deploy và QA của nhóm trang Hỗ trợ đã có run **SUCCESS**. Công cụ truy cập trực tiếp website trong lượt này gặp lỗi, nên chưa xác minh live độc lập lần nữa; không chạy lại các test đã PASS.
+Mình đã đối chiếu thêm các quy tắc Knowledge và bằng chứng nghiệm thu để xác định còn điểm nào thực sự chưa hoàn thành, thay vì sửa lại những phần đã chạy tốt.
 
-**Kết luận:** Chưa phát hiện đầu việc dang dở sau checkpoint mới nhất. Mình không sửa source, CMS hoặc kích hoạt build khi chưa có thay đổi cần xử lý. Nếu có yêu cầu mới, có thể tiếp tục từ chính HEAD nêu trên mà không làm lại các bước cũ.
+## Đối chiếu cuối cùng
+
+- Astro `master`: `29bee66d`; PHP `master`: `dcec014a`; Knowledge `main`: `60fb7759`.
+- WordPress writer: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42562870596 — PASS.
+- Build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42563116978 — PASS.
+- Deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42563204071 — PASS.
+- QA: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42563351997 — 10 trang/viewport PASS, log kiểm tra URL, H1, ESC Table, SEO meta description, footer, FAQ và tràn ngang.
+- Checkpoint: https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-support-pages-production.md
+
+**Kết luận:** không còn đầu việc dang dở trong phạm vi 5 trang của phiên trước; tránh build lại không cần thiết. Không thực hiện sửa source/deploy thêm. Kiểm tra này dựa trên commit, kết quả run và log Playwright (công cụ đọc web trực tiếp không mở được URL), không tuyên bố đã thử thao tác sửa–lưu–hoàn nguyên trong Visual Builder.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
