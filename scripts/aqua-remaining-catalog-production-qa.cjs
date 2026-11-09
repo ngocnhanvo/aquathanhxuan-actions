@@ -186,8 +186,13 @@ async function main(){
   assert.equal(childCases.length,46,'Original nine menu child taxonomy count changed');
   console.log('AQUA_REMAINING_CHILD_CATEGORY_SCOPE_PASS='+JSON.stringify({children:childCases.length,
     withProducts:childCases.filter(c=>c.sourceCount>0).length}));
-  const selectedBatches=process.env.AQUA_QA_BATCHES?.trim()
-   ?new Set(process.env.AQUA_QA_BATCHES.split(',').map(value=>Number(value.trim()))):null;
+  // A scoped QA request is the authoritative batch selector. Full-data and
+  // production requests omit batches and therefore audit the complete catalog.
+  const requestBatches=Array.isArray(CONFIG.batches)?CONFIG.batches:null;
+  const envBatches=process.env.AQUA_QA_BATCHES?.trim();
+  const selectedBatches=requestBatches
+   ?new Set(requestBatches.map(value=>Number(value)))
+   :envBatches?new Set(envBatches.split(',').map(value=>Number(value.trim()))):null;
   if(selectedBatches){
    assert(DATA_ONLY,'A partial-batch audit must never be called production QA');
    assert([...selectedBatches].every(n=>Number.isInteger(n)&&n>=0&&n<13),'Invalid QA batch scope');
