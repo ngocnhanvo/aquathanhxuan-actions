@@ -148,7 +148,7 @@ async function main(){
    const rows=await paged(original,'/wp-json/wc/store/v1/products?category='+sourceId,100);
    report.categories.push({name,slug,sourceId,targetId,sourceCount:rows.length});
    assert(rows.length>0,'Source root empty '+slug);
-   samples.push({name,slug,product:rows[0]});
+   samples.push({name,slug,product:rows[0],expectedTargetIds:rows.map(src=>targetBySlug.get(src.slug)?.id).filter(Boolean)});
    for(const product of rows){
     const old=originalById.get(Number(product.id));
     if(old)assert.equal(old.slug,product.slug,'Original Product source-id collision');
@@ -181,6 +181,8 @@ async function main(){
    assert.equal(String(dst.price||''),String(src.prices?.price||''),'Sale/current price mismatch '+src.slug);
    assert.equal(String(dst.regular_price||''),String(src.prices?.regular_price||''),'Regular price mismatch '+src.slug);
    assert.equal(dst.stock_status,src.is_in_stock?'instock':'outofstock','Inventory state mismatch '+src.slug);
+   assert.equal(dst.status,'publish','Target Product is not published '+src.slug);
+   assert.notEqual(dst.catalog_visibility,'hidden','Source storefront Product is hidden on destination '+src.slug);
    for(const c of src.categories||[]){
     const expected=sourceTermToTarget.get(Number(c.id));
     if(!expected)continue;
@@ -230,13 +232,19 @@ async function main(){
    const tab=await ctx.newPage();
    const errors=[];
    tab.on('pageerror',e=>errors.push(String(e.message)));
-   for(const {name,slug,sourceId,product} of samples){
+   for(const {name,slug,sourceId,product,expectedTargetIds} of samples){
     const categoryPath='/san-pham/'+slug;
     const res=await tab.goto(PUBLIC+categoryPath,{waitUntil:'domcontentloaded',timeout:60000});
     assert.equal(res?.status(),200,'Category public HTTP '+categoryPath);
     await tab.locator('article[data-catalog-product]').first().waitFor({state:'visible',timeout:15000});
     const cardCount=await tab.locator('article[data-catalog-product]').count();
     assert(cardCount>0,'Empty category '+slug);
+    const renderedIds=await tab.locator('article[data-catalog-product]').evaluateAll(nodes=>
+      nodes.map(node=>Number(node.getAttribute('data-catalog-product'))));
+    assert(renderedIds.every(id=>Number.isInteger(id)&&id>0),'Card missing WooCommerce Product ID '+slug);
+    const acceptable=new Set(expectedTargetIds.map(Number));
+    assert(renderedIds.every(id=>acceptable.has(id)),'Category contains Product outside verified original source '+slug);
+    assert.equal(new Set(renderedIds).size,renderedIds.length,'Repeated Product card in category '+slug);
     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
     assert(overflow<=3,'Category horizontal overflow '+slug+' '+width);
     const screenshot='category-'+slug+'-'+width+'.png';
