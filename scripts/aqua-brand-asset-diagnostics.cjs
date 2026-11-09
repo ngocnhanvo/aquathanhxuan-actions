@@ -65,9 +65,9 @@ async function fetchAsset(url){
         const search=await page.request.get(WP+'/wp-json/wp/v2/media?context=edit&per_page=100&search='+encodeURIComponent(stem),{headers,timeout:30000});
         if(search.ok()){
          const items=await search.json();
-         for(const m of items.filter(x=>decodeURIComponent(new URL(x.source_url).pathname).endsWith('/'+name))){
+         for(const m of items.filter(x=>decodeURIComponent(new URL(x.source_url,WP).pathname).endsWith('/'+name))){
             rec.targetMedia.push({id:m.id,source_url:m.source_url,original_image:m.media_details?.original_image,media_details:m.media_details?.sizes?Object.keys(m.media_details.sizes):[]});
-            urls.add(m.source_url);
+            urls.add(new URL(m.source_url,WP).href);
          }
         }
       }
