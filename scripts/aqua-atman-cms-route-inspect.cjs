@@ -38,5 +38,20 @@ const wp='https://admin.aquathanhxuan.io.vn';
     err:document.querySelector('.notice-error')?.textContent?.trim()?.slice(0,500)
   }));
   console.log('ATMAN_ROUTE_CMS_ADMIN='+JSON.stringify(admin).slice(0,15000));
+  await page.goto(wp+'/wp-admin/post-new.php?post_type=chuyen-huong-link',{waitUntil:'domcontentloaded',timeout:45000});
+  const fieldInfo=await page.evaluate(()=>({
+    url:location.href,title:document.title,
+    fields:[...document.querySelectorAll('[data-name]')].filter(x=>x.querySelector('input,select,textarea'))
+      .map(node=>({
+       name:node.getAttribute('data-name'),key:node.getAttribute('data-key'),label:node.querySelector('.acf-label label')?.textContent?.trim(),
+       inputs:[...node.querySelectorAll('input,select,textarea')].slice(0,10).map(el=>({
+         name:el.getAttribute('name'),type:el.getAttribute('type'),value:el.value,
+         options:el.tagName==='SELECT'?[...el.options].map(o=>({value:o.value,text:o.textContent?.trim()})):undefined
+       }))
+      })).slice(0,70),
+    publishButton:document.querySelector('#publish')?.textContent,
+    error:document.querySelector('.notice-error')?.textContent?.trim()?.slice(0,700)
+  }));
+  console.log('ATMAN_ROUTE_CMS_EDITOR='+JSON.stringify(fieldInfo).slice(0,30000));
  }finally{await browser.close()}
 })().catch(e=>{console.error('ATMAN_ROUTE_CMS_INSPECT_FAIL='+e.stack);process.exitCode=1});
