@@ -20,7 +20,13 @@
       "asset_type": "image",
       "attempt_count": 0,
       "error": "Source Woo Store Product has no image",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "dual-pro-t5ho-90100-2",
+      "source_product_name": "Odyssea dual pro T5HO 90/100",
+      "source_category_slugs": [
+        "den-weekaqua"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 1815,
@@ -30,7 +36,13 @@
       "asset_type": "image",
       "attempt_count": 0,
       "error": "Source Woo Store Product has no image",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "dual-pro-t5ho-120140-2",
+      "source_product_name": "Odyssea dual pro T5HO 120/140",
+      "source_category_slugs": [
+        "den-weekaqua"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 1816,
@@ -40,7 +52,13 @@
       "asset_type": "image",
       "attempt_count": 0,
       "error": "Source Woo Store Product has no image",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "odyssea-dual-pro-t5ho-6080-2",
+      "source_product_name": "Odyssea dual pro T5HO 60/80",
+      "source_category_slugs": [
+        "den-weekaqua"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3052,
@@ -50,7 +68,13 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-cho-ca-rong-180cm",
+      "source_product_name": "Đèn led 85% XML 4 hàng bóng cho cá rồng 180cm",
+      "source_category_slugs": [
+        "den-chihiros"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3054,
@@ -60,7 +84,13 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-cho-ca-rong-150cm",
+      "source_product_name": "Đèn led 85% XML 4 hàng bóng cho cá rồng 150cm",
+      "source_category_slugs": [
+        "den-chihiros"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3056,
@@ -70,7 +100,13 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-cho-ca-rong-120cm",
+      "source_product_name": "Đèn led 85% XML 4 hàng bóng cho cá rồng 120cm",
+      "source_category_slugs": [
+        "den-chihiros"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3057,
@@ -80,7 +116,14 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-cho-ca-rong-100cm",
+      "source_product_name": "Đèn led 85% XML 4 hàng bóng cho cá rồng 100cm",
+      "source_category_slugs": [
+        "den",
+        "xuanmailong"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3058,
@@ -90,7 +133,14 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-2-hang-bong-cho-ca-rong-180cm",
+      "source_product_name": "Đèn led 85% XML 2 hàng bóng cho cá rồng 180cm",
+      "source_category_slugs": [
+        "den",
+        "xuanmailong"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3059,
@@ -100,7 +150,13 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-2-hang-bong-cho-ca-rong-150cm",
+      "source_product_name": "Đèn led 85% XML 2 hàng bóng cho cá rồng 150cm",
+      "source_category_slugs": [
+        "xuanmailong"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3060,
@@ -110,7 +166,13 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-2-hang-bong-cho-ca-rong-120cm",
+      "source_product_name": "Đèn led 85% XML 2 hàng bóng cho cá rồng 120cm",
+      "source_category_slugs": [
+        "den-chihiros"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3061,
@@ -120,7 +182,13 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-2-hang-bong-cho-ca-rong-100cm",
+      "source_product_name": "Đèn led 85% XML 2 hàng bóng cho cá rồng 100cm",
+      "source_category_slugs": [
+        "xuanmailong"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3062,
@@ -130,7 +198,14 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-2-hang-bong-cho-ca-rong-80cm",
+      "source_product_name": "Đèn led 85% XML 2 hàng bóng cho cá rồng 80cm",
+      "source_category_slugs": [
+        "den",
+        "xuanmailong"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     },
     {
       "source_id": 3063,
@@ -140,7 +215,18 @@
       "asset_type": "image",
       "attempt_count": 1,
       "error": "HTTP 404 from original source, resized image unavailable",
-      "status": "ASSET_DEFERRED"
+      "status": "ASSET_DEFERRED",
+      "source_slug": "den-led-85-xml-2-hang-bong-cho-ca-rong-60cm",
+      "source_product_name": "Đèn led 85% XML 2 hàng bóng cho cá rồng 60cm",
+      "source_category_slugs": [
+        "den",
+        "xuanmailong"
+      ],
+      "frontend_display": "NO_IMAGE_SOURCE_LABEL_VERIFIED"
     }
-  ]
+  ],
+  "source_taxonomy_audit_run": 42648269372,
+  "frontend_missing_media_qa_run": 42648594682,
+  "frontend_display_commit": "c5edf8c0513c96f8e5a13ab23c25a33c9294c2f3",
+  "source_media_provenance_audit_run": 42645287337
 }
