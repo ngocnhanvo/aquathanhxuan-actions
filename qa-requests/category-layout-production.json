@@ -1,6 +1,6 @@
 {
-  "source_sha": "29fc579c7c2a6041b14ac2f576032c62d4ec89dd",
-  "deploy_run_id": 42568340258,
-  "scope": "Atman real products, two CMS banners, price sorting, recent views; desktop and mobile",
+  "source_sha": "a9540b252236099fb6b1e2e1d007559c27fec9b1",
+  "deploy_run_id": 42569898224,
+  "scope": "Two native CMS banners, 9 Atman products, all 9 detail routes, sorting, recent views, SEO, desktop and mobile",
   "expected_products": 9
 }
