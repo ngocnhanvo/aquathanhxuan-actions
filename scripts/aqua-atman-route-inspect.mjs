@@ -2,14 +2,16 @@ const wp='https://admin.aquathanhxuan.io.vn',front='https://aquathanhxuan.io.vn'
 async function examine(url){
  try{
  const r=await fetch(url,{redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(20000)});
- const body=String(r.headers.get('content-type')||'').includes('text/html')?(await r.text()).slice(0,500):'';
- return {url,status:r.status,location:r.headers.get('location'),body:body.slice(0,180)};
+ const body=String(r.headers.get('content-type')||'').includes('text/html')?(await r.text()).slice(0,5500):'';
+ return {url,status:r.status,location:r.headers.get('location'),body:body.slice(0,5500)};
  }catch(e){return {url,error:String(e).slice(0,180)}}
 }
 const tests=[
 '/san-pham/may-sui-khi-atman-hp-12000',
 '/san-pham/may-sui-khi-atman-hp-12000/',
 '/san-pham/atman',
+'/san-pham/atman-at-304s',
+'/ssr/products/atman-at-304s/detail',
 '/ssr/products/may-sui-khi-atman-hp-12000/detail',
 '/ssr/products/may-sui-khi-atman-hp-12000/detail?basename=%2F&curUrl=%2Fsan-pham%2Fmay-sui-khi-atman-hp-12000',
 '/san-pham/atman?sort=price-asc'
