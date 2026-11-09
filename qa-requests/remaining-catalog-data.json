@@ -1,0 +1,22 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
+  "mode": "DATA_ONLY",
+  "sourceProducts": 389,
+  "preflightRun": 42662410500,
+  "verifiedMigrationRun": 42663313074,
+  "verifiedProductRewritesRun": 42682739649,
+  "verifiedSpecialUvBonsaiRun": 42683571067,
+  "independentCompletedBatchQaRuns": [
+    42676337353,
+    42677338267,
+    42678118188,
+    42679696661,
+    42680375081,
+    42683429503
+  ],
+  "scope": "Read-only independent source WooCommerce data and original source HTML SEO title/metadesc parity for all 389 nine-root Products; validate two exact Gebo UV Products and verified Bonsai category, plus Woo taxonomy, price, regular price, stock, long/short description, provenance, source cover exceptions. Do not mutate CMS."
+}
