@@ -1,0 +1,54 @@
+name: Aqua migrate unaffected remaining brand groups
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-brand-catalog-remaining.yml'
+      - 'cms-requests/brand-catalog-remaining.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-brand-catalog-writes
+  cancel-in-progress: false
+jobs:
+  brand-c:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: "brand-c"
+      BRAND_TARGET_SLUGS: "moutaintree,jbl,neo,nuphar,prodac-italia"
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-catalog-migrate.py
+      - run: python3 scripts/aqua-brand-catalog-migrate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-catalog-brand-c
+          path: artifacts/aqua-brand-migration/brand-c.json
+          if-no-files-found: ignore
+          retention-days: 12
+  brand-d:
+    needs: [brand-c]
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      BRAND_BATCH: "brand-d"
+      BRAND_TARGET_SLUGS: "prodibio,seachem,sera,sobo,week-aqua"
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-brand-catalog-migrate.py
+      - run: python3 scripts/aqua-brand-catalog-migrate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-catalog-brand-d
+          path: artifacts/aqua-brand-migration/brand-d.json
+          if-no-files-found: ignore
+          retention-days: 12
