@@ -204,6 +204,7 @@ async function main(){
    {id:5054,slug:'den-uv-30w',name:'Đèn UV Gebo 30W',categoryIds:[1771,1835]},
    {id:4355,slug:'den-uv-40w',name:'Đèn UV Gebo 40W',categoryIds:[1771,1835]},
   ];
+  const verifiedExtraSeoSources=[];
   if(!selectedBatches){
    for(const spec of specialProducts){
     const src=await original('/wp-json/wc/store/v1/products/'+spec.id);
@@ -212,6 +213,7 @@ async function main(){
     assert.equal(norm(src.name),norm(spec.name),'Original special Product name changed');
     assert.equal(src.type,'simple');
     assert.equal((src.categories||[]).length,0,'Special UV source taxonomy has changed');
+    verifiedExtraSeoSources.push(src);
     const dst=targetBySlug.get(spec.slug);
     assert(dst,'Exact original UV Product not yet imported '+spec.slug);
     assert.equal(norm(dst.name),norm(src.name),'Special Product target title differs from source '+spec.slug);
@@ -261,7 +263,7 @@ async function main(){
   }
   console.log('AQUA_REMAINING_WOO_PARITY_PASS='+JSON.stringify({unique:auditProducts.length,scopeTotal:originalById.size,roots:roots.length,mediaDeferred:deferred}));
   // HTML head remains an independent SEO source. Validate the selected set in controlled batches.
-  const all=auditProducts;
+  const all=[...auditProducts,...verifiedExtraSeoSources];
   let seoTitles=0,seoDescriptions=0,missingTitles=0,missingDescriptions=0;
   for(let i=0;i<all.length;i+=5){
    const chunk=all.slice(i,i+5);
