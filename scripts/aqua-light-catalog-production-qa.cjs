@@ -212,12 +212,12 @@ async function run(){
      const res=await tab.goto(PUBLIC+url,{waitUntil:'domcontentloaded',timeout:60000});
      assert.equal(res?.status(),200,'Product detail HTTP '+url);
      await tab.locator('h1').first().waitFor({state:'visible',timeout:15000});
-     const h1=(await tab.locator('h1').first().innerText()).replace(/\\s+/g,' ').trim();
+     const h1=(await tab.locator('h1').first().innerText()).replace(/\s+/g,' ').trim();
      const name=await tab.evaluate(value=>{
        const doc=new DOMParser().parseFromString(value,'text/html');
-       return String(doc.body.textContent||'').replace(/\\s+/g,' ').trim();
+       return String(doc.body.textContent||'').replace(/\s+/g,' ').trim();
      },String(sourceProduct.name||''));
-     const normalized=value=>String(value).normalize('NFC').replace(/\\s+/g,' ').trim().toLocaleLowerCase('vi');
+     const normalized=value=>String(value).normalize('NFC').replace(/\s+/g,' ').trim().toLocaleLowerCase('vi');
      assert.equal(normalized(h1),normalized(name),'Product H1 mismatch '+slug);
      const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
      assert(overflow<=3,'Detail horizontal overflow '+url+' '+width+' '+overflow);
