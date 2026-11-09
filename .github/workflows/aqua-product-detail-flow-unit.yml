@@ -57,6 +57,24 @@ jobs:
       - name: Install Astro dependencies
         working-directory: source-astro
         run: pnpm install --frozen-lockfile
+      - name: Validate product purchase template before production deploy
+        working-directory: source-astro
+        run: |
+          set -euo pipefail
+          pnpm exec astro check --js-only
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          const file=fs.readFileSync('src/astro/pages/ProductDetailsPage.astro','utf8');
+          const early=file.indexOf('id="product-purchase-actions"');
+          const detail=file.indexOf('class="product-description prose prose-lg');
+          assert(early>=0&&detail>early,'Primary purchase CTA must precede long description');
+          assert(file.includes('id="product-sticky-purchase"'));
+          assert(file.includes('stickyActionBtn?.addEventListener("click", () => mainActionBtn?.click())'),'Sticky CTA must delegate to existing cart handler');
+          assert(file.includes('classList.toggle("product-sticky-visible", visible)'));
+          assert(file.includes('stockStatus === "outofstock"'));
+          console.log('AQUA_PRODUCT_PURCHASE_STRUCTURE_PASS');
+          JS
       - name: Test Woo detail price/stock mapping, cache upgrade, and discount
         working-directory: source-astro
         run: pnpm exec vitest run src/lib/wordpress/products/detailFields.test.ts src/lib/wordpress/products/detailPrice.test.ts
