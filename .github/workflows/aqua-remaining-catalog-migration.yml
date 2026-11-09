@@ -43,8 +43,47 @@ jobs:
           path: artifacts/aqua-remaining-catalog/inventory.json
           retention-days: 14
           if-no-files-found: error
-  import:
+  pilot:
     needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      AQUA_BATCH_COUNT: '13'
+      AQUA_BATCH_INDEX: '0'
+      AQUA_PILOT_LIMIT: '3'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: aqua-remaining-verified-source-manifest
+          path: artifacts/aqua-remaining-catalog
+      - name: Trial migration limited to three independently verified Products
+        run: python3 scripts/aqua-remaining-catalog-migrate.py
+      - name: Validate pilot outcomes and recorded source IDs
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('artifacts/aqua-remaining-migration/remaining-0.json')
+          j=json.loads(p.read_text())
+          assert j['status']=='PASS'
+          assert j['pilot_limit']==3
+          assert len(j['products'])==3
+          assert j['failed']==0
+          print('AQUA_REMAINING_PILOT_PASS='+str(len(j['products'])),flush=True)
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-pilot
+          path: artifacts/aqua-remaining-migration/remaining-0.json
+          retention-days: 14
+          if-no-files-found: ignore
+  import:
+    needs: pilot
     runs-on: ubuntu-latest
     timeout-minutes: 55
     strategy:
