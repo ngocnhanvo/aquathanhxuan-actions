@@ -224,13 +224,18 @@ def retrieve_asset(uri,filename,source_id):
     data=None
     for attempt in range(1,5):
         try:
-            with request(uri,timeout=55) as r: data=r.read()
+            req=urllib.request.Request(uri,headers={'Cache-Control':'no-cache'})
+            with opener.open(req,timeout=55) as r: data=r.read()
             if not data or len(data)<120: raise ValueError('Media payload empty/truncated')
             if data[:12].lower().startswith(b'<!doctype'): raise ValueError('Media response is HTML')
             return data
+        except urllib.error.HTTPError as exc:
+            # Permanent not-found/auth/malformed assets must be deferred at once.
+            if exc.code not in (429,500,502,503,504) or attempt==4:
+                raise AssetDeferred(uri,filename,source_id,attempt,'HTTP '+str(exc.code)) from exc
         except Exception as exc:
             if attempt==4: raise AssetDeferred(uri,filename,source_id,attempt,str(exc)[:250]) from exc
-            time.sleep(attempt)
+        time.sleep(attempt)
     raise AssertionError('unreachable')
 
 def ensure_media(src,alt,source_id):
