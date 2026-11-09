@@ -1,0 +1,46 @@
+name: Aqua brand catalog dispatch existing Astro production
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/brand-catalog-build.json'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: aquathanhxuan-astro-production-dispatch
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+          path: source
+      - name: Verify exact production source before triggering deployment
+        run: |
+          set -euo pipefail
+          test "$(git -C source rev-parse HEAD)" = 1971495f1e1990983a75bf7e7a4c9b91d84c7f77
+          echo "BRAND_ASTRO_SOURCE_VERIFIED=$(git -C source rev-parse HEAD)"
+      - name: Dispatch only the existing production workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo}=context.repo;
+            const found=await github.rest.actions.listWorkflowRuns({
+              owner,repo,workflow_id:'aquathanhxuan-production-deploy.yml',per_page:25
+            });
+            const active=found.data.workflow_runs.filter(run=>
+              ['in_progress','queued','waiting','pending'].includes(run.status));
+            if(active.length)throw Error('Existing production deploy still active: '+active.map(x=>x.id).join(','));
+            await github.rest.repos.createDispatchEvent({
+              owner,repo,event_type:'wp_trigger_build',
+              client_payload:{site_domain:'aquathanhxuan.io.vn'}
+            });
+            core.info('Production workflow dispatched; verify deploy run and QA separately.');
