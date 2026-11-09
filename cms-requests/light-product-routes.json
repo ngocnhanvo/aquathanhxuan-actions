@@ -1,0 +1,13 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "expected_unique_products": 59,
+  "category_root_source_id": 1546,
+  "category_root_target_id": 1768,
+  "verified_inventory_run": 42636196189,
+  "kaokui_success_run": 42638590689,
+  "write_scope": "Only missing native WordPress chuyen-huong-link Rewrites for exact 59 verified source Product slugs; deny if Product source identity or root category absent",
+  "at": "2026-11-09",
+  "attempt": 1
+}
