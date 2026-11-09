@@ -17,5 +17,7 @@
   "sourceFailureRun": 42583628239,
   "sourceAuditRun": 42586934224,
   "notes": "Source thumbnails from original WP attachment media_details are used if full-size file filename conflicts with different target SHA256. Preserve actual source variant filenames and record deferred originals; do not fabricate images. Serial CMS writer concurrency.",
-  "mode": "idempotent"
+  "mode": "idempotent",
+  "revision": "Use source-media lookup for description and gallery attachments",
+  "sourceRescueCommit": "5a2b79d364299a93ae1cfb3e259382b92499888f"
 }
