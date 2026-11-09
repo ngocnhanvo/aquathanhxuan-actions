@@ -2,11 +2,14 @@ const wp='https://admin.aquathanhxuan.io.vn',front='https://aquathanhxuan.io.vn'
 async function examine(url){
  try{
  const r=await fetch(url,{redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(20000)});
- const body=String(r.headers.get('content-type')||'').includes('text/html')?(await r.text()).slice(0,5500):'';
+ const body=String(r.headers.get('content-type')||'').includes('text/html')?(await r.text()):'';
  const title=body.split('<title>')[1]?.split('</title>')[0]||'';
  const meta=body.match(/<meta name="description" content(?:="([^"]*)")?/)?.[1]||'';
  const schemaExcerpt=body.slice(body.indexOf('application/ld+json'),body.indexOf('application/ld+json')+450);
- return {url,status:r.status,location:r.headers.get('location'),title,meta,headers:Object.fromEntries(r.headers.entries()),schemaExcerpt};
+ const matches=[...body.matchAll(/data-catalog-product-price="([0-9.]+)"/g)].map(x=>Number(x[1]));
+ const hrefs=[...body.matchAll(/href="(\/san-pham\/[a-z0-9-]+)"/g)].map(x=>x[1]);
+ const canonical=body.match(/<link rel="canonical"[^>]*href="([^"]*)"/)?.[1]||"";
+ return {url,status:r.status,location:r.headers.get('location'),title,meta,headers:Object.fromEntries(r.headers.entries()),schemaExcerpt,priceOrder:matches,links:[...new Set(hrefs)].slice(0,15),canonical,bodyLength:body.length};
  }catch(e){return {url,error:String(e).slice(0,180)}}
 }
 const tests=[
