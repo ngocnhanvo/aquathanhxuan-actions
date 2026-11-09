@@ -136,7 +136,7 @@ def source_list(category_id):
     out=[]
     for page in range(1,30):
         rows=get_json(SOURCE+'/wp-json/wc/store/v1/products?per_page=100&page='+str(page)+'&category='+str(category_id))
-        assert isinstance(rows,list),'Invalid source category product API '+str(category_id))
+        assert isinstance(rows,list),'Invalid source category product API '+str(category_id)
         out.extend(rows)
         if len(rows)<100: break
     assert len(out)==len(set(int(item['id']) for item in out)), 'Duplicated products in source category '+str(category_id)
