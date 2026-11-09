@@ -15,7 +15,7 @@ async function sourceJson(url){
  for(let i=0;i<4;i++){
   try{
    const r=await fetch(url,{signal:AbortSignal.timeout(30000)});
-   if(!r.ok)throw Error('SOURCE HTTP '+r.status());
+   if(!r.ok)throw Error('SOURCE HTTP '+r.status);
    return await r.json();
   }catch(e){if(i===3)throw e;await pause(1000*(i+1))}
  }
