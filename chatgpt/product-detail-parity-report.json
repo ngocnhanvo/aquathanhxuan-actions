@@ -1,15 +1,15 @@
 {
-  "runId": 42603746430,
-  "commit": "1c8901f664be85e779df0337973d1dc1fe0c66e7",
-  "startedAt": "2026-11-09T10:48:00.586Z",
+  "runId": 42604260244,
+  "commit": "9d6189ba25f4a21c314ea1be367763cf04d15853",
+  "startedAt": "2026-11-09T10:51:45.912Z",
   "status": "GAPS_FOUND",
   "scope": "20 brand categories, storefront products; source wc/store/v1 vs authenticated target wc/v3; 4 public detail samples",
   "distinctProducts": 157,
-  "mismatchedProducts": 28,
+  "mismatchedProducts": 3,
   "comparisons": {
     "name": {
-      "pass": 130,
-      "mismatch": 27,
+      "pass": 157,
+      "mismatch": 0,
       "sourceNonEmpty": 157,
       "targetEmpty": 0
     },
@@ -161,317 +161,17 @@
   ],
   "differences": [
     {
-      "slug": "shade-tam-chan-sang-chihiros-vivid-2",
-      "sourceId": 267091,
-      "targetId": 82746,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 44,
-          "targetLength": 38,
-          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Vivid 2",
-          "targetSnippet": "Shade – tấm chắn sáng Chihiros Vivid 2"
-        }
-      ]
-    },
-    {
-      "slug": "shape-tam-chan-sang-chihiros-wrgb2-60-pro",
-      "sourceId": 267089,
-      "targetId": 82748,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 49,
-          "targetLength": 43,
-          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Wrgb2 60 pro",
-          "targetSnippet": "Shade – tấm chắn sáng Chihiros Wrgb2 60 pro"
-        }
-      ]
-    },
-    {
-      "slug": "shape-tam-chan-sang-chihiros-wrgb2-60",
-      "sourceId": 267088,
-      "targetId": 82750,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 45,
-          "targetLength": 39,
-          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Wrgb2 60",
-          "targetSnippet": "Shade – tấm chắn sáng Chihiros Wrgb2 60"
-        }
-      ]
-    },
-    {
-      "slug": "shade-tam-chan-sang-chihiros-wrgb-60",
-      "sourceId": 267086,
-      "targetId": 82751,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 44,
-          "targetLength": 38,
-          "sourceSnippet": "Shade &#8211; tấm chắn sáng Chihiros Wrgb 45",
-          "targetSnippet": "Shade – tấm chắn sáng Chihiros Wrgb 45"
-        }
-      ]
-    },
-    {
-      "slug": "shape-tam-chan-sang-chihiros-wrgb2-30",
-      "sourceId": 267078,
-      "targetId": 82753,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 45,
-          "targetLength": 39,
-          "sourceSnippet": "Shape &#8211; tấm chắn sáng Chihiros Wrgb2 30",
-          "targetSnippet": "Shape – tấm chắn sáng Chihiros Wrgb2 30"
-        }
-      ]
-    },
-    {
-      "slug": "den-led-chihiros-a2-series-a120",
-      "sourceId": 265842,
-      "targetId": 82760,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 39,
-          "targetLength": 33,
-          "sourceSnippet": "Đèn LED Chihiros A2 series &#8211; A120",
-          "targetSnippet": "Đèn LED Chihiros A2 series – A120"
-        }
-      ]
-    },
-    {
-      "slug": "phan-nen-dennerle-scapers-soil-4lit",
-      "sourceId": 234252,
-      "targetId": 82481,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 50,
-          "targetLength": 44,
-          "sourceSnippet": "Phân nền thủy sinh Dennerle Scaper&#8217;s Soil 4L",
-          "targetSnippet": "Phân nền thủy sinh Dennerle Scaper’s Soil 4L"
-        }
-      ]
-    },
-    {
-      "slug": "dennerle-carbo-elixier-bio-500ml-phan-nuoc-bo-sung-co2-uc-che-reu-hai-chlb-duc",
-      "sourceId": 19885,
-      "targetId": 82781,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 50,
-          "targetLength": 44,
-          "sourceSnippet": "Phân nước dennerle &#8211; Carbo Elixier Bio 500ml",
-          "targetSnippet": "Phân nước dennerle – Carbo Elixier Bio 500ml"
-        }
-      ]
-    },
-    {
-      "slug": "dennerle-carbo-elixier-bio-250ml-phan-nuoc-bo-sung-co2-uc-che-reu-hai-chlb-duc",
-      "sourceId": 19882,
-      "targetId": 82783,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 50,
-          "targetLength": 44,
-          "sourceSnippet": "Phân nước dennerle &#8211; Carbo Elixier Bio 250ml",
-          "targetSnippet": "Phân nước dennerle – Carbo Elixier Bio 250ml"
-        }
-      ]
-    },
-    {
-      "slug": "phan-nhet-giup-phat-trien-re-cay-thuy-sinh-dennerle-power-tabs-30-vien",
-      "sourceId": 15622,
-      "targetId": 82788,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 45,
-          "targetLength": 39,
-          "sourceSnippet": "Phân nhét Dennerle &#8211; Power Tabs 30 viên",
-          "targetSnippet": "Phân nhét Dennerle – Power Tabs 30 viên"
-        }
-      ]
-    },
-    {
-      "slug": "phan-nhet-giup-phat-trien-re-cay-thuy-sinh-dennerle-power-tabs-10-vien",
-      "sourceId": 15618,
-      "targetId": 82789,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 45,
-          "targetLength": 39,
-          "sourceSnippet": "Phân nhét Dennerle &#8211; Power Tabs 10 viên",
-          "targetSnippet": "Phân nhét Dennerle – Power Tabs 10 viên"
-        }
-      ]
-    },
-    {
-      "slug": "phan-nen-chuyen-nghiep-cho-be-nuoi-va-sinh-san-tep-canh-shrimp-king-active-soil-loai-4l",
-      "sourceId": 15117,
-      "targetId": 82491,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 59,
-          "targetLength": 53,
-          "sourceSnippet": "Phân nền cho bể tép &#8211; Shrimp King Active Soil Loại 4L",
-          "targetSnippet": "Phân nền cho bể tép – Shrimp King Active Soil Loại 4L"
-        }
-      ]
-    },
-    {
-      "slug": "van-co-co2-mufan",
-      "sourceId": 18456,
-      "targetId": 82894,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 24,
-          "targetLength": 18,
-          "sourceSnippet": "Van cơ CO2 &#8211; Mufan",
-          "targetSnippet": "Van cơ CO2 – Mufan"
-        }
-      ]
-    },
-    {
-      "slug": "dung-dich-khu-doc-giam-stress-cho-ca-30ml-prodac-aquasana",
-      "sourceId": 269092,
-      "targetId": 82926,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 69,
-          "targetLength": 68,
-          "sourceSnippet": "Dung dịch khử độc &#038; giảm stress cho cá 30ml Prodac Aquasana",
-          "targetSnippet": "Dung dịch khử độc &amp; giảm stress cho cá 30ml Prodac Aquasana"
-        }
-      ]
-    },
-    {
-      "slug": "dung-dich-khu-doc-giam-stress-cho-ca-100ml-prodac-aquasana",
-      "sourceId": 269091,
-      "targetId": 82927,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 70,
-          "targetLength": 69,
-          "sourceSnippet": "Dung dịch khử độc &#038; giảm stress cho cá 100ml Prodac Aquasana",
-          "targetSnippet": "Dung dịch khử độc &amp; giảm stress cho cá 100ml Prodac Aquasana"
-        }
-      ]
-    },
-    {
-      "slug": "dung-dich-khu-doc-giam-stress-cho-ca-250ml-prodac-aquasana",
-      "sourceId": 269089,
-      "targetId": 82928,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 70,
-          "targetLength": 69,
-          "sourceSnippet": "Dung dịch khử độc &#038; giảm stress cho cá 250ml Prodac Aquasana",
-          "targetSnippet": "Dung dịch khử độc &amp; giảm stress cho cá 250ml Prodac Aquasana"
-        }
-      ]
-    },
-    {
-      "slug": "thuc-an-dang-hat-cho-ca-dia-probits-100g-prodac",
-      "sourceId": 268934,
-      "targetId": 82930,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 55,
-          "targetLength": 49,
-          "sourceSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 100g &#8211; Prodac",
-          "targetSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 100g – Prodac"
-        }
-      ]
-    },
-    {
-      "slug": "thuc-an-ca-canh-dang-hat-color-granules-100gram-prodac",
-      "sourceId": 268931,
-      "targetId": 82932,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 62,
-          "targetLength": 56,
-          "sourceSnippet": "Thức ăn cá cảnh dạng hạt Color Granules 100gram &#8211; Prodac",
-          "targetSnippet": "Thức ăn cá cảnh dạng hạt Color Granules 100gram – Prodac"
-        }
-      ]
-    },
-    {
-      "slug": "thuc-an-dang-hat-cho-ca-dia-probits-500g-prodac",
-      "sourceId": 267235,
-      "targetId": 82934,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 55,
-          "targetLength": 49,
-          "sourceSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 500g &#8211; Prodac",
-          "targetSnippet": "Thức ăn dạng hạt cho cá đĩa Probits 500g – Prodac"
-        }
-      ]
-    },
-    {
-      "slug": "thuc-an-color-dang-hat-500g",
-      "sourceId": 265568,
-      "targetId": 82938,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 54,
-          "targetLength": 48,
-          "sourceSnippet": "Thức ăn cá cảnh dạng hạt Color Granules &#8211; Prodac",
-          "targetSnippet": "Thức ăn cá cảnh dạng hạt Color Granules – Prodac"
-        }
-      ]
-    },
-    {
-      "slug": "bo-test-kit-gh-prodac-italia",
-      "sourceId": 265409,
-      "targetId": 82940,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 36,
-          "targetLength": 30,
-          "sourceSnippet": "Bộ test kit GH &#8211; Prodac Italia",
-          "targetSnippet": "Bộ test kit GH – Prodac Italia"
-        }
-      ]
-    },
-    {
       "slug": "bo-test-kit-kh-prodac-italia",
       "sourceId": 265405,
       "targetId": 83124,
       "flags": [
         {
-          "field": "name",
-          "sourceLength": 36,
-          "targetLength": 30,
-          "sourceSnippet": "Bộ Test Kit KH &#8211; Prodac Italia",
-          "targetSnippet": "Bộ Test Kit KH – Prodac Italia"
-        },
-        {
           "field": "full",
           "sourceLength": 1047,
           "targetLength": 1022,
-          "sourceSnippet": "Thử nước để đo độ cứng KH (độ Đức) trong bể cá nước ngọt và nước biển. Giá trị tối ưu trong bể cá nước ngọt là",
-          "targetSnippet": "Thử nước để đo độ cứng KH (độ Đức) trong bể cá nước ngọt và nước biển. Giá trị tối ưu trong bể cá nước ngọt là"
+          "firstDifferenceIndex": 929,
+          "sourceAround": "nh ánh nắng mặt trời. Để sản phẩm xa tầm tay trẻ em. Video hướng dẫn: https://aquathanhxuan.com/wp-content/uploads/2022/03/PRODACTEST-KH-How-to-check-carbonate-hardness-with-Prodactest.mp4",
+          "targetAround": "nh ánh nắng mặt trời. Để sản phẩm xa tầm tay trẻ em. Video hướng dẫn: /wp-content/uploads/2022/03/PRODACTEST-KH-How-to-check-carbonate-hardness-with-Prodactest.mp4"
         }
       ]
     },
@@ -481,74 +181,12 @@
       "targetId": 83129,
       "flags": [
         {
-          "field": "name",
-          "sourceLength": 36,
-          "targetLength": 30,
-          "sourceSnippet": "Bộ test kit PH &#8211; Prodac italia",
-          "targetSnippet": "Bộ test kit PH – Prodac italia"
-        },
-        {
           "field": "full",
           "sourceLength": 1328,
           "targetLength": 1303,
-          "sourceSnippet": "Kiểm tra nước để đo độ pH của nước trong bể cá nước ngọt, biển và ao. Cách dùng: 1. Tráng ống nghiệm mẫu nước ",
-          "targetSnippet": "Kiểm tra nước để đo độ pH của nước trong bể cá nước ngọt, biển và ao. Cách dùng: 1. Tráng ống nghiệm mẫu nước "
-        }
-      ]
-    },
-    {
-      "slug": "thuc-an-dang-hat-danh-cho-ca-vang-coldwater-granules-prodac-italia",
-      "sourceId": 265398,
-      "targetId": 83135,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 65,
-          "targetLength": 59,
-          "sourceSnippet": "Thức ăn dạng hạt cho cá vàng &#8211; Coldwater granules mini 145g",
-          "targetSnippet": "Thức ăn dạng hạt cho cá vàng – Coldwater granules mini 145g"
-        }
-      ]
-    },
-    {
-      "slug": "thuc-an-dang-vien-danh-cho-cac-loai-ca-an-thuy-sinh-algae-wafers-lo-50g-prodac-italia",
-      "sourceId": 265393,
-      "targetId": 82949,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 65,
-          "targetLength": 59,
-          "sourceSnippet": "Thức ăn dạng viên cho cá tầng đáy Algae wafer 50gr &#8211; Prodac",
-          "targetSnippet": "Thức ăn dạng viên cho cá tầng đáy Algae wafer 50gr – Prodac"
-        }
-      ]
-    },
-    {
-      "slug": "dong-ho-canh-bao-alert-combo12-thang",
-      "sourceId": 265379,
-      "targetId": 83143,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 75,
-          "targetLength": 68,
-          "sourceSnippet": "Bộ theo dõi nồng độ NH3 &#038; PH Seachem &#8211; Combo Alert Seachem 1 năm",
-          "targetSnippet": "Bộ theo dõi nồng độ NH3 &amp; PH Seachem – Combo Alert Seachem 1 năm"
-        }
-      ]
-    },
-    {
-      "slug": "dong-ho-canh-bao-alert-combo",
-      "sourceId": 2953,
-      "targetId": 82997,
-      "flags": [
-        {
-          "field": "name",
-          "sourceLength": 71,
-          "targetLength": 70,
-          "sourceSnippet": "Bộ theo dõi nồng độ NH3 &#038; PH Seachem – Combo Alert Seachem 6 tháng",
-          "targetSnippet": "Bộ theo dõi nồng độ NH3 &amp; PH Seachem – Combo Alert Seachem 6 tháng"
+          "firstDifferenceIndex": 1225,
+          "sourceAround": "nh ánh nắng mặt trời. Để sản phẩm xa tầm tay trẻ em. Video hướng dẫn: https://aquathanhxuan.com/wp-content/uploads/2022/03/PRODACTEST-PH-How-to-use-Prodactest-pH-4.5-9.0.mp4",
+          "targetAround": "nh ánh nắng mặt trời. Để sản phẩm xa tầm tay trẻ em. Video hướng dẫn: /wp-content/uploads/2026/11/PRODACTEST-PH-How-to-use-Prodactest-pH-4.5-9.0.mp4"
         }
       ]
     },
@@ -561,8 +199,9 @@
           "field": "full",
           "sourceLength": 1615,
           "targetLength": 1614,
-          "sourceSnippet": "Seachem Purigen là vật liệu lọc hấp thụ đặc biệt không giống các loại vật liệu lọc khác. Các hạt nhựa polymer ",
-          "targetSnippet": "Seachem Purigen là vật liệu lọc hấp thụ đặc biệt không giống các loại vật liệu lọc khác. Các hạt nhựa polymer "
+          "firstDifferenceIndex": 258,
+          "sourceAround": "với tốc độ vượt trội lên đến 500%, hơn hẳn các loại vật liệu lọc khác.\\ Seachem Purigen có thể khử Amoniac, Nitrit, Nitrat bằng cách loại bỏ chất thải hữu cơ có chứa nitơ mà nếu không sẽ chuyển hòa thành các hợp chất có ",
+          "targetAround": "với tốc độ vượt trội lên đến 500%, hơn hẳn các loại vật liệu lọc khác. Seachem Purigen có thể khử Amoniac, Nitrit, Nitrat bằng cách loại bỏ chất thải hữu cơ có chứa nitơ mà nếu không sẽ chuyển hòa thành các hợp chất có h"
         }
       ]
     }
@@ -584,7 +223,7 @@
         "hasConsultation": true,
         "hasDetailedInfo": true,
         "containsShortDescription": true,
-        "bodyLength": 2767,
+        "bodyLength": 2784,
         "oldPriceDisplayed": false,
         "descriptionLength": 0,
         "detailWrapper": false
@@ -621,7 +260,7 @@
         "hasConsultation": true,
         "hasDetailedInfo": true,
         "containsShortDescription": true,
-        "bodyLength": 4508,
+        "bodyLength": 4491,
         "oldPriceDisplayed": true,
         "descriptionLength": 0,
         "detailWrapper": false
@@ -658,7 +297,7 @@
         "hasConsultation": true,
         "hasDetailedInfo": true,
         "containsShortDescription": true,
-        "bodyLength": 4788,
+        "bodyLength": 4805,
         "oldPriceDisplayed": false,
         "descriptionLength": 0,
         "detailWrapper": false
@@ -695,7 +334,7 @@
         "hasConsultation": true,
         "hasDetailedInfo": true,
         "containsShortDescription": true,
-        "bodyLength": 4072,
+        "bodyLength": 4055,
         "oldPriceDisplayed": false,
         "descriptionLength": 0,
         "detailWrapper": false
