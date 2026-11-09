@@ -197,6 +197,37 @@ async function run(){
     console.log('LIGHT_CATEGORY_UI_PASS='+JSON.stringify({slug:c.slug,width,cards}));
     save();
    }
+   // Product detail route smoke: newly imported source IDs and one enriched
+   // existing Kaokui. These are backed by native WP Product Rewrites.
+   const representativeSlugs=[
+     'chihiros-b-series-den-led-cho-be-thuy-sinh-chihiros-b90',
+     'den-led-trang-xuanmeilong-xml-60-12w',
+     'led-odyssea-slim-x-10000k',
+     'den-kaokui-70w-pro-2',
+   ];
+   for(const slug of representativeSlugs){
+     const sourceProduct=seen.get(slug);
+     assert(sourceProduct,'Route QA source slug missing '+slug);
+     const url='/san-pham/'+slug;
+     const res=await tab.goto(PUBLIC+url,{waitUntil:'domcontentloaded',timeout:60000});
+     assert.equal(res?.status(),200,'Product detail HTTP '+url);
+     await tab.locator('h1').first().waitFor({state:'visible',timeout:15000});
+     const h1=(await tab.locator('h1').first().innerText()).replace(/\\s+/g,' ').trim();
+     const name=await tab.evaluate(value=>{
+       const doc=new DOMParser().parseFromString(value,'text/html');
+       return String(doc.body.textContent||'').replace(/\\s+/g,' ').trim();
+     },String(sourceProduct.name||''));
+     const normalized=value=>String(value).normalize('NFC').replace(/\\s+/g,' ').trim().toLocaleLowerCase('vi');
+     assert.equal(normalized(h1),normalized(name),'Product H1 mismatch '+slug);
+     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
+     assert(overflow<=3,'Detail horizontal overflow '+url+' '+width+' '+overflow);
+     const filename='light-detail-'+slug+'-'+width+'.png';
+     await tab.screenshot({path:dir+'/'+filename,fullPage:false});
+     report.screenshots.push(filename);
+     report.checks.push({url,width,h1,sourceId:sourceProduct.id,http:res.status(),overflow});
+     console.log('LIGHT_PRODUCT_DETAIL_UI_PASS='+JSON.stringify({slug,width,sourceId:sourceProduct.id}));
+     save();
+   }
    assert.deepEqual(errors,[],'Product category browser JS errors width='+width);
    await context.close();
   }
