@@ -1,5 +1,5 @@
 {
-  "task": "compare public vs internal SEO headers and cache controls",
+  "task": "compare public vs internal product listing SSR product prices and cache headers",
   "sourceSha": "a9540b252236099fb6b1e2e1d007559c27fec9b1",
-  "diagnostics": 3
+  "diagnostics": 4
 }
