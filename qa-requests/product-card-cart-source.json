@@ -1,6 +1,6 @@
 {
   "project": "aquathanhxuan.com",
-  "astro_sha": "beb08cf9c402b53c0ffe603dd540f98ab6082e04",
-  "scope": "related cards + SSR category + legacy category real cart API, stock and variant protection",
-  "attempt": 1
+  "astro_sha": "c5edf8c0513c96f8e5a13ab23c25a33c9294c2f3",
+  "scope": "Missing original product media displays explicit neutral state across SSR categories, related, legacy and product detail; preserve real image and cart behavior",
+  "attempt": 2
 }
