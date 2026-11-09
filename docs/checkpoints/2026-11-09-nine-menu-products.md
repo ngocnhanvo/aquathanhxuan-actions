@@ -95,3 +95,10 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - QA independent [#42679696661](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42679696661) **PASS 30/30** của batch 10, source SEO title 30/30, metadesc không có nguồn; [#42680375081](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42680375081) **PASS 27/27** của batch 11, SEO title 27/27. Tổng QA không trùng batch 0..11: **356/389** Product IDs.
 - Tiếp tục gate: job batch 12 SUCCESS -> verify 389 unique source ID/category SUCCESS -> Native Rewrites -> special 2 UV + Bonsai -> full DATA_ONLY QA -> production Build Website -> 134 browser checks. Chưa trigger CMS writers/production trong mốc này.
 - Trạng thái: PARTIAL — chưa hoàn tất.
+
+## Tiếp tục 2026-11-10 — 13/13 batch PASS, verify đang chạy
+
+- [Run #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074) đã **PASS 13/13 import batch** (0..12), mỗi batch 0 errors; batch cuối 12 expected 33, created 21, reused 12, category_linked 12, failed 0. 389/389 Products đã được importer xử lý nhưng **chưa công bố DATA_PASS** khi `verify` cuối còn in_progress.
+- QA độc lập đã PASS 356/389 Product (batches 0..11): #42676337353 (210), #42677338267 (60), #42678118188 (29), #42679696661 (30), #42680375081 (27). Batch 12 chưa có QA độc lập; job `verify` đang đọc nguồn/đích.
+- Chỉ khi `verify` job SUCCESS và toàn bộ run SUCCESS mới tạo request `cms-requests/remaining-product-routes.json`; tiếp theo 2 UV + Bonsai, full QA, production build, 134 browser cases. `ASSET_DEFERRED` tiếp tục giữ nguyên chứng cứ media gốc HTTP 404.
+- Trạng thái: PARTIAL — chưa hoàn tất.
