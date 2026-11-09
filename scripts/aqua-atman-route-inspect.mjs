@@ -14,7 +14,10 @@ const tests=[
 '/ssr/products/atman-at-304s/detail',
 '/ssr/products/may-sui-khi-atman-hp-12000/detail',
 '/ssr/products/may-sui-khi-atman-hp-12000/detail?basename=%2F&curUrl=%2Fsan-pham%2Fmay-sui-khi-atman-hp-12000',
-'/san-pham/atman?sort=price-asc'
+'/san-pham/atman?sort=price-asc',
+'/ssr/products/san-pham/1?catSlug=atman',
+'/ssr/products/san-pham/atman?catSlug=atman',
+'/ssr/products/san-pham/1?basename=%2F&catSlug=atman&curUrl=%2Fsan-pham%2Fatman'
 ];
 for(const path of tests)console.log('ATMAN_ROUTE_HTTP='+JSON.stringify(await examine(front+path)));
 const root=wp+'/wp-json/wp/v2/chuyen-huong-link?status=publish&per_page=100&page=';
