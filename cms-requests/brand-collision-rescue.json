@@ -19,5 +19,8 @@
   "notes": "Source thumbnails from original WP attachment media_details are used if full-size file filename conflicts with different target SHA256. Preserve actual source variant filenames and record deferred originals; do not fabricate images. Serial CMS writer concurrency.",
   "mode": "idempotent",
   "revision": "Use source-media lookup for description and gallery attachments",
-  "sourceRescueCommit": "5a2b79d364299a93ae1cfb3e259382b92499888f"
+  "sourceRescueCommit": "5a2b79d364299a93ae1cfb3e259382b92499888f",
+  "retry": "Use exact original full-size source image in original year-month via temporary draft, preserve SHA and filename; clean draft",
+  "codeCommit": "cf0a4a4c29b2189111bcb7bcc3ee0f28452b6a6b",
+  "lastFailedRun": 42588861095
 }
