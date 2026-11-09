@@ -28,7 +28,10 @@ const result={slug:s.slug,id:s.id,
  targetDescriptionBytes:String(t.description||'').length,
  sourceShortBytes:String(s.short_description||'').length,
  targetShortBytes:String(t.short_description||'').length,
- sourceImages:(s.images||[]).length,targetImages:(t.images||[]).length
+ sourceImages:(s.images||[]).length,targetImages:(t.images||[]).length,
+ sourceImageDetails:(s.images||[]).map(z=>({id:z.id,url:z.src,filename:decodeURIComponent(new URL(z.src).pathname.split('/').pop())})),
+ targetImageDetails:(t.images||[]).map(z=>({id:z.id,url:z.src,filename:decodeURIComponent(new URL(z.src).pathname.split('/').pop())})),
+ sourceDistinctSrcs:new Set((s.images||[]).map(z=>z.src)).size
 };results.push(result);
 }
 console.log('ATMAN_CONTENT_AUDIT='+JSON.stringify({count:results.length,results}));
