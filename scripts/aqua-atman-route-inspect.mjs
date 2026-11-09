@@ -3,10 +3,19 @@ async function examine(url){
  try{
  const r=await fetch(url,{redirect:'manual',headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(20000)});
  const body=String(r.headers.get('content-type')||'').includes('text/html')?(await r.text()).slice(0,5500):'';
- return {url,status:r.status,location:r.headers.get('location'),body:body.slice(0,5500)};
+ const title=body.split('<title>')[1]?.split('</title>')[0]||'';
+ const meta=body.match(/<meta name="description" content(?:="([^"]*)")?/)?.[1]||'';
+ const schemaExcerpt=body.slice(body.indexOf('application/ld+json'),body.indexOf('application/ld+json')+450);
+ return {url,status:r.status,location:r.headers.get('location'),title,meta,headers:Object.fromEntries(r.headers.entries()),schemaExcerpt};
  }catch(e){return {url,error:String(e).slice(0,180)}}
 }
 const tests=[
+'/san-pham/atman?qa_nocache=1794204882680',
+'/san-pham/atman?cb=rhnxa9v7fcg',
+'/san-pham/atman?page=1&test=unique-1794204882680',
+'/san-pham/atman/1',
+'/san-pham/atman/1?random=1794204882680',
+'/preview/san-pham/atman',
 '/san-pham/may-sui-khi-atman-hp-12000',
 '/san-pham/may-sui-khi-atman-hp-12000/',
 '/san-pham/atman',
