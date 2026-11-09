@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
-          test "$actual" = "a9540b252236099fb6b1e2e1d007559c27fec9b1"
+          test "$actual" = "1971495f1e1990983a75bf7e7a4c9b91d84c7f77"
           echo "ASTRO_TEST_SHA=$actual"
       - uses: pnpm/action-setup@v4
         with:
@@ -35,3 +35,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec vitest run src/lib/wordpress/products/catalogSort.test.ts src/lib/seo/listingTitles.test.ts
       - run: node --test scripts/atman-redirect-rule.test.mjs
+      - run: pnpm exec astro check
