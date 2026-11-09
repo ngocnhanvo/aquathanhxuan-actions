@@ -1,0 +1,7 @@
+{
+  "scope": "brand-product-details",
+  "source": "aquathanhxuan.com",
+  "target": "aquathanhxuan.io.vn",
+  "astro_sha": "bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d",
+  "reason": "classify_html_entity_and_description_differences"
+}
