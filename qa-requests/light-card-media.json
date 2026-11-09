@@ -13,8 +13,9 @@
     83166,
     82539
   ],
-  "scope": "Read-only desktop/mobile: verify 4 real source image cards decode + 3 Odyssea and 10 Xuanmailong missing covers display explicitly + missing-image product detail",
+  "scope": "Read-only investigate actual card image URL and missing-cover state per Product in Odyssea/Xuanmailong; no CMS write or rebuild",
   "productionQaRun": 42641456578,
-  "attempt": 2,
-  "astroDeployRun": 42646881625
+  "attempt": 3,
+  "astroDeployRun": 42646881625,
+  "reason": "Missing image count unexpectedly zero; collect per-card URL/provenance diagnostics"
 }
