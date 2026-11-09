@@ -2,6 +2,6 @@
   "project": "aquathanhxuan.com",
   "astro_sha": "5f158c4ea8d214f2f83f94dc2285032a81e983f8",
   "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
-  "scope": "Product detail sticky purchase bar and cart CTA + prior Woo price/stock integration",
-  "attempt": 3
+  "scope": "Compile product purchase Astro template + Woo detail fields (scoped QA)",
+  "attempt": 4
 }
