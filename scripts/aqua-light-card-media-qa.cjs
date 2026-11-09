@@ -66,6 +66,17 @@ const samples=[
      await page.locator('article[data-catalog-product]').first().waitFor({state:'visible',timeout:12000});
      const labels=page.locator('article[data-catalog-product] [data-product-image-unavailable]');
      const found=await labels.count();
+     const imageAudit=await page.locator('article[data-catalog-product]').evaluateAll(cards=>cards.map(card=>{
+       const img=card.querySelector('img');
+       const link=card.querySelector('a[href]');
+       return {id:card.getAttribute('data-catalog-product'),url:link?.getAttribute('href')||'',
+         unavailable:!!card.querySelector('[data-product-image-unavailable]'),
+         currentSrc:img?.currentSrc||'',imageSrcset:img?.getAttribute('srcset')||'',
+         naturalWidth:img?.naturalWidth||0};
+     }));
+     console.log('LIGHT_PRODUCT_IMAGE_AUDIT='+JSON.stringify({slug:missing.slug,width,found,expected:missing.count,items:imageAudit}));
+     report.checks.push({slug:missing.slug,width,observedMissing:found,expectedMissing:missing.count,cardImageAudit:imageAudit});
+     save();
      assert.equal(found,missing.count,'Wrong number of honest image-unavailable labels '+missing.slug+' width='+width);
      assert.equal(await page.locator('article[data-catalog-product] img[src*="/placeholders/product.webp"], article[data-catalog-product] img[srcset*="/placeholders/product.webp"]').count(),0,'Dummy product covers must not be rendered '+route);
      const label=await labels.first().innerText();
