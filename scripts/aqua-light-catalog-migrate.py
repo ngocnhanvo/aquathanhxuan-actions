@@ -201,6 +201,12 @@ source_product_groups={
   sid: info for sid,info in sorted(source_product_groups.items())
   if sid % BATCH_COUNT == BATCH_INDEX
 }
+specific_ids=os.environ.get('LIGHT_ONLY_SOURCE_IDS','').strip()
+if specific_ids:
+    parsed=[int(value.strip()) for value in specific_ids.split(',') if value.strip().isdigit()]
+    assert parsed and len(parsed)==len(specific_ids.split(',')) and len(set(parsed))==len(parsed), 'Invalid exact source IDs'
+    assert set(parsed).issubset(source_product_groups), 'Requested source Product outside verified light batch'
+    source_product_groups={sid:info for sid,info in source_product_groups.items() if sid in set(parsed)}
 print('LIGHT_SOURCE_SCOPE_PASS='+json.dumps({
  'categories':len(brand_pairs),'unique_source_products':total_source_unique,
  'batch':BATCH,'selected':len(source_product_groups)
@@ -294,6 +300,11 @@ def ensure_media_exact(src,alt,source_id):
     media_url=str(media.get('source_url') or '')
     actual_name=os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(media_url).path))
     if actual_name!=filename:
+        # This upload was created by this exact request but WP renamed it; do
+        # not leave an orphan or quietly accept an unapproved filename.
+        removal=api('/wp-json/wp/v2/media/'+str(media_id)+'?force=true',method='DELETE')
+        assert removal and removal.get('deleted') is True, 'Renamed temporary upload cleanup failed'
+        print('LIGHT_RENAMED_UPLOAD_CLEANUP_PASS='+str(media_id),flush=True)
         raise AssetDeferred(uri,filename,source_id,1,'WordPress renamed original media to '+actual_name)
     path=urllib.parse.urlparse(media_url).path
     assert path.startswith('/wp-content/uploads/'),'Uploaded asset missing WP media path'
@@ -403,7 +414,7 @@ def ensure_media(src,alt,source_id,source_media_id=None):
     try:
         return ensure_media_exact(src,alt,source_id)
     except AssetDeferred as original_error:
-        if 'different' not in str(original_error).lower():
+        if not any(marker in str(original_error).lower() for marker in ('different','renamed original media')):
             raise
         # The original media filename collides globally in the destination,
         # but the historical year/month folder may be free. Try exact bytes
