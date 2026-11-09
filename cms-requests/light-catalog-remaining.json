@@ -1,0 +1,13 @@
+{
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "inventoryRun": 42627591343,
+  "initialMigrationRun": 42628551840,
+  "scope": "Continue independent batch-1 and batch-2; do not rerun successful batch-0 records; failed source media IDs deferred separately",
+  "batchIndices": [
+    1,
+    2
+  ],
+  "sourceUnique": 59,
+  "at": "2026-11-09"
+}
