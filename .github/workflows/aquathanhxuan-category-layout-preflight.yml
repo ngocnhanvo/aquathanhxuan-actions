@@ -1,0 +1,28 @@
+name: Aqua category source and target layout preflight
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-category-layout-preflight.yml'
+      - 'qa-requests/category-layout-preflight.json'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aquathanhxuan-category-layout-preflight.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aquathanhxuan-category-layout-preflight.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-atman-category-source-target
+          path: artifacts/category-layout
+          if-no-files-found: ignore
+          retention-days: 7
