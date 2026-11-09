@@ -157,6 +157,19 @@ async function main(){
    console.log('AQUA_REMAINING_CATEGORY_SOURCE_PASS='+JSON.stringify({slug,count:rows.length}));
   }
   assert.equal(originalById.size,389,'Original nine-menu product scope changed');
+  const menuOnlyTargetIds=[
+   {id:1822,label:'Eheim',minimum:0},
+   {id:1835,label:'Đèn UV',minimum:2,slugs:['den-uv-30w','den-uv-40w']},
+   {id:1841,label:'Bonsai',minimum:1,slugs:['cay-bonsai-to']},
+   {id:1849,label:'Bể đúc',minimum:0},
+   {id:1782,label:'Contro Soil',minimum:0},
+   {id:1857,label:'Cá thủy sinh',minimum:0},
+  ];
+  const menuOnlyCases=menuOnlyTargetIds.map(spec=>{
+   const target=targetTerms.find(cat=>Number(cat.id)===spec.id);
+   assert(target&&target.slug,'Verified menu-only category missing '+spec.label);
+   return {...spec,slug:target.slug};
+  });
   const rootIds=new Set(roots.map(([, ,sourceId])=>sourceId));
   const childCases=[];
   for(const cat of sourceTerms){
@@ -347,6 +360,27 @@ async function main(){
     console.log('AQUA_REMAINING_CHILD_CATEGORY_UI_PASS='+JSON.stringify({slug:child.targetSlug,width,cardCount:displayed,sourceCount:child.sourceCount}));
     save();
    }
+   // Six menu items exist on the new WordPress header even though their
+   // source has no matching child term. Do not invent original membership,
+   // but ensure every link resolves; UV and Bonsai must render verified IDs.
+   for(const specialMenu of menuOnlyCases){
+    const path='/san-pham/'+specialMenu.slug;
+    const res=await tab.goto(PUBLIC+path,{waitUntil:'domcontentloaded',timeout:60000});
+    assert.equal(res?.status(),200,'Menu-only Woo category URL '+path);
+    const cards=tab.locator('article[data-catalog-product]');
+    const count=await cards.count();
+    assert(count>=specialMenu.minimum,'Menu-only category lacks verified source-backed Products '+specialMenu.label);
+    if(specialMenu.slugs){
+     const expected=specialMenu.slugs.map(slug=>Number(targetBySlug.get(slug)?.id));
+     const ids=await cards.evaluateAll(nodes=>nodes.map(node=>Number(node.getAttribute('data-catalog-product'))));
+     assert(expected.every(id=>ids.includes(id)),'Menu-only category missing exact original Product '+specialMenu.slug);
+    }
+    const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
+    assert(overflow<=3,'Menu-only category overflow '+specialMenu.slug+' '+width);
+    report.checks.push({type:'menu-only-category',slug:specialMenu.slug,label:specialMenu.label,width,cardCount:count,overflow});
+    console.log('AQUA_REMAINING_MENU_ONLY_UI_PASS='+JSON.stringify({slug:specialMenu.slug,label:specialMenu.label,width,cards:count}));
+    save();
+   }
    // Explicit source-backed UV items and Cây Bonsai belong to menu child
    // categories; verify their real public detail links as well.
    for(const spec of [...specialProducts,{id:3321,slug:'cay-bonsai-to',name:'Cây Bonsai'}]){
@@ -366,7 +400,7 @@ async function main(){
    assert.deepEqual(errors,[],'Browser Javascript errors '+width);
    await ctx.close();
   }
-  assert.equal(report.checks.length,134,'Expected 9 roots, 9 representative Products, 3 special Products and 46 original child menus at desktop/mobile');
+  assert.equal(report.checks.length,146,'Expected 9 roots + 9 root details + 46 original children + 6 menu-only children + 3 special details on desktop/mobile');
   report.status='PASS';
   save();
   console.log('AQUA_REMAINING_PRODUCTION_QA_PASS='+JSON.stringify({products:originalById.size,checks:report.checks.length,seoTitles,seoDescriptions,mediaDeferred:deferred}));
