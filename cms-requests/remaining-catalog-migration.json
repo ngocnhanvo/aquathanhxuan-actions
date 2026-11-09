@@ -1,0 +1,15 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "inventoryRun": 42662410500,
+  "taxonomyRun": 42661708486,
+  "sourceUnique": 389,
+  "alreadyPresent": 146,
+  "missingBefore": 243,
+  "batchCount": 13,
+  "pilotCount": 3,
+  "scope": "Source-verified simple Products in nine non-light roots; fill missing Product with original media, price, stock, descriptions and original HTML SEO title/description into Yoast; reuse legitimate WordPress IDs, no menu/header changes",
+  "mode": "apply",
+  "attempt": 1
+}
