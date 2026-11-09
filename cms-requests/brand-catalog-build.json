@@ -11,5 +11,19 @@
   "execution": "Trigger the existing Aqua Thanh Xuân Astro production deployment by wp_trigger_build repository_dispatch only",
   "sourceProducts": 157,
   "sourceCategoryCount": 20,
-  "verifyAfter": "Published build marker matches pinned Astro SHA, brand catalogue QA"
+  "verifyAfter": "Published build marker matches pinned Astro SHA, brand catalogue QA",
+  "buildRequest": 2,
+  "reason": "Publish verified WordPress gallery fixes to Astro SSR cms-products.json build snapshot",
+  "galleryRestoreRun": 42598203773,
+  "galleryAuditRun": 42598746988,
+  "required": {
+    "sourceProducts": 157,
+    "missing": 0,
+    "galleryUnresolved": 0,
+    "sourceMediaExceptions": [
+      184,
+      3178,
+      15280
+    ]
+  }
 }
