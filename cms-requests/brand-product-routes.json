@@ -1,0 +1,22 @@
+{
+  "scope": "Only verified source WooCommerce Product slugs from four known brand batch source categories",
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "sourceCategoryOccurrences": 148,
+  "batches": {
+    "A": 33,
+    "B": 36,
+    "C": 41,
+    "D": 38
+  },
+  "witnesses": {
+    "A": 42579994450,
+    "B": 42585734376,
+    "C": 42591540748,
+    "D": 42591602696,
+    "sourceReadOnlyInventory": 42593789909
+  },
+  "runtimeTarget": "/ssr/products/$1/detail",
+  "routePrefix": "/san-pham/",
+  "notes": "Preflight all target published Product identities first; publish up to four scoped CMS-owned native Regex Rewrites, not an all-products wildcard; do not alter Atman or category routes"
+}
