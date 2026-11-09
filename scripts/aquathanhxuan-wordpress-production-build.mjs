@@ -176,7 +176,39 @@ try {
   const mobileOverflow = await page.evaluate(() => Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth);
   if (mobileOverflow > 2) throw new Error('QA_FAILED check=mobileHeaderOverflow actual=' + mobileOverflow);
   console.log('HEADER_SEARCH_MOBILE_UNCHANGED_PASS=390');
+  if (await page.locator('#header-brandbar .header-logo-bubbles').isVisible()) {
+    throw new Error('QA_FAILED check=mobileLogoBubblesHidden expected=false');
+  }
+  console.log('HEADER_BUBBLES_MOBILE_HIDDEN_PASS=390');
   await page.setViewportSize({ width: 1440, height: 900 });
+
+  const bubbles = await page.evaluate(() => {
+    const logo = document.querySelector('#header-brandbar a[aria-label="Về trang chủ"]');
+    const wrapper = logo?.querySelector('.header-logo-bubbles');
+    const items = [...(wrapper?.querySelectorAll('.header-logo-bubble') || [])];
+    const style = wrapper ? getComputedStyle(wrapper) : null;
+    return {
+      count: items.length,
+      ariaHidden: wrapper?.getAttribute('aria-hidden'),
+      pointerEvents: style?.pointerEvents,
+      firstAnimation: items.length ? getComputedStyle(items[0]).animationName : null,
+      firstDuration: items.length ? getComputedStyle(items[0]).animationDuration : null,
+      wrapperInsideLogo: !!wrapper && logo?.contains(wrapper),
+      headerHorizontalOverflow: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) - window.innerWidth,
+    };
+  });
+  if (bubbles.count !== 5 || bubbles.ariaHidden !== 'true' || bubbles.pointerEvents !== 'none'
+      || bubbles.firstAnimation !== 'header-bubble-rise' || !bubbles.wrapperInsideLogo
+      || bubbles.headerHorizontalOverflow > 2) {
+    throw new Error('QA_FAILED check=logoBubbleAnimation expected=5 valid decorative bubbles actual=' + JSON.stringify(bubbles));
+  }
+  console.log('HEADER_LOGO_BUBBLES_DESKTOP_PASS=' + JSON.stringify(bubbles));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  if (await page.locator('#header-brandbar .header-logo-bubbles').isVisible()) {
+    throw new Error('QA_FAILED check=reducedMotionBubblesHidden expected=false');
+  }
+  console.log('HEADER_LOGO_BUBBLES_REDUCED_MOTION_PASS=hidden');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   await mkdir('artifacts', { recursive: true });
   await page.screenshot({ path: 'artifacts/aquathanhxuan-header-production.png', fullPage: false });
