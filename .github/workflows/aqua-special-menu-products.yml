@@ -1,0 +1,55 @@
+name: Aqua exact UV and Bonsai original Product mapping
+on:
+  push:
+    branches: [main]
+    paths:
+      - cms-requests/special-menu-products.json
+permissions:
+  contents: read
+concurrency:
+  group: aqua-remaining-catalog-writes
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      AQUA_BATCH_COUNT: '1'
+      AQUA_BATCH_INDEX: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check special Product and routing scripts before CMS writes
+        run: |
+          python3 -m py_compile scripts/aqua-special-menu-product-migrate.py
+          node --check scripts/aqua-special-uv-product-routes.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Import exact Gebo 30W/40W Product IDs and link verified Cây Bonsai
+        run: python3 scripts/aqua-special-menu-product-migrate.py
+      - name: Require two verified Products and one Bonsai category link
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path('artifacts/aqua-special-menu-products/uv-products-0.json').read_text())
+          assert j['status']=='PASS' and j['failed']==0
+          assert len(j['products'])==2 and {x['source_id'] for x in j['products']}=={5054,4355}
+          assert j['bonsai']['source_id']==3321 and j['bonsai']['target_category_id']==1841
+          print('AQUA_SPECIAL_UV_AND_BONSAI_PASS',flush=True)
+          PY
+      - name: Create only two missing WordPress Product native Rewrites
+        run: node scripts/aqua-special-uv-product-routes.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-special-uv-bonsai-migration
+          path: |
+            artifacts/aqua-special-menu-products/uv-products-0.json
+            artifacts/aqua-special-uv-routes/result.json
+          retention-days: 14
+          if-no-files-found: ignore
