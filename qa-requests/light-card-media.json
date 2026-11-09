@@ -1,6 +1,6 @@
 {
   "project": "aquathanhxuan.com",
-  "sha": "beb08cf9c402b53c0ffe603dd540f98ab6082e04",
+  "sha": "c5edf8c0513c96f8e5a13ab23c25a33c9294c2f3",
   "sourceProductIds": [
     265801,
     265482,
@@ -13,7 +13,8 @@
     83166,
     82539
   ],
-  "scope": "Read-only media decode after lazy loading in four original-image Product cards, desktop/mobile",
+  "scope": "Read-only desktop/mobile: verify 4 real source image cards decode + 3 Odyssea and 10 Xuanmailong missing covers display explicitly + missing-image product detail",
   "productionQaRun": 42641456578,
-  "attempt": 1
+  "attempt": 2,
+  "astroDeployRun": 42646881625
 }
