@@ -188,18 +188,20 @@ async function main(){
   // their manually mapped WP child are independently verified in #42666557375.
   // Skip only for scoped early audits, not for full DATA_ONLY / production.
   const specialProducts=[
-   {id:5054,slug:'den-uv-30w',categoryIds:[1771,1835]},
-   {id:4355,slug:'den-uv-40w',categoryIds:[1771,1835]},
+   {id:5054,slug:'den-uv-30w',name:'Đèn UV Gebo 30W',categoryIds:[1771,1835]},
+   {id:4355,slug:'den-uv-40w',name:'Đèn UV Gebo 40W',categoryIds:[1771,1835]},
   ];
   if(!selectedBatches){
    for(const spec of specialProducts){
     const src=await original('/wp-json/wc/store/v1/products/'+spec.id);
     assert.equal(Number(src.id),spec.id);
     assert.equal(src.slug,spec.slug);
+    assert.equal(norm(src.name),norm(spec.name),'Original special Product name changed');
     assert.equal(src.type,'simple');
     assert.equal((src.categories||[]).length,0,'Special UV source taxonomy has changed');
     const dst=targetBySlug.get(spec.slug);
     assert(dst,'Exact original UV Product not yet imported '+spec.slug);
+    assert.equal(norm(dst.name),norm(src.name),'Special Product target title differs from source '+spec.slug);
     const origin=(dst.meta_data||[]).find(x=>x.key==='_esc_origin_product_id');
     assert.equal(String(origin?.value||''),String(spec.id),'Special UV Product provenance mismatch '+spec.slug);
     assert.equal(String(dst.price||''),String(src.prices?.price||''),'Special UV price mismatch '+spec.slug);
@@ -340,12 +342,12 @@ async function main(){
    }
    // Explicit source-backed UV items and Cây Bonsai belong to menu child
    // categories; verify their real public detail links as well.
-   for(const spec of [...specialProducts,{id:3321,slug:'cay-bonsai-to'}]){
+   for(const spec of [...specialProducts,{id:3321,slug:'cay-bonsai-to',name:'Cây Bonsai'}]){
     const path='/san-pham/'+spec.slug;
     const response=await tab.goto(PUBLIC+path,{waitUntil:'domcontentloaded',timeout:60000});
     assert.equal(response?.status(),200,'Special source Product URL '+path);
     const heading=await tab.locator('h1').first().innerText();
-    assert(heading.trim().length>2,'Special source Product H1 empty '+spec.slug);
+    assert.equal(norm(heading),norm(spec.name),'Special Product H1 mismatch '+spec.slug);
     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
     assert(overflow<=3,'Special Product overflow '+spec.slug+' '+width);
     const filename='detail-special-'+spec.slug+'-'+width+'.png';
