@@ -1,0 +1,6 @@
+{
+  "task": "Read-only source-target inventory for all 20 target header Brand child categories",
+  "source": "aquathanhxuan.com",
+  "target": "admin.aquathanhxuan.io.vn",
+  "request": "2026-11-09-brand-menu"
+}
