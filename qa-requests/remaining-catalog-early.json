@@ -3,19 +3,14 @@
   "source": "https://aquathanhxuan.com",
   "target": "https://admin.aquathanhxuan.io.vn",
   "sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
-  "scope": "Read-only verify source Product IDs modulo 13 belonging only to successful import batches 0-6, Woo price, stock, category, descriptions, SEO title/metadesc",
+  "scope": "Read-only parity of successfully imported batches 7 and 8, including prices, stock, categories, original SEO metadata",
   "sourceMigrationRun": 42663313074,
   "batches": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6
+    7,
+    8
   ],
-  "attempt": 2,
-  "reason": "Corrected target product pagination by ID ascending; previous QA failed due duplicate published slug in unstable pagination while imports were running, not proof of duplicate Woo Product",
+  "attempt": 3,
+  "reason": "Previous 210 Product parity source IDs 0-6 PASS 42676337353; now check successful 7-8 without re-auditing",
   "verifiedRuns": [
     42675861683
   ]
