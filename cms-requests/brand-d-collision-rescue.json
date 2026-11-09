@@ -1,0 +1,17 @@
+{
+  "sourceFailedRun": 42586832096,
+  "expected": 5,
+  "sourceIds": [
+    265594,
+    265379,
+    265293,
+    265292,
+    265290
+  ],
+  "targetCategories": [
+    "prodibio",
+    "seachem"
+  ],
+  "mode": "verified-source-image-variants",
+  "rule": "never overwrite different bytes under same filename; use original source WP media_details sizes"
+}
