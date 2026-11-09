@@ -3,14 +3,18 @@
   "source": "https://aquathanhxuan.com",
   "target": "https://admin.aquathanhxuan.io.vn",
   "sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
-  "scope": "Read-only independent validation of batch 9 against live original Product data",
+  "scope": "Read-only independent original Product parity for final completed import batch 12",
   "sourceMigrationRun": 42663313074,
   "batches": [
-    11
+    12
   ],
-  "attempt": 6,
-  "reason": "Batch 11 imported successfully; verify source vs WordPress data while final batch 12 is running",
+  "attempt": 7,
+  "reason": "All 13 import batches and full 389 inventory verify succeeded; final independent source-HTML/Yoast check for last 33",
   "verifiedRuns": [
-    42675861683
+    42676337353,
+    42677338267,
+    42678118188,
+    42679696661,
+    42680375081
   ]
 }
