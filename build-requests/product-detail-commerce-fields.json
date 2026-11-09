@@ -1,0 +1,7 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "b6856c2ff4abaaa7d227e7f6e1d8737f3f414ddd",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "purpose": "Release Woo regular price, percent discount, stock status and short description"
+}
