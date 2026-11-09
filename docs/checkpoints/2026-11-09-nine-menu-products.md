@@ -53,3 +53,12 @@ Ngày checkpoint: 2026-11-09 (Asia/Ho_Chi_Minh).
 - QA production bổ sung yêu cầu Product published và catalog_visibility không hidden; mọi Product card của 9 root category phải có target ID nằm trong tập source đã kiểm chứng, không lặp ID.
 - Chỉ tạo `cms-requests/remaining-product-routes.json` khi import 13 batch + verify của #42663313074 thành công. Tiếp theo kích `cms-requests/special-menu-products.json` cho 2 UV và Bonsai, QA toàn bộ 389 + SEO, build production bằng pipeline hiện hành, browser QA 36 checks.
 - Trạng thái: **PARTIAL — chưa hoàn tất**.
+
+
+## Kiểm thử độc lập hai đợt — 270/389 nguồn Product PASS
+
+- [Read-only QA 7 lô đầu #42676337353](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42676337353) **success**: 210 Product ID chính xác, price/regular price, stock status, source child taxonomy, mô tả, 210 SEO titles khớp; source SEO metadesc không tồn tại cho 210/210.
+- [Read-only QA lô 7,8 #42677338267](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42677338267) **success**: 60 Product khác, price/regular price, stock, taxonomy, mô tả và 60 SEO titles khớp, không có SEO metadesc nguồn; source list toàn bộ 389 nhưng chỉ audit ID modulo 13 thuộc 7,8.
+- Tổng **270/389 Product IDs đã qua independent source-target parity**, không chỉ qua write confirmations. Trong report `AQUA_REMAINING_TARGET_PAGING` id-ascending không có slug/ID collision.
+- Import workflow #42663313074: **9/13 lô PASS** (0..8), batches 9/10 in progress, 11/12 queued, verify full chưa chạy tại mốc này.
+- No production route/build/36-case browser QA fired. Still PARTIAL.
