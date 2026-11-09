@@ -1,0 +1,41 @@
+name: Aqua Header child menu CMS sync (owner legacy list)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-header-submenus-sync.yml'
+      - 'scripts/aquathanhxuan-header-submenus-sync.cjs'
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-header-submenus-cms
+  cancel-in-progress: false
+jobs:
+  sync-menu:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check scoped CMS importer syntax
+        run: node --check scripts/aquathanhxuan-header-submenus-sync.cjs
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Add only missing Product categories and canonical Header child items
+        run: node scripts/aquathanhxuan-header-submenus-sync.cjs
+      - name: Preserve source and created-ID evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-header-submenus-cms-records
+          path: artifacts/header-submenus
+          if-no-files-found: ignore
+          retention-days: 7
