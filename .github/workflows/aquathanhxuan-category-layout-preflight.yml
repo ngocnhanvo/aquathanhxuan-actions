@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/aquathanhxuan-category-layout-preflight.yml'
       - 'qa-requests/category-layout-preflight.json'
+      - 'scripts/aquathanhxuan-category-layout-preflight.cjs'
 permissions:
   contents: read
 jobs:
