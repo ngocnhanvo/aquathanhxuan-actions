@@ -37,13 +37,13 @@ body=urllib.parse.urlencode({'log':username,'pwd':password,'wp-submit':'Log In',
 dash=raw(TARGET+'/wp-login.php','POST',body,{'Content-Type':'application/x-www-form-urlencoded'}).decode('utf-8','replace')
 assert 'wp-admin-bar-my-account' in dash,'WP auth denied'
 import re
-m=re.search(r'wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;',dash,re.S)
+m=re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;',dash,re.S)
 nonce=''
 if m:
     try:nonce=json.loads(m.group(1)).get('nonce','')
     except json.JSONDecodeError:pass
 if not nonce:
-    m=re.search(r'"nonce"\\s*:\\s*"([A-Za-z0-9]+)"',dash)
+    m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',dash)
     nonce=m.group(1) if m else ''
 assert nonce,'Missing WP nonce'
 def api(url,method='GET'):
