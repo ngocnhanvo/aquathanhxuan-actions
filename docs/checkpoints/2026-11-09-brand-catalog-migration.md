@@ -84,6 +84,13 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 
 - Production browser QA đang chạy run [42595915988](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595915988), riêng desktop/mobile/URL/SEO; chưa đánh dấu QA_PASS trước kết quả.
 
+## QA production — phát hiện và sửa đếm gallery
+
+- Lượt QA đầu [42595915988](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595915988) FAIL tại Atman `may-sui-khi-atman-hp-12000`, assert so sánh *độ dài thô* `product.images` của nguồn với target. `TEMP_DRAFT_CLEANUP_PASS` và marker source chính xác trước khi assert.
+- Kiểm toán đọc độc lập [42596581622](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42596581622) PASS: Woo Store API nguồn **lặp ảnh chính** trong array gallery. HP-12000 source có 4 entries nhưng **3 URL/filename khác nhau**, target có đủ 3; nhiều sản phẩm Atman khác có 2-3 entries nhưng chỉ 1-2 URL duy nhất. Nội dung HTML full/short đã được enrich sau khi migrate. Không ghi thêm media trùng.
+- QA script đã sửa so **mọi URL ảnh nguồn duy nhất + filename** với WordPress target, vẫn fail nếu thiếu một ảnh duy nhất. Workflow test lại [42596794623](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42596794623). Production Astro không thay đổi; không build lại khi chỉ test sửa.
+- QA vẫn phải kiểm tra 20 brand, 157 memberships, Product detail cho từng URL, layout/banner/sort/recent, 1440/390px và ảnh nguồn exception.
+
 ## Chốt tiến độ
 
 - `SOURCE_INVENTORY_PASS`: Có.
