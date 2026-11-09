@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Migrate only source-verified Products in nine remaining Aqua menu roots.
-
-Inventory manifest (generated read-only in same workflow) pins all 389 source IDs,
-destination terms and slugs. Existing Products are identity checked; no menu edits.
-Original image bytes/filenames are preserved; inaccessible covers are recorded as
-ASSET_DEFERRED without preventing import of genuine product details.
+"""Import only two verified categoryless original Gebo UV Products, then link one
+verified Cây Bonsai Product to its display category. Requires the 389 Product
+main import to have passed. Scoped source IDs: 5054, 4355 and 3321 only.
+Media and SEO originate only from exact source Product IDs; no synthetic data.
 """
 import hashlib
 import html
@@ -41,7 +39,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 checkpoint_path = output_dir / (BATCH + '.json')
 journal = {
     'batch': BATCH, 'source': SOURCE, 'target': DEST, 'requested': TARGET_SLUGS,
-    'write_scope': '389 verified source products within nine menu roots only; originals + ACF vi + Yoast; no menu modifications',
+    'write_scope': 'Only source UV Products 5054/4355 and existing Cây Bonsai 3321 category link; originals + ACF vi + Yoast; no menu edits',
     'batch_index':BATCH_INDEX,'batch_count':BATCH_COUNT,
     'started_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
     'brands': [], 'products': [], 'asset_deferred': [],
