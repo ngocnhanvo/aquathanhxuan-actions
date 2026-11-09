@@ -1,0 +1,31 @@
+name: Aqua product detail source-target content audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-product-detail-parity-audit.yml'
+      - 'audit-requests/product-detail-parity.json'
+permissions:
+  contents: read
+jobs:
+  detail-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-product-detail-parity-audit.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aqua-product-detail-parity-audit.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-product-detail-parity
+          path: artifacts/product-detail-parity
+          if-no-files-found: ignore
+          retention-days: 14
