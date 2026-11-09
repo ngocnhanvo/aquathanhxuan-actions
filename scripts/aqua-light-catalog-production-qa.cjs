@@ -15,9 +15,30 @@ const report={source:SOURCE,target:DEST,production:PUBLIC,sha:CONFIG.sha,categor
 const save=()=>fs.writeFileSync(dir+'/report.json',JSON.stringify(report,null,2)+'\n');
 save();
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function retryRead(label,execute){
+ for(let attempt=1;attempt<=3;attempt++){
+  try{
+   const r=await execute();
+   const status=typeof r.status==='function'?r.status():r.status;
+   if([429,500,502,503,504].includes(status)&&attempt<3){
+    console.log('LIGHT_READ_RETRY='+JSON.stringify({label,attempt,status}));
+    await sleep(800*attempt);continue;
+   }
+   assert.equal(status,200,label+' HTTP '+status);
+   return r;
+  }catch(error){
+   const transient=/ECONNRESET|ETIMEDOUT|EAI_AGAIN|socket hang up|fetch failed|network|TimeoutError|ECONNREFUSED/i.test(String(error));
+   if(!transient||attempt===3)throw error;
+   console.log('LIGHT_READ_RETRY='+JSON.stringify({label,attempt,error:String(error).slice(0,160)}));
+   await sleep(800*attempt);
+  }
+ }
+ throw Error('LIGHT_READ_RETRY_EXHAUSTED '+label);
+}
 async function sourceJSON(path){
- const r=await fetch(SOURCE+path,{signal:AbortSignal.timeout(45000),headers:{'cache-control':'no-cache'}});
- assert.equal(r.status,200,'Source fetch '+path);
+ const r=await retryRead('Source '+path,()=>fetch(SOURCE+path,{
+  signal:AbortSignal.timeout(45000),headers:{'cache-control':'no-cache'}
+ }));
  return r.json();
 }
 async function sourcePaged(path,category){
@@ -57,8 +78,8 @@ async function run(){
   assert.equal(nr.status(),200);
   const headers={'X-WP-Nonce':(await nr.text()).trim()};
   async function wc(path){
-   const r=await page.request.get(DEST+path,{headers,timeout:45000});
-   assert.equal(r.status(),200,'Target WooCommerce GET '+path);
+   const r=await retryRead('Target WooCommerce '+path,
+     ()=>page.request.get(DEST+path,{headers,timeout:45000}));
    return r.json();
   }
   const sourceCategories=await sourcePaged('/wp-json/wc/store/v1/products/categories');
@@ -121,10 +142,10 @@ async function run(){
   for(const [slug,sourceProduct] of seen){
     const target=seenDest.get(slug);
     assert(target,'No destination to verify SEO '+slug);
-    const response=await fetch(SOURCE+'/san-pham/'+encodeURIComponent(slug)+'/',{
-      signal:AbortSignal.timeout(45000),headers:{'cache-control':'no-cache'},
-    });
-    assert.equal(response.status,200,'Source SEO HTML '+slug);
+    const response=await retryRead('Source SEO HTML '+slug,
+      ()=>fetch(SOURCE+'/san-pham/'+encodeURIComponent(slug)+'/',{
+        signal:AbortSignal.timeout(45000),headers:{'cache-control':'no-cache'},
+      }));
     const head=(await response.text()).split('</head>')[0];
     const sourceSeo=await page.evaluate(head=>{
       const doc=new DOMParser().parseFromString(head+'</head>','text/html');
