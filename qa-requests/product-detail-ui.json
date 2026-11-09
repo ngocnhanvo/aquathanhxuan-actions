@@ -1,7 +1,8 @@
 {
   "project": "aquathanhxuan.com",
   "environment": "production",
-  "astro_sha": "b6856c2ff4abaaa7d227e7f6e1d8737f3f414ddd",
+  "astro_sha": "5f158c4ea8d214f2f83f94dc2285032a81e983f8",
   "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
-  "scope": "Price regular/discount + short description + stock WooCommerce; desktop/mobile"
+  "scope": "Sticky purchase bar + view cart and source Woo detail fields; desktop 1440/mobile 390",
+  "attempt": 2
 }
