@@ -23,14 +23,13 @@ jobs:
           const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
           const tests=[
             {name:'baseline'},
-            {name:'external-styles-off',external:false},
-            {name:'inline-styles-off',inline:false},
-            {name:'all-styles-off',external:false,inline:false},
-            {name:'force-visibility',css:'*{opacity:1!important;visibility:visible!important;content-visibility:visible!important;animation:none!important;transition:none!important;transform:none!important;clip-path:none!important;filter:none!important}'},
-            {name:'force-visibility-only',css:'*{opacity:1!important;visibility:visible!important;content-visibility:visible!important}'},
-            {name:'force-transform-only',css:'*{transform:none!important;filter:none!important;clip-path:none!important;animation:none!important;transition:none!important}'},
-          ];
-          for(const test of tests){
+            {name:'compiler-off',block:'compiler.OaLulciC.css'},
+            {name:'layout-off',block:'Layout.CqAepo0p.css'},
+            {name:'small-fixed-text',htmlInject:'<h1 id="probe-small" style="position:fixed;top:120px;left:24px;width:280px;height:130px;z-index:999999;font:bold 37px Arial;background:#fff;color:#000;overflow:hidden">Đèn thủy sinh giảm giá</h1>'},
+            {name:'no-backdrop',css:'*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;mix-blend-mode:normal!important}'},
+            {name:'hero-flow',css:'.aqua-hero__slide{position:relative!important;visibility:visible!important;opacity:1!important;transition:none!important}.aqua-hero__slide:not([data-active="true"]){display:none!important}.aqua-hero__media{position:relative!important}.aqua-hero__media img{height:auto!important;object-fit:contain!important}'},
+            {name:'all-external-styles-off',external:false},
+          ];          for(const test of tests){
             const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true});
             const page=await context.newPage();
             await page.addInitScript(()=>{
@@ -38,15 +37,17 @@ jobs:
               try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__lcp.push({t:e.startTime,size:e.size,url:e.url,tag:e.element?.tagName}))).observe({type:'largest-contentful-paint',buffered:true})}catch(e){window.__lcpError=e.message}
               try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__paint.push({t:e.startTime,name:e.name}))).observe({type:'paint',buffered:true})}catch{}
             });
+            if(test.block)await page.route('**/*',r=>r.request().resourceType()==='stylesheet'&&r.request().url().includes(test.block)?r.abort():r.continue());
             if(test.external===false){
               await page.route('**/*',route=>route.request().resourceType()==='stylesheet'?route.abort():route.continue());
             }
-            if(test.inline===false||test.css){
+            if(test.inline===false||test.css||test.htmlInject){
               await page.route('https://aquathanhxuan.io.vn/**',async route=>{
                 if(route.request().resourceType()!=='document')return route.continue();
                 const r=await route.fetch();let html=await r.text();
                 if(test.inline===false){while(html.includes('<style')){const s=html.indexOf('<style'),open=html.indexOf('>',s),end=html.indexOf('</style>',open);if(end<0)break;html=html.slice(0,s)+html.slice(end+8)}}
                 if(test.css)html=html.replace('</body>','<style>'+test.css+'</style></body>');
+                if(test.htmlInject)html=html.replace(/<body([^>]*)>/i,'<body$1>'+test.htmlInject);
                 await route.fulfill({response:r,body:html,headers:{...r.headers(),'content-type':'text/html; charset=utf-8'}});
               });
             }
@@ -62,7 +63,7 @@ jobs:
                   node=node.parentElement;
                 }
                 const styles=[...document.querySelectorAll('link[rel=stylesheet]')].map(e=>e.href);
-                return{ready:document.readyState,lcp:window.__lcp,paint:window.__paint,bodyText:document.body?.innerText?.length,styleLinks:styles,styleBlocks:document.querySelectorAll('style').length,chain}
+                return{ready:document.readyState,lcp:window.__lcp,paint:window.__paint,bodyText:document.body?.innerText?.length,probe:document.getElementById('probe-small')?.getBoundingClientRect().toJSON(),styleLinks:styles,styleBlocks:document.querySelectorAll('style').length,chain}
               });
               console.log('CSS_ISOLATION '+JSON.stringify({name:test.name,status:res?.status(),...a}));
             }catch(e){console.log('CSS_ISOLATION_ERROR '+test.name+' '+e.message)}
