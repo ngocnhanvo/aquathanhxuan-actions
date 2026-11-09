@@ -61,6 +61,7 @@ const time=()=>Date.now();
      description:document.querySelector('meta[name="description"]')?.getAttribute('content')||'',
      schema:[...document.querySelectorAll('script[type="application/ld+json"]')].map(e=>e.textContent||'').join(' ')
    }));
+   console.log('ATMAN_SEO_DIAGNOSTIC='+JSON.stringify({description:seo.description, schemaMatches:seo.schema.match(/.{0,170}\\[table.{0,170}/gi)?.slice(0,4) || [], schemaLength:seo.schema.length}).slice(0,2200));
    assert(!/\[table\s/i.test(seo.description+seo.schema),'WordPress TablePress shortcode leaked into SEO metadata');
    assert.equal(await page.locator('#catalog-sort option').count(),4,'Sort options');
    assert.equal(await page.locator('#recently-viewed-title').count(),1,'Recent history section');
