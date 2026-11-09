@@ -128,7 +128,7 @@ async function sourceImage(url){
     const altInput=page.locator('.media-modal .attachment-details [data-setting="alt"] input');
     if(await altInput.count())await altInput.fill(def.alt);
     await page.locator('.media-modal .media-button-insert').click();
-    await page.waitForFunction(row=>window.tp.editor.getData().some((r,i)=>i>1&&r.some(v=>/<img\\b/i.test(String(v||'')))),row,{timeout:15000}).catch(async e=>{
+    await page.waitForFunction(row=>window.tp.editor.getData().some((r,i)=>i>1&&r.some(v=>/<img\b/i.test(String(v||'')))),row,{timeout:15000}).catch(async e=>{
       console.log('CATALOG_INSERT_DIAGNOSTIC='+JSON.stringify({row,grid:await page.evaluate(()=>window.tp.editor.getData())}));
       throw e;
     });
