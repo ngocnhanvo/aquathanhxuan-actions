@@ -131,6 +131,26 @@ async function run(){
       return !!buy&&!!description&&Boolean(buy.compareDocumentPosition(description)&Node.DOCUMENT_POSITION_FOLLOWING);
     });
     assert(order,'Buy actions must precede long description '+slug+' '+width);
+    // Regression for reported issue: bottom CTA must NOT appear on initial entry,
+    // nor when the original purchase buttons are still within the viewport.
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='true');
+    assert.equal(await sticky.isVisible(),false,'Sticky bar must not appear on first page entry '+slug+' '+width);
+    await primary.scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='true');
+    assert.equal(await sticky.isVisible(),false,'Sticky bar must not appear before scrolling past in-page buttons '+slug+' '+width);
+    // Cross the actual bottom edge of the purchase panel, not a fixed scroll pixel.
+    await page.evaluate(()=>{
+       const buy=document.getElementById('product-purchase-actions');
+       if(!buy)throw Error('Missing original purchase actions');
+       const after=window.scrollY+buy.getBoundingClientRect().bottom+8;
+       window.scrollTo(0,after);
+    });
+    await page.waitForFunction(()=>{
+       const buy=document.getElementById('product-purchase-actions');
+       return buy?.getBoundingClientRect().bottom<=0 &&
+              document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='false';
+    });
     await page.evaluate(()=>{
       const detail=document.querySelector('.product-description');
       if(!detail)throw Error('Missing long description');
@@ -170,7 +190,7 @@ async function run(){
     report.screenshots.push(stickyShot);
     await page.locator('footer').scrollIntoViewIfNeeded();
     await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='true',{timeout:5000});
-    console.log('PRODUCT_PURCHASE_STICKY_PASS='+JSON.stringify({slug,width,stickyVisibleOnDescription:true,footerHidden:true,delegatedClick:true}));
+    console.log('PRODUCT_PURCHASE_STICKY_PASS='+JSON.stringify({slug,width,initialHidden:true,beforeOriginalHidden:true,afterOriginalVisible:true,stickyVisibleOnDescription:true,footerHidden:true,delegatedClick:true}));
     assert.deepEqual(errors,[],'Browser errors '+slug);
     await ctx.close();
     row.screenshots.push(screenshot);
