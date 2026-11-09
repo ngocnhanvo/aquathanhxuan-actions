@@ -1,25 +1,21 @@
 # Phản hồi ChatGPT mới nhất — Aqua Thanh Xuân
 
-- Dự án: aquathanhxuan.com; nguồn https://aquathanhxuan.com → WordPress https://admin.aquathanhxuan.io.vn.
-- Scope: 9 menu Máy lọc, Vật liệu lọc, Phụ kiện, Đá/Lũa/Cát, Hóa chất, Bể kính, Nền, CO2, Sinh vật. Không nhập lại Đèn 59/59.
-- Ngày: 2026-11-10 (Asia/Ho_Chi_Minh).
-- Repo: ngocnhanvo/aquathanhxuan-actions main. Frontend Astro production master @ 40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d; chưa build lại trong nhiệm vụ 9 menu.
+- Ngày: 2026-11-10 (Asia/Ho_Chi_Minh). Project: aquathanhxuan.com.
+- Repo: ngocnhanvo/aquathanhxuan-actions (main); Astro production: ngocnhanvo/aquathanhxuan-astro master @ 40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d.
 - Chế độ code: auto-build. Cổng ghi source: bypass.
-- Checkpoint: docs/checkpoints/2026-11-09-nine-menu-products.md.
-- [Preflight #42662410500](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42662410500) PASS: 389 Product source unique, 146 đã có, 243 cần tạo, identity conflict=0.
-- [Taxonomy #42661708486](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42661708486) PASS: 4 child category terms bổ sung đúng nguồn, không đổi menu header.
-- [Import #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074) CHƯA xong: preflight PASS, pilot 3/3 PASS; **9/13 batch success** (0,1,2,3,4,5,6,7,8), 9 và 10 in_progress, 11/12 queued; chưa có job verify toàn bộ.
-- Báo cáo 8 batch đầu: 237 Product IDs được xử lý, 146 mới tính cả pilot, 91 cũ, 88 category links, failed=0. Batch 8 đã PASS thêm nhưng chưa tổng hợp số.
-- [Early QA #42676337353](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42676337353) **PASS 210/210 nguồn Product thuộc batches 0–6**, nguồn/đích giá, giá gốc, tồn kho, danh mục, mô tả, SEO title 210/210, nguồn không có SEO metadesc 210.
-- Early QA #42675861683 lỗi phân trang khi chạy song song import; sửa `orderby=id&order=asc`, xác nhận true-duplicate by distinct ID, không có thao tác xóa.
-- [Early QA #42677338267](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42677338267) đang chạy kiểm chứng batches 7,8.
-- Chờ tất cả 13 import batches và verify PASS rồi mới kích tạo native Rewrite `cms-requests/remaining-product-routes.json`. Tiếp theo nhập 2 UV category-less source IDs 5054,4355 và liên kết Cây Bonsai source 3321 (workflow đã chuẩn bị nhưng CHƯA kích hoạt), QA full 389, build/deploy Astro theo production pipeline hiện tại, Playwright 36 case desktop/mobile.
-- Những media nguồn 404 ghi `ASSET_DEFERRED` không gán ảnh khác, vẫn nhập dữ liệu Product thật.
-- Trạng thái: PARTIAL — chưa hoàn tất.
+- Công việc: đồng bộ Product từ aquathanhxuan.com → admin.aquathanhxuan.io.vn cho 9 menu (không nhập lại Đèn 59/59).
+- Nguồn: 389 Product unique, 146 có sẵn, 243 cần tạo, 0 conflict ở preflight #42662410500.
+- [Import workflow #42663313074](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42663313074): preflight + pilot PASS; **10/13 batches (0..9) PASS**. Import (10), import (11) `in_progress`; import (12) `queued`; verify toàn bộ chưa chạy. Không có lỗi trong 10 lô đã hoàn tất.
+- [QA #42676337353](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42676337353) PASS 210; [#42677338267](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42677338267) PASS 60; [#42678118188](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42678118188) PASS 29. Tổng **299/389** distinct Product PASS independent source-target price/stock/category/descriptions/source HTML SEO title → Yoast. Source meta descriptions không tồn tại trong 299 item được kiểm.
+- Đã cập nhật checkpoint `docs/checkpoints/2026-11-09-nine-menu-products.md` bằng commit [3a26f03e](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/3a26f03e5c22d340596c5494be2e64c534e5e4a9).
+- Không có request mới kích Rewrite/CMS specials/production build trong lượt này vì 13/13 + verify chưa PASS. Không replay 10 batch thành công.
+- Tiếp theo: kiểm tra #42663313074 đến khi 13/13 + `verify` PASS; nếu fail, đọc log và sửa đúng batch. Sau đó tạo request `cms-requests/remaining-product-routes.json`, chờ PASS; tạo `cms-requests/special-menu-products.json` cho 2 UV 5054/4355 và Bonsai 3321, chờ PASS; tạo `qa-requests/remaining-catalog-data.json` parity 389; nếu PASS trigger `build-requests/<one-new-json>` đúng existing WordPress production pipeline và pinned Astro master SHA; khi deployment marker PASS thì tạo `qa-requests/remaining-catalog-production.json` để chạy 134 case; ghi checkpoint và phản hồi mới.
+- Media legacy thiếu/404 vẫn `ASSET_DEFERRED`, cấm bịa dữ liệu hoặc ghép ảnh khác.
+- Trạng thái dự án: PARTIAL — chưa hoàn tất.
 
 ## Nội dung phản hồi gửi người dùng
 
-Đang tiếp tục workflow #42663313074 mà không nhập lại các batch thành công. Hiện 9/13 batch PASS, không batch nào thất bại; QA độc lập 210/210 sản phẩm đầu PASS cả giá, tồn kho, danh mục, SEO. Các batch còn lại chưa hoàn tất; chưa chạy native Rewrite, data QA toàn bộ hoặc production deploy. Mình tiếp tục xử lý đúng checkpoint.
+Đã khôi phục checkpoint chín menu: 389 sản phẩm nguồn, 146 sản phẩm đích có sẵn ban đầu và 243 sản phẩm cần tạo. Import workflow #42663313074 hiện có 10/13 batch PASS, hai batch đang chạy và batch cuối đợi; QA độc lập đã PASS 299/389 sản phẩm. Không chạy lại batch thành công. Checkpoint mới đã commit `3a26f03e`. Chưa đủ điều kiện tạo Rewrite, bổ sung UV/Bonsai, chạy QA toàn bộ hoặc build production. Công việc vẫn đang dở, workflow hiện hữu vẫn chạy.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
