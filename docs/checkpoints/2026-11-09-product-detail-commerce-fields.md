@@ -22,8 +22,8 @@
 
 ## Phát hành và QA tiếp theo
 
-- Build request WordPress: [42610626409](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610626409) `IN_PROGRESS` khi ghi checkpoint, source SHA `b6856c2...`.
-- Chưa được báo `BUILD_SUCCESS`, `DEPLOY_READY` hoặc `QA_PASS` trước khi run production kết thúc và xác minh marker SHA.
-- Sau production PASS, tạo `qa-requests/product-detail-ui.json` chứa `astro_sha` chính xác để kích workflow `.github/workflows/aqua-product-detail-ui-qa.yml`. Test WP WC giá gốc/kho vs REST và DOM, excerpt, % giảm, trang không sale, 1440/390px, source screenshots và lỗi browser.
-- Nếu build/QA fail: đọc run/log, sửa đúng nguyên nhân, không đổi pipeline hoặc chạy trùng.
-- Trạng thái toàn nhiệm vụ: `PARTIAL — chưa hoàn tất` tới khi production QA PASS.
+- **BUILD_SUCCESS + DEPLOY_READY**: WordPress wrapper [42610626409](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610626409) `completed/success`, existing production pipeline [42610738651](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42610738651) `completed/success`, exact source SHA `b6856c2ff4abaaa7d227e7f6e1d8737f3f414ddd` verified by deployment marker.
+- **Cache field schema migration PASS**: build log `Woo Product detail fields upgraded from live WordPress REST: 182`; processed Product data rehydrated without regenerating all images.
+- **QA_PASS:** workflow [42611391976](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42611391976) completed/success; `DETAIL_DEPLOY_READY` khớp commit, **4 sản phẩm × 2 viewport (1440,390) PASS**. Dennerle Scaper's Soil 4L hiển thị `259000/375000/-31%`, 3 sản phẩm không sale không có giá gốc gạch/xuống giá giả; cả 4 mẫu có mô tả ngắn và trạng thái `instock` theo đúng Woo REST, không overflow/JS errors. **12 screenshot** nguồn/đích: [artifact 13669513851](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42611391976/artifacts/13669513851).
+- Nhánh `outofstock` và `onbackorder` đã được xác minh bởi test mapping/nhãn; 4 mẫu đang xuất bản được QA đều `instock`. Không tuyên bố production đã thử đủ 3 trạng thái bằng dữ liệu thật nếu nguồn không có ca mẫu phù hợp.
+- Trạng thái toàn nhiệm vụ: **DONE — hoàn tất** cho bốn yêu cầu (mô tả ngắn, giá gốc gạch ngang, phần trăm giảm, trạng thái còn/hết hàng) và dây chuyền API→getData→snapshot→giao diện.
