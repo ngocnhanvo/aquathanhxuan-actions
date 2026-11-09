@@ -167,6 +167,39 @@ async function main(){
    !selectedBatches||selectedBatches.has(Number(src.id)%13));
   assert(auditProducts.length>0,'No source Product selected for QA');
   console.log('AQUA_REMAINING_AUDIT_SOURCE_SCOPE='+JSON.stringify({all:originalById.size,auditing:auditProducts.length,batches:selectedBatches?[...selectedBatches]:null}));
+  // Two original Gebo UV Products are category-less at source and therefore
+  // excluded from the 389 verified root listings. The exact source IDs and
+  // their manually mapped WP child are independently verified in #42666557375.
+  // Skip only for scoped early audits, not for full DATA_ONLY / production.
+  const specialProducts=[
+   {id:5054,slug:'den-uv-30w',categoryIds:[1771,1835]},
+   {id:4355,slug:'den-uv-40w',categoryIds:[1771,1835]},
+  ];
+  if(!selectedBatches){
+   for(const spec of specialProducts){
+    const src=await original('/wp-json/wc/store/v1/products/'+spec.id);
+    assert.equal(Number(src.id),spec.id);
+    assert.equal(src.slug,spec.slug);
+    assert.equal(src.type,'simple');
+    assert.equal((src.categories||[]).length,0,'Special UV source taxonomy has changed');
+    const dst=targetBySlug.get(spec.slug);
+    assert(dst,'Exact original UV Product not yet imported '+spec.slug);
+    const origin=(dst.meta_data||[]).find(x=>x.key==='_esc_origin_product_id');
+    assert.equal(String(origin?.value||''),String(spec.id),'Special UV Product provenance mismatch '+spec.slug);
+    assert.equal(String(dst.price||''),String(src.prices?.price||''),'Special UV price mismatch '+spec.slug);
+    assert.equal(String(dst.regular_price||''),String(src.prices?.regular_price||''),'Special UV regular price mismatch '+spec.slug);
+    assert.equal(dst.stock_status,src.is_in_stock?'instock':'outofstock','Special UV stock mismatch '+spec.slug);
+    assert(spec.categoryIds.every(id=>(dst.categories||[]).some(c=>Number(c.id)===id)),
+       'Special UV Product missing verified menu category '+spec.slug);
+   }
+   const bonsai=targetBySlug.get('cay-bonsai-to');
+   assert(bonsai,'Exact original Bonsai Product missing');
+   const bonsaiOrigin=(bonsai.meta_data||[]).find(x=>x.key==='_esc_origin_product_id');
+   assert.equal(String(bonsaiOrigin?.value||''),'3321','Bonsai identity mismatch');
+   assert([1772,1839,1841].every(id=>(bonsai.categories||[]).some(c=>Number(c.id)===id)),
+       'Bonsai must retain original Đá plus verified submenu category');
+   console.log('AQUA_REMAINING_SPECIAL_SOURCE_MAPPING_PASS='+JSON.stringify({uvProducts:2,bonsai:1}));
+  }
   const originalBySlug=new Map();
   let deferred=0;
   for(const src of auditProducts){
@@ -268,10 +301,26 @@ async function main(){
     console.log('AQUA_REMAINING_DETAIL_UI_PASS='+JSON.stringify({slug:product.slug,width,sourceId:product.id}));
     save();
    }
+   // Explicit source-backed UV items and Cây Bonsai belong to menu child
+   // categories; verify their real public detail links as well.
+   for(const spec of [...specialProducts,{id:3321,slug:'cay-bonsai-to'}]){
+    const path='/san-pham/'+spec.slug;
+    const response=await tab.goto(PUBLIC+path,{waitUntil:'domcontentloaded',timeout:60000});
+    assert.equal(response?.status(),200,'Special source Product URL '+path);
+    const heading=await tab.locator('h1').first().innerText();
+    assert(heading.trim().length>2,'Special source Product H1 empty '+spec.slug);
+    const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
+    assert(overflow<=3,'Special Product overflow '+spec.slug+' '+width);
+    const filename='detail-special-'+spec.slug+'-'+width+'.png';
+    await tab.screenshot({path:directory+'/'+filename,fullPage:false});
+    report.checks.push({type:'special-detail',slug:spec.slug,sourceId:spec.id,width,h1:heading,overflow,screenshot:filename});
+    console.log('AQUA_REMAINING_SPECIAL_DETAIL_PASS='+JSON.stringify({slug:spec.slug,width,sourceId:spec.id}));
+    save();
+   }
    assert.deepEqual(errors,[],'Browser Javascript errors '+width);
    await ctx.close();
   }
-  assert.equal(report.checks.length,36,'Expected nine roots and nine Product detail routes on two viewports');
+  assert.equal(report.checks.length,42,'Expected nine roots, nine root Products and three verified special Products across two viewports');
   report.status='PASS';
   save();
   console.log('AQUA_REMAINING_PRODUCTION_QA_PASS='+JSON.stringify({products:originalById.size,checks:report.checks.length,seoTitles,seoDescriptions,mediaDeferred:deferred}));
