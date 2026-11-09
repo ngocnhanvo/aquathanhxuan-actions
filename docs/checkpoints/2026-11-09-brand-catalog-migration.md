@@ -103,6 +103,14 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - **GALLERY_WRITER_PASS:** [42598203773](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42598203773) hoàn thành `status=PASS, expected=6, created=0, reused=6, failed=0, deferred_ids=[]`; mỗi Product được thêm đúng ảnh thiếu: Chihiros 2+2, Dennerle 1+2+1+1 = **9 ảnh**. Ảnh gốc được kiểm tra SHA256, WordPress temp cleanup PASS. Không chạm 157 Product identity hay ảnh cover đã có.
 - **READONLY_GALLERY_AUDIT_IN_PROGRESS:** [42598746988](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42598746988) đối chiếu source–target cho 20 brand + 157 source memberships; yêu cầu `galleryUnresolved=[]` (ngoại trừ 3 source-media exceptions 184/3178/15280 đã xác minh). Kế tiếp: sau khi audit PASS **phải rebuild Astro** vì runtime SSR Products archive đọc từ `cms-products.json` *được đóng gói tại build*, không phải dữ liệu CMS mới mỗi request. Dùng duy nhất existing production pipeline, rồi chạy lại QA browser desktop/mobile toàn bộ danh mục.
 
+## Production rebuild sau đồng bộ gallery
+
+- Inventory [42598746988](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42598746988) **PASS:** `source=157,target=157,missing=0,galleryUnresolved=[]`, còn 3 source-media exceptions nguồn đã có bằng chứng.
+- Do `src/pages/san-pham/[...parts].astro` đọc `cms-products.json` từ snapshot build nên phải chạy lại production pipeline sau sửa gallery (không chỉ cập nhật WordPress).
+- Dispatcher lần 1 [42599186749](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599186749), lần 2 [42599487661](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599487661) cùng `completed/success` nhưng GitHub không tạo *bất kỳ* `repository_dispatch` production run; kiểm tra danh sách runs đã xác nhận.
+- Sửa đúng `.github/workflows/aqua-brand-catalog-dispatch-production.yml` để dùng secret token `SOURCE_REPO_PAT` đã có thay token mặc định `GITHUB_TOKEN`, thêm `request_id` (không thay production workflow, SHA, target, rollback hay lock); dispatcher [42599830507](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599830507) PASS, sản sinh **production run thật** [42599850218](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42599850218).
+- Astro nguồn đúng SHA `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d`; prod run 42599850218 đang chạy tại thời điểm ghi. Tiếp theo: verify build/FTPS/activation status PASS, rồi chạy lại `scripts/aqua-brand-catalog-production-qa.cjs` (update `qa-requests/brand-catalog-production.json`) và khắc phục fail thật đến PASS.
+
 ## Chốt tiến độ
 
 - `SOURCE_INVENTORY_PASS`: Có.
