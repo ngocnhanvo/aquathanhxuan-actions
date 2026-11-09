@@ -27,5 +27,9 @@
       15280
     ]
   },
-  "notes": "Prod only; fail-fast if deployed source marker differs; source original photos for 184 and 3178 remain HTTP 404 and must show local placeholder"
+  "notes": "Prod only; fail-fast if deployed source marker differs; source original photos for 184 and 3178 remain HTTP 404 and must show local placeholder",
+  "runAttempt": 2,
+  "priorQaRun": 42595915988,
+  "galleryValidation": "Compare each distinct source image src and original filename, excluding duplicate Woo Store API gallery entries; no asset parity relaxation",
+  "auditEvidenceRun": 42596581622
 }
