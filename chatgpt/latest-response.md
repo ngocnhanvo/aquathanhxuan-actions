@@ -1,58 +1,60 @@
 # Latest ChatGPT response — aquathanhxuan.com
 
-Time: 2026-11-09 Asia/Ho_Chi_Minh
+Date: 2026-11-09 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
-Repository: ngocnhanvo/aquathanhxuan-actions (main)
-Astro: ngocnhanvo/aquathanhxuan-astro master @ 282aac0a62bf4dd2d860faaa927e5a55bab8aed5
-PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
+Repository for response: ngocnhanvo/aquathanhxuan-actions (main)
 Knowledge: ngocnhanvo/knowledge main @ 78865ea3036b8d816f82d97b7bdecb1e3361c30a
-Checkpoint: docs/checkpoints/2026-11-09-header-parent-all-links.md
-Outcome: DONE — WordPress 11 native custom Tất cả children, parent labels only toggle; source CI PASS; production build/deploy PASS; 5-viewport browser QA PASS. No additional outstanding work from this request.
+Astro: ngocnhanvo/aquathanhxuan-astro master @ 1a835b579a239ea6dc87ce4cf02018c4ec62c4c9
+PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
+Checkpoint: docs/checkpoints/2026-11-09-home00-mobile-banner.md
+Outcome: DONE. New mobile aquascape image uploaded to WordPress Media ID 82696 and native ESC Table home_00 third row; 2 existing desktop image cells unchanged, mobile flags 0,0,1; source CI, production build/deploy and 6-viewport Playwright PASS.
+
 Evidence:
-- CMS sync: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545042895 (HEADER_ALL_CMS_PASS parents=11, reused=11, reordered=75, childCounts=[21,8,9,6,9,5,7,5,8,5,3])
-- Source CI: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42544643430
-- Build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545372518 (BUILD_SUCCESS/DEPLOY_READY PASS)
-- Deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545446332 (success)
-- Production QA: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545625065 (PASS all viewports, desktop/mobile menu, Footer, Home05, consultation; artifact 13643860044)
+- Preflight: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42547410623
+- WordPress Media/ESC Table Save/readback: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42547865785
+- Source CI: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548056437
+- Build: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548269209 (BUILD_SUCCESS, DEPLOY_READY PASS)
+- Deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548344975 (SUCCESS)
+- Production QA: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548911873 (SUCCESS, screenshots artifact 13644476593)
+- Asset GitHub blob SHA: 6895019acf7683f76ae3ce4ab4ba44f341d66562, source SHA256 d9bf3fe3855df0fa49381bf356c8b91ba1a56aed5a5eb3e02640866bad111d71
 
 ## Full intended user-visible reply
 
-## Đã hoàn tất phần giao diện và WordPress
+**Đã upload lên ESC Table rồi bạn.** WordPress xác nhận lưu thành công:
 
-- **11 menu cha:** nhấp vào tên chỉ mở/đóng menu con, không chuyển trang.
-- **11 mục “Tất cả”:** đã lưu thành menu con tùy chỉnh trong WordPress, nằm đầu mỗi nhóm và trỏ về URL cũ của menu cha.
-- **75 mục con cũ:** được giữ nguyên, đã sắp xếp lại thứ tự.
-- **Kiểm thử source:** PASS.
-- **Kiểm tra WordPress:** PASS — [Actions #42545042895](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545042895).
+- **Bảng:** `home_00`
+- **Media ID:** `82696`
+- **Desktop:** giữ nguyên 2 ảnh `cropped-banner-8-1.png` và `cropped-banner-6.png`
+- **Mobile:** thêm 1 banner mới, đặt `mobile = 1`
+- **Kiểm tra lưu và đọc lại:** PASS
 
-Commit Astro: [`282aac0a62bf`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/282aac0a62bf4dd2d860faaa927e5a55bab8aed5).
+Bằng chứng: [Actions #42547865785](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42547865785).
 
-Mình đang chuyển sang bước build production và kiểm thử giao diện thực tế.
+Mình đã bổ sung cách hiển thị ảnh dọc trên điện thoại và vùng nhấp “Khám phá ngay”. Phần còn lại là build production và kiểm thử giao diện thực tế.
 
-## Production đã triển khai thành công
+Bản cập nhật đã **build và deploy thành công lên production**, đúng commit Astro `1a835b579a23`.
 
-**BUILD_SUCCESS và DEPLOY_READY đều PASS.**
+- [Build #42548269209](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548269209): PASS
+- [Deploy #42548344975](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548344975): PASS
 
-- [Build #42545372518](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545372518)
-- [Deploy #42545446332](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545446332)
-- Production đã xác nhận đúng commit `282aac0a62bf`.
+Mình đang chạy lượt kiểm thử cuối trên desktop và điện thoại để xác nhận ảnh mobile hiển thị đúng, không mất hai banner desktop.
 
-Mình tiếp tục chạy kiểm thử Playwright chuyên biệt để xác nhận các nút menu cha, mục “Tất cả” và giao diện trên nhiều kích thước màn hình.
+**Giao diện đã PASS trên cả 6 viewport**: desktop 1440, 1024, 768, điện thoại ngang 844 và điện thoại dọc 390, 320 px.
 
-## Playwright production: PASS
+Playwright xác nhận:
 
-[Kiểm thử #42545625065](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545625065) đã thành công.
+- 2 banner desktop cũ vẫn hiển thị và chuyển slide bình thường.
+- Banner mobile mới được tải từ `/images/pages/aqua-thanh-xuan-mobile-hero-480w.webp`.
+- Ảnh dọc hiển thị không bị cắt và không gây tràn ngang.
+- Hàng mobile trong ESC Table đã được đọc lại đúng.
 
-Đã xác minh:
+Còn một phép kiểm tra Media Library bị từ chối do thiếu nonce xác thực trong script QA. Mình sẽ sửa phần xác thực này và chạy lại để có kết quả PASS toàn bộ.
 
-- Menu cha không chuyển trang khi nhấp vào tên, cả desktop và mobile.
-- Mục **“Tất cả”** nằm đầu cả 11 menu con, đường dẫn đúng.
-- Cả 5 kích thước màn hình đều đạt kiểm thử.
-- Footer, Home_05 và bong bóng tư vấn vẫn hoạt động bình thường.
+## Kết quả cuối
 
-**Website đã được cập nhật:** https://aquathanhxuan.io.vn.
+Đã sửa phép kiểm tra nonce và chạy lại. [Playwright production #42548911873](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548911873) **PASS** toàn bộ: 6 viewport, 2 desktop + 1 mobile, WordPress Media ID 82696 và ESC Table readback. Banner mobile đang hiển thị trên [aquathanhxuan.io.vn](https://aquathanhxuan.io.vn); 2 banner desktop gốc được giữ nguyên.
 
-Checkpoint nghiệm thu: [2026-11-09 Header parent / Tất cả](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-header-parent-all-links.md).
+Checkpoint: [Home00 mobile banner](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-home00-mobile-banner.md).
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
