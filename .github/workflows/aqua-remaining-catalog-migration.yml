@@ -1,0 +1,110 @@
+name: Aqua verified products migration for nine remaining menus
+on:
+  push:
+    branches: [main]
+    paths:
+      - cms-requests/remaining-catalog-migration.json
+permissions:
+  contents: read
+concurrency:
+  group: aqua-remaining-catalog-writes
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 52
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile importer and inventory scripts before any CMS mutation
+        run: |
+          python3 -m py_compile scripts/aqua-remaining-catalog-inventory.py
+          python3 -m py_compile scripts/aqua-remaining-catalog-migrate.py
+      - name: Independent read-only source and target inventory
+        run: python3 scripts/aqua-remaining-catalog-inventory.py
+      - name: Block migration unless all 389 source IDs, types and category mapping verified
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('artifacts/aqua-remaining-catalog/inventory.json').read_text())
+          assert d['state']=='PASS',d['state']
+          assert d['unique_count']==389 and d['type_counts']=={'simple':389}
+          assert d['identity_conflicts']==0 and d['missing_target_category_count']==0
+          assert len(d['roots'])==9
+          print('AQUA_NINE_ROOTS_PREFLIGHT_PASS='+str(d['unique_count']),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-verified-source-manifest
+          path: artifacts/aqua-remaining-catalog/inventory.json
+          retention-days: 14
+          if-no-files-found: error
+  import:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        batch: [0,1,2,3,4,5,6,7,8,9,10,11,12]
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+      AQUA_BATCH_COUNT: '13'
+      AQUA_BATCH_INDEX: ${{ matrix.batch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: aqua-remaining-verified-source-manifest
+          path: artifacts/aqua-remaining-catalog
+      - name: Verify importer syntax
+        run: python3 -m py_compile scripts/aqua-remaining-catalog-migrate.py
+      - name: Import only the scoped, source-verified Product IDs in this batch
+        run: python3 scripts/aqua-remaining-catalog-migrate.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-product-batch-${{ matrix.batch }}
+          path: artifacts/aqua-remaining-migration/remaining-${{ matrix.batch }}.json
+          retention-days: 14
+          if-no-files-found: ignore
+  verify:
+    needs: import
+    runs-on: ubuntu-latest
+    timeout-minutes: 52
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read-after-write verify every source slug across all nine roots
+        run: python3 scripts/aqua-remaining-catalog-inventory.py
+      - name: Confirm 389 original Product slugs and categories exist
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('artifacts/aqua-remaining-catalog/inventory.json').read_text())
+          assert d['state']=='PASS'
+          assert d['unique_count']==389
+          assert d['unique_missing']==0,'Source Products still missing in target: '+str(d['unique_missing'])
+          assert d['identity_conflicts']==0 and d['missing_target_category_count']==0
+          missing=[x['slug'] for x in d['unique_products'] if x['missing_target_terms']]
+          assert not missing,'Category associations still missing: '+str(missing[:15])
+          print('AQUA_REMAINING_PRODUCT_INVENTORY_PASS=389',flush=True)
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-postimport-verification
+          path: artifacts/aqua-remaining-catalog/inventory.json
+          retention-days: 14
+          if-no-files-found: ignore
