@@ -57,6 +57,41 @@ const samples=[
     console.log('LIGHT_CARD_MEDIA_PASS='+JSON.stringify({slug:sample.slug,id:sample.id,width,naturalWidth:imageDetails.naturalWidth}));
     save();
    }
+   // A missing cover must be represented as a truthful neutral state, never
+   // a fabricated image or an unrelated default product placeholder.
+   for(const missing of [{slug:'odyssea',count:3},{slug:'xuanmailong',count:10}]){
+     const route='/san-pham/'+missing.slug;
+     const res=await page.goto(url+route,{waitUntil:'domcontentloaded',timeout:60000});
+     assert.equal(res?.status(),200,'Missing media category route '+route);
+     await page.locator('article[data-catalog-product]').first().waitFor({state:'visible',timeout:12000});
+     const labels=page.locator('article[data-catalog-product] [data-product-image-unavailable]');
+     const found=await labels.count();
+     assert.equal(found,missing.count,'Wrong number of honest image-unavailable labels '+missing.slug+' width='+width);
+     assert.equal(await page.locator('article[data-catalog-product] img[src*="/placeholders/product.webp"], article[data-catalog-product] img[srcset*="/placeholders/product.webp"]').count(),0,'Dummy product covers must not be rendered '+route);
+     const label=await labels.first().innerText();
+     assert.match(label,/Chưa có ảnh sản phẩm|Product image unavailable/);
+     const overflow=await page.evaluate(()=>Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth);
+     assert(overflow<=3,'Missing media category horizontal overflow '+route+' '+width);
+     await labels.first().scrollIntoViewIfNeeded();
+     const filename='missing-'+missing.slug+'-'+width+'.png';
+     await page.screenshot({path:dir+'/'+filename,fullPage:false});
+     report.checks.push({route,width,missingProductCovers:found,status:'EXPLICIT_MISSING_IMAGE'});
+     console.log('LIGHT_CATEGORY_MISSING_MEDIA_PASS='+JSON.stringify({slug:missing.slug,width,missingProductCovers:found}));
+     save();
+   }
+   const detail='/san-pham/dual-pro-t5ho-90100-2';
+   const detailResponse=await page.goto(url+detail,{waitUntil:'domcontentloaded',timeout:60000});
+   assert.equal(detailResponse?.status(),200,'Missing image Product detail route '+detail);
+   await page.locator('h1').first().waitFor({state:'visible',timeout:12000});
+   const missingDetail=page.locator('[data-product-image-unavailable]').first();
+   await missingDetail.waitFor({state:'visible',timeout:12000});
+   assert.match(await missingDetail.innerText(),/Chưa có ảnh sản phẩm|Product image unavailable/);
+   assert.equal(await page.locator('#product-main-image[src="/placeholders/product.webp"]').count(),0,'Detail must not show fabricated cover');
+   const detailShot='missing-detail-dual-pro-'+width+'.png';
+   await page.screenshot({path:dir+'/'+detailShot,fullPage:false});
+   report.checks.push({route:detail,width,status:'EXPLICIT_MISSING_IMAGE'});
+   console.log('LIGHT_PRODUCT_DETAIL_MISSING_MEDIA_PASS='+JSON.stringify({route:detail,width}));
+   save();
    assert.deepEqual(errors,[],'Browser runtime page errors width='+width);
    await ctx.close();
   }
