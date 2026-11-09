@@ -19,8 +19,7 @@ jobs:
       - run: node --check scripts/aquathanhxuan-category-layout-production-qa.cjs
       - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - run: node scripts/aquathanhxuan-category-layout-production-qa.cjs
-        env:
-          EXPECTED_ASTRO_SHA: ${{ fromJson(github.event.head_commit.message == '' && '{}' || '{}').sha || '29fc579c7c2a6041b14ac2f576032c62d4ec89dd' }}
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
