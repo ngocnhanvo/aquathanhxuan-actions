@@ -49,13 +49,22 @@ assert nonce,'Missing WP nonce'
 def api(url,method='GET'):
     return json.loads(raw(TARGET+url,method,headers={'X-WP-Nonce':nonce,'Accept':'application/json'}))
 items=api('/wp-json/wc/v3/products?status=any&per_page=100&slug='+SLUG)
-assert not items,'Product exists, do not clean up images used by commerce'
+assert isinstance(items,list) and len(items)<=1,'Ambiguous WooCommerce Product identity'
+product=items[0] if items else None
+if product:
+    metadata=product.get('meta_data') or []
+    source_ids=[str(x.get('value')) for x in metadata if x.get('key')=='_esc_origin_product_id']
+    assert not source_ids or source_ids==[str(PRODUCT_ID)],'Different product owns the exact slug'
+    assert RENAMED not in str(product.get('description') or '')+str(product.get('short_description') or ''),'Renamed media is in use by Product HTML'
 found=api('/wp-json/wp/v2/media?context=edit&per_page=100&search=kaokui2-300x300')
 candidates=[x for x in found if urllib.parse.urlparse(str(x.get('source_url') or '')).path.endswith('/'+RENAMED)]
 assert len(candidates)<=1,'Ambiguous renamed orphan'
 for asset in candidates:
     media_id=int(asset['id'])
     assert media_id>0 and int(asset.get('post') or 0)==0,'Media has been linked to content'
+    if product:
+        image_ids={int(i.get('id') or 0) for i in product.get('images') or []}
+        assert media_id not in image_ids,'Renamed media referenced by existing WooCommerce Product'
     timestamp=str(asset.get('date_gmt') or asset.get('date') or '')
     assert '2026-11-09T14:20:'<=timestamp<='2026-11-09T14:23:59','Media creation outside failed run window'
     path=urllib.parse.urlparse(str(asset.get('source_url') or '')).path
