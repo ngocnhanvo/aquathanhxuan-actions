@@ -1,0 +1,215 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "migrationRun": 42663313074,
+  "productionDataQaRun": 42684232514,
+  "productionBrowserQaRun": 42696378064,
+  "sourceDeferredAssetEvents": 36,
+  "uniqueDeferredSourceAssets": 20,
+  "uniqueSourceProductsInDeferredEvents": 20,
+  "targetProductsWithoutCoverInFinalQA": 19,
+  "notes": "Independent source asset issues from pilot and all 13 migration batches. A deferred source-media event does not itself mean its target Product currently lacks a cover. Full QA separately counted 19 target Products without cover and validated their source exception markers. Do not substitute media from other Products. Original site media HTTP 404 or no original image.",
+  "items": [
+    {
+      "source_id": 184,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-20T220456.211.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-20T220456.211.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (2)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 472,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-20T212727.622.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-20T212727.622.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (4)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 547,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-20T212426.604.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-20T212426.604.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (1)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 858,
+      "source_filename": null,
+      "source_url": null,
+      "error": "Source Store Product has no images",
+      "asset_type": "image",
+      "source_job": "pilot",
+      "attempt_count": 0,
+      "logOccurrences": 1
+    },
+    {
+      "source_id": 892,
+      "source_filename": "Thiet-ke-chua-co-ten-37.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-37.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (8)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 894,
+      "source_filename": "Thiet-ke-chua-co-ten-37.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-37.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (10)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 1084,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T201747.835.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-19T201747.835.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (5)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 1894,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T162106.538.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-19T162106.538.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (9)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 1901,
+      "source_filename": "19.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/19.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (3)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 1934,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T161756.698.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-19T161756.698.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (10)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 1946,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T160340.137.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-19T160340.137.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (9)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 1947,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T160340.137.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/06/Thiet-ke-chua-co-ten-2024-05-19T160340.137.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (10)",
+      "attempt_count": 1,
+      "logOccurrences": 1
+    },
+    {
+      "source_id": 2814,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-20T221514.687.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/07/Thiet-ke-chua-co-ten-2024-05-20T221514.687.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (6)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 2818,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-20T221514.687.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/07/Thiet-ke-chua-co-ten-2024-05-20T221514.687.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (10)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 2820,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-20T221014.754.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/07/Thiet-ke-chua-co-ten-2024-05-20T221014.754.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (12)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 2859,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T142037.296.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/07/Thiet-ke-chua-co-ten-2024-05-19T142037.296.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (12)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 2870,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T141653.086.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/07/Thiet-ke-chua-co-ten-2024-05-19T141653.086.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (10)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 3134,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T121756.178.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/09/Thiet-ke-chua-co-ten-2024-05-19T121756.178.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (1)",
+      "attempt_count": 1,
+      "logOccurrences": 1
+    },
+    {
+      "source_id": 3178,
+      "source_filename": "Thiet-ke-chua-co-ten-2024-05-19T115829.070.png",
+      "source_url": "https://aquathanhxuan.com/wp-content/uploads/2017/10/Thiet-ke-chua-co-ten-2024-05-19T115829.070.png",
+      "error": "HTTP 404",
+      "asset_type": "image",
+      "source_job": "import (6)",
+      "attempt_count": 1,
+      "logOccurrences": 2
+    },
+    {
+      "source_id": 3321,
+      "source_filename": null,
+      "source_url": null,
+      "error": "Source Store Product has no images",
+      "asset_type": "image",
+      "source_job": "import (6)",
+      "attempt_count": 0,
+      "logOccurrences": 1
+    }
+  ]
+}
