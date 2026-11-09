@@ -343,11 +343,41 @@ def migrate_one(source_id, info):
         if not needed.issubset(old_categories):
             updates['categories']=[{'id':c} for c in sorted(old_categories|needed)]
         if to_add: updates['meta_data']=to_add
+        # Existing products may have been imported before source content/gallery
+        # migration was introduced. Only fill genuinely absent content.
+        if not str(existing.get('description') or '').strip() and str(src.get('description') or '').strip():
+            updates['description']=localize_html(src['description'],source_id)
+        if not str(existing.get('short_description') or '').strip() and str(src.get('short_description') or '').strip():
+            updates['short_description']=localize_html(src['short_description'],source_id)
+        existing_images=existing.get('images') or []
+        existing_media_names=set()
+        for item in existing_images:
+            current_src=str(item.get('src') or '')
+            filename=os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(current_src).path))
+            if filename:existing_media_names.add(filename)
+        append_images=[]
+        for item in src.get('images') or []:
+            uri=str(item.get('src') or '')
+            if not uri: continue
+            source_name=os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(uri).path))
+            if source_name in existing_media_names:continue
+            media_id,_=ensure_media(uri,item.get('alt') or name,source_id)
+            append_images.append({'id':media_id,'alt':item.get('alt') or name})
+            existing_media_names.add(source_name)
+        if append_images:
+            # Preserve the existing cover and its custom ordering/alt.
+            updates['images']=[{'id':int(x['id']),'alt':str(x.get('alt') or '')} for x in existing_images]+append_images
         if updates:
             existing=api('/wp-json/wc/v3/products/'+str(existing['id']),method='POST',obj=updates)
             if 'categories' in updates:journal['category_linked']+=1
         target_id=int(existing['id'])
         ensure_locale(target_id)
+        if updates.get('description') or updates.get('short_description') or updates.get('images'):
+            print('BRAND_PRODUCT_ENRICHED='+json.dumps({
+              'id':target_id,'slug':slug,'description':bool(updates.get('description')),
+              'short_description':bool(updates.get('short_description')),
+              'gallery_added':len(append_images)
+            },ensure_ascii=False),flush=True)
         result='reused'
         journal['reused']+=1
     else:
