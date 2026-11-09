@@ -425,11 +425,29 @@ def ensure_media(src,alt,source_id,source_media_id=None):
             print('LIGHT_MEDIA_MONTH_DEFERRED='+json.dumps({
               'source_id':source_id,'url':src,'error':str(month_error)[:240]},ensure_ascii=False),flush=True)
         if source_media_id is None:
-            # Inline HTML references a resized source image, not a Woo cover.
-            # Resolve only the exact WordPress media attachment that owns this
-            # size. Its full-size asset is a true source image, not a guess.
             filename=os.path.basename(urllib.parse.urlparse(src).path)
-            stem=re.sub(r'-[0-9]+x[0-9]+
+            stem=re.sub(r'-[0-9]+x[0-9]+\Z','',os.path.splitext(filename)[0])
+            entries=get_json(SOURCE+'/wp-json/wp/v2/media?search='+urllib.parse.quote(stem)+'&per_page=100')
+            matches=[entry for entry in entries if src==entry.get('source_url') or
+                any(size.get('source_url')==src for size in
+                    (entry.get('media_details',{}).get('sizes') or {}).values())]
+            if len(matches)!=1:
+                raise original_error
+            media=matches[0]
+            source_media_id=int(media['id'])
+            print('LIGHT_INLINE_MEDIA_ATTACHMENT_VERIFIED='+json.dumps({
+                'source_id':source_id,'inline_url':src,'media_id':source_media_id
+            },ensure_ascii=False),flush=True)
+        else:
+            media=get_json(SOURCE+'/wp-json/wp/v2/media/'+str(source_media_id))
+        assert int(media.get('id',0))==int(source_media_id),'Source attachment identity changed'
+        if not str(media.get('source_url','')).startswith(SOURCE+'/wp-content/uploads/'):
+            raise original_error
+        sizes=media.get('media_details',{}).get('sizes') or {}
+        variants=[]
+        full_url=str(media.get('source_url') or '')
+        if full_url.startswith(SOURCE+'/wp-content/uploads/') and full_url!=src:
+            variants.append(full_url)
         for name in ('large','woocommerce_single','medium_large','medium','woocommerce_thumbnail'):
             info=sizes.get(name) or {}
             url=str(info.get('source_url') or '')
