@@ -1,5 +1,6 @@
 name: Aqua Thanh Xuân Visual Builder contracts (NO BUILD OR DEPLOY)
 # Verify direct red/blue Product item pick in nested source with no duplicate ID-list UI.
+# Also guard the consultation icon/stacking and click-to-open WordPress Header submenus.
 on:
   push:
     branches: [main]
