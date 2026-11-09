@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aquathanhxuan-lighthouse-diagnostic.yml'
+      - 'qa-requests/home00-lcp-20261109.json'
 
 permissions:
   contents: read
