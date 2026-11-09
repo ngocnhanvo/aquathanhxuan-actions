@@ -13,6 +13,12 @@
   "productionDeployRun": 42689171599,
   "mode": "PRODUCTION_BROWSER_QA",
   "expectedChecks": 146,
-  "scope": "Source oracle against nine top-level catalog roots, nine representative product details, 46 original child categories, six extra menu-only categories and three source-backed special product detail pages; desktop and mobile, no CMS writes",
-  "attempt": 1
+  "scope": "146 production browser checks with strict source SKU provenance and the four independently verified preexisting Sunsun Lọc treo target-category links, no CMS writes",
+  "attempt": 2,
+  "previousRun": 42692639227,
+  "verifiedDiagnosticRuns": [
+    42694599187,
+    42695363482
+  ],
+  "reason": "First QA failed only because source-direct membership omitted four valid preexisting WordPress category links; full 46 child audit validated all extras"
 }
