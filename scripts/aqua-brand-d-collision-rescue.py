@@ -286,6 +286,98 @@ def ensure_media_exact(src,alt,source_id):
     print('BRAND_MEDIA_CREATED='+json.dumps({'id':media_id,'filename':filename,'source_id':source_id}),flush=True)
     return media_id,path
 
+def ensure_media_in_original_month(src,alt,source_id):
+    """Keep original filename and full-resolution bytes in its source year/month.
+
+    WP REST core accepts a backdated non-Page parent post's date as the upload
+    month. Create a scoped temporary draft and always remove it after upload.
+    """
+    uri,filename=image_uri(src,source_id)
+    parsed=urllib.parse.urlparse(uri)
+    match=re.fullmatch(r'/wp-content/uploads/([0-9]{4})/([0-9]{2})/([^/]+)',parsed.path)
+    if not match or match.group(3)!=filename:
+        raise AssetDeferred(uri,filename,source_id,0,'Unverified original media path')
+    year,month=match.group(1),match.group(2)
+    if not (2015<=int(year)<=2026 and 1<=int(month)<=12):
+        raise AssetDeferred(uri,filename,source_id,0,'Invalid year/month source path')
+    original_bytes=retrieve_asset(uri,filename,source_id)
+    digest=hashlib.sha256(original_bytes).hexdigest()
+    expected_path=f'/wp-content/uploads/{year}/{month}/{filename}'
+    # Idempotent: reusable only if BOTH path and SHA256 match the source.
+    found=api('/wp-json/wp/v2/media?context=edit&per_page=100&search='+urllib.parse.quote(os.path.splitext(filename)[0]))
+    assert isinstance(found,list),'Media query invalid'
+    for existing in found:
+        target_path=urllib.parse.urlparse(str(existing.get('source_url') or '')).path
+        if target_path!=expected_path:
+            continue
+        actual=retrieve_asset(urllib.parse.urljoin(DEST+'/',target_path),filename,source_id)
+        if hashlib.sha256(actual).hexdigest()!=digest:
+            raise AssetDeferred(uri,filename,source_id,1,'Existing same-path Media has different bytes; never overwrite')
+        mid=int(existing['id'])
+        image_cache[uri]=(mid,target_path)
+        print('BRAND_MEDIA_ORIGINAL_MONTH_REUSED='+json.dumps({'source_id':source_id,
+              'target_media_id':mid,'target_path':target_path}),flush=True)
+        return mid,target_path
+    temp_id=None
+    media_id=None
+    succeeded=False
+    try:
+        temp=api('/wp-json/wp/v2/posts',method='POST',obj={
+            'title':'[TEMP AQUA MEDIA] '+year+'-'+month+' '+str(source_id),
+            'slug':'temp-aqua-media-'+year+month+'-'+str(source_id),
+            'date':year+'-'+month+'-01T12:00:00',
+            'status':'draft',
+            'acf':{'key':'ssr-post','action':'PostDetails'},
+        })
+        temp_id=int(temp['id'])
+        assert temp_id>0 and temp.get('status')=='draft','Temporary post was not saved as draft'
+        confirmed=api('/wp-json/wp/v2/posts/'+str(temp_id)+'?context=edit')
+        assert str(confirmed.get('date','')).startswith(year+'-'+month+'-01'), 'Backdated temporary post date did not persist'
+        upload=api('/wp-json/wp/v2/media?post='+str(temp_id),method='POST',
+            raw=original_bytes,headers={
+              'Content-Type':mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+              'Content-Disposition':'attachment; filename="'+filename+'"',
+              'Content-MD5':hashlib.md5(original_bytes).hexdigest()
+            })
+        media_id=int(upload['id'])
+        actual_path=urllib.parse.urlparse(str(upload.get('source_url') or '')).path
+        if actual_path!=expected_path:
+            # Remove only the attachment just created by this task, not existing media.
+            api('/wp-json/wp/v2/media/'+str(media_id)+'?force=true',method='DELETE')
+            media_id=None
+            raise AssetDeferred(uri,filename,source_id,1,
+                'WordPress changed original filename/path: '+actual_path)
+        uploaded=retrieve_asset(urllib.parse.urljoin(DEST+'/',actual_path),filename,source_id)
+        if hashlib.sha256(uploaded).hexdigest()!=digest:
+            api('/wp-json/wp/v2/media/'+str(media_id)+'?force=true',method='DELETE')
+            media_id=None
+            raise AssetDeferred(uri,filename,source_id,1,'Uploaded media SHA256 differs; deleted own upload')
+        api('/wp-json/wp/v2/media/'+str(media_id),method='POST',obj={'post':0,'alt_text':alt or ''})
+        detached=api('/wp-json/wp/v2/media/'+str(media_id)+'?context=edit')
+        assert int(detached.get('post') or 0)==0, 'Uploaded media still attached to temporary draft'
+        image_cache[uri]=(media_id,actual_path)
+        journal.setdefault('source_media_original_month',[]).append({
+          'source_id':source_id,'source_url':uri,'source_sha256':digest,
+          'target_media_id':media_id,'target_path':actual_path,
+          'temporary_post_id':temp_id,'mode':'PRESERVED_SOURCE_FILENAME_AND_BYTES'})
+        save()
+        succeeded=True
+        print('BRAND_MEDIA_SOURCE_MONTH_UPLOADED='+json.dumps({
+          'source_id':source_id,'source_file':filename,'source_month':year+'-'+month,
+          'target_media_id':media_id,'target_path':actual_path}),flush=True)
+        return media_id,actual_path
+    finally:
+        if temp_id is not None:
+            try:
+                deleted=api('/wp-json/wp/v2/posts/'+str(temp_id)+'?force=true',method='DELETE')
+                assert bool(deleted.get('deleted')), 'Temporary draft delete was not acknowledged'
+                print('BRAND_TEMP_POST_CLEANUP_PASS='+str(temp_id),flush=True)
+            except Exception as cleanup_error:
+                journal.setdefault('temp_cleanup_pending',[]).append({
+                  'post_id':temp_id,'source_id':source_id,'error':str(cleanup_error)[:250]})
+                save()
+                raise RuntimeError('TEMP_POST_CLEANUP_FAILED id='+str(temp_id)) from cleanup_error
+
 source_media_regex=re.compile(r'https?://aquathanhxuan\.com/wp-content/uploads/[^\s"\'<>]+',re.I)
 # Use an actual resized file created and publicly hosted by original WordPress
 # only when the source full filename collides with a *different* target asset.
@@ -294,8 +386,18 @@ def ensure_media(src,alt,source_id,source_media_id=None):
     try:
         return ensure_media_exact(src,alt,source_id)
     except AssetDeferred as original_error:
-        if 'different' not in str(original_error).lower() or source_media_id is None:
+        if 'different' not in str(original_error).lower():
             raise
+        # The original media filename collides globally in the destination,
+        # but the historical year/month folder may be free. Try exact bytes
+        # there before substituting the original site's resized variants.
+        try:
+            return ensure_media_in_original_month(src,alt,source_id)
+        except AssetDeferred as month_error:
+            print('BRAND_MEDIA_MONTH_DEFERRED='+json.dumps({
+              'source_id':source_id,'url':src,'error':str(month_error)[:240]},ensure_ascii=False),flush=True)
+        if source_media_id is None:
+            raise original_error
         media=get_json(SOURCE+'/wp-json/wp/v2/media/'+str(source_media_id))
         assert int(media.get('id',0))==int(source_media_id), 'Source attachment identity changed'
         if not str(media.get('source_url','')).startswith(SOURCE+'/wp-content/uploads/'):
