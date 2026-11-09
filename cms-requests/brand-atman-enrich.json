@@ -1,0 +1,9 @@
+{
+  "scope": "Enrich 9 existing Atman product records only: fill empty description, empty short description, append source gallery images, preserve price and cover",
+  "targetCategoryId": 1793,
+  "sourceCategoryId": 2162,
+  "source": "https://aquathanhxuan.com",
+  "writeScope": "existing 9 product descriptions/gallery and missing local media",
+  "sourceAuditRun": 42583378280,
+  "afterCurrentBrandMigration": true
+}
