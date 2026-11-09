@@ -1,0 +1,68 @@
+name: Aqua Product logs pagination contract regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/product-log-pagination.json'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source-php
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source-astro
+          persist-credentials: false
+      - name: Pin exact source revisions from one QA request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,re,subprocess
+          j=json.load(open('qa-requests/product-log-pagination.json'))
+          assert j['project']=='aquathanhxuan.com' and j['mode']=='unit-only'
+          for key,repo in [('php_sha','source-php'),('astro_sha','source-astro')]:
+              sha=j.get(key,'')
+              assert re.fullmatch('[0-9a-f]{40}',sha),key
+              actual=subprocess.check_output(['git','-C',repo,'rev-parse','HEAD'],text=True).strip()
+              assert actual==sha,(key,sha,actual)
+          print('AQUA_PRODUCT_LOG_UNIT_SOURCE_SHA_PASS')
+          PY
+      - name: PHP paged endpoint syntax and backward compatibility regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l source-php/wp-content/plugins/github-trigger/products/endpoint.php
+          php -l source-php/wp-content/plugins/github-trigger/tests/product-log-pagination.test.php
+          php source-php/wp-content/plugins/github-trigger/tests/product-log-pagination.test.php
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source-astro/pnpm-lock.yaml
+      - name: Verify Astro transport with isolated Vitest regressions
+        working-directory: source-astro
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm exec vitest run src/lib/wordpress/products/getProductLogsPaged.test.ts
