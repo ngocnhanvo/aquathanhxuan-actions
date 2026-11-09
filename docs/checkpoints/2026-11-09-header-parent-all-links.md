@@ -11,7 +11,7 @@ Status: IN_PROGRESS. Preserve existing deployed state until WordPress menu order
 - Astro master `282aac0a62bf4dd2d860faaa927e5a55bab8aed5` (parent anchor removed for nodes with children in Desktop.astro and MobileBranch.astro; whole label is one toggle; leaf links still navigate; footerCmsContract.test.ts covers).
 - WordPress PHP master unchanged `dcec014aec735061bcc8af1060a6cd5d64766243`.
 - Source contract CI Actions run [42544643430](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42544643430): SUCCESS (all 4 jobs).
-- Astro source not yet built/deployed. Production still at `cebdd48dd73a41ba130cbbeddda8ae5252621730` pending final CMS/QA.
+- Astro production source `282aac0a62bf4dd2d860faaa927e5a55bab8aed5` has been built/deployed; WordPress build [42545372518](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545372518) SUCCESS with `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS`, source SHA confirmed; deployment [42545446332](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545446332) SUCCESS.
 
 ## WordPress CMS
 - Real WordPress Header VI native menu ID 1778, eleven parents. Scoped writer `scripts/aquathanhxuan-header-all-children.cjs`, workflow `aquathanhxuan-header-all-children.yml`.
@@ -24,8 +24,8 @@ Status: IN_PROGRESS. Preserve existing deployed state until WordPress menu order
 
 ## Remaining steps
 1. DONE: WordPress CMS run 42545042895 PASS with all 11 first-child Tất cả items and 75 original children retained.
-2. IN PROGRESS: production build request `build-requests/2026-11-09-header-all-282aac0.json` was created, workflow [42545372518](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545372518) is running. Watch exact build/deploy conclusion; do not trigger again.
-3. Production QA script `scripts/aquathanhxuan-footer-consultation-home05-qa.cjs` already updated for new SHA 282aac0a and expects 11 Tất cả items. Trigger via updated `qa-requests/footer-consultation-20261109.json` only after deploy. Check Playwright 5 viewports, desktop/mobile toggle no navigation, all links, Footer/Home05 unaffected.
+2. DONE: production build/deploy 42545372518 / 42545446332 PASS for exact Astro SHA. No rerun.
+3. IN PROGRESS: QA request `qa-requests/footer-consultation-20261109.json` updated and [production Playwright run 42545625065](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545625065) is running. Script checks 11 Tất cả children, parent button-only navigation, 5 viewports, Footer/Home05. Investigate if failure, do not rerun blindly.
 4. Update this checkpoint with verified SHA, run IDs and outcomes, then write `chatgpt/latest-response.md` in this Actions repo. No repeat of successful CMS writes/builds.
 
 Chế độ code: auto-build
