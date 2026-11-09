@@ -18,7 +18,7 @@
     "Đèn"
   ],
   "requestedAt": "2026-11-09",
-  "attempt": 2,
-  "mode": "TAXONOMY_ONLY",
-  "reason": "Read exact legacy/source top-level terms and target taxonomy before linking nine menu roots"
+  "attempt": 3,
+  "mode": "FULL",
+  "reason": "Exact nine source and target root slugs verified by taxonomy-only run 42660517291; compare child product types and existing slugs"
 }
