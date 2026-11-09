@@ -3,5 +3,7 @@
   "environment": "production",
   "source_sha": "5f158c4ea8d214f2f83f94dc2285032a81e983f8",
   "frontend_host": "aquathanhxuan.io.vn",
-  "purpose": "Purchase CTA before description and responsive sticky purchase bar"
+  "purpose": "Purchase CTA before description and responsive sticky purchase bar",
+  "attempt": 2,
+  "note": "Retry once after pre-trigger WordPress admin login timeout; no production build was dispatched by previous run"
 }
