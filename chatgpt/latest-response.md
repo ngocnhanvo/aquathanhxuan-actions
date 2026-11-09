@@ -10,6 +10,7 @@
 - Source/target parity 42639768313 success (59/59); native routes 42639822903 success (59 routes).
 - Production QA 42641456578 success (24/24), card media 42642675336 success (8/8).
 - Product data and website DONE; 13 irrecoverable source cover files still ASSET_DEFERRED.
+- Source media actual-location audit: 42643781321 completed/success, attachments 266690 and 266681 return HTTP404 both in 2017/09 and 2024/05.
 - Trạng thái báo cáo: PARTIAL — chưa hoàn tất phần ảnh nguồn.
 
 ## Nội dung phản hồi gửi người dùng
@@ -22,7 +23,7 @@
 
 [Playwright QA #42641456578](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42641456578) **PASS 24/24** (8 danh mục và 4 trang chi tiết, desktop/mobile). [QA ảnh lazy loading #42642675336](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42642675336) **PASS 8/8**, ảnh của các sản phẩm có ảnh nguồn thật tải thành công khi cuộn đến card.
 
-**Còn 13 ảnh nguồn chưa thể phục hồi**: 3 sản phẩm nguồn không có ảnh, 10 sản phẩm có file ảnh nguồn trả HTTP 404. Đã tạo sản phẩm thật, không gán nhầm ảnh hay bịa placeholder và đánh dấu `ASSET_DEFERRED`. Khi ảnh nguồn được khôi phục hoặc bạn có ảnh gốc, có thể nhập tiếp đúng 13 bản ghi mà không nhập lại 59 sản phẩm. Danh sách ID và URL ảnh lỗi lưu tại [light-media-deferred.json](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-light-media-deferred.json).
+**Còn 13 ảnh nguồn chưa thể phục hồi**: 3 sản phẩm nguồn không có ảnh, 10 sản phẩm có file ảnh nguồn trả HTTP 404. Đã kiểm tra thêm hai attachment gốc (ID 266690 và 266681); cả đường dẫn theo metadata 2017/09 lẫn thư mục theo ngày gốc 2024/05 đều trả 404 ([audit #42643781321](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42643781321)). Đã tạo sản phẩm thật, không gán nhầm ảnh hay bịa placeholder và đánh dấu `ASSET_DEFERRED`. Khi ảnh nguồn được khôi phục hoặc bạn có ảnh gốc, có thể nhập tiếp đúng 13 bản ghi mà không nhập lại 59 sản phẩm. Danh sách ID và URL ảnh lỗi lưu tại [light-media-deferred.json](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-light-media-deferred.json).
 
 Checkpoint đầy đủ: [light-catalog-import.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-light-catalog-import.md).
 
