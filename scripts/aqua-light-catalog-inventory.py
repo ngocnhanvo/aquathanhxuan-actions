@@ -30,12 +30,12 @@ payload=urllib.parse.urlencode({'log':username,'pwd':password,'wp-submit':'Log I
 dashboard=opener.open(urllib.request.Request(DEST+'/wp-login.php',data=payload,headers={'Content-Type':'application/x-www-form-urlencoded'}),timeout=65).read().decode('utf-8','replace')
 assert 'wp-admin-bar-my-account' in dashboard,'Destination WordPress login failed'
 nonce=''
-m=re.search(r'wpApiSettings\\s*=\\s*(\\{.*?\\})\\s*;',dashboard,re.S)
+m=re.search(r'wpApiSettings\s*=\s*(\{.*?\})\s*;',dashboard,re.S)
 if m:
     try:nonce=json.loads(m.group(1)).get('nonce','')
     except json.JSONDecodeError:pass
 if not nonce:
-    m=re.search(r'"nonce"\\s*:\\s*"([A-Za-z0-9]+)"',dashboard)
+    m=re.search(r'"nonce"\s*:\s*"([A-Za-z0-9]+)"',dashboard)
     nonce=m.group(1) if m else ''
 assert nonce,'Missing authorized WP REST nonce'
 def target(path):return json.loads(get(DEST+path,{'X-WP-Nonce':nonce}))
