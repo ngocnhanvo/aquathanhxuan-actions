@@ -91,6 +91,17 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - QA script đã sửa so **mọi URL ảnh nguồn duy nhất + filename** với WordPress target, vẫn fail nếu thiếu một ảnh duy nhất. Workflow test lại [42596794623](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42596794623). Production Astro không thay đổi; không build lại khi chỉ test sửa.
 - QA vẫn phải kiểm tra 20 brand, 157 memberships, Product detail cho từng URL, layout/banner/sort/recent, 1440/390px và ảnh nguồn exception.
 
+## QA ảnh gallery sau deploy — 17:02–17:05, 09/11/2026 (Asia/Ho_Chi_Minh)
+
+- [QA production 42595077807](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42595077807) **BUILD/UPLOAD/ACTIVATION PASS** ở Astro SHA `bc1ebedbe4ed0df5dd180c8f3fa38debc9e9b62d`; không build lại cho dữ liệu WordPress nếu không cần.
+- [QA 42596794623](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42596794623) **FAIL** có thật tại `hanging-kits-bo-kit-treo-den-wrgb2-pro-chihiros`, nguồn 3 ảnh duy nhất nhưng đích 1. Atman duplicate-source-array QA đã khắc phục bằng unique source filenames (audit 42596581622).
+- Inventory độc lập [42597184215](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42597184215) PASS xác nhận `157/157` sản phẩm đúng danh mục/giá; 20 categories. Chỉ **6 sản phẩm có 9 ảnh gallery nguồn thật còn thiếu** ngoài 3 ngoại lệ cũ:
+  - Chihiros source Product `267097`: thiếu `Thiet-ke-chua-co-ten-58.png`, `Thiet-ke-chua-co-ten-60.png`; `267093`: thiếu `Thiet-ke-chua-co-ten-59.png`, `Thiet-ke-chua-co-ten-60.png`.
+  - Dennerle `234252`: thiếu `Thiet-ke-chua-co-ten-85.png`; `36878`: thiếu `Thiet-ke-chua-co-ten-85.png`, `ScapersSoil_DENNERLE_AQUA-THANH-XUAN-1.jpg`; `15166`: thiếu `Thiet-ke-chua-co-ten-2024-05-18T160104.453.png`; `15117`: thiếu `Thiet-ke-chua-co-ten-2024-05-18T160124.275.png`.
+  - 3 ngoại lệ nguồn đã xác minh: Product 3178 ISTA ảnh nguồn HTTP404, Product 184 Seachem ảnh nguồn HTTP404; Product 15280 JECOD Store API thêm file không nằm trong gallery công khai và bị filename collision khác hash; không thay bằng ảnh giả.
+- Script phục hồi idempotent `scripts/aqua-brand-catalog-collision-rescue.py` thêm profile khóa chặt `brand-gallery-six` với 6 ID và danh mục `thuong-hieu-chihiros,thuong-hieu-dennerle`; giữ nguyên cover, không ghi đè Media khác hash; sử dụng ảnh gốc theo thư mục tháng/năm nếu cần; dọn nháp tạm sau upload.
+- Writer [42598203773](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42598203773) **IN_PROGRESS** tại thời điểm checkpoint. **Không tuyên bố pass** trước khi log `BRAND_MIGRATION_RESULT` `expected:6, failed:0`. Kế tiếp: kiểm kê lại riêng gallery hoặc inventory source/target, chạy lại `qa-requests/brand-catalog-production.json` QA toàn diện desktop 1440/mobile 390, xử lý các lỗi tiếp theo, chốt `QA_PASS` nếu thực sự pass.
+
 ## Chốt tiến độ
 
 - `SOURCE_INVENTORY_PASS`: Có.
