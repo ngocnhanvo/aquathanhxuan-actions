@@ -468,7 +468,7 @@ def localize_html(value,source_id,source_media_by_url=None):
         except AssetDeferred as exc:
             note_source_asset(source_id,exc.record)
             # Preserve all product copy; remove only broken source <img> tags.
-            content=re.sub(r'<img\\b[^>]*>',lambda match: '' if canonical in html.unescape(match.group(0)) else match.group(0),content,flags=re.I)
+            content=re.sub(r'<img\b[^>]*>',lambda match: '' if canonical in html.unescape(match.group(0)) else match.group(0),content,flags=re.I)
             content=content.replace(uri,'')
     return content
 
