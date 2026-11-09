@@ -22,6 +22,11 @@ const woo=await page.request.get(WP+'/wp-json/wc/v3/products?slug='+slug,{header
 assert.equal(raw.status(),200,'Raw WP '+slug);assert.equal(woo.status(),200,'Woo '+slug);
 const a=(await raw.json())[0],b=(await woo.json())[0];
 assert(a&&b,'Missing product '+slug);
+assert.equal(a.regular_price,b.regular_price,'Raw WordPress regular_price does not match WooCommerce for '+slug);
+assert.equal(a.stock_status,b.stock_status,'Raw WordPress stock_status does not match WooCommerce for '+slug);
+console.log('AQUA_PRODUCT_REST_LIVE_PARITY_PASS='+JSON.stringify({
+ slug,id:a.id,regularPrice:a.regular_price,stockStatus:a.stock_status
+}));
 const keys=Object.keys(a).filter(k=>/price|stock|status|currency|sale|regular|manage|product_type|type|acf|rest|meta/i.test(k));
 const sample=Object.fromEntries(keys.map(k=>[k,a[k]]));
 const limited={slug,id:a.id,rawKeys:keys,raw:sample,woo:{id:b.id,price:b.price,regular_price:b.regular_price,sale_price:b.sale_price,on_sale:b.on_sale,stock_status:b.stock_status,manage_stock:b.manage_stock,stock_quantity:b.stock_quantity,backorders:b.backorders,backorders_allowed:b.backorders_allowed,type:b.type,currency:b.currency}};
