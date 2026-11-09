@@ -1,0 +1,39 @@
+name: Aqua Home00 mobile Media upload and native ESC Table update
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-home00-mobile-upload.yml'
+      - 'scripts/aquathanhxuan-home00-mobile-upload.cjs'
+permissions:
+  contents: read
+concurrency:
+  group: aquathanhxuan-home00-mobile-cms
+  cancel-in-progress: false
+jobs:
+  upload-and-link:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aquathanhxuan-home00-mobile-upload.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Upload verified image then author one mobile-only hero row
+        run: node scripts/aquathanhxuan-home00-mobile-upload.cjs
+      - name: Save scoped before-and-after evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-home00-mobile-media-cms
+          path: artifacts/home00-mobile-upload/
+          if-no-files-found: ignore
+          retention-days: 7
