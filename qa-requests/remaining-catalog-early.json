@@ -6,10 +6,10 @@
   "scope": "Read-only independent validation of batch 9 against live original Product data",
   "sourceMigrationRun": 42663313074,
   "batches": [
-    10
+    11
   ],
-  "attempt": 5,
-  "reason": "Import batch 10 completed success in run 42663313074. Read-only source/target price, category, stock, image exceptions and SEO parity",
+  "attempt": 6,
+  "reason": "Batch 11 imported successfully; verify source vs WordPress data while final batch 12 is running",
   "verifiedRuns": [
     42675861683
   ]
