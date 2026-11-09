@@ -12,7 +12,7 @@
   "sourceProducts": 157,
   "sourceCategoryCount": 20,
   "verifyAfter": "Published build marker matches pinned Astro SHA, brand catalogue QA",
-  "buildRequest": 3,
+  "buildRequest": 4,
   "reason": "Publish verified WordPress gallery fixes to Astro SSR cms-products.json build snapshot",
   "galleryRestoreRun": 42598203773,
   "galleryAuditRun": 42598746988,
@@ -27,5 +27,12 @@
     ]
   },
   "retryReason": "Previous dispatch 42599186749 reported createDispatchEvent success but zero new repository_dispatch runs exist after checking GitHub run list; exactly one replay with same site_domain, SHA and pipeline",
-  "previousDispatchRun": 42599186749
+  "previousDispatchRun": 42599186749,
+  "triggerTransport": "Use SOURCE_REPO_PAT for createDispatchEvent; previous two GITHUB_TOKEN triggers returned success but no production workflow run",
+  "targetPipeline": "aquathanhxuan-production-deploy.yml",
+  "previousDispatchRuns": [
+    42599186749,
+    42599487661
+  ],
+  "require": "New repository_dispatch workflow run ID, not just dispatch trigger success"
 }
