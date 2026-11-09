@@ -6,5 +6,6 @@
   "slug": "den-kaokui-70w-pro-2",
   "write_scope": "Verify/remove only 2026-11-09 failed-run renamed orphan if source byte hash matches, then import exact Product with original basename/year-month; no other Product writes",
   "sourceRun": 42632639554,
-  "attempt": 1
+  "attempt": 2,
+  "retry_reason": "First attempt failed in read-only source image lookup before any write; include verified Product description image URL"
 }
