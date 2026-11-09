@@ -13,10 +13,23 @@ const titles=new Set([
 const time=()=>Date.now();
 (async()=>{
  assert(/^[0-9a-f]{40}$/.test(expectedSha||''),'Expected exact Astro SHA');
- const r=await fetch(origin+'/aquathanhxuan-staging-build.json?t='+time(),{headers:{'Cache-Control':'no-cache'}});
- assert.equal(r.status,200,'Production marker');
- const marker=await r.json();
- assert.equal(marker.commit,expectedSha,'Deployed Astro commit mismatch');
+ const markerDeadline=Date.now()+8*60*1000;
+ let marker=null;
+ let lastMarker='unavailable';
+ while(Date.now()<markerDeadline){
+   try{
+     const r=await fetch(origin+'/aquathanhxuan-staging-build.json?t='+time(),{headers:{'Cache-Control':'no-cache'},signal:AbortSignal.timeout(14000)});
+     if(r.ok){
+       marker=await r.json();
+       lastMarker=String(marker?.commit||'unknown');
+       if(lastMarker===expectedSha&&marker.branch==='master'&&marker.target==='aquathanhxuan.io.vn')break;
+     }else lastMarker='HTTP '+r.status;
+   }catch(e){lastMarker=String(e.message||e).slice(0,160)}
+   console.log('ATMAN_DEPLOY_READINESS_WAIT expected='+expectedSha+' actual='+lastMarker);
+   await new Promise(resolve=>setTimeout(resolve,15000));
+ }
+ assert(marker && marker.commit===expectedSha && marker.branch==='master' && marker.target==='aquathanhxuan.io.vn',
+   'DEPLOY_READY_TIMEOUT expected='+expectedSha+' actual='+lastMarker);
  fs.mkdirSync('artifacts/category-layout-production',{recursive:true});
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
