@@ -124,7 +124,11 @@ async function categoryPages(root,slug){
       // JECOD Product 15280: Woo Store API includes one extra image whose basename
       // collides with unrelated target image; the legacy public detail itself
       // displays only the other three original images.
-      if(Number(product.id)===3178){
+      if(Number(product.id)===184){
+        assert.equal(product.slug,'seachem-matrix-0-5','Seachem source asset exception identity changed');
+        assert.equal(target.images.length,0,'Do not fabricate missing Seachem image');
+        summary.sourceMediaDeferred=(summary.sourceMediaDeferred||[]).concat([{sourceId:184,slug:product.slug,missing:'legacy-original-and-all-derivatives-404'}]);
+      }else if(Number(product.id)===3178){
         assert.equal(product.slug,'su-ista-active-bio-pearl','ISTA source asset exception identity changed');
         assert.equal(target.images.length,0,'Do not fabricate missing ISTA image');
         summary.sourceMediaDeferred=(summary.sourceMediaDeferred||[]).concat([{sourceId:3178,slug:product.slug,missing:'legacy-original-404'}]);
@@ -248,7 +252,7 @@ async function categoryPages(root,slug){
   console.log('BRAND_CATALOG_PRODUCTION_PARITY_PARTIAL_MEDIA='+JSON.stringify({
     sourceProducts:summary.categories.reduce((v,x)=>v+x.sourceCount,0),
     categories:summary.categories.length,viewports:[1440,390],screenshots:summary.screenshots.length,
-    sourceMediaDeferred:[3178,15280],deployedSha:cfg.sha
+    sourceMediaDeferred:[184,3178,15280],deployedSha:cfg.sha
   }));
  }finally{await browser.close()}
 })().catch(e=>{
