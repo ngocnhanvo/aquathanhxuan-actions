@@ -148,8 +148,20 @@ async function categoryPages(root,slug){
         summary.sourceMediaDeferred=(summary.sourceMediaDeferred||[]).concat([{sourceId:15280,slug:product.slug,missing:'source-store-only-extra-image-filename-conflict'}]);
       }else{
         assert(target.images.length>0,'Missing target media '+product.slug);
-        assert(target.images.length>=(product.images||[]).filter(x=>x.src).length,
-          'Missing source image/gallery media '+product.slug);
+        // Woo Store API frequently repeats the exact same attachment as main
+        // image and final gallery entry. WordPress rightly stores only distinct
+        // photos; compare real unique source assets, never raw array length.
+        const originalAssets=[...new Map((product.images||[])
+          .filter(x=>x.src)
+          .map(x=>[String(x.src),decodeURIComponent(new URL(x.src,SOURCE).pathname.split('/').pop())])).values()];
+        const targetAssets=target.images.map(x=>decodeURIComponent(new URL(x.src,WP).pathname.split('/').pop()));
+        assert(targetAssets.length>=originalAssets.length,
+          'Missing distinct source image/gallery media '+product.slug+
+          ' source='+JSON.stringify(originalAssets)+' target='+JSON.stringify(targetAssets));
+        for(const filename of originalAssets){
+          assert(targetAssets.includes(filename),
+            'Original image filename missing for '+product.slug+': '+filename);
+        }
       }
       assert(target.images.every(image=>String(image.src||'').includes('/wp-content/uploads/')&&!String(image.src||'').startsWith(SOURCE)),
         'Media hotlink or missing original asset '+product.slug);
