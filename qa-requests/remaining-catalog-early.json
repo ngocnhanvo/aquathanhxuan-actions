@@ -6,10 +6,10 @@
   "scope": "Read-only independent validation of batch 9 against live original Product data",
   "sourceMigrationRun": 42663313074,
   "batches": [
-    9
+    10
   ],
-  "attempt": 4,
-  "reason": "All batches 0-8 have already passed write and independent parity; next new successful batch 9",
+  "attempt": 5,
+  "reason": "Import batch 10 completed success in run 42663313074. Read-only source/target price, category, stock, image exceptions and SEO parity",
   "verifiedRuns": [
     42675861683
   ]
