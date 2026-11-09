@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {chromium}=require('playwright');
 const origin='https://aquathanhxuan.io.vn';
-const expectedSha=process.env.EXPECTED_ASTRO_SHA;
+const expectedSha=process.env.EXPECTED_ASTRO_SHA || JSON.parse(fs.readFileSync('qa-requests/category-layout-production.json','utf8')).source_sha;
 const titles=new Set([
  'Máy sủi Oxy công suất lớn HP 12000 Atman','Máy sủi oxy công suất lớn Atman HP-4000',
  'Máy sủi oxy công suất lớn Atman HP-8000','Máy sưởi Atman CH 300W',
