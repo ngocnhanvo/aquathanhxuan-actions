@@ -1,0 +1,82 @@
+name: Aqua product cards cart source QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/product-card-cart-source.json'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: actions-hub
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          path: source-astro
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - name: Verify requested exact Astro source commit
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, subprocess
+          expected=json.load(open('actions-hub/qa-requests/product-card-cart-source.json'))['astro_sha']
+          actual=subprocess.check_output(['git','-C','source-astro','rev-parse','HEAD'],text=True).strip()
+          assert actual==expected,f'Astro source drift {actual} != {expected}'
+          print('CARD_SOURCE_SHA_PASS='+actual)
+          PY
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source-astro/pnpm-lock.yaml
+      - name: Install source dependencies
+        working-directory: source-astro
+        run: pnpm install --frozen-lockfile
+      - name: Compile edited Astro templates and verify real purchase CTA bindings
+        working-directory: source-astro
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {createRequire} from 'node:module';
+          const require=createRequire(import.meta.url);
+          const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
+          for(const file of [
+            'src/astro/components/Product/ProductCardCartButton.astro',
+            'src/astroutils/RelatedProducts.astro',
+            'src/astro/pages/ProductsSSRPage.astro',
+            'src/astro/pages/ProductsPage.astro',
+            'src/astro/pages/ProductDetailsPage.astro',
+          ]){
+            const source=fs.readFileSync(file,'utf8');
+            assert((await transform(source,{filename:file})).code,'Failed to compile '+file);
+            console.log('PRODUCT_CARD_COMPILE_PASS='+file);
+          }
+          const related=fs.readFileSync('src/astroutils/RelatedProducts.astro','utf8');
+          const ssr=fs.readFileSync('src/astro/pages/ProductsSSRPage.astro','utf8');
+          const legacy=fs.readFileSync('src/astro/pages/ProductsPage.astro','utf8');
+          const card=fs.readFileSync('src/astro/components/Product/ProductCardCartButton.astro','utf8');
+          const cart=fs.readFileSync('src/astroreact/productCardCart.ts','utf8');
+          assert(!related.includes('data-product-quote-button'),'Related quote button still present');
+          assert(related.includes('<ProductCardCartButton')&&ssr.includes('<ProductCardCartButton'),'Shared button not rendered in related+SSR');
+          assert(legacy.includes('data-product-card-add'),'Legacy product cards must support add-cart');
+          assert(card.includes('data-product-id={id}')&&card.includes('outOfStock')&&card.includes('needsSelection'));
+          assert(cart.includes('addCartItem(')&&cart.includes('cartToProducts(')&&cart.includes('cart:updated'));
+          console.log('PRODUCT_CARD_CTA_BINDING_PASS');
+          JS
+      - name: Unit-test cart API state synchronization and duplicate prevention
+        working-directory: source-astro
+        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts
