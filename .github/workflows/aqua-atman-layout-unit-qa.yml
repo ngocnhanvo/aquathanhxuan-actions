@@ -1,0 +1,37 @@
+name: Aqua catalog and Atman routing targeted unit QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-atman-layout-unit-qa.yml'
+      - 'qa-requests/atman-unit.json'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - name: Verify tested Astro source identity
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "a9540b252236099fb6b1e2e1d007559c27fec9b1"
+          echo "ASTRO_TEST_SHA=$actual"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run src/lib/wordpress/products/catalogSort.test.ts src/lib/seo/listingTitles.test.ts
+      - run: node --test scripts/atman-redirect-rule.test.mjs
