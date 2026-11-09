@@ -19,6 +19,23 @@ assert int(src['id'])==PRODUCT and src['slug']==SLUG
 report={'source_id':PRODUCT,'slug':SLUG,'source_media':get(SOURCE+path),'target_media':get(DEST+path),
         'source_main_images':[{'id':x.get('id'),'src':x.get('src')} for x in src.get('images') or []],
         'embedded_in_description':SOURCE+path in str(src.get('description') or '')+str(src.get('short_description') or '')}
+# Only attachment-owned variants qualify as possible genuine alternatives.
+try:
+    media=json.loads(urllib.request.urlopen(SOURCE+'/wp-json/wp/v2/media?search=kaokui2&per_page=100',timeout=45).read())
+except Exception as e:
+    media=[]
+    report['source_media_query_error']=str(e)[:180]
+report['source_attachments']=[]
+for m in media[:15]:
+    url=str(m.get('source_url') or '')
+    if 'kaokui2' not in url.lower():continue
+    sizes=m.get('media_details',{}).get('sizes') or {}
+    record={'id':m.get('id'),'source_url':url,'source_check':get(url),'sizes':[]}
+    for name,v in sizes.items():
+        sized_url=str(v.get('source_url') or '')
+        if sized_url.startswith(SOURCE+'/wp-content/uploads/'):
+            record['sizes'].append({'name':name,'url':sized_url,'check':get(sized_url)})
+    report['source_attachments'].append(record)
 report['exact_match']=report['source_media'].get('status')==200 and report['source_media'].get('sha256')==report['target_media'].get('sha256')
 Path('artifacts/aqua-light-kaokui').mkdir(parents=True,exist_ok=True)
 Path('artifacts/aqua-light-kaokui/diagnostic.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
