@@ -177,6 +177,12 @@ for product in manifest['unique_products']:
 assert len(source_product_groups)==389,'Scope source IDs not unique'
 source_product_groups={sid:entry for sid,entry in sorted(source_product_groups.items())
   if sid%BATCH_COUNT==BATCH_INDEX}
+pilot_limit=int(os.environ.get('AQUA_PILOT_LIMIT','0'))
+assert 0<=pilot_limit<=5,'Pilot limit must be 0..5'
+if pilot_limit:
+    source_product_groups=dict(list(source_product_groups.items())[:pilot_limit])
+    assert source_product_groups,'Pilot scope empty'
+journal['pilot_limit']=pilot_limit
 journal['inventory_state']='PASS'
 journal['inventory_unique_count']=389
 journal['selected_source_ids']=list(source_product_groups)
