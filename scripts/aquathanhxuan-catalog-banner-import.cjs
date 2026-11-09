@@ -83,6 +83,18 @@ async function sourceImage(url){
   }
   const priorTableRes=await page.request.get(WP+'/wp-json/tablepress/v1/table/'+tableId,{headers,timeout:30000});
   if(priorTableRes.status()===404){
+    // Resume the table allocated by the previous failed run. Never allocate a second table.
+    const recovery=await page.request.get(WP+'/wp-json/tablepress/v1/table/157',{headers,timeout:30000});
+    if(recovery.status()===200){
+      await page.goto(WP+'/wp-admin/admin.php?page=tablepress&action=edit&table_id=157',{waitUntil:'domcontentloaded',timeout:45000});
+      await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData),null,{timeout:30000});
+      const old=await page.evaluate(()=>window.tp.editor.getData());
+      assert.deepEqual(old.slice(0,2),records.slice(0,2),'Recovery Table 157 unexpected schema');
+      assert.equal(old.length,4,'Recovery Table 157 unexpected rows');
+      await page.locator('#table-id').fill(tableId);
+      await page.locator('#table-id').press('Tab');
+      console.log('CATALOG_TABLE_RECOVERING=157');
+    }else if(recovery.status()===404){
     await page.goto(WP+'/wp-admin/admin.php?page=tablepress_add',{waitUntil:'domcontentloaded',timeout:45000});
     await page.locator('[name="table[name]"]').fill('Banner danh mục sản phẩm');
     await page.locator('[name="table[description]"]').fill('Hai banner danh mục từ website gốc — quản lý bằng ESC Table / Visual Builder.');
@@ -95,6 +107,7 @@ async function sourceImage(url){
     await page.locator('#table-id').press('Tab');
     await page.evaluate(rows=>{window.tp.editor.setData(rows);window.tp.helpers.unsaved_changes.set()},records);
     console.log('CATALOG_TABLE_CREATED_ID='+new URL(page.url()).searchParams.get('table_id'));
+    }else throw Error('Recovery table 157 unexpected status '+recovery.status());
   }else{
     assert.equal(priorTableRes.status(),200,'Table API status unexpected '+priorTableRes.status());
     await page.goto(tableEditor,{waitUntil:'domcontentloaded',timeout:45000});
@@ -108,14 +121,17 @@ async function sourceImage(url){
     const def=bannerDefs[i],media=journal.media[i],row=i+2;
     if(String(grid[row]?.[0]||'').includes(media.path)){continue;}
     assert(!String(grid[row]?.[0]||'').trim(),'Refuse to overwrite unrecognized banner image');
-    await page.evaluate(({row})=>{window.tp.editor.updateSelectionFromCoords(row,0,row,0);window.tp.callbacks.insert_image.open_dialog()},{row});
+    await page.evaluate(({row})=>{window.tp.editor.updateSelectionFromCoords(0,row,0,row);window.tp.callbacks.insert_image.open_dialog()},{row});
     const item=page.locator('.media-modal .attachment[data-id="'+media.id+'"]');
     await item.waitFor({state:'visible',timeout:30000});
     await item.click();
     const altInput=page.locator('.media-modal .attachment-details [data-setting="alt"] input');
     if(await altInput.count())await altInput.fill(def.alt);
     await page.locator('.media-modal .media-button-insert').click();
-    await page.waitForFunction(row=>/<img\b/i.test(String(window.tp.editor.getData()[row][0]||'')),row,{timeout:15000});
+    await page.waitForFunction(row=>window.tp.editor.getData().some((r,i)=>i>1&&r.some(v=>/<img\\b/i.test(String(v||'')))),row,{timeout:15000}).catch(async e=>{
+      console.log('CATALOG_INSERT_DIAGNOSTIC='+JSON.stringify({row,grid:await page.evaluate(()=>window.tp.editor.getData())}));
+      throw e;
+    });
     grid=await page.evaluate(()=>window.tp.editor.getData());
     let value=String(grid[row][0]||'');
     assert.equal((value.match(/<img\b/gi)||[]).length,1,'One inserted image per row');
