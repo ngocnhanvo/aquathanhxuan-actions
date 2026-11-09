@@ -23,7 +23,11 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 ## Nhập sản phẩm — action đang chạy
 
 - **Batch A PASS** (job `brand-a` trong run 42579994450): `expected=33, created=24, reused=9, category_linked=9, failed=0`. Chihiros 14, Continuum Aquatics 5, Dennerle 13, Eheim 1 đã đủ trong WordPress; 9 reused là sản phẩm có sẵn ở danh mục khác, không tạo trùng.
-- **Batch B đang chạy** (GEX/ISTA/JEBAO/JECOD); batch C/D được workflow `needs` kích hoạt lần lượt sau B PASS.
+- **Batch B kết thúc PARTIAL** (run [42579994450](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42579994450)): `expected=36, created=34, reused=0, failed=2`. Hai nguồn lỗi:
+  - Source Product 3178 `su-ista-active-bio-pearl`: media ID 266663 ảnh `Thiet-ke-chua-co-ten-2024-05-19T115829.070.png` HTTP 404 trên source, kể cả thumbnail và tất cả kích thước srcset. Product chưa tạo tại WP đích.
+  - Source Product 15280 `bom-jecod-fa-1000`: ảnh đầu `Thiet-ke-chua-co-ten-34.png` xung đột filename/hash với media ID 82763 trên WP đích; source có ba ảnh gallery khác hợp lệ. Không ghi đè, không đổi tên; Product chưa tạo.
+- **Batch C/D tiếp tục độc lập** bằng run [42583628239](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42583628239) do B partial không được chặn các record độc lập. Workflow `.github/workflows/aqua-brand-catalog-remaining.yml`. Không chạy song song ghi cùng ảnh trong một job.
+- Lượt chẩn đoán read-only 42584186049 xác minh image gốc ISTA thật sự HTTP 404 mọi kích thước, gallery JECOD có ba ảnh hợp lệ. `ASSET_DEFERRED` phải được duy trì, không tuyên bố đủ media.
 - Đã có snapshot đối chiếu độc lập run [42581260357](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42581260357) PASS tại 07:47 UTC: Chihiros đủ 14, Continuum đủ 5, Dennerle đang 8/13.
 
 - Script: `scripts/aqua-brand-catalog-migrate.py` (độc lập, idempotent), workflow `.github/workflows/aqua-brand-catalog-migrate.yml` với 4 job nối tiếp.
