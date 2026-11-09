@@ -158,6 +158,13 @@ async function run(){
     });
     await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.classList.contains('is-visible'),{timeout:5000});
     assert.equal(await sticky.getAttribute('aria-hidden'),'false','Sticky purchase accessible on detail scroll');
+    // Wait for the 200ms entrance transition before measuring pixel geometry.
+    await page.waitForFunction(()=>{
+      const bar=document.getElementById('product-sticky-purchase');
+      if(!bar)return false;
+      const rect=bar.getBoundingClientRect();
+      return rect.top>=0 && rect.bottom<=innerHeight+2;
+    },null,{timeout:5000});
     const cartLinks=await sticky.locator('a[href]').count();
     assert.equal(cartLinks,1,'Sticky view-cart link '+slug);
     const buyActions=await sticky.locator('#sticky-add-to-cart').count();
