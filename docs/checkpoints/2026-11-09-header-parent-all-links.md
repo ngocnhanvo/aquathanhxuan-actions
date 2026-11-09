@@ -1,6 +1,6 @@
 # Checkpoint — Header parent only toggles / Tất cả children (2026-11-09)
 
-Status: IN_PROGRESS. Preserve existing deployed state until WordPress menu order and final QA pass.
+Status: DONE. WordPress CMS, Astro source tests, production build/deploy and read-only browser QA all PASS.
 
 ## Owner requirement
 - The eleven Header parent labels should not navigate. Clicking/tapping the label toggles the submenu.
@@ -25,9 +25,9 @@ Status: IN_PROGRESS. Preserve existing deployed state until WordPress menu order
 ## Remaining steps
 1. DONE: WordPress CMS run 42545042895 PASS with all 11 first-child Tất cả items and 75 original children retained.
 2. DONE: production build/deploy 42545372518 / 42545446332 PASS for exact Astro SHA. No rerun.
-3. IN PROGRESS: QA request `qa-requests/footer-consultation-20261109.json` updated and [production Playwright run 42545625065](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545625065) is running. Script checks 11 Tất cả children, parent button-only navigation, 5 viewports, Footer/Home05. Investigate if failure, do not rerun blindly.
-4. Update this checkpoint with verified SHA, run IDs and outcomes, then write `chatgpt/latest-response.md` in this Actions repo. No repeat of successful CMS writes/builds.
+3. DONE: read-only [production Playwright 42545625065](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545625065) SUCCESS: Header WordPress childCounts 21,8,9,6,9,5,7,5,8,5,3, first child Tất cả and matching parent href at all 11, Desktop and Mobile parent label click does not navigate, five viewports PASS, Footer waves, Contact widget, Home05 descriptions and native builder inspector PASS. Artifact 13643860044 (five viewport screenshots). No production CMS test writes.
+4. DONE: Verified records saved here. Write `chatgpt/latest-response.md` at end of user-visible reply. No code/CMS/build reruns. Note separately: Visual Builder production write → save → readback → undo remains untested and was not part of this Header task.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất
