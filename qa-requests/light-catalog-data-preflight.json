@@ -16,5 +16,7 @@
     3061,
     3062,
     3063
-  ]
+  ],
+  "attempt": 2,
+  "retry_reason": "Fixed source HTML SEO regex parse syntax, previous run failed before QA"
 }
