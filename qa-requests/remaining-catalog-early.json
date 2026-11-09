@@ -3,14 +3,13 @@
   "source": "https://aquathanhxuan.com",
   "target": "https://admin.aquathanhxuan.io.vn",
   "sha": "40d900bb6c2d8f3d1e4aceec8d4f6c819f15591d",
-  "scope": "Read-only parity of successfully imported batches 7 and 8, including prices, stock, categories, original SEO metadata",
+  "scope": "Read-only independent validation of batch 9 against live original Product data",
   "sourceMigrationRun": 42663313074,
   "batches": [
-    7,
-    8
+    9
   ],
-  "attempt": 3,
-  "reason": "Previous 210 Product parity source IDs 0-6 PASS 42676337353; now check successful 7-8 without re-auditing",
+  "attempt": 4,
+  "reason": "All batches 0-8 have already passed write and independent parity; next new successful batch 9",
   "verifiedRuns": [
     42675861683
   ]
