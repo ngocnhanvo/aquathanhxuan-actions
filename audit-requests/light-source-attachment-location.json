@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "scope": "READ_ONLY exact original attachment IDs 266690 and 266681, compare media WP source_url with filename date-derived upload month only; verify PNG bytes/dimensions",
+  "attachment_ids": [
+    266690,
+    266681
+  ],
+  "verified_legacy_diagnostic_run": 42630327380,
+  "attempt": 1
+}
