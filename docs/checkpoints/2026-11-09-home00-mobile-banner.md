@@ -22,13 +22,17 @@ Verify native desktop/mobile image handling in Home_00; design/upload one new po
   - Unit test `home00.test.ts` verifies desktop/mobile separation and original sources.
 - Source-only CI [Actions #42548056437](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548056437): SUCCESS all 4 jobs.
 
-## Release status and next steps
-- Existing WordPress production pipeline triggered through `build-requests/2026-11-09-home00-mobile-1a835b5.json`, build run [42548269209](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548269209); associated deploy run [42548344975](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548344975). Both IN_PROGRESS at last checkpoint. Do not duplicate the build.
-- Wait for exact `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS` plus deploy run SUCCESS. If FAIL, inspect logs and repair minimal cause.
-- QA source script `scripts/aquathanhxuan-home00-mobile-production-qa.cjs` exists. After deploy, create a trigger workflow `.github/workflows/aquathanhxuan-home00-mobile-production-qa.yml` in Actions (read-only Playwright), run production QA 1440x900, 1024x768, 768x1024, 844x390, 390x844, 320x700; verify active image, mobile portrait uncropped, clickable CTA, desktop original images, native WordPress table/readback, Media Library and no horizontal overflow.
-- If QA FAIL, read log and fix code/QA depending on actual root cause, rerun only affected steps, never re-create media/table row.
-- Update checkpoint with actual build/deploy/QA outcomes and save user-visible response into `chatgpt/latest-response.md`.
+## Production release and final QA
+- Production build [42548269209](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548269209) SUCCESS, `SOURCE_SHA_VERIFIED=1a835b5...`, `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS commit=1a835b579a239ea6dc87ce4cf02018c4ec62c4c9`, WordPress-triggered canonical pipeline. Deploy [42548344975](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548344975) SUCCESS. No duplicate build.
+- Final read-only Playwright [42548911873](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42548911873) SUCCESS:
+  - `HOME00_DESKTOP_VIEWPORT_PASS`: 1440x900, 1024x768, 768x1024, 844x390. Both original desktop banners retained and carousel Next works.
+  - `HOME00_MOBILE_VIEWPORT_PASS`: 390x844 and 320x700. CMS-sourced optimized portrait image `/images/pages/aqua-thanh-xuan-mobile-hero-480w.webp` loads, object-fit contain prevents crop, CTA hotspot links to /san-pham, no horizontal overflow.
+  - `HOME00_NATIVE_CMS_READBACK_PASS=desktop:2,mobile:1,row:2`.
+  - `HOME00_MOBILE_MEDIA_PASS=82696`, `HOME00_MOBILE_PRODUCTION_QA=PASS`.
+  - QA screenshot artifact ID `13644476593` (six viewport screenshots).
+- Intermediate read-only QA runs 42548569826 and 42548722560 failed test implementation assertions only: compared .png names against processed .webp and read authenticated Media REST without nonce. Corrected QA; no additional CMS writes or deployment required.
+- All requested work is complete and verified. Do not repeat image upload, CMS update or build on next chat. Re-run only if a new regression is reported.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất
