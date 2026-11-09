@@ -296,6 +296,9 @@ async function main(){
     const acceptable=new Set(expectedTargetIds.map(Number));
     assert(renderedIds.every(id=>acceptable.has(id)),'Category contains Product outside verified original source '+slug);
     assert.equal(new Set(renderedIds).size,renderedIds.length,'Repeated Product card in category '+slug);
+    const hasCartActions=await tab.locator('article[data-catalog-product]').evaluateAll(nodes=>
+      nodes.every(card=>!!card.querySelector('button[data-product-card-add], button:disabled')));
+    assert(hasCartActions,'A source Product card has no add-to-cart or out-of-stock action '+slug);
     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
     assert(overflow<=3,'Category horizontal overflow '+slug+' '+width);
     const screenshot='category-'+slug+'-'+width+'.png';
@@ -305,6 +308,7 @@ async function main(){
     const productPath='/san-pham/'+product.slug;
     const detail=await tab.goto(PUBLIC+productPath,{waitUntil:'domcontentloaded',timeout:60000});
     assert.equal(detail?.status(),200,'Product detail route HTTP '+productPath);
+    await tab.locator('#product-purchase-actions button').first().waitFor({state:'attached',timeout:15000});
     const title=(await tab.locator('h1').first().innerText()).trim();
     const expected=await tab.evaluate(html=>{
      const doc=new DOMParser().parseFromString(html,'text/html');
@@ -333,6 +337,9 @@ async function main(){
     assert(targetIds.every(id=>Number.isInteger(id)&&id>0&&expected.has(id)),
       'Unverified Product card in child category '+child.targetSlug);
     assert.equal(new Set(targetIds).size,targetIds.length,'Repeated Product card in child category '+child.targetSlug);
+    const validCartActions=await childNodes.evaluateAll(nodes=>nodes.every(card=>
+      !!card.querySelector('button[data-product-card-add], button:disabled')));
+    assert(validCartActions,'Source Product card is missing cart/out-of-stock button '+child.targetSlug);
     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth);
     assert(overflow<=3,'Original child category horizontal overflow '+child.targetSlug+' '+width);
     report.checks.push({type:'child-category',slug:child.targetSlug,sourceId:child.sourceId,
