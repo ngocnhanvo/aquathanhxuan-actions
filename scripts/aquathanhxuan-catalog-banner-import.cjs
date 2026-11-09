@@ -115,7 +115,7 @@ async function sourceImage(url){
     const altInput=page.locator('.media-modal .attachment-details [data-setting="alt"] input');
     if(await altInput.count())await altInput.fill(def.alt);
     await page.locator('.media-modal .media-button-insert').click();
-    await page.waitForFunction(row=>/<img\\b/i.test(String(window.tp.editor.getData()[row][0]||'')),row,{timeout:15000});
+    await page.waitForFunction(row=>/<img\b/i.test(String(window.tp.editor.getData()[row][0]||'')),row,{timeout:15000});
     grid=await page.evaluate(()=>window.tp.editor.getData());
     let value=String(grid[row][0]||'');
     assert.equal((value.match(/<img\b/gi)||[]).length,1,'One inserted image per row');
