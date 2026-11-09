@@ -3,5 +3,7 @@
   "failedQa": 42595915988,
   "sourceCategory": 2162,
   "targetCategory": 1793,
-  "mode": "read-only"
+  "mode": "read-only",
+  "retry": "Audit target media src may be relative, resolve against WP origin",
+  "recoveryPatch": "683b47e14c571689919a6662c45a3f0210042cfd"
 }
