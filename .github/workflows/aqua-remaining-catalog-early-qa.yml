@@ -17,7 +17,7 @@ jobs:
       WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
       WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
       AQUA_QA_DATA_ONLY: '1'
-      AQUA_QA_BATCHES: '10'
+      AQUA_QA_BATCHES: '11'
       AQUA_QA_REQUEST_PATH: qa-requests/remaining-catalog-early.json
     steps:
       - uses: actions/checkout@v4
