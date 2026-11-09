@@ -118,6 +118,11 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
    const originRefs=new Set(targetList.map(x=>(x.meta_data||[]).find(z=>z.key==='_esc_origin_product_id')?.value).filter(Boolean).map(String));
    const tgtSlugs=new Set(targetList.map(x=>x.slug));
    const missing=srcList.filter(x=>!originRefs.has(String(x.id))&&!tgtSlugs.has(x.slug));
+   const targetBySlug=new Map(targetList.map(x=>[x.slug,x]));
+   const priceMismatches=srcList.filter(x=>{
+     const dst=targetBySlug.get(x.slug);
+     return dst && String(dst.price)!==String(x.prices?.price||'');
+   }).map(x=>({sourceId:x.id,slug:x.slug,sourcePrice:String(x.prices?.price||''),targetPrice:String(targetBySlug.get(x.slug)?.price||'')}));
    const kinds=srcList.reduce((m,x)=>(m[x.type]=(m[x.type]||0)+1,m),{});
    const record={
       source:{id:cat.id,name:cat.name,slug:cat.slug,count:srcList.length},
@@ -131,11 +136,14 @@ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').repl
       tgtProducts:targetList.map(x=>({id:x.id,name:x.name,slug:x.slug,status:x.status,
          sourceId:(x.meta_data||[]).find(z=>z.key==='_esc_origin_product_id')?.value||null,
          categories:(x.categories||[]).map(c=>c.id)})),
-      missing:missing.map(x=>({id:x.id,slug:x.slug,name:x.name,type:x.type}))
+      missing:missing.map(x=>({id:x.id,slug:x.slug,name:x.name,type:x.type})),
+      priceMismatches
    };
    results.push(record);
    console.log('BRAND_INVENTORY='+JSON.stringify({brand:cat.name,src:srcList.length,dst:targetList.length,missing:missing.length,
-      srcId:cat.id,dstId:match?.id,srcSlug:cat.slug,dstSlug:match?.slug,types:kinds,sampleMissing:record.missing.slice(0,5)}));
+      srcId:cat.id,dstId:match?.id,srcSlug:cat.slug,dstSlug:match?.slug,types:kinds,
+      priceMismatchCount:priceMismatches.length,priceMismatchSample:priceMismatches.slice(0,3),
+      sampleMissing:record.missing.slice(0,5)}));
   }
   const manifest={source,target,date,srcParent:{id:srcParent.id,slug:srcParent.slug},tgtParent:{id:tgtParent.id,slug:tgtParent.slug},results};
   fs.writeFileSync(output+'/source-target-parity.json',JSON.stringify(manifest,null,2)+'\n');
