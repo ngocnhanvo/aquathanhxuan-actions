@@ -48,6 +48,38 @@ jobs:
           set +e
           curl --retry 1 --connect-timeout 15 --max-time 120 -sS -G 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed' --data-urlencode "url=$URL" --data-urlencode 'strategy=mobile' --data-urlencode 'category=PERFORMANCE' -o artifacts/lighthouse/psi-mobile.json -w 'PAGESPEED_HTTP=%{http_code}\n'
           exit 0
+      - name: Check native Chrome LCP observer independent of Lighthouse
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+          for(const [label,url,viewport] of [
+            ['aqua-mobile','https://aquathanhxuan.io.vn/',{width:390,height:844}],
+            ['aqua-desktop','https://aquathanhxuan.io.vn/',{width:1440,height:900}],
+            ['baseline-mobile','https://www.google.com/',{width:390,height:844}]
+          ]){
+            const context=await browser.newContext({viewport,deviceScaleFactor:1,isMobile:label.includes('mobile')});
+            const page=await context.newPage();
+            const requestFailures=[];const jsErrors=[];
+            page.on('requestfailed',r=>requestFailures.push({url:r.url().slice(0,120),failure:r.failure()}));
+            page.on('pageerror',e=>jsErrors.push(e.message.slice(0,200)));
+            await page.addInitScript(()=>{
+              window.__lcpEvents=[];
+              try{new PerformanceObserver(list=>{for(const e of list.getEntries()){window.__lcpEvents.push({startTime:e.startTime,size:e.size,url:e.url,tag:e.element?.tagName,classes:e.element?.className?.toString().slice(0,140)})}}).observe({type:'largest-contentful-paint',buffered:true})}catch(e){window.__lcpError=e.message}
+            });
+            try{await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});await page.waitForTimeout(5500);
+              const data=await page.evaluate(()=>({url:location.href,ready:document.readyState,visibility:document.visibilityState,title:document.title,bodyTextLength:document.body?.innerText?.length||0,images:document.images.length,events:window.__lcpEvents,lcpError:window.__lcpError}));
+              await page.screenshot({path:'artifacts/lighthouse/'+label+'-browser.png'});
+              console.log('NATIVE_LCP '+JSON.stringify({label,...data,requestFailures:requestFailures.slice(0,10),jsErrors:jsErrors.slice(0,8)}));
+              fs.writeFileSync('artifacts/lighthouse/'+label+'-native.json',JSON.stringify({label,...data,requestFailures,jsErrors},null,2));
+            }catch(e){console.log('NATIVE_LCP_ERROR '+label+' '+e.message)}
+            await context.close();
+          }
+          await browser.close();
+          NODE
       - name: Report errors, LCP, screenshots, and key performance metrics
         shell: bash
         run: |
