@@ -325,7 +325,7 @@ def ensure_media(src,alt,source_id,source_media_id=None):
                 continue
         raise original_error
 
-def localize_html(value,source_id):
+def localize_html(value,source_id,source_media_by_url=None):
     content=str(value or '')
     matches=list(dict.fromkeys(source_media_regex.findall(content)))
     for uri in matches:
@@ -333,7 +333,8 @@ def localize_html(value,source_id):
         original_uri=html.unescape(uri)
         parsed=urllib.parse.urlparse(original_uri)
         canonical=parsed._replace(query='',fragment='').geturl()
-        media_id,path=ensure_media(canonical,'',source_id)
+        original_attachment_id=(source_media_by_url or {}).get(canonical)
+        media_id,path=ensure_media(canonical,'',source_id,original_attachment_id)
         content=content.replace(uri,path)
     return content
 
@@ -369,6 +370,7 @@ def migrate_one(source_id, info):
     name=html.unescape(re.sub(r'<[^>]*>',' ',str(src['name']))).strip()
     slug=src['slug']
     existing=lookup_slug(slug)
+    source_media_by_url={str(item.get('src') or ''):item.get('id') for item in (src.get('images') or []) if item.get('src') and item.get('id')}
     # SEO must be audited on both creation and reuse, without invented metadata.
     seo_title,seo_description=source_seo(slug)
     if existing:
@@ -390,9 +392,9 @@ def migrate_one(source_id, info):
         # Existing products may have been imported before source content/gallery
         # migration was introduced. Only fill genuinely absent content.
         if not str(existing.get('description') or '').strip() and str(src.get('description') or '').strip():
-            updates['description']=localize_html(src['description'],source_id)
+            updates['description']=localize_html(src['description'],source_id,source_media_by_url)
         if not str(existing.get('short_description') or '').strip() and str(src.get('short_description') or '').strip():
-            updates['short_description']=localize_html(src['short_description'],source_id)
+            updates['short_description']=localize_html(src['short_description'],source_id,source_media_by_url)
         existing_images=existing.get('images') or []
         existing_media_names=set()
         for item in existing_images:
@@ -434,8 +436,8 @@ def migrate_one(source_id, info):
             mid,path=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
             images.append({'id':mid,'alt':item.get('alt') or name})
         assert images,'Cannot import without original product media'
-        description=localize_html(src.get('description') or '',source_id)
-        short_description=localize_html(src.get('short_description') or '',source_id)
+        description=localize_html(src.get('description') or '',source_id,source_media_by_url)
+        short_description=localize_html(src.get('short_description') or '',source_id,source_media_by_url)
         metadata=[{'key':'_esc_origin_product_id','value':str(source_id)},
                   {'key':'product_lang','value':'vi'}]
         if seo_title:metadata.append({'key':'_yoast_wpseo_title','value':seo_title})
