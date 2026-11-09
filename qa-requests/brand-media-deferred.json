@@ -8,5 +8,6 @@
     "destination media same filename but different SHA256"
   ],
   "run": 42579994450,
-  "mode": "read-only"
+  "mode": "read-only",
+  "probe": "source-attachment-metadata-and-srcset-all-resolutions; relative-WP-URL"
 }
