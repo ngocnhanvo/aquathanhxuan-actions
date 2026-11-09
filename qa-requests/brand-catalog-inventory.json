@@ -1,11 +1,19 @@
 {
-  "task": "Independent read-only progress audit after A/B and during D/C rescue",
+  "task": "Final independent post-migration source-target parity audit after batch C and D rescue success",
   "source": "aquathanhxuan.com",
   "target": "admin.aquathanhxuan.io.vn",
   "request": "2026-11-09-brand-menu",
   "followupRunId": 42579994450,
-  "snapshot": 3,
+  "snapshot": 4,
   "recoveryRun": 42585734376,
   "collisionRun": 42588322749,
-  "batchDRun": 42586832096
+  "batchDRun": 42586832096,
+  "rescueC": 42591540748,
+  "rescueD": 42591602696,
+  "expect": {
+    "brands": 20,
+    "category_memberships": 157,
+    "missing": 0,
+    "price_mismatches": 0
+  }
 }
