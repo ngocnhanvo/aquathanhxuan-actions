@@ -128,6 +128,16 @@ async function categoryPages(root,slug){
   for(const width of [1440,390]){
     const context=await browser.newContext({viewport:{width,height:width===390?844:900}});
     const page=await context.newPage();
+    // Independent source visual baseline, same viewport as the target screenshots.
+    for(const sourceSlug of ['chihiros','dennerle','seachem']){
+      const sourcePage=await context.newPage();
+      const response=await sourcePage.goto(SOURCE+'/danh-muc/thuong-hieu/'+sourceSlug+'/',{waitUntil:'domcontentloaded',timeout:60000});
+      assert.equal(response.status(),200,'Source Brand visual baseline HTTP '+sourceSlug);
+      const filename=out+'/source-'+sourceSlug+'-'+width+'.png';
+      await sourcePage.screenshot({path:filename,fullPage:true});
+      summary.screenshots.push(filename);
+      await sourcePage.close();
+    }
     const errors=[];page.on('pageerror',error=>errors.push(error.message));
     for(const category of dstBrands){
       const href='/san-pham/'+category.slug;
