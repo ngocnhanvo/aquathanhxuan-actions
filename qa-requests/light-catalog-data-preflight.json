@@ -17,7 +17,7 @@
     3062,
     3063
   ],
-  "attempt": 3,
+  "attempt": 4,
   "retry_reason": "Fixed source HTML SEO regex parse syntax, previous run failed before QA",
-  "reason": "After Kaokui exact Source Product 350144 update completed success 42638590689 with category and verified source image parity"
+  "reason": "Retry transient ECONNRESET only for read-only source and WP API; corrected connection retry with max 3"
 }
