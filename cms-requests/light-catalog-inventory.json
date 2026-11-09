@@ -1,0 +1,17 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "root": "den",
+  "children": [
+    "WeekAqua",
+    "Chihiros",
+    "Neo Helios",
+    "Xuanmailong",
+    "Kaokui",
+    "Odyssea",
+    "Phụ kiện đèn"
+  ],
+  "scope": "READ_ONLY",
+  "requestedAt": "2026-11-09"
+}
