@@ -445,6 +445,14 @@ def ensure_media(src,alt,source_id,source_media_id=None):
                 continue
         raise original_error
 
+deferred_by_product={}
+def note_source_asset(source_id, record):
+    item=dict(record)
+    item['source_id']=source_id
+    journal['asset_deferred'].append(item)
+    deferred_by_product.setdefault(source_id,[]).append(item)
+    print('AQUA_REMAINING_ASSET_DEFERRED='+json.dumps(item,ensure_ascii=False),flush=True)
+
 def localize_html(value,source_id,source_media_by_url=None):
     content=str(value or '')
     matches=list(dict.fromkeys(source_media_regex.findall(content)))
@@ -454,8 +462,14 @@ def localize_html(value,source_id,source_media_by_url=None):
         parsed=urllib.parse.urlparse(original_uri)
         canonical=parsed._replace(query='',fragment='').geturl()
         original_attachment_id=(source_media_by_url or {}).get(canonical)
-        media_id,path=ensure_media(canonical,'',source_id,original_attachment_id)
-        content=content.replace(uri,path)
+        try:
+            media_id,path=ensure_media(canonical,'',source_id,original_attachment_id)
+            content=content.replace(uri,path)
+        except AssetDeferred as exc:
+            note_source_asset(source_id,exc.record)
+            # Preserve all product copy; remove only broken source <img> tags.
+            content=re.sub(r'<img\\b[^>]*>',lambda match: '' if canonical in html.unescape(match.group(0)) else match.group(0),content,flags=re.I)
+            content=content.replace(uri,'')
     return content
 
 def lookup_slug(slug):
@@ -476,6 +490,7 @@ def ensure_locale(target_id):
     assert value=='vi','Failed to save source language to ACF Product '+str(target_id)
 
 def migrate_one(source_id, info):
+    deferred_by_product[source_id]=[]
     src=get_json(SOURCE+'/wp-json/wc/store/v1/products/'+str(source_id))
     source_media_by_url={str(item.get('src') or ''):item.get('id')
       for item in (src.get('images') or []) if item.get('src') and item.get('id')}
@@ -528,12 +543,29 @@ def migrate_one(source_id, info):
             if not uri: continue
             source_name=os.path.basename(urllib.parse.unquote(urllib.parse.urlparse(uri).path))
             if source_name in existing_media_names:continue
-            media_id,_=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
-            append_images.append({'id':media_id,'alt':item.get('alt') or name})
-            existing_media_names.add(source_name)
+            try:
+                media_id,_=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
+                append_images.append({'id':media_id,'alt':item.get('alt') or name})
+                existing_media_names.add(source_name)
+            except AssetDeferred as exc:
+                note_source_asset(source_id,exc.record)
         if append_images:
             # Preserve the existing cover and its custom ordering/alt.
             updates['images']=[{'id':int(x['id']),'alt':str(x.get('alt') or '')} for x in existing_images]+append_images
+        if deferred_by_product[source_id] or not (src.get('images') or []):
+            deferred_value=(deferred_by_product[source_id][0]['source_url']
+                if deferred_by_product[source_id] else 'NO_SOURCE_STORE_IMAGE:'+str(source_id))
+            if not any(m.get('key')=='_esc_source_media_deferred' and str(m.get('value') or '').strip() for m in meta):
+                updates.setdefault('meta_data',[]).append({'key':'_esc_source_media_deferred','value':deferred_value})
+        if str(existing.get('regular_price') or '')!=regular:
+            updates['regular_price']=regular
+        if int(current)<int(regular):
+            if str(existing.get('sale_price') or '')!=current:updates['sale_price']=current
+        elif str(existing.get('sale_price') or ''):
+            updates['sale_price']=''
+        expected_stock='instock' if src.get('is_in_stock') else 'outofstock'
+        if existing.get('stock_status')!=expected_stock:
+            updates['stock_status']=expected_stock
         if updates:
             existing=api('/wp-json/wc/v3/products/'+str(existing['id']),method='POST',obj=updates)
             if 'categories' in updates:journal['category_linked']+=1
@@ -550,19 +582,30 @@ def migrate_one(source_id, info):
     else:
         images=[]
         original_images=src.get('images') or []
-        assert original_images,'Published source product has no image'
         for item in original_images:
             uri=item.get('src') or ''
             if not uri: continue
-            mid,path=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
-            images.append({'id':mid,'alt':item.get('alt') or name})
-        assert images,'Cannot import without original product media'
+            try:
+                mid,path=ensure_media(uri,item.get('alt') or name,source_id,item.get('id'))
+                images.append({'id':mid,'alt':item.get('alt') or name})
+            except AssetDeferred as exc:
+                note_source_asset(source_id,exc.record)
+        # A missing or HTTP404 source cover must not erase the genuine Product.
+        if not original_images:
+            note_source_asset(source_id,{
+              'source_url':None,'source_filename':None,'parent_record':source_id,
+              'asset_type':'image','attempt_count':0,'error':'Source Store Product has no images',
+              'status':'ASSET_DEFERRED'
+            })
         description=localize_html(src.get('description') or '',source_id,source_media_by_url)
         short_description=localize_html(src.get('short_description') or '',source_id,source_media_by_url)
         metadata=[{'key':'_esc_origin_product_id','value':str(source_id)},
                   {'key':'product_lang','value':'vi'}]
         if seo_title:metadata.append({'key':'_yoast_wpseo_title','value':seo_title})
         if seo_description:metadata.append({'key':'_yoast_wpseo_metadesc','value':seo_description})
+        if deferred_by_product[source_id]:
+            first=deferred_by_product[source_id][0]
+            metadata.append({'key':'_esc_source_media_deferred','value':first['source_url'] or 'NO_SOURCE_STORE_IMAGE:'+str(source_id)})
         fields={
             'name':name,'slug':slug,'type':'simple','status':'publish',
             'catalog_visibility':'visible',
@@ -581,7 +624,11 @@ def migrate_one(source_id, info):
     check=api('/wp-json/wc/v3/products/'+str(target_id))
     assert check['slug']==slug and normalize(check['name'])==normalize(name),'Target identity check failed'
     assert set(info['brands']).issubset({int(c['id']) for c in check.get('categories') or []}), 'Target verified category link absent'
-    assert check.get('images') and int(check['images'][0]['id'])>0, 'Missing source media not labeled'
+    if not check.get('images'):
+        assert deferred_by_product[source_id] or any(
+          m.get('key')=='_esc_source_media_deferred' and str(m.get('value') or '').strip()
+          for m in check.get('meta_data') or []
+        ), 'Missing source media has no explicit source evidence'
     if result=='created':
         assert str(check.get('regular_price') or '')==regular,'New target regular price mismatch'
         assert str(check.get('price') or '')==current,'New target actual price mismatch'
@@ -590,7 +637,8 @@ def migrate_one(source_id, info):
     if seo_title:
         assert any(m.get('key')=='_yoast_wpseo_title' and str(m.get('value') or '').strip() for m in stored_meta),'Yoast title missing after write'
     return {'source_id':source_id,'target_id':target_id,'slug':slug,'status':result,'categories':info['brands'],
-            'seo_title':bool(seo_title),'seo_description':bool(seo_description)}
+            'seo_title':bool(seo_title),'seo_description':bool(seo_description),
+            'media_deferred':len(deferred_by_product[source_id])}
 
 for source_id,info in source_product_groups.items():
     try:
