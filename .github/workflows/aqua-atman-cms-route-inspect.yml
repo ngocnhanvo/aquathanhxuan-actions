@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aqua-atman-cms-route-inspect.yml'
+      - 'scripts/aqua-atman-cms-route-inspect.cjs'
 permissions:
   contents: read
 jobs:
