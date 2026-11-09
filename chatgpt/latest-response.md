@@ -1,28 +1,43 @@
-# Latest ChatGPT checkpoint — aquathanhxuan.com
+# Latest ChatGPT response — aquathanhxuan.com
 
-Date: 2026-11-09 Asia/Ho_Chi_Minh
+Time: 2026-11-09 07:26 Asia/Ho_Chi_Minh
 Project: aquathanhxuan.com
-Knowledge: ngocnhanvo/knowledge main
+Repository for this response: ngocnhanvo/aquathanhxuan-actions (main)
+Knowledge: ngocnhanvo/knowledge main @ 78865ea3036b8d816f82d97b7bdecb1e3361c30a
 Astro: ngocnhanvo/aquathanhxuan-astro master @ cebdd48dd73a41ba130cbbeddda8ae5252621730
 PHP: ngocnhanvo/aquathanhxuan-php master @ dcec014aec735061bcc8af1060a6cd5d64766243
-Actions: ngocnhanvo/aquathanhxuan-actions main
 Checkpoint: docs/checkpoints/2026-11-09-header-submenus-consultation.md
+Outcome: all four latest user-requested changes completed, built, deployed, browser QA PASS; no redundant rerun.
 
-## Latest task completed — consultation floating controls and WP Header children
-- Increased Back to Top vs Tư vấn button gap; popup now overlays the arrow, maintains adaptive placement.
-- Replaced phone and Messenger emoji with modern SVG circular icons, Zalo SVG badge; retained existing AI avatar and agent.
-- Desktop and mobile menu parent now has distinct usable link and click-to-open child chevron. WordPress Header Menu Manager remains the only source.
-- Parsed legacy owner-supplied Aqua menu: 11 parents / 75 submenu items.
-- WordPress Header VI menu id 1778: 66 missing product categories created, 9 reused, all 75 submenu items created natively and verified by REST (no replacement or deletion of 11 parents).
-- Astro production source SHA cebdd48dd73a41ba130cbbeddda8ae5252621730.
-- CMS sync run 42538691882 SUCCESS; source CI 42538938980 4/4 PASS.
-- WordPress build 42539210197 SUCCESS, Astro deploy 42539285414 SUCCESS.
-- Production Playwright 42539445503 SUCCESS: full menu tree 20/7/8/5/8/4/6/4/7/4/2, desktop/mobile submenu clicks, 5 responsive viewport consultation overlay/icons and existing Footer/Home05/Visual Builder QA PASS.
-- QA no CMS writes; 66 new product_cat categories may be empty until WooCommerce products are assigned. Product classification not requested.
+## Full intended user-visible reply
 
-## Carry-forward
-- Do not redo this implemented and deployed Header/consultation work. Use checkpoint and check latest HEAD for new tasks.
-- CMS write/readback/rollback for Visual Builder cells remains separate and unverified. Read-only inspector click PASS is not equivalent to live Save.
+## Đã khôi phục checkpoint mới nhất
+
+Mình đã đối chiếu repository Knowledge và hai nhánh `master` của dự án Aqua Thanh Xuân.
+
+| Repository | HEAD hiện tại |
+|---|---|
+| Astro | `cebdd48dd73a` |
+| WordPress/PHP | `dcec014aec73` |
+| Knowledge | `78865ea3036b` |
+
+Đối chiếu lịch sử commit cho thấy **4 yêu cầu ở chat trước đã được đưa vào source**: giãn khoảng cách hai nút nổi, đưa panel tư vấn lên trên, thay emoji bằng icon SVG và bổ sung khả năng mở menu con ở desktop/mobile.
+
+Các workflow gần nhất cũng đã báo thành công:
+
+- [Production build #42539285414](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42539285414)
+- [Kiểm thử production #42539445503](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42539445503)
+- [Đồng bộ menu con WordPress #42538691882](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42538691882)
+
+Mình tiếp tục kiểm tra log chi tiết và bằng chứng nghiệm thu để xác định có lỗi còn sót không, thay vì triển khai lại những phần đã chạy thành công.
+
+### Kết quả xác minh
+
+- WordPress Header giữ nguyên 11 menu cha; 75 mục con được lưu thật trong Menu Manager (66 danh mục sản phẩm mới, 9 danh mục dùng lại).
+- Playwright production PASS cả 5 viewport: 1440×900, 1024×768, 768×1024, 844×390 và 390×844. Xác minh khoảng cách hai nút, panel thực sự che mũi tên xanh, icon SVG, menu con desktop/mobile.
+- Production deploy và build đã thành công trên đúng Astro commit `cebdd48dd73a41ba130cbbeddda8ae5252621730`. Không tạo commit giao diện, CMS write hoặc build trùng lặp.
+- Checkpoint hoàn tất: [2026-11-09 Header + consultation](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-09-header-submenus-consultation.md).
+- Giới hạn riêng biệt: kiểm thử Visual Builder ghi → lưu → đọc lại → hoàn tác trên production chưa thực hiện; bài QA hiện tại chỉ đọc. Đây không phải phần còn thiếu của bốn yêu cầu vừa nghiệm thu.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
