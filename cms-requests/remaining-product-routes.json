@@ -1,0 +1,13 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "sourceUnique": 389,
+  "verifiedMigrationRun": 42663313074,
+  "verifiedProducts": 389,
+  "missing": 0,
+  "identityConflicts": 0,
+  "missingCategories": 0,
+  "mode": "apply",
+  "scope": "Create only source-verified missing Product native WordPress Rewrite rules for nine menu catalog roots, with readback; preserve existing enabled published rewrites"
+}
