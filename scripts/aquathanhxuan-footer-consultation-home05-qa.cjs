@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium}=require('playwright');
 const site='https://aquathanhxuan.io.vn';
 const wp='https://admin.aquathanhxuan.io.vn';
-const expectedSha='cebdd48dd73a41ba130cbbeddda8ae5252621730';
+const expectedSha='282aac0a62bf4dd2d860faaa927e5a55bab8aed5';
 const widths=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 const expectedHome=[
   'Nhập khẩu và phân phối chính hãng, được chọn lọc và kiểm tra kỹ trước khi giao tới tay khách hàng.',
@@ -16,7 +16,7 @@ const expectedFeatured=[
   'Vi sinh biodigest Probidio','Phân nước Tropica'
 ];
 const expectedSupport=['Chính sách đổi trả hàng','Giới thiệu','Đại Lý','Khiếu nại','Liên hệ'];
-const expectedSubmenuCounts=[20,7,8,5,8,4,6,4,7,4,2];
+const expectedSubmenuCounts=[21,8,9,6,9,5,7,5,8,5,3];
 (async()=>{
  const markerResponse=await fetch(site+'/aquathanhxuan-staging-build.json?footerconsult='+Date.now(),{headers:{'Cache-Control':'no-cache'}});
  assert.equal(markerResponse.status,200,'MISSING_DEPLOY_MARKER');
@@ -27,8 +27,17 @@ const expectedSubmenuCounts=[20,7,8,5,8,4,6,4,7,4,2];
  const menuSource=(await menuResponse.json())?.menus?.Header?.vi?.items;
  assert(Array.isArray(menuSource)&&menuSource.length===11,'WORDPRESS_HEADER_ROOT_MISMATCH');
  for(let i=0;i<11;i++){
-   assert((menuSource[i]?.children||[]).length>=expectedSubmenuCounts[i],
-     'WORDPRESS_MENU_CHILD_MISSING_'+i+' expected='+expectedSubmenuCounts[i]);
+   const root=menuSource[i],children=root?.children||[];
+   assert.equal(children.length,expectedSubmenuCounts[i],
+     'WORDPRESS_MENU_CHILD_COUNT_'+i);
+   assert.equal(children[0]?.label,'Tất cả','WORDPRESS_ALL_ITEM_MUST_BE_FIRST_'+i);
+   const pathOf=value=>{
+     const link=String(value||'');
+     const parsed=/^https?:\/\//i.test(link)?new URL(link).pathname:link;
+     return parsed.replace(/\/+$/,'');
+   };
+   assert.equal(pathOf(children[0]?.href||children[0]?.slug),
+     pathOf(root?.href||root?.slug),'WORDPRESS_ALL_TARGET_MISMATCH_'+i);
  }
  console.log('HEADER_WORDPRESS_MENU_CHILDREN_PASS='+menuSource.map(i=>(i.children||[]).length).join(','));
 
@@ -47,11 +56,21 @@ const expectedSubmenuCounts=[20,7,8,5,8,4,6,4,7,4,2];
      const roots=page.locator('#desktop-menu > ul > li');
      assert.equal(await roots.count(),11,'DESKTOP_HEADER_ROOT_COUNT');
      const first=roots.first();
-     assert.match(await first.locator(':scope > div > a[href]').getAttribute('href'),/\/san-pham\/thuong-hieu/,'DESKTOP_PARENT_URL_MISSING');
-     const toggle=first.locator(':scope > div > button[data-menu-trigger]');
-     await toggle.click();
+     for(let i=0;i<11;i++){
+       const parent=roots.nth(i);
+       assert.equal(await parent.locator(':scope > a[href]').count(),0,'DESKTOP_PARENT_LINK_NOT_REMOVED_'+i);
+       assert.equal(await parent.locator(':scope > button[data-menu-trigger]').count(),1,
+         'DESKTOP_PARENT_TOGGLE_MISSING_'+i);
+     }
+     const toggle=first.locator(':scope > button[data-menu-trigger]');
+     const initialUrl=page.url();
+     await toggle.locator('span').first().click();
+     assert.equal(page.url(),initialUrl,'DESKTOP_PARENT_NAVIGATED');
      assert.equal(await toggle.getAttribute('aria-expanded'),'true','DESKTOP_SUBMENU_NOT_OPEN');
-     assert((await first.locator('[data-menu-panel] a[href]').count())>=20,'DESKTOP_SUBMENU_LINKS_MISSING');
+     const firstAll=first.locator('[data-menu-panel] a[href]').first();
+     assert.equal((await firstAll.innerText()).trim(),'Tất cả','DESKTOP_ALL_LABEL');
+     assert.match(await firstAll.getAttribute('href'),/\/san-pham\/thuong-hieu\/?$/,'DESKTOP_ALL_PARENT_URL');
+     assert((await first.locator('[data-menu-panel] a[href]').count())>=21,'DESKTOP_SUBMENU_LINKS_MISSING');
      await page.screenshot({path:'artifacts/footer-consultation-home05/header-desktop-submenu.png'});
      await toggle.click();
      assert.equal(await toggle.getAttribute('aria-expanded'),'false','DESKTOP_SUBMENU_NOT_CLOSED');
@@ -62,11 +81,21 @@ const expectedSubmenuCounts=[20,7,8,5,8,4,6,4,7,4,2];
      const roots=page.locator('#mobile-menu-container nav > ul > li');
      assert.equal(await roots.count(),11,'MOBILE_HEADER_ROOT_COUNT');
      const first=roots.first();
-     assert.match(await first.locator(':scope > div > a[href]').getAttribute('href'),/\/san-pham\/thuong-hieu/,'MOBILE_PARENT_URL_MISSING');
+     for(let i=0;i<11;i++){
+       const parent=roots.nth(i);
+       assert.equal(await parent.locator(':scope > div > a[href]').count(),0,'MOBILE_PARENT_LINK_NOT_REMOVED_'+i);
+       assert.equal(await parent.locator(':scope > div > button[data-menu-toggle]').count(),1,
+         'MOBILE_PARENT_TOGGLE_MISSING_'+i);
+     }
      const toggle=first.locator(':scope > div > button[data-menu-toggle]');
-     await toggle.click();
+     const initialUrl=page.url();
+     await toggle.locator('span').first().click();
+     assert.equal(page.url(),initialUrl,'MOBILE_PARENT_NAVIGATED');
      assert.equal(await toggle.getAttribute('aria-expanded'),'true','MOBILE_SUBMENU_NOT_OPEN');
-     assert((await first.locator('div[id^="mobile-branch-"] a[href]').count())>=20,'MOBILE_SUBMENU_LINKS_MISSING');
+     const firstAll=first.locator('div[id^="mobile-branch-"] a[href]').first();
+     assert.equal((await firstAll.innerText()).trim(),'Tất cả','MOBILE_ALL_LABEL');
+     assert.match(await firstAll.getAttribute('href'),/\/san-pham\/thuong-hieu\/?$/,'MOBILE_ALL_PARENT_URL');
+     assert((await first.locator('div[id^="mobile-branch-"] a[href]').count())>=21,'MOBILE_SUBMENU_LINKS_MISSING');
      await page.screenshot({path:'artifacts/footer-consultation-home05/header-mobile-submenu.png'});
      await toggle.click();
      assert.equal(await toggle.getAttribute('aria-expanded'),'false','MOBILE_SUBMENU_NOT_CLOSED');
