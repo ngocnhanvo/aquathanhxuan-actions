@@ -1,0 +1,46 @@
+{
+  "project": "aquathanhxuan.com",
+  "task": "Đồng bộ layout danh mục Thương hiệu/ATMAN theo web gốc",
+  "status": "DONE",
+  "updated_at": "2026-11-09",
+  "production": {
+    "frontend": "https://aquathanhxuan.io.vn/san-pham/atman",
+    "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+    "branch": "master",
+    "deployed_sha": "1971495f1e1990983a75bf7e7a4c9b91d84c7f77",
+    "deploy_workflow": "Aqua Thanh Xuân Astro deployment (WordPress Build Website only)",
+    "deploy_run_id": 42572528497,
+    "deploy_result": "success"
+  },
+  "wordpress": {
+    "site": "https://admin.aquathanhxuan.io.vn",
+    "page_id": 82457,
+    "esc_table": "catalog_banner",
+    "native_tablepress_id": 157,
+    "imported_banner_count": 2,
+    "category_id": 1793,
+    "migrated_product_count": 9,
+    "migration_result": "success",
+    "migration_readback_run_id": 42567646966,
+    "public_product_rewrite_record_id": 82743
+  },
+  "qa": {
+    "run_id": 42572578094,
+    "result": "success",
+    "viewport_widths": [
+      1440,
+      390
+    ],
+    "checked": [
+      "2 independently selectable CMS banners",
+      "9 actual ATMAN products",
+      "all 9 public product URLs HTTP 200",
+      "4 sorting options; prices asc/desc",
+      "recently viewed after product detail navigation",
+      "source shortcode not leaked to HTML SEO meta/JSON-LD",
+      "no browser pageerrors",
+      "no horizontal overflow"
+    ]
+  },
+  "note": "Earlier 9 global astro check errors are in unrelated existing modules; targeted 6 tests passed; production Astro build passed. Public archive is src/pages/san-pham/[...parts].astro, not solely the internal SSR route."
+}
