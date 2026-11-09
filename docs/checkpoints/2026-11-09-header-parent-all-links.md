@@ -19,12 +19,12 @@ Status: IN_PROGRESS. Preserve existing deployed state until WordPress menu order
 - Run [42544481100](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42544481100) created exactly eleven native custom children (IDs 82685–82695), one per parent, preserving the original parent URL. Readback failed over a harmless slash prefix mismatch; children persist.
 - Run [42544745106](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42544745106) confirmed 97 menu items and detected existing sibling menu_order conflicts: Tất cả not necessarily first in every submenu.
 - Current writer `9c61ffd9d2e94819a20dec1aea3082d91f5300af` preserves current sibling order while assigning stable 1-based menu_order only within the affected parent subtrees, skips unchanged records, and validates final WordPress REST hierarchy.
-- Run [42545042895](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545042895) was IN_PROGRESS at last check; MUST inspect its actual conclusion/job log/artifact before deployment.
+- Run [42545042895](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545042895) SUCCESS: `HEADER_ALL_CMS_PASS={parents:11,added:0,reused:11,reordered:75,firstChild:Tất cả,childCounts:[21,8,9,6,9,5,7,5,8,5,3]}`. 75 existing children received stable order; original 11 parent URLs/IDs and original child routes preserved.
 - No product categories or parent menu items are created/deleted/modified by this writer.
 
 ## Remaining steps
-1. Confirm run 42545042895 SUCCESS and `HEADER_ALL_CMS_PASS` in log; if not, inspect failure and repair minimal scope. Verify WordPress REST first child `Tất cả` for all 11, href equals the original parent route, 75 original child entries preserved.
-2. Verify Astro `master` HEAD still 282aac0a. Trigger **existing** production pipeline via new `build-requests/*.json` using exact source_sha; watch its run and associated deploy until both BUILD_SUCCESS and DEPLOY_READY.
+1. DONE: WordPress CMS run 42545042895 PASS with all 11 first-child Tất cả items and 75 original children retained.
+2. IN PROGRESS: production build request `build-requests/2026-11-09-header-all-282aac0.json` was created, workflow [42545372518](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42545372518) is running. Watch exact build/deploy conclusion; do not trigger again.
 3. Production QA script `scripts/aquathanhxuan-footer-consultation-home05-qa.cjs` already updated for new SHA 282aac0a and expects 11 Tất cả items. Trigger via updated `qa-requests/footer-consultation-20261109.json` only after deploy. Check Playwright 5 viewports, desktop/mobile toggle no navigation, all links, Footer/Home05 unaffected.
 4. Update this checkpoint with verified SHA, run IDs and outcomes, then write `chatgpt/latest-response.md` in this Actions repo. No repeat of successful CMS writes/builds.
 
