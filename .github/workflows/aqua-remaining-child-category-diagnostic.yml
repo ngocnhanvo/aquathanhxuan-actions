@@ -1,0 +1,31 @@
+name: Aqua child category original product read-only diagnostics
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'audit-requests/remaining-child-category.json'
+permissions:
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-remaining-child-category-diagnostic.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Compare original child taxonomy with WordPress and public rendered Product IDs
+        run: node scripts/aqua-remaining-child-category-diagnostic.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-child-diagnostic
+          path: artifacts/aqua-remaining-child-diagnostic/report.json
+          if-no-files-found: ignore
+          retention-days: 14
