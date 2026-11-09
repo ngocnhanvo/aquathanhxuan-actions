@@ -1,0 +1,7 @@
+{
+  "project": "aquathanhxuan.com",
+  "mode": "unit-only",
+  "php_sha": "8dec3b5ce68e4576551e6509449c4134a7b2f1d0",
+  "astro_sha": "ed8bd633bb5447efb74ffa161d93277166d2c88d",
+  "reason": "Regression tests for product log paged transport and fail-closed snapshots after nine-menu import"
+}
