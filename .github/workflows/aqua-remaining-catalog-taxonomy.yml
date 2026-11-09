@@ -1,0 +1,31 @@
+name: Aqua remaining catalog four verified Woo taxonomy terms
+on:
+  push:
+    branches: [main]
+    paths:
+      - cms-requests/remaining-catalog-taxonomy.json
+permissions:
+  contents: read
+concurrency:
+  group: aqua-remaining-catalog-writes
+  cancel-in-progress: false
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m py_compile scripts/aqua-remaining-catalog-ensure-categories.py
+      - name: Create only four source-proven missing Woo categories
+        run: python3 scripts/aqua-remaining-catalog-ensure-categories.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-remaining-catalog-taxonomy
+          path: artifacts/aqua-remaining-catalog-taxonomy/result.json
+          if-no-files-found: ignore
+          retention-days: 14
