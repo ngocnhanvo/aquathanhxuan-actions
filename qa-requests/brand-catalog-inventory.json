@@ -1,6 +1,8 @@
 {
-  "task": "Read-only source-target inventory for all 20 target header Brand child categories",
+  "task": "Read-only progress snapshot while brand-a importer is in progress",
   "source": "aquathanhxuan.com",
   "target": "admin.aquathanhxuan.io.vn",
-  "request": "2026-11-09-brand-menu"
+  "request": "2026-11-09-brand-menu",
+  "followupRunId": 42579994450,
+  "snapshot": 2
 }
