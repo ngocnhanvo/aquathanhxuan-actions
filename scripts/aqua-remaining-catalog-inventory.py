@@ -7,7 +7,17 @@ import html,http.cookiejar,json,os,re,time,urllib.parse,urllib.request,urllib.er
 from pathlib import Path
 SOURCE="https://aquathanhxuan.com"
 DEST="https://admin.aquathanhxuan.io.vn"
-ROOT_NAMES=("Máy lọc","Vật liệu lọc","Phụ kiện","Đá / Lũa / Cát","Hóa chất","Bể kính","Nền","CO2","Sinh vật")
+ROOT_IDS=(
+ ("Máy lọc","may-loc","may-loc"),
+ ("Vật liệu lọc","vat-lieu-loc","vat-lieu-loc"),
+ ("Phụ kiện","may-lam-mat-chiler","phu-kien"),
+ ("Đá / Lũa / Cát","lua-va-da","da-lua-va-cat"),
+ ("Hóa chất","thuoc-xu-ly-van-de","thuoc-xu-ly-van-de"),
+ ("Bể kính","be-kinh-va-chan","be-kinh-va-chan"),
+ ("Nền","nen-cho-be-thuy-sinh","nen-cho-be-thuy-sinh"),
+ ("CO2","co2","co2"),
+ ("Sinh vật","cay-va-ca-thuy-sinh","cay-va-ca-thuy-sinh"),
+)
 OUT=Path("artifacts/aqua-remaining-catalog")
 OUT.mkdir(parents=True,exist_ok=True)
 result={"project":"aquathanhxuan.com","source":SOURCE,"target":DEST,"read_only":True,
@@ -110,13 +120,15 @@ def add_listing(sc,dc,root_id,root_target):
   print("AQUA_REMAINING_CATEGORY="+json.dumps(record,ensure_ascii=False),flush=True)
   save()
 root_ids=[]
-for name in ROOT_NAMES:
-  roots=[c for c in source_cats if norm(c.get("name"))==norm(name) and not int(c.get("parent") or 0)]
+for name,source_slug,target_slug in ROOT_IDS:
+  roots=[c for c in source_cats if c.get("slug")==source_slug and not int(c.get("parent") or 0)]
   if len(roots)!=1:
-    result["failures"].append({"type":"SOURCE_ROOT_MISSING_OR_AMBIGUOUS","name":name,"matches":len(roots)})
+    result["failures"].append({"type":"SOURCE_ROOT_MISSING_OR_AMBIGUOUS","name":name,"source_slug":source_slug,"matches":len(roots)})
     continue
   root=roots[0];sid=int(root["id"]);root_ids.append(sid)
-  target=match_category(root,0)
+  target_candidates=[c for c in target_cats if c.get("slug")==target_slug and not int(c.get("parent") or 0)]
+  assert len(target_candidates)<=1,"Destination root slug collision"
+  target=target_candidates[0] if target_candidates else None
   root_target=int(target["id"]) if target else 0
   if not target:result["failures"].append({"type":"TARGET_ROOT_MISSING","name":name,"source_slug":root.get("slug"),"source_id":sid})
   descendants=[]
