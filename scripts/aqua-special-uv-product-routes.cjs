@@ -98,7 +98,7 @@ async function pagedTarget(page,url,headers){
    const url='/san-pham/'+slug;
    return previous.some(rule=>{
     const acf=rule.acf||{};
-    if(acf.type!=='Rewrite'||acf.match_type!=='Regex'||![true,1,'1'].includes(acf.enable))return false;
+    if(rule.status!=='publish'||acf.type!=='Rewrite'||acf.match_type!=='Regex'||![true,1,'1'].includes(acf.enable))return false;
     if(String(acf.to_link)!=='/ssr/products/$1/detail')return false;
     try{return new RegExp(String(acf.from_link||'')).test(url)}catch{return false}
    });
@@ -120,6 +120,8 @@ async function pagedTarget(page,url,headers){
     assert.equal(acf.to_link,rule.to);
     assert.equal(acf.type,'Rewrite');
     assert.equal(acf.match_type,'Regex');
+    assert.equal(matches[0].status,'publish','Matching Product Rewrite is not published');
+    assert([true,1,'1'].includes(acf.enable),'Matching Product Rewrite is disabled');
     report.routes.push({id:matches[0].id,count:rule.slugs.length,status:'reused'});
     save();
     continue;
