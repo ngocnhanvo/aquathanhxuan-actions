@@ -28,7 +28,7 @@ jobs:
           const { chromium } = require('playwright');
           const assert = require('node:assert/strict');
           const origin='https://aquathanhxuan.io.vn';
-          const expected='197a54fcddb77c02d5d986f71cdc92b14c403341';
+          const expected='7fe42e89648c13dc84d72db8d80bf77086c13306';
           const cases=[[1440,900],[1024,768],[768,1024],[844,390],[390,844]];
 
           (async()=>{
@@ -66,6 +66,8 @@ jobs:
                 assert.equal(await cards.count(),12,'Sale product card count');
                 assert.equal(await sale.locator('.aqua-sale__discount').count(),12,'Discount badge count');
                 assert.equal(await sale.locator('.aqua-sale__prices strong').count(),12,'Sale price count');
+                const salePriceColor=await sale.locator('.aqua-sale__prices strong').first().evaluate(node=>getComputedStyle(node).color);
+                assert.equal(salePriceColor,'rgb(227, 35, 53)','Sale price must be red on every viewport');
                 assert.equal(await sale.locator('.aqua-sale__prices del').count(),12,'Regular price count');
                 assert.equal(await sale.locator('[data-sale-add]').count(),12,'Cart button count');
 
@@ -125,6 +127,9 @@ jobs:
                   'Production must not hotlink legacy product images');
 
                 const trackLocator=sale.locator('[data-sale-track]');
+                const trackCss=await trackLocator.evaluate(node=>({behavior:getComputedStyle(node).scrollBehavior,snap:getComputedStyle(node).scrollSnapType}));
+                assert.equal(trackCss.behavior,'auto','CSS smooth scrolling must not suppress Lighthouse LCP');
+                assert.equal(trackCss.snap,'x mandatory','Sale scroll snap must remain enabled');
                 await trackLocator.evaluate(el=>{
                   el.style.scrollBehavior='auto';
                   el.style.scrollSnapType='none';
