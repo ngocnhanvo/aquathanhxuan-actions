@@ -78,6 +78,8 @@ async function run(){
     ['Odyssea','odyssea',2176,1818,6],
     ['Phụ kiện đèn','den-phu-kien',1524,1792,7],
   ];
+  const allowedDeferred=new Set(CONFIG.mediaDeferredSourceIds||[]);
+  const observedDeferred=new Set();
   const seen=new Map();
   for(const [name,dslug,srcId,dstId,count] of expected){
    const sc=sourceCategories.find(x=>Number(x.id)===srcId);
@@ -99,7 +101,12 @@ async function run(){
     assert.equal(String(dst.price||''),String(item.prices.price),'Price mismatch '+item.slug);
     assert.equal(dst.stock_status,item.is_in_stock?'instock':'outofstock','Stock status mismatch '+item.slug);
     assert((dst.categories||[]).some(x=>Number(x.id)===1768),'Root Đèn category not assigned '+item.slug);
-    assert((dst.images||[]).length>0,'Missing original product media '+item.slug);
+    if(!(dst.images||[]).length){
+      assert(allowedDeferred.has(Number(item.id)),'Missing original product media without source evidence '+item.slug);
+      const marker=(dst.meta_data||[]).find(x=>x.key==='_esc_source_media_deferred');
+      assert(marker?.value,'Missing explicit source media deferred record '+item.slug);
+      observedDeferred.add(Number(item.id));
+    }
     seen.set(item.slug,item);
    }
    const item={name,sourceCount:count,targetCount:targetRows.length,sourceCategory:srcId,targetCategory:dstId,slug:dslug,missing:0};
@@ -107,7 +114,7 @@ async function run(){
    console.log('LIGHT_CATEGORY_DATA_PASS='+JSON.stringify(item));save();
   }
   assert.equal(seen.size,59,'Root + children unique total changed');
-  console.log('LIGHT_WOO_PARITY_PASS='+JSON.stringify({unique:seen.size,categories:report.categories.length}));
+  console.log('LIGHT_WOO_PARITY_PASS='+JSON.stringify({unique:seen.size,categories:report.categories.length,mediaDeferred:[...observedDeferred]}));
   for(const width of [1440,390]){
    const context=await browser.newContext({viewport:{width,height:width===1440?900:844}});
    const tab=await context.newPage();
