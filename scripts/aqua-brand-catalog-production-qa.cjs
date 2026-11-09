@@ -94,6 +94,7 @@ async function categoryPages(root,slug){
   const dstBrands=dstCats.filter(x=>Number(x.parent)===Number(destParents[0].id));
   assert.equal(dstBrands.length,20,'Target WordPress must have 20 menu brand categories');
   const oracle={};
+  const allPublicProductSlugs=new Set();
   for(const category of dstBrands){
     const source=srcBrands.find(x=>norm(x.name)===norm(category.name));
     if(!source){
@@ -110,6 +111,7 @@ async function categoryPages(root,slug){
     assert.equal(bySlug.size,targetRows.length,'Target product slugs not unique '+category.name);
     assert.equal(targetRows.length,sourceRows.length,'CMS count mismatch '+category.name);
     for(const product of sourceRows){
+      allPublicProductSlugs.add(product.slug);
       const target=bySlug.get(product.slug);
       assert(target,'Missing '+category.name+' product '+product.slug);
       const orig=(target.meta_data||[]).find(x=>x.key==='_esc_origin_product_id');
@@ -147,6 +149,30 @@ async function categoryPages(root,slug){
     oracle[category.slug]=new Map(sourceRows.map(p=>[p.slug,Number(p.prices?.price||0)]));
     console.log('BRAND_QA_CATEGORY_PASS='+JSON.stringify(summary.categories.at(-1)));persist();
   }
+  // Validate every public Product detail permalink, not just one sample.
+  // Three concurrent reads keep production load bounded.
+  const routeContext=await browser.newContext();
+  const publicSlugs=[...allPublicProductSlugs];
+  let cursor=0;
+  const routeWorker=async()=>{
+    for(;;){
+      const index=cursor++;
+      if(index>=publicSlugs.length)return;
+      const slug=publicSlugs[index];
+      const href=FRONT+'/san-pham/'+encodeURIComponent(slug);
+      let response;
+      for(let attempt=0;attempt<2;attempt++){
+        response=await routeContext.request.get(href,{timeout:30000,failOnStatusCode:false});
+        if(response.status()!==502&&response.status()!==503&&response.status()!==504)break;
+        if(attempt===0)await pause(700);
+      }
+      assert.equal(response.status(),200,'Broken public Product permalink '+href);
+    }
+  };
+  try{await Promise.all(Array.from({length:3},()=>routeWorker()))}
+  finally{await routeContext.close()}
+  console.log('BRAND_QA_ALL_PRODUCT_LINKS_PASS='+publicSlugs.length);
+
   for(const width of [1440,390]){
     const context=await browser.newContext({viewport:{width,height:width===390?844:900}});
     const page=await context.newPage();
