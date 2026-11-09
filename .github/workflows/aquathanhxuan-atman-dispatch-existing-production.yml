@@ -1,0 +1,49 @@
+name: Aqua Atman dispatch existing production pipeline
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-atman-dispatch-existing-production.yml'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: aquathanhxuan-astro-production-dispatch
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact Astro production source
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+          path: source
+      - name: Verify immutable requested source SHA
+        run: |
+          set -euo pipefail
+          test "$(git -C source symbolic-ref --short HEAD)" = master
+          actual="$(git -C source rev-parse HEAD)"
+          test "$actual" = 29fc579c7c2a6041b14ac2f576032c62d4ec89dd
+          echo "AQUA_ASTRO_SHA_VERIFIED=$actual"
+      - name: Refuse duplicate active production deployment and dispatch existing workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo}=context.repo;
+            const found=await github.rest.actions.listWorkflowRuns({
+              owner,repo,workflow_id:'aquathanhxuan-production-deploy.yml',per_page:25
+            });
+            const active=found.data.workflow_runs.filter(run=>
+              run.status==='in_progress'||run.status==='queued'||run.status==='waiting'||run.status==='pending');
+            if(active.length)throw Error('Existing production deploy active: '+active.map(x=>x.id).join(','));
+            await github.rest.repos.createDispatchEvent({
+              owner,repo,event_type:'wp_trigger_build',
+              client_payload:{site_domain:'aquathanhxuan.io.vn'}
+            });
+            core.info('Existing AQUA production workflow dispatched; this is not a build PASS.');
