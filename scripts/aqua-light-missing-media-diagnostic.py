@@ -6,6 +6,7 @@ from html.parser import HTMLParser
 
 ORIGIN='https://aquathanhxuan.com'
 IDS=[1815,3054,3057,3060,3063]
+source_media_regex=re.compile(r'https?://aquathanhxuan\.com/wp-content/uploads/[^\s"\'<>]+',re.I)
 class HeadParser(HTMLParser):
   def __init__(self):
     super().__init__()
@@ -26,7 +27,7 @@ def jsonget(url):return json.loads(raw(url).decode('utf-8','replace'))
 def check(url):
   try:
     blob=raw(url,60)
-    good=blob.startswith((b'\\x89PNG\\r\\n',b'\\xff\\xd8\\xff',b'RIFF',b'GIF8',b'\\x00\\x00\\x00'))
+    good=(blob.startswith(bytes([137,80,78,71])) or blob.startswith(bytes([255,216,255])) or blob.startswith(b'RIFF') or blob.startswith(b'GIF8'))
     return {'url':url,'status':200,'looks_like_image':good,'size_preview':len(blob)}
   except urllib.error.HTTPError as e:
     return {'url':url,'status':e.code}
@@ -50,7 +51,7 @@ for sid in IDS:
             entry['source_sizes'].append({'kind':kind,**check(url)})
       except Exception as e:entry['media_meta_error']=str(e)[:170]
     item['images'].append(entry)
-  for u in re.findall(r'https?://aquathanhxuan\\.com/wp-content/uploads/[^\\s"\\'<>]+',str(src.get('description') or '')+' '+str(src.get('short_description') or '')):
+  for u in source_media_regex.findall(str(src.get('description') or '')+' '+str(src.get('short_description') or '')):
     url=html.unescape(u).split('?',1)[0]
     if url not in item['description_image_urls']:
       item['description_image_urls'].append(url)
