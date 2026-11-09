@@ -104,6 +104,7 @@ async function run(){
   const observedDeferred=new Set();
   const seen=new Map();
   const seenDest=new Map();
+  const expectedIdsByCategory=new Map();
   for(const [name,dslug,srcId,dstId,count] of expected){
    const sc=sourceCategories.find(x=>Number(x.id)===srcId);
    const dc=targetCategories.find(x=>Number(x.id)===dstId);
@@ -133,6 +134,7 @@ async function run(){
     seen.set(item.slug,item);
     seenDest.set(item.slug,dst);
    }
+   expectedIdsByCategory.set(dslug,new Set(original.map(x=>String(mapped.get(x.slug).id))));
    const item={name,sourceCount:count,targetCount:targetRows.length,sourceCategory:srcId,targetCategory:dstId,slug:dslug,missing:0};
    report.categories.push(item);
    console.log('LIGHT_CATEGORY_DATA_PASS='+JSON.stringify(item));save();
@@ -188,6 +190,13 @@ async function run(){
     await tab.locator('[data-catalog-product]').first().waitFor({state:'visible',timeout:15000});
     const cards=await tab.locator('[data-catalog-product]').count();
     assert(cards>0,'No cards in category '+url);
+    if(c.sourceCount<=8){
+      const actualIds=await tab.locator('[data-catalog-product]').evaluateAll(nodes=>nodes.map(node=>String(node.getAttribute('data-catalog-product')||'')));
+      const expectedIds=[...expectedIdsByCategory.get(c.slug)];
+      assert.deepEqual(actualIds.sort(),expectedIds.sort(),'Product IDs shown in category differ from verified WordPress '+url);
+    }else{
+      assert(cards>=8,'Too few Product cards rendered for '+url+' expected at least 8 actual '+cards);
+    }
     const overflow=await tab.evaluate(()=>Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-window.innerWidth);
     assert(overflow<=3,'Horizontal overflow '+url+' '+width+' '+overflow);
     const filename='light-'+c.slug+'-'+width+'.png';
