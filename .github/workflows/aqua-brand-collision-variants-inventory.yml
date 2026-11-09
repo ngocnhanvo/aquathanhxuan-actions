@@ -1,0 +1,31 @@
+name: Aqua inspect exact source media variants for missing brands
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-brand-collision-variants-inventory.yml'
+      - 'qa-requests/brand-collision-variants.json'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/aqua-brand-collision-variants-inventory.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - run: node scripts/aqua-brand-collision-variants-inventory.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aqua-brand-source-media-variants
+          path: artifacts/brand-collision-inventory
+          if-no-files-found: ignore
+          retention-days: 14
