@@ -1,0 +1,22 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "https://aquathanhxuan.com",
+  "target": "https://admin.aquathanhxuan.io.vn",
+  "read_only": true,
+  "root_labels": [
+    "Máy lọc",
+    "Vật liệu lọc",
+    "Phụ kiện",
+    "Đá / Lũa / Cát",
+    "Hóa chất",
+    "Bể kính",
+    "Nền",
+    "CO2",
+    "Sinh vật"
+  ],
+  "excluded_already_verified_roots": [
+    "Đèn"
+  ],
+  "requestedAt": "2026-11-09",
+  "attempt": 1
+}
