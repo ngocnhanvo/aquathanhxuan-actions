@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
+  "purpose": "Expose WooCommerce regular_price and stock_status to Astro Product detail REST"
+}
