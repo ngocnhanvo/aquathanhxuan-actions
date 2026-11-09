@@ -1,0 +1,19 @@
+{
+  "project": "aquathanhxuan.com",
+  "sha": "beb08cf9c402b53c0ffe603dd540f98ab6082e04",
+  "sourceProductIds": [
+    265801,
+    265482,
+    6582,
+    350144
+  ],
+  "targetProductIds": [
+    83196,
+    83183,
+    83166,
+    82539
+  ],
+  "scope": "Read-only media decode after lazy loading in four original-image Product cards, desktop/mobile",
+  "productionQaRun": 42641456578,
+  "attempt": 1
+}
