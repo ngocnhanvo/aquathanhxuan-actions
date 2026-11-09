@@ -41,6 +41,15 @@ GitHub Actions read-only run [42579127519](https://github.com/ngocnhanvo/aquatha
 - Nếu có lỗi ở job, đọc `BRAND_PRODUCT_FAILED`, `BRAND_ASSET_DEFERRED` và `BRAND_MIGRATION_RESULT`; sau sửa phải rerun idempotent. Không dùng fake products, không tự xóa dữ liệu. Script tải ảnh đã được cập nhật giới hạn retry hữu hạn sau khi run hiện hành khởi động; rerun mới áp dụng.
 - **Chưa đánh dấu DATA_PARITY_PASS khi run chưa xong**.
 
+## Cập nhật bổ sung — 09/11/2026, từ 15:42 giờ Việt Nam
+
+- Batch D [42586832096](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42586832096) kết thúc `PARTIAL`: `expected=38, created=28, reused=4, category_linked=4, failed=6`. Các source Product ID cần xử lý: `265594,265379,265293,265292,265290` (trùng basename/khác SHA256); `184` (ảnh source HTTP 404).
+- Batch C source 10 IDs đang phục hồi bằng size variants *thật từ source WordPress media_details*: [run 42588861095](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42588861095), workflow `aqua-brand-collision-rescue.yml`. Không ghi đè/rename file gốc; metadata `source_media_variants` ghi ngoại lệ original full-size collision. Đã sửa fallback ảnh trong description theo source media ID cùng sản phẩm.
+- Batch D 5 IDs tên ảnh xung đột đã gửi [run 42589466504](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42589466504), chờ chung `concurrency.group=aqua-brand-catalog-writes` với C. Script `scripts/aqua-brand-d-collision-rescue.py` chỉ nhận đúng 5 IDs.
+- Source Product `184` (`seachem-matrix-0-5`) đã được xác minh [run 42589471431](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42589471431): media ID `266903`, `src` và **tất cả ảnh resized** (300x199, 1024x678, 768x509, 600x398, 300x300) HTTP 404 trên chính source. Gửi script phục hồi gốc, không dùng ảnh giả: [run 42589893222](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42589893222). QA phải chấp nhận ngoại lệ `sourceMediaDeferred:184`, vẫn kiểm tra giá/slug/category/meta.
+- Lượt inventory độc lập [42588537709](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42588537709) PASS: `157` memberships nguồn, `138` đã có ở WordPress tính tại thời điểm đọc, `19` missing (C=10; D=9 tại lúc đang nhập), **0 price mismatches** trong từng category. Con số thay đổi khi D và recovery chạy, phải kiểm kê lại trước build.
+- Chưa đánh dấu QA/DATA_PARITY/DEPLOY_PASS cho toàn bộ thương hiệu cho tới khi cả 157 memberships và permalink/ảnh đại diện (ngoại lệ source 404) được xác minh.
+
 ## Link chi tiết, build và QA — tiếp theo
 
 - Atman đã có một WordPress Rewrite scoped (post ID 82743). Các sản phẩm brand mới cũng cần Rewrite có giới hạn slug, nếu không `/san-pham/<product-slug>` bị route nhầm category và lỗi 500.
