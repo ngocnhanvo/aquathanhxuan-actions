@@ -117,8 +117,12 @@ async function categoryPages(root,slug){
       const srcPrice=String(product.prices?.price||'');
       assert.equal(String(target.price),srcPrice,'Price mismatch '+product.slug);
       assert(target.images.length>0,'Missing target media '+product.slug);
+      assert(target.images.length>=(product.images||[]).filter(x=>x.src).length,
+        'Missing source image/gallery media '+product.slug);
       assert(target.images.every(image=>String(image.src||'').includes('/wp-content/uploads/')&&!String(image.src||'').startsWith(SOURCE)),
         'Media hotlink or missing original asset '+product.slug);
+      if(String(product.description||'').trim())assert(String(target.description||'').trim(),'Original description missing '+product.slug);
+      if(String(product.short_description||'').trim())assert(String(target.short_description||'').trim(),'Original short description missing '+product.slug);
       assert(target.categories.some(c=>Number(c.id)===Number(category.id)),'Broken target category link '+product.slug);
     }
     summary.categories.push({name:category.name,srcSlug:source.slug,dstSlug:category.slug,sourceCount:sourceRows.length,targetCount:targetRows.length});
