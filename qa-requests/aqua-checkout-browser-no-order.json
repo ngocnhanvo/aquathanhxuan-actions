@@ -1,0 +1,10 @@
+{
+  "scope": "AQUA_BROWSER_CART_TO_GATEWAY",
+  "project": "aquathanhxuan.com",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "astro_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
+  "routes_run": 42782297740,
+  "no_order_creation": true,
+  "no_payment_attempt": true,
+  "cleanup_required": true
+}
