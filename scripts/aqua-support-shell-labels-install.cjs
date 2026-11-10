@@ -89,7 +89,7 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD,'Missing W
     // The native Save Changes button keeps the old row dimension after calling
     // setData() programmatically. Use its nonce-checked TablePress AJAX writer
     // with explicit new dimensions; preserve the table's existing options.
-    const nonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+    const nonce=(await page.content()).match(/edit_table:\s*'([^']+)'/)?.[1];
     assert(nonce,'Native TablePress edit nonce missing '+target.table);
     const form=new URLSearchParams();
     for(const [key,value] of [
