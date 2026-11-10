@@ -1,0 +1,33 @@
+name: Aqua order history skeleton production browser QA (READ ONLY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-order-history-skeleton-production-qa.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify browser script syntax
+        run: node --check scripts/aqua-order-history-skeleton-qa.cjs
+      - name: Use matching installed browser driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Validate desktop/mobile loading and 200/401/500 API outcomes
+        run: node scripts/aqua-order-history-skeleton-qa.cjs
+      - name: Upload desktop and mobile skeleton screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-order-history-skeleton-browser-evidence
+          path: artifacts/aqua-order-history-skeleton/
+          if-no-files-found: ignore
+          retention-days: 7
