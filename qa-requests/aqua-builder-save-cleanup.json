@@ -1,0 +1,14 @@
+{
+  "environment": "production",
+  "mode": "recover-preview-only-esc-label",
+  "source_run": 42870673248,
+  "page_id": 83810,
+  "table_id": "checkout_ui_vi",
+  "key": "demo_quantity",
+  "original_label": "Số lượng: 1",
+  "expected_marker": "Số lượng: 1 [QA-42870673248]",
+  "no_orders": true,
+  "no_customer_write": true,
+  "no_email": true,
+  "cleanup_remaining_expected": 0
+}
