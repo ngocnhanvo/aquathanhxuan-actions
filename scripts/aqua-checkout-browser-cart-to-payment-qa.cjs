@@ -31,6 +31,29 @@ async function apiPost(path,body){
   await page.locator('h1').filter({hasText:'Giỏ hàng'}).waitFor({timeout:12000});
   await page.locator('#cart-content-wrapper').waitFor({timeout:5000});
   result.checks.push({stage:'SSR cart route',status:'PASS',http:200});save();
+  // Verify the exact cart defect reported by the buyer:
+  // real thumbnail, correct individual and line prices, VAT already included.
+  await page.waitForFunction(() => {
+    const img=document.querySelector('#cart-list-container img');
+    const prices=[...document.querySelectorAll('#cart-list-container p.font-bold.text-primary')];
+    return img?.complete && img?.naturalWidth > 0 && !img.src.startsWith('data:') &&
+      prices.length >= 2 && prices.every(x => /2[.,]700[.,]000/.test(x.textContent||'')) &&
+      /2[.,]565[.,]000/.test(document.querySelector('#summary-total')?.textContent||'');
+  },null,{timeout:20000});
+  const productImage=await page.locator('#cart-list-container img').first().getAttribute('src');
+  const cartPrices=await page.locator('#cart-list-container p.font-bold.text-primary').allTextContents();
+  const cartSubtotal=await page.locator('#summary-subtotal').textContent();
+  const cartDiscount=await page.locator('#summary-discount-total').textContent();
+  const cartTotal=await page.locator('#summary-total').textContent();
+  assert(/2[.,]700[.,]000/.test(cartSubtotal||''),'Gross product subtotal must include VAT');
+  assert(/135[.,]000/.test(cartDiscount||''),'Woo automatic 5% coupon must be preserved');
+  assert(/2[.,]565[.,]000/.test(cartTotal||''),'VAT must not be added to total a second time');
+  assert.equal(await page.locator('#summary-tax-wrapper').count(),0,'Cart must not show VAT surcharge');
+  result.checks.push({
+    stage:'Cart thumbnail, unit/line price and total include VAT',status:'PASS',
+    image_loaded:true,image_src:productImage,prices:cartPrices,
+    gross_subtotal:cartSubtotal,discount:cartDiscount,total:cartTotal
+  });save();
   await page.screenshot({path:OUT+'/cart.png',fullPage:false});
   const go=page.locator('#btn-proceed-checkout');
   await go.waitFor({timeout:12000});
@@ -42,6 +65,18 @@ async function apiPost(path,body){
   await page.locator('h1').filter({hasText:'Thanh toán'}).waitFor({timeout:12000});
   await page.locator('#checkout-form').waitFor({timeout:8000});
   result.checks.push({stage:'SSR checkout route with real cart',status:'PASS',http:200});save();
+  await page.waitForFunction(()=>{
+    const c=document.querySelector('#checkout-cart-container');
+    return c && /2[.,]700[.,]000/.test(c.textContent||'') &&
+      /2[.,]565[.,]000/.test(c.textContent||'');
+  },null,{timeout:15000});
+  assert(await page.locator('#checkout-cart-container img').first().evaluate(
+    img=>img instanceof HTMLImageElement && img.complete && img.naturalWidth>0
+  ),'Checkout product thumbnail must load');
+  assert.equal(await page.locator('#checkout-cart-container').getByText('Thuế', {exact:true}).count(),0,
+    'Checkout must not add a separate VAT surcharge');
+  result.checks.push({stage:'Checkout thumbnail and tax-inclusive total',status:'PASS'});save();
+
   await page.waitForFunction(()=>{
    const el=document.querySelector('#checkout-payment-methods');
    return !!el?.querySelector('input[name="payment_method"]');
