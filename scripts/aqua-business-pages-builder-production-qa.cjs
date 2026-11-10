@@ -8,15 +8,17 @@ const WP='https://admin.aquathanhxuan.io.vn';
 const FRONT='https://aquathanhxuan.io.vn';
 const OUT='artifacts/aqua-business-pages-builder';
 const pages=[
+ // Check ordinary support Pages first so failures are diagnosed quickly,
+ // followed by the previously verified stateful commerce previews.
+ {id:82718,table:'support_contact',slug:'lien-he',states:[]},
+ {id:82716,table:'support_complaint',slug:'khieu-nai',states:[]},
+ {id:82714,table:'support_dealer',slug:'dai-ly',states:[]},
  {id:83821,table:'order_history_vi',count:38,slug:'lich-su-mua-hang',states:['orders','empty','guest','loading','error']},
  {id:83808,table:'cart_ui_vi',count:20,slug:'cart',states:['items','empty']},
  {id:83810,table:'checkout_ui_vi',count:59,slug:'checkout',states:['guest','account']},
  {id:83812,table:'checkout_done_ui_vi',count:34,slug:'order-received',states:['success','error']},
  {id:83827,table:'lost_password_vi',count:12,slug:'quen-mat-khau',states:['form','success','error']},
- {id:83829,table:'reset_password_vi',count:20,slug:'dat-lai-mat-khau',states:['form','invalid','success']},
- {id:82718,table:'support_contact',slug:'lien-he',states:[]},
- {id:82716,table:'support_complaint',slug:'khieu-nai',states:[]},
- {id:82714,table:'support_dealer',slug:'dai-ly',states:[]}
+ {id:83829,table:'reset_password_vi',count:20,slug:'dat-lai-mat-khau',states:['form','invalid','success']}
 ];
 fs.mkdirSync(OUT,{recursive:true});
 const audit={result:'STARTED',pages:[],blockedWrites:[]};
