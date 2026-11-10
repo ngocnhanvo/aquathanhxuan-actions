@@ -44,14 +44,14 @@ const getCoupons=c=>(c.coupons||[]).map(x=>String(typeof x==='string'?x:(x.coupo
   const subtotal=Number(cart?.totals?.subtotal||0);
   const discount=Number(cart?.totals?.discount_total||0);
   const coupons=getCoupons(cart);
-  const expectedDiscount=Math.round(subtotal*0.05);
+  const expectedDiscount=Math.round(subtotal*0.10);
   console.log('AQUA_CART_SYNCED_SUMMARY='+JSON.stringify({coupons,subtotal,discount,expectedDiscount}));
   result.checks.push({step:'after_sync',coupons,subtotal,discount,expectedDiscount});save();
   assert(subtotal>200000,'Test product subtotal did not meet promotion threshold: '+subtotal);
-  assert.equal(coupons.length,1,'Expected exactly one WooCommerce automatic coupon: '+JSON.stringify(coupons));
+  assert.deepEqual(coupons,['mf10'],'High-value 2.7m cart must use only MF10 (not MF5): '+JSON.stringify(coupons));
   assert(discount>0,'WooCommerce returned no discount');
   assert(Math.abs(discount-expectedDiscount)<=1,
-    'Discount does not equal native 5%: actual='+discount+' expected='+expectedDiscount);
+    'Discount does not equal native 10%: actual='+discount+' expected='+expectedDiscount);
   result.checks.push({step:'woo_automatic_coupon',code:coupons[0],subtotal,discount,expectedDiscount,total:Number(cart?.totals?.total||0),pass:true});
   save();
   console.log('AQUA_CART_PROMOTION_PASS='+JSON.stringify(result.checks.at(-1)));
