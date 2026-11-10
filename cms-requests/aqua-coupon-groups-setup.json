@@ -17,5 +17,8 @@
   "stack_mode": "cross_group",
   "no_orders": true,
   "no_products_modified": true,
-  "temporary_created": 0
+  "temporary_created": 0,
+  "attempt": 1,
+  "reason": "Idempotent readback of MF5/MF10 groups plus browser verification that WooCommerce group management page is editable",
+  "previous_setup_run": 42902485026
 }
