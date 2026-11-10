@@ -1,0 +1,7 @@
+{
+  "scope": "READ_ONLY",
+  "source": "https://aquathanhxuan.com/cart/",
+  "target": "https://aquathanhxuan.io.vn",
+  "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
+  "date": "2026-11-10"
+}
