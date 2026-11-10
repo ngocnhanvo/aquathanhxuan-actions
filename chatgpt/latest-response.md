@@ -4,37 +4,33 @@
 - Project: aquathanhxuan.com
 - Repository: ngocnhanvo/aquathanhxuan-actions
 - Branch: main
-- Astro master SHA: 3e00ba57d9adfb70d2c5f8658a63ac99f3314098
-- PHP master SHA: cbaffc1831a40fc85fc829e0ad2d40025107bdeb
-- COD Woo readback: PASS #42817289132
-- Source QA: PASS #42818057110
-- PHP release: SUCCESS #42818081582
-- Astro trigger: SUCCESS #42818312059
-- Astro deploy: SUCCESS #42818443637
-- Browser Playwright: PASS #42818776565, cleanup PASS, orders 0
-- Latest-response lưu: SAVED (được xác minh bởi commit cập nhật file)
+- Frontend repository: ngocnhanvo/aquathanhxuan-astro, master
+- Astro master SHA: 0a4b1c2799e3c002ae1715156acc0fffb724a256
+- Source QA: PASS https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42821859696 (attempt 2)
+- Production build/deploy: PASS https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637 (attempt 3)
+- Browser Playwright: PASS https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42823803716
+- Checkout/order/payment backend changes: NONE
+- Checkpoint: docs/checkpoints/2026-11-10-header-commerce-integration.md
+- Latest-response lưu: SAVED after read-after-write verification
 
 ## Nguyên văn phản hồi gửi người dùng
 
-Mình đã cập nhật mã nguồn checkout và **bật thành công phương thức COD trong WooCommerce**.
+Mình đã sửa các điểm kết nối trong source Astro trên nhánh `master`:
 
-Các thay đổi đang được triển khai gồm:
+- **Giỏ hàng:** Biểu tượng và chữ “Giỏ hàng” dùng cùng một liên kết, nhận `cart_key` và hiển thị số lượng sản phẩm.
+- **Tài khoản:** Khách chưa đăng nhập được dẫn đến trang đăng nhập/lịch sử đơn hàng. Khách đã đăng nhập có menu xem đơn hàng và đăng xuất, sử dụng phiên đăng nhập WordPress hiện có.
+- **Desktop và mobile:** Đồng bộ các nút điều hướng, đồng thời sửa cách xác định route giỏ hàng từ trang SSR WooCommerce.
+- **Sau đặt hàng:** Nút giỏ hàng cập nhật lại khi trạng thái giỏ được xóa, tránh giữ `cart_key` cũ.
 
-1. Bỏ lựa chọn **Cá nhân / Tổ chức** và trường **CCCD/MSDN**.
-2. Đổi nhãn thành **Họ và tên \***.
-3. **Số điện thoại không bắt buộc**, kể cả khi gửi đơn về backend WordPress.
-4. Chỉ cho phép chọn **Thanh toán khi nhận hàng (COD)** trên website mới; giữ cấu hình OnePay trong WordPress để sử dụng lại khi cần.
-5. Đưa trường **Địa chỉ** lên trước **Tỉnh/Thành phố** và **Quận/Huyện/Phường**.
+Các thay đổi đã được commit lên GitHub, HEAD tại thời điểm đó là `79c21723`. Phần kiểm thử và triển khai production vẫn cần xác nhận.
 
-WooCommerce đã xác nhận bật COD qua [Actions #42817289132](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42817289132). Mình tiếp tục phần kiểm thử, phát hành PHP/Astro và nghiệm thu giao diện production.
+**Đã triển khai và nghiệm thu thành công trên production.** Trong quá trình kiểm thử, mình phát hiện liên kết tài khoản cũ trả 404. Đã sửa header lấy đúng trang WordPress `ssr-order-history` với đường dẫn [Lịch sử mua hàng](https://aquathanhxuan.io.vn/lich-su-mua-hang).
 
-**Đã hoàn tất triển khai lên production và nghiệm thu thành công.** Bạn có thể xem tại [trang thanh toán](https://aquathanhxuan.io.vn/checkout).
+Bản production hiện tại là commit [`0a4b1c2`](https://github.com/ngocnhanvo/aquathanhxuan-astro/commit/0a4b1c2799e3c002ae1715156acc0fffb724a256). [Kiểm thử source](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42821859696) và [build/deploy production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637) đều **PASS**.
 
-[Kiểm thử mã nguồn](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818057110) đã PASS; [phát hành PHP](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818081582) và [deploy Astro](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637) đều SUCCESS. [Playwright trên production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818776565) cũng PASS: kiểm tra desktop/mobile, chỉ hiển thị COD, số điện thoại có thể bỏ trống và địa chỉ đúng thứ tự.
+[Playwright trên production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42823803716) cũng **PASS**: ba vị trí giỏ hàng đồng bộ số lượng và `cart_key`, xóa giỏ thì xóa khóa cũ; khách chưa đăng nhập mở đúng form; menu tài khoản, hiển thị tên an toàn và đăng xuất được kiểm tra bằng phiên mô phỏng; desktop/mobile đều đạt. Không tạo đơn hàng, thanh toán hoặc ghi dữ liệu WordPress khi thử nghiệm.
 
-**An toàn dữ liệu:** Bài kiểm thử chặn thao tác tạo đơn, không phát sinh đơn hàng hoặc tài khoản thật; giỏ hàng thử đã được dọn sạch. Coupon 5% và giá đã gồm thuế được giữ nguyên.
-
-Đã lưu [checkpoint triển khai](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-cod-simplified.md) cùng bản phản hồi mới nhất trong repo Actions.
+Đã lưu [checkpoint kỹ thuật](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-header-commerce-integration.md). Toàn dự án vẫn có 9 lỗi type-check tồn tại từ trước ở những file không liên quan; các component vừa sửa và bộ test hồi quy đã đạt.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
