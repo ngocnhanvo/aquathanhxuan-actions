@@ -86,14 +86,33 @@ assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD,'Missing W
     assert.deepEqual(before.slice(2).map(row=>String(row[1])),table.items.map(x=>String(x.title)),
       'Native table title readback mismatch');
     const newRows=[...before,...LABELS.map(([key,label])=>['shell',key,label,''])];
-    await page.evaluate(rows=>{
-      window.tp.editor.setData(rows);
-      window.tp.helpers.unsaved_changes.set();
-    },newRows);
-    assert.deepEqual(await page.evaluate(()=>window.tp.editor.getData()),newRows,
-      'Native editor differs before save');
-    await page.getByRole('button',{name:'Save Changes'}).first().click();
-    await page.waitForTimeout(1300);
+    // The native Save Changes button keeps the old row dimension after calling
+    // setData() programmatically. Use its nonce-checked TablePress AJAX writer
+    // with explicit new dimensions; preserve the table's existing options.
+    const nonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+    assert(nonce,'Native TablePress edit nonce missing '+target.table);
+    const form=new URLSearchParams();
+    for(const [key,value] of [
+      ['action','tablepress_save_table'],['_ajax_nonce',nonce],
+      ['tablepress[id]',target.table],['tablepress[new_id]',target.table],
+      ['tablepress[name]',String(table.name||target.table)],
+      ['tablepress[description]',String(table.description||'ESC support content')],
+      ['tablepress[data]',JSON.stringify(newRows)],
+      ['tablepress[options]',JSON.stringify(table.options||{})],
+      ['tablepress[visibility]',JSON.stringify({rows:newRows.map(()=>1),columns:[1,1,1,1]})],
+      ['tablepress[number][rows]',String(newRows.length)],
+      ['tablepress[number][columns]','4'],
+      ['custom_api',''],['custom_image',''],['custom_cols',''],['custom_rows','']
+    ])form.append(key,value);
+    const result=await page.evaluate(async body=>{
+      const response=await fetch('/wp-admin/admin-ajax.php',{method:'POST',
+        credentials:'same-origin',
+        headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},
+        body});
+      return {status:response.status,json:await response.json()};
+    },form.toString());
+    assert(result.status===200 && result.json?.success===true &&
+      result.json?.table_id===target.table,'Native TablePress append failed '+target.table);
     await page.goto(WP+'/wp-admin/admin.php?page=tablepress&action=edit&table_id='+target.table,
       {waitUntil:'domcontentloaded',timeout:60000});
     await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData),null,{timeout:20000});
