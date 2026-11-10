@@ -1,5 +1,5 @@
 {
-  "scope": "AQUA_BROWSER_CART_TO_GATEWAY",
+  "scope": "FULL_BROWSER_CART_CHECKOUT_INTERCEPTED_NO_ORDERS",
   "project": "aquathanhxuan.com",
   "frontend": "https://aquathanhxuan.io.vn",
   "astro_sha": "fa1fddbd4c7fefcf76f62e168bf11c8bc26b2ead",
@@ -10,5 +10,8 @@
   "php_release_run": 42785150060,
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
-  "reason": "Anonymous Woo cart -> checkout -> payment select, BACS hidden while no bank recipients, cleanup and no orders"
+  "reason": "Test cart, native coupon, OnePay checkout browser submit intercepted by Playwright, retry ID reuse, mobile form and cleanup",
+  "attempt": 2,
+  "source_qa_run": 42785105749,
+  "astro_deploy_run": 42785546490
 }
