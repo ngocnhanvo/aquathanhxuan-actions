@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "3e00ba57d9adfb70d2c5f8658a63ac99f3314098",
+  "purpose": "Checkout remove buyer category and ID, optional phone, address before locality, native COD only",
+  "source_qa_run": 42818057110,
+  "php_release_run": 42818081582,
+  "no_real_orders": true
+}
