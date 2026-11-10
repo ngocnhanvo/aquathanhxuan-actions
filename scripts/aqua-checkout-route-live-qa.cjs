@@ -9,9 +9,14 @@ const checks=[];
 const report={scope:'AQUA_CHECKOUT_ROUTES_READ_ONLY',status:'STARTED',checks,created_orders:0,created_cart_items:0};
 const save=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(report,null,2)+'\n');
 async function get(path){
- const response=await fetch(FRONT+path,{headers:{'Cache-Control':'no-cache','Accept':'application/json, text/html'},redirect:'follow',signal:AbortSignal.timeout(15000)});
- const text=await response.text();
- return {status:response.status,body:text,contentType:response.headers.get('content-type')||''};
+ try{
+  const response=await fetch(FRONT+path,{headers:{'Cache-Control':'no-cache','Accept':'application/json, text/html'},redirect:'follow',signal:AbortSignal.timeout(15000)});
+  const body=await response.text();
+  return {status:response.status,body,contentType:response.headers.get('content-type')||''};
+ }catch(e){
+  const reason=e instanceof Error?e.message:String(e);
+  throw Error('GET '+path+' failed: '+reason);
+ }
 }
 (async()=>{
  try{
