@@ -2,30 +2,28 @@
 
 - Ngày: 2026-11-10 (Asia/Ho_Chi_Minh)
 - Project: aquathanhxuan.com
-- Astro master: 4aee9b926d82e26df4cb45b0d38c95dcae9edcf9
-- PHP master: 54849c882e4c1fa774f3edf774261252e3dfd8ac
-- CMS Page install: PASS #42826347954
-- Source QA: PASS #42828073678
-- Astro deployment: PASS #42818443637 attempt 5
-- Browser QA: PASS #42827438561 attempt 2
-- PHP source audit: PASS #42829490570
-- PHP deployment: PASS #42829857079
-- Live negative backend QA: PASS #42830297176
-- Checkpoint: docs/checkpoints/2026-11-10-password-recovery.md
-- Latest-response: SAVED (verified by read-after-write)
+- Repository: ngocnhanvo/aquathanhxuan-actions
+- Logging branch: main
+- Astro repo/branch: ngocnhanvo/aquathanhxuan-astro / master
+- Astro commit deployed: 6400fccb29df970ec911f33b1bd44b3739a80733
+- PHP source: unchanged
+- Source QA: PASS #42837357222
+- Astro production deploy: PASS #42837688901
+- Production browser QA: PASS #42838110404
+- WordPress trigger post-deploy header QA: FAIL #42837523847 (unrelated headerSearchTrueCenter @ 900px)
+- Checkpoint: docs/checkpoints/2026-11-10-order-history-skeleton.md
 
 ## Nguyên văn phản hồi gửi người dùng
 
-Đã sửa luồng **Quên mật khẩu** và triển khai lên production.
+Đã triển khai **loading skeleton** cho [trang Lịch sử mua hàng](https://aquathanhxuan.io.vn/lich-su-mua-hang).
 
-- **Quên mật khẩu?** ở trang Lịch sử mua hàng hiện mở đúng [trang yêu cầu đặt lại mật khẩu](https://aquathanhxuan.io.vn/quen-mat-khau), không còn liên kết `#`.
-- Đã tạo hai Page trong WordPress, bổ sung form nhập email/tên đăng nhập và [form đặt mật khẩu mới](https://aquathanhxuan.io.vn/dat-lai-mat-khau).
-- Sửa cache Astro để tự phát hiện Page mới, tránh build thành công nhưng route vẫn 404.
-- Sửa PHP tạo liên kết email từ domain trong **Thông tin chung** của WordPress, đồng thời xác thực token và tránh tiết lộ tài khoản tồn tại.
+- Trang hiển thị ngay hai khung đơn hàng giả lập khi API đang tải, thay vì để trống.
+- Skeleton tự biến mất để hiển thị đơn hàng, form đăng nhập, thông báo chưa có đơn hoặc lỗi mạng. Có hỗ trợ mobile và chế độ giảm chuyển động.
+- **Source QA PASS:** [#42837357222](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42837357222).
+- **Deploy production PASS:** [#42837688901](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42837688901).
+- **Playwright production PASS 4/4:** [#42838110404](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42838110404).
 
-**Kiểm thử production:** [Giao diện desktop/mobile PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42827438561), [Astro deploy PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637), [PHP deploy PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42829857079), [API live PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42830297176).
-
-Đã lưu [checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-password-recovery.md). **Lưu ý:** bài test không gửi email thật hoặc đổi mật khẩu tài khoản thật; việc email tới hộp thư người nhận chưa được xác minh trực tiếp.
+**Lưu ý:** workflow kích hoạt build [#42837523847](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42837523847) báo FAIL ở bài kiểm thử header tại viewport 900px **sau khi deploy thành công**; lỗi kiểm thử header này không nằm trong thay đổi skeleton. Đã ghi vào [checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-order-history-skeleton.md).
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
