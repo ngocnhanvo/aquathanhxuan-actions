@@ -1,11 +1,11 @@
 {
-  "scope": "AQUA_WOOCOMMERCE_CHECKOUT_ONEPAY_RETURN_READONLY",
+  "scope": "AQUA_AUTH_ENDPOINTS_AND_SHIPPING_GATEWAYS_READONLY",
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
   "date": "2026-11-10",
-  "attempt": 10,
-  "reason": "Verify current Woo checkout shortcode, anonymous backend checkout response, fake invalid order receipt and parse OnePay gateway URL safely. Do not create orders.",
+  "attempt": 11,
+  "reason": "Investigate synthetic Woo customer login HTTP 400 after temporary customer creation and successful cleanup; inspect WP route index for custom/v1 login without user data",
   "failed_qa_run": 42776753563,
   "deploy_run": 42780443864,
   "browser_qa_run": 42787012776,
@@ -13,5 +13,7 @@
   "previous_audit_run": 42787729538,
   "backend_pages_run": 42788844918,
   "callback_release_run": 42790542372,
-  "previous_onepay_release_run": 42790542372
+  "previous_onepay_release_run": 42790542372,
+  "previous_customer_run": 42802133987,
+  "no_orders": true
 }
