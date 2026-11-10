@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "85d371680fd7486d0c44a2fcd31a28bdc6010d64",
+  "purpose": "Publish native ESC Table labels for password Pages and business Visual Builder preview states",
+  "source_qa_run": 42852391646,
+  "cms_page_run": 42852802752,
+  "no_orders": true
+}
