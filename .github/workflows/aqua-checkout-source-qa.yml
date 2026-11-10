@@ -41,6 +41,16 @@ jobs:
           NODE
       - working-directory: source-astro
         run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Keep Vitest files outside Astro src/pages routes
+        working-directory: source-astro
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find src/pages -type f \( -name '*.test.*' -o -name '*.spec.*' \) | grep -q .; then
+            echo '::error::Test/spec files in src/pages would be treated as Astro routes'
+            exit 1
+          fi
+          echo 'AQUA_ASTRO_ROUTE_TEST_FILES=NONE'
       - name: Astro cart, checkout, payment method and receipt source compiler
         working-directory: source-astro
         run: |
@@ -99,4 +109,4 @@ jobs:
           NODE
       - name: Existing cart product buttons regression
         working-directory: source-astro
-        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/wordpress/pages/ssrActionAudit.test.ts src/lib/utils/signedSession.test.ts src/pages/api/user/order.test.ts
+        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/wordpress/pages/ssrActionAudit.test.ts src/lib/utils/signedSession.test.ts src/lib/utils/orderHistoryApi.test.ts
