@@ -36,7 +36,17 @@ const labels = [
  ['status_cancelled','Đã hủy'],
  ['status_refunded','Đã hoàn tiền'],
  ['status_failed','Thất bại'],
- ['search_limit','Kết quả tìm kiếm đã đạt giới hạn hiển thị. Vui lòng tìm bằng mã đơn cụ thể.']
+ ['search_limit','Kết quả tìm kiếm đã đạt giới hạn hiển thị. Vui lòng tìm bằng mã đơn cụ thể.'],
+ ['login_text','Vui lòng đăng nhập để xem đơn hàng của bạn.'],
+ ['login_username','Tên đăng nhập hoặc Email'],
+ ['login_username_placeholder','Nhập email hoặc tên tài khoản'],
+ ['login_password','Mật khẩu'],
+ ['login_password_toggle','Hiện/Ẩn mật khẩu'],
+ ['login_remember','Ghi nhớ đăng nhập'],
+ ['login_forgot','Quên mật khẩu?'],
+ ['login_button','Đăng nhập'],
+ ['login_error','Tài khoản hoặc mật khẩu không chính xác.'],
+ ['login_network_error','Đã có lỗi xảy ra khi kết nối đến máy chủ']
 ];
 const keys = labels.map(x=>x[0]); assert.equal(keys.length,new Set(keys).size);
 const snapshot = {table:TABLE,page:PAGE_ID,writes:[],result:'STARTED'};
@@ -93,6 +103,47 @@ const save = ()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(snapshot,nul
      'Save native TablePress failed: '+JSON.stringify(result));
    snapshot.writes.push('native ESC Table '+TABLE);save();
    r=await rest('/wp-json/tablepress/v1/table/'+TABLE+'?_esc_verify='+Date.now());
+  }
+  // Existing table may already have customer-edited text. Append only missing
+  // new label rows and preserve every existing label verbatim.
+  if(r.status===200 && Array.isArray(r.data?.items) && r.data.items.length<labels.length){
+    const existing=r.data.items;
+    for(let i=0;i<existing.length;i++){
+      assert.equal(existing[i].key,labels[i][0],'Unexpected existing table key before append');
+      assert(String(existing[i].label||'').trim(),'Existing editor label empty '+existing[i].key);
+    }
+    const missing=labels.slice(existing.length);
+    assert(missing.length>0 && missing.every(x=>x[0].startsWith('login_')),
+      'Unexpected or non-login field append');
+    await page.goto(WP+'/wp-admin/admin.php?page=tablepress&action=edit&table_id='+TABLE,
+      {waitUntil:'domcontentloaded',timeout:45000});
+    const saveNonce=(await page.content()).match(/edit_table:\s*'([^']+)'/)?.[1];
+    assert(saveNonce,'Cannot read native TablePress editing nonce');
+    const grid=[['key','label'],['Mã trường','Nội dung'],
+      ...existing.map(x=>[x.key,x.label]),...missing];
+    const form=new URLSearchParams();
+    for(const [key,value] of [
+      ['action','tablepress_save_table'],['_ajax_nonce',saveNonce],
+      ['tablepress[id]',TABLE],['tablepress[new_id]',TABLE],
+      ['tablepress[name]',String(r.data.name||'Lịch sử mua hàng — nội dung giao diện')],
+      ['tablepress[description]',String(r.data.description||'Nội dung nhãn điều chỉnh trong Visual Builder')],
+      ['tablepress[data]',JSON.stringify(grid)],
+      ['tablepress[options]',JSON.stringify(r.data.options||{})],
+      ['tablepress[visibility]',JSON.stringify({rows:grid.map(()=>1),columns:[1,1]})],
+      ['tablepress[number][rows]',String(grid.length)],['tablepress[number][columns]','2'],
+      ['custom_api',''],['custom_image',''],['custom_cols',''],['custom_rows','']
+    ])form.append(key,value);
+    const update=await page.evaluate(async body=>{
+      const response=await fetch('/wp-admin/admin-ajax.php',{method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body});
+      return {status:response.status,json:await response.json()};
+    },form.toString());
+    assert(update.status===200 && update.json?.success===true && update.json?.table_id===TABLE,
+      'Native TablePress append failed: '+JSON.stringify(update));
+    snapshot.writes.push('Append '+missing.length+' new login label rows');save();
+    r=await rest('/wp-json/tablepress/v1/table/'+TABLE+'?_esc_verify='+Date.now());
+    for(let i=0;i<existing.length;i++)assert.equal(r.data.items[i].label,existing[i].label,
+      'Existing customer-edited field overwritten '+existing[i].key);
   }
   assert.equal(r.status,200,'Cannot read published TablePress');
   assert(!String(r.data?.meta?.api||'').trim(),'Unexpected ESC Table API source');
