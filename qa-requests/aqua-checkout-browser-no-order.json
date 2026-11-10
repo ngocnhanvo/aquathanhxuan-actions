@@ -10,9 +10,10 @@
   "php_release_run": 42785150060,
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
-  "reason": "Verify real product image, unit and line price, tax-inclusive 2,565,000 VND total in cart and checkout; intercept checkout before Woo order",
-  "attempt": 7,
+  "reason": "Add regression for direct /cart without URL cart_key, restore localStorage and refresh Woo product image/prices; no orders",
+  "attempt": 8,
   "source_qa_run": 42814401425,
   "astro_deploy_run": 42814669203,
-  "woo_tax_settings_qa_run": 42814147919
+  "woo_tax_settings_qa_run": 42814147919,
+  "previous_browser_qa_run": 42814974242
 }
