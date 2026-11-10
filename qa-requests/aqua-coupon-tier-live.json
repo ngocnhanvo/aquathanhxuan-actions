@@ -1,0 +1,11 @@
+{
+  "project": "aquathanhxuan.com",
+  "source": "published WooCommerce products",
+  "target": "https://aquathanhxuan.io.vn",
+  "scope": "DISPOSABLE_CART_MF5_MF10_TIER_2026_11_11",
+  "php_release_run": 42902204133,
+  "cms_setup_run": 42902485026,
+  "scenario": "259000 VND single item -> MF5; 5 items -> 1295000 VND -> MF10",
+  "no_orders": true,
+  "no_product_changes": true
+}
