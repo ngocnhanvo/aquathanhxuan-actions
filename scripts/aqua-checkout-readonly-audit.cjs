@@ -32,11 +32,13 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    report.checks.push({key,status:r.status(),isArray:Array.isArray(data)});
    return Array.isArray(data)?data:[];
   }
-  const [gateways,coupons,pages]=await Promise.all([
+  const [gateways,coupons,pages,settings]=await Promise.all([
    get('gateways','/wp-json/wc/v3/payment_gateways'),
    get('coupons','/wp-json/wc/v3/coupons?per_page=100'),
-   get('pages','/wp-json/wp/v2/pages?per_page=100&status=publish&context=edit')
+   get('pages','/wp-json/wp/v2/pages?per_page=100&status=publish&context=edit'),
+   get('settings','/wp-json/wc/v3/settings/general')
   ]);
+  report.woocommerceCouponSetting=settings.find(x=>x.id==='woocommerce_enable_coupons')?.value??'NOT_RETURNED';
   report.gateway=gateways.map(x=>({id:x.id,title:x.title,enabled:x.enabled,method_title:x.method_title}));
   report.coupons=coupons.filter(x=>x.status==='publish').map(x=>({id:x.id,code:x.code,discount_type:x.discount_type,amount:x.amount,minimum_amount:x.minimum_amount,individual_use:x.individual_use}));
   report.pageCandidates=pages.filter(x=>/ssr-cart|ssr-checkout|cart|checkout|thanh-toan|gio-hang/i.test(JSON.stringify(x.acf||{})+' '+x.slug+' '+x.title?.rendered)).map(x=>({id:x.id,slug:x.slug,acf:{key:x.acf?.key,action:x.acf?.action},title:x.title?.rendered}));
