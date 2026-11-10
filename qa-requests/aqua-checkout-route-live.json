@@ -1,15 +1,15 @@
 {
   "project": "aquathanhxuan.com",
   "production": "https://aquathanhxuan.io.vn",
-  "build_sha": "c3d5714f9ec37e1f1d030524abc852be95cdfb0b",
-  "build_run": 42799397565,
+  "build_sha": "2c1891795dda2b85af0903f19e4dc98b625c3950",
+  "build_run": 42806552098,
   "no_orders": true,
   "no_cart_writes": true,
-  "attempt": 6,
+  "attempt": 7,
   "previous_failed_run": 42781432063,
-  "reason": "Live production QA after deploy: 4 real WP Pages incl OrderHistoryPage, signed-session privacy: guest and forged JSON cookie return 401, Woo payment methods read only",
+  "reason": "Verify production SSR cart/checkout/order-history and signed customer privacy after new confirmed order ownership linking deploy",
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
-  "source_qa_run": 42799262653,
-  "deploy_run": 42799520104
+  "source_qa_run": 42806360718,
+  "deploy_run": 42806700958
 }
