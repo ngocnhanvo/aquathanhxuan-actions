@@ -1,35 +1,35 @@
 # ChatGPT latest-response — aquathanhxuan.com
 
-- Ngày: 2026-11-10 (Asia/Ho_Chi_Minh)
+- Ngày: 2026-11-11 (Asia/Ho_Chi_Minh)
 - Project: aquathanhxuan.com
-- Source reviewed: ngocnhanvo/aquathanhxuan-astro/master
-- Task: Phân loại Page Visual Builder preview thường / preview nghiệp vụ theo trạng thái
-- Scope: Read-only review; no production mutation or deploy
+- Astro production: ngocnhanvo/aquathanhxuan-astro / master / `4a361f8c39077f820be5bf0f7d93ce421d67ad0f`
+- WordPress PHP: ngocnhanvo/aquathanhxuan-php / master / `9328a023934c78e2054406fed0edb3c11a45fff9`
+- Actions: ngocnhanvo/aquathanhxuan-actions / main
+- Code mode: auto-build; source gateway: bypass
+- Task: Tiếp tục công việc dang dở — Visual Builder 9 Page nghiệp vụ/hỗ trợ, nhãn native ESC Table và Save WordPress
+- Trạng thái: DONE — hoàn thành phạm vi 9 Page và kiểm thử Save/Restore thành công
 
-## Nguyên văn phản hồi gửi người dùng
+## Nguyên văn phản hồi kết luận gửi người dùng
 
-## Đánh giá 9 trang trong Visual Builder
+Đã hoàn thành và nghiệm thu Visual Builder của 9 trang: Lịch sử mua hàng, Giỏ hàng, Thanh toán, Đơn hàng đã đặt, Quên mật khẩu, Đặt lại mật khẩu, Liên hệ, Khiếu nại và Đại lý.
 
-Đã đối chiếu source Astro `master` và cơ chế `esc-builder/preview/[pageId].astro`. Kết luận: **5 trang cần Preview nghiệp vụ theo trạng thái** và **4 trang có thể hiển thị gần giống production**. Mọi trang vẫn phải dùng đúng bố cục production; chữ cần sửa được chọn tại vị trí thật, không chỉ đưa vào danh sách nhãn.
+- Các Page nghiệp vụ có trạng thái Preview an toàn, sử dụng dữ liệu minh họa; không tạo đơn hàng/gửi email/thanh toán/reset tài khoản thật.
+- Nội dung có nghĩa thuộc Page được quản lý bởi ESC Table WordPress có thật. Các nhãn ngoài shortcode wrapper (form, H1, breadcrumb, receipt, support shell) giờ chọn sửa theo `Table ID + row + field + version`.
+- Sửa nháp là thấy thay đổi tức thì trong iframe, Hủy trả lại chữ cũ và không ghi WordPress.
+- Save thật đã kiểm thử trên đúng một nhãn minh họa `checkout_ui_vi`, dòng 58 `demo_quantity`: HTTP 200/saved=true, REST readback và iframe hiển thị đúng, sau đó lưu trả lại nội dung gốc. **cleanup_remaining=0**.
+- Không ảnh hưởng nội dung sản phẩm, khách hàng, coupon, thanh toán, dữ liệu đơn hàng hoặc PHP API nghiệp vụ.
 
-| Trang | Cách hiển thị trong Visual Builder | Hiện trạng cần lưu ý |
-|---|---|---|
-| **Đặt lại mật khẩu** | Preview đặc biệt: form khi token hợp lệ, link lỗi/hết hạn, trạng thái thành công | Code không có token sẽ ẩn form và báo link không hợp lệ. Cần dữ liệu trạng thái minh họa, không dùng token thật |
-| **Quên mật khẩu** | Hiển thị giao diện form như production, có thể chọn trạng thái thành công/lỗi để sửa thông báo | Form được render trực tiếp; nhiều nhãn còn hard-code, phải vô hiệu hóa thao tác gửi email trong Preview |
-| **Lịch sử mua hàng** | Preview đặc biệt: đã đăng nhập/có đơn, chưa có đơn, chưa đăng nhập, loading, lỗi | Đã có ESC Table `order_history_vi` (38 nhãn), nhưng Preview hiện còn render danh sách nhãn riêng; nên hiển thị ngay trong giao diện thẻ đơn và chặn gọi API đơn hàng thật ở Preview |
-| **Đơn hàng đã đặt** | Preview đặc biệt: hóa đơn mẫu an toàn, chi tiết sản phẩm, COD, địa chỉ minh họa và trạng thái lỗi | Component cần `order_id/order_key`; không có tham số sẽ chỉ hiện lỗi thiếu đơn |
-| **Thanh toán** | Preview đặc biệt: giỏ mẫu, thông tin khách, địa chỉ, phương thức COD, các trường hợp guest/đã đăng nhập | Preview chung chưa cấp `serverCartData/userData` như route production; biểu mẫu đang dùng nhiều nhãn JSON i18n thay vì ESC |
-| **Giỏ hàng** | Preview đặc biệt: giỏ có sản phẩm và giỏ rỗng, giảm giá nếu có | Không có `serverCartData` trong Builder dễ rơi về giỏ trống; nhãn đang lấy từ JSON i18n |
-| **Liên hệ** | Hiển thị như production | Dùng `SupportPage` + ESC Table `support_contact`, có tọa độ chỉnh sửa phần nội dung |
-| **Khiếu nại** | Hiển thị như production | Dùng `SupportPage` + ESC Table `support_complaint` |
-| **Đại lý** | Hiển thị như production | Dùng `SupportPage` + ESC Table `support_dealer` |
+## Bằng chứng
 
-**Kiến trúc nên triển khai:** một cơ chế Preview trạng thái dùng chung (không tạo 5 hệ thống riêng). Visual Builder chọn trạng thái cần xem, Astro dựng **đúng layout production** nhưng dùng dữ liệu minh họa chỉ trong môi trường Preview; vô hiệu hóa đặt hàng, thanh toán, email, đăng nhập và mọi ghi WooCommerce. Mỗi dòng chữ có tọa độ ESC Table `Table ID + row + field + version` để chọn và sửa tại đúng vị trí. Các nhãn vốn ở trạng thái phụ vẫn chọn được qua chuyển trạng thái.
+- CMS các bảng commerce: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42857479598 — SUCCESS.
+- CMS các nhãn chrome cho 5 Support Pages: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42862224453 — SUCCESS.
+- PHP label editor >42 rows fix `9328a023...`: release https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42867578142 — SUCCESS.
+- Source QA Astro `4a361f8...`: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42872941031 — SUCCESS.
+- WordPress Build Website: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42873812125 — SUCCESS.
+- Signed production deploy: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42873991762 — SUCCESS.
+- Playwright 9 Pages + kiểm tra nhãn detached trong Preview (read-only): https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42874455432 — SUCCESS.
+- Controlled Save → REST readback → Live Preview → Restore: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42875159644 — SUCCESS; `changed=1 restored=1 cleanup_remaining=0`.
+- Knowledge anti-regression: ngocnhanvo/knowledge commit `0a316918e9de25c531d06cffd487b7411c72c11e`, `stacks/wordpress-editor-esc-table.md`.
+- Checkpoint: `docs/checkpoints/2026-11-10-business-pages-visual-builder.md`.
 
-**Điểm cần bổ sung:** các trang hỗ trợ đã có ESC Table cho nội dung chính, nhưng trong `SupportPage.astro` vẫn có chữ cứng ở breadcrumb/khung tư vấn. Trang Quên/Đặt lại mật khẩu và các trang giao dịch còn nhiều nhãn hard-code hoặc JSON i18n nên chưa thể coi là đã sửa trực quan toàn bộ. Nhóm hỗ trợ ưu tiên giữ nguyên preview production; nhóm nghiệp vụ bổ sung preview trạng thái và ESC Table nội dung trước khi nghiệm thu.
-
-Đây là **kết quả rà soát source**, không phải xác nhận Playwright trên cả 9 trang. Chưa sửa mã, CMS hoặc deploy ở lượt này.
-
-Chế độ code: auto-build  
-Cổng ghi source: bypass  
-Trạng thái: DONE — hoàn tất
+Kết luận: **DONE — hoàn tất phạm vi Visual Builder 9 trang.** Những thay đổi/việc mới ngoài phạm vi sẽ có checkpoint và QA riêng.
