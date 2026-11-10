@@ -7,7 +7,10 @@
   "no_orders": true,
   "no_payments": true,
   "cleanup_required": true,
-  "attempt": 2,
+  "attempt": 3,
   "previous_failure": 42801757653,
-  "reason": "Rerun corrected JS syntax QA using one synthetic Woo user and mandatory cleanup"
+  "reason": "Native custom/v1/login route deployed to WordPress; verify real QA customer authentication / history isolation / logout and automatic cleanup",
+  "php_release_run": 42803579093,
+  "previous_login_failure_run": 42802133987,
+  "scope": "VERIFY_REAL_WP_AUTH_TO_SIGNED_ASTRO_COOKIE_AND_CLEANUP"
 }
