@@ -71,6 +71,15 @@ jobs:
           const login=fs.readFileSync(files[4],'utf8');
           const history=fs.readFileSync(files[6],'utf8');
           assert(history.includes('const esc =') && history.includes('${esc(item.name)}'),'Order history must HTML-escape customer-originated content');
+          const session=fs.readFileSync('src/lib/utils/user.ts','utf8');
+          const login=fs.readFileSync('src/pages/api/user/login.ts','utf8');
+          const orders=fs.readFileSync('src/pages/api/user/order.ts','utf8');
+          assert(session.includes('verifySignedUserSession') && !session.includes('JSON.parse(decoded)'),
+            'All Astro authentication must reject unsigned cookies');
+          assert(login.includes('issueSignedUserSession'),
+            'A successful WordPress login must issue an HMAC-signed cookie');
+          assert(!orders.includes('&search=') && orders.includes('customerId'),
+            'Woo order history must be scoped to a verified numeric customer ID');
           assert(login.includes('pageLostPass?.slug'),'Missing WordPress lost-password Page must not crash checkout SSR');
           const payment=fs.readFileSync('src/pages/api/cart/payment-methods.ts','utf8');
           assert(form.includes('/api/cart/payment-methods'),'Checkout must load active gateway list');
@@ -90,4 +99,4 @@ jobs:
           NODE
       - name: Existing cart product buttons regression
         working-directory: source-astro
-        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/wordpress/pages/ssrActionAudit.test.ts
+        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/wordpress/pages/ssrActionAudit.test.ts src/lib/utils/signedSession.test.ts src/pages/api/user/order.test.ts
