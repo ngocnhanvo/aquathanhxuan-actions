@@ -2,24 +2,34 @@
 
 - Ngày: 2026-11-10 (Asia/Ho_Chi_Minh)
 - Project: aquathanhxuan.com
-- Knowledge repo: ngocnhanvo/knowledge
-- Branch: main
-- Last Knowledge commit: 3d61b6ca942f438b16d773e5ed97f0ef7ea19b8a
-- Scope: Knowledge-only; no app code changes, no WordPress writes, no build/deploy
-- Files: stacks/wordpress-editor-esc-table.md, AGENTS.md, README.md, CHANGELOG.md
-- Verified: main commits chain and readback for all changed docs
-- Mode: auto-build / bypass
+- Source reviewed: ngocnhanvo/aquathanhxuan-astro/master
+- Task: Phân loại Page Visual Builder preview thường / preview nghiệp vụ theo trạng thái
+- Scope: Read-only review; no production mutation or deploy
 
 ## Nguyên văn phản hồi gửi người dùng
 
-Đã ghi quy tắc **ESC Table cho các trang nghiệp vụ đặc biệt** vào repo `ngocnhanvo/knowledge` trên nhánh `main`.
+## Đánh giá 9 trang trong Visual Builder
 
-Quy tắc áp dụng cho các trang như **Lịch sử mua hàng, Giỏ hàng, Thanh toán, Tài khoản, Đăng nhập và Quên mật khẩu**: Page WordPress thật + ESC Table chèn bằng **Insert Code**; nhãn/placeholder/CTA/loading/trạng thái nằm trong bảng `key | label`; dữ liệu đơn hàng, thanh toán và xác thực vẫn nằm ở API/WooCommerce, không đưa vào ESC Table hay Preview. Visual Builder phải cho sửa đúng từng ô theo `Table ID + row + field + version`, và QA phân biệt mở được ô với lưu/đọc lại thành công.
+Đã đối chiếu source Astro `master` và cơ chế `esc-builder/preview/[pageId].astro`. Kết luận: **5 trang cần Preview nghiệp vụ theo trạng thái** và **4 trang có thể hiển thị gần giống production**. Mọi trang vẫn phải dùng đúng bố cục production; chữ cần sửa được chọn tại vị trí thật, không chỉ đưa vào danh sách nhãn.
 
-Đã cập nhật 4 file: [quy tắc chính](https://github.com/ngocnhanvo/knowledge/blob/main/stacks/wordpress-editor-esc-table.md), [AGENTS.md](https://github.com/ngocnhanvo/knowledge/blob/main/AGENTS.md), [README.md](https://github.com/ngocnhanvo/knowledge/blob/main/README.md) và [CHANGELOG.md](https://github.com/ngocnhanvo/knowledge/blob/main/CHANGELOG.md).
+| Trang | Cách hiển thị trong Visual Builder | Hiện trạng cần lưu ý |
+|---|---|---|
+| **Đặt lại mật khẩu** | Preview đặc biệt: form khi token hợp lệ, link lỗi/hết hạn, trạng thái thành công | Code không có token sẽ ẩn form và báo link không hợp lệ. Cần dữ liệu trạng thái minh họa, không dùng token thật |
+| **Quên mật khẩu** | Hiển thị giao diện form như production, có thể chọn trạng thái thành công/lỗi để sửa thông báo | Form được render trực tiếp; nhiều nhãn còn hard-code, phải vô hiệu hóa thao tác gửi email trong Preview |
+| **Lịch sử mua hàng** | Preview đặc biệt: đã đăng nhập/có đơn, chưa có đơn, chưa đăng nhập, loading, lỗi | Đã có ESC Table `order_history_vi` (38 nhãn), nhưng Preview hiện còn render danh sách nhãn riêng; nên hiển thị ngay trong giao diện thẻ đơn và chặn gọi API đơn hàng thật ở Preview |
+| **Đơn hàng đã đặt** | Preview đặc biệt: hóa đơn mẫu an toàn, chi tiết sản phẩm, COD, địa chỉ minh họa và trạng thái lỗi | Component cần `order_id/order_key`; không có tham số sẽ chỉ hiện lỗi thiếu đơn |
+| **Thanh toán** | Preview đặc biệt: giỏ mẫu, thông tin khách, địa chỉ, phương thức COD, các trường hợp guest/đã đăng nhập | Preview chung chưa cấp `serverCartData/userData` như route production; biểu mẫu đang dùng nhiều nhãn JSON i18n thay vì ESC |
+| **Giỏ hàng** | Preview đặc biệt: giỏ có sản phẩm và giỏ rỗng, giảm giá nếu có | Không có `serverCartData` trong Builder dễ rơi về giỏ trống; nhãn đang lấy từ JSON i18n |
+| **Liên hệ** | Hiển thị như production | Dùng `SupportPage` + ESC Table `support_contact`, có tọa độ chỉnh sửa phần nội dung |
+| **Khiếu nại** | Hiển thị như production | Dùng `SupportPage` + ESC Table `support_complaint` |
+| **Đại lý** | Hiển thị như production | Dùng `SupportPage` + ESC Table `support_dealer` |
 
-**Commit cuối:** [`3d61b6c`](https://github.com/ngocnhanvo/knowledge/commit/3d61b6ca942f438b16d773e5ed97f0ef7ea19b8a). Đã đọc lại cả bốn file và xác minh chuỗi commit trên `main`. Đây là thay đổi tài liệu Knowledge, **không sửa hay build/deploy website**.
+**Kiến trúc nên triển khai:** một cơ chế Preview trạng thái dùng chung (không tạo 5 hệ thống riêng). Visual Builder chọn trạng thái cần xem, Astro dựng **đúng layout production** nhưng dùng dữ liệu minh họa chỉ trong môi trường Preview; vô hiệu hóa đặt hàng, thanh toán, email, đăng nhập và mọi ghi WooCommerce. Mỗi dòng chữ có tọa độ ESC Table `Table ID + row + field + version` để chọn và sửa tại đúng vị trí. Các nhãn vốn ở trạng thái phụ vẫn chọn được qua chuyển trạng thái.
 
-Chế độ code: auto-build
-Cổng ghi source: bypass
+**Điểm cần bổ sung:** các trang hỗ trợ đã có ESC Table cho nội dung chính, nhưng trong `SupportPage.astro` vẫn có chữ cứng ở breadcrumb/khung tư vấn. Trang Quên/Đặt lại mật khẩu và các trang giao dịch còn nhiều nhãn hard-code hoặc JSON i18n nên chưa thể coi là đã sửa trực quan toàn bộ. Nhóm hỗ trợ ưu tiên giữ nguyên preview production; nhóm nghiệp vụ bổ sung preview trạng thái và ESC Table nội dung trước khi nghiệm thu.
+
+Đây là **kết quả rà soát source**, không phải xác nhận Playwright trên cả 9 trang. Chưa sửa mã, CMS hoặc deploy ở lượt này.
+
+Chế độ code: auto-build  
+Cổng ghi source: bypass  
 Trạng thái: DONE — hoàn tất
