@@ -77,3 +77,14 @@ Next action: verify #42888057217 and downstream production deploy result/source 
 - Read-only 9-Page Visual Builder production QA now checks native Checkout labels count 65 (including selection of physical row 64) while retaining detached live draft/revert row 58. Run `#42889046860` was started after this patch; confirm final status and correct failures before claiming Visual Builder acceptance.
 
 **Still gated:** Woo production shipping policy remains disabled (read-only audit `#42878442799`), no approved shipping methods/rates; no authorized real COD order/stock/email/buyer receipt end-to-end test. These decisions cannot be invented. No real orders or customers were created by the tests in this continuation.
+
+## Final no-order and Visual Builder acceptance after production rebuild
+
+- `#42889046860`: **SUCCESS**, real WordPress Visual Builder read-only browser QA on 9/9 Pages and all their configured preview states. `AQUA_CHECKOUT_SHIPPING_ESC_BUILDER_SELECT_PASS row=64`; detached `checkout_ui_vi` row 58 draft/save-disabled/revert PASS. Checkout native editor exposes **65** editable `label` rows while `key` column remains immutable. `AQUA_BUILDER_NINE_PAGES_QA_PASS pages=9 readonly=true`.
+- `#42888566052`: **SUCCESS**, live anonymous Woo cart and COD checkout end-to-end *without* actual order submission, native discount/tax totals and Woo shipping quote verified, order POST fully intercepted, `created_orders=0`, cleanup PASS.
+- `#42888057217` and signed deploy `#42888200487`: **SUCCESS** for Astro master source `089d05c6f9d0b49fa67d7801c9c7248edf2568b1` after Checkout ESC Table 65-row upgrade.
+- `#42886074121`: **SUCCESS** for PHP source `436a7ea571ec9db5e23b30e820e2d5248d51241f`; `checkout_endpoint.php` SHA-256 checked. New shipping quote/runtime accepts only current WooCommerce rates and returns no methods when Woo shipping disabled. No invented shipping policy or cost.
+- Scope DONE: source fixes, offline shipping fixtures, PHP/Astro production release, Checkout ESC Table added label keys, safe buyer browser regression and 9-Page Visual Builder production read-only regression.
+- Scope REMAINING / external business gate: shipping zones/rates must first be configured by owner in WooCommerce; then rerun safe rate-enabled/browser scenarios and arrange an explicitly authorized buyer test order or staging acceptance to verify actual COD order, shipping line/tax, stock and notification. Do **not** create a real order, change coupons, enable shipping, invent rate policy, or bypass deployment policy in order to obtain a green check.
+
+Overall project checkout acceptance: PARTIAL because real Woo shipping policy and real-order approval are not provided. This is a business gate, not a code-source QA failure.
