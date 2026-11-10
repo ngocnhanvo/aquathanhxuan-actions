@@ -1,7 +1,7 @@
 {
   "project": "aquathanhxuan.com",
-  "astro_sha": "04425828497f5f6c3ec0f30b49f1d808d473f238",
-  "php_sha": "4a65e0cab7864a44dbce83f01bf15723a7a5f589",
-  "scope": "Sticky purchase bar visibility only after scrolling past original in-page purchase actions; scoped Astro syntax and prior detail fields",
-  "attempt": 5
+  "astro_sha": "99c476a7f3af13717f7294f23e39b31922ea3320",
+  "php_sha": "54a305357893461b1fc8256e899a424b90840a88",
+  "scope": "Product detail sticky CTA remains visible at footer, view cart label single line, purchase-handler preserved; Astro compiler + PHP REST and price/stock regression",
+  "attempt": 6
 }
