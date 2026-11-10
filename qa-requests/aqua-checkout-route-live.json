@@ -5,9 +5,10 @@
   "build_run": 42785546490,
   "no_orders": true,
   "no_cart_writes": true,
-  "attempt": 3,
+  "attempt": 4,
   "previous_failed_run": 42781432063,
-  "reason": "Confirm checkout routes and OnePay available; BACS hidden because WooCommerce BACS accounts list is empty",
+  "reason": "Read-only verify Woo account email history link route plus cart/checkout/order receipt and OnePay-only gateway",
   "expected_bacs": false,
-  "bacs_audit_run": 42783621660
+  "bacs_audit_run": 42783621660,
+  "source_qa_run": 42794755129
 }
