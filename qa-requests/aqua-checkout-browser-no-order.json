@@ -2,9 +2,13 @@
   "scope": "AQUA_BROWSER_CART_TO_GATEWAY",
   "project": "aquathanhxuan.com",
   "frontend": "https://aquathanhxuan.io.vn",
-  "astro_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
+  "astro_sha": "fa1fddbd4c7fefcf76f62e168bf11c8bc26b2ead",
   "routes_run": 42782297740,
   "no_order_creation": true,
   "no_payment_attempt": true,
-  "cleanup_required": true
+  "cleanup_required": true,
+  "php_release_run": 42785150060,
+  "expected_bacs": false,
+  "bacs_audit_run": 42783621660,
+  "reason": "Anonymous Woo cart -> checkout -> payment select, BACS hidden while no bank recipients, cleanup and no orders"
 }
