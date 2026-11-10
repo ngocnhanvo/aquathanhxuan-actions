@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "736c9936129c67fc169393044283c48f0d7886fe",
+  "purpose": "Build WordPress Page 83821 + Rewrite 83823 for /lich-su-mua-hang with OrderHistoryPage and HTML escaping",
+  "source_qa_run": 42796533065,
+  "cms_page_run": 42796129841,
+  "no_orders": true
+}
