@@ -510,9 +510,24 @@ const shortcode = t=>'[table id='+t.table+' /]';
   const nonceRes=await page.request.get(WP+'/wp-admin/admin-ajax.php?action=rest-nonce');
   assert.equal(nonceRes.status(),200,'WordPress nonce request failed');
   const headers={'X-WP-Nonce':(await nonceRes.text()).trim()};
+  // GETs only: bounded retry for transient WordPress/PHP-FPM overloads.
+  // Never retry permission failures or turn a failed mutation into another write.
   const rest=async path=>{
-    const r=await page.request.get(WP+path,{headers,timeout:35000,failOnStatusCode:false});
-    return {status:r.status(),data:await r.json().catch(()=>null)};
+    for(let attempt=0;attempt<3;attempt++){
+      try{
+        const r=await page.request.get(WP+path,{headers,timeout:35000,failOnStatusCode:false});
+        if([429,502,503,504].includes(r.status())&&attempt<2){
+          await page.waitForTimeout(900*(attempt+1));
+          continue;
+        }
+        return {status:r.status(),data:await r.json().catch(()=>null)};
+      }catch(err){
+        const transient=/ECONNRESET|socket hang up|ETIMEDOUT|Timeout|ECONNREFUSED/i.test(String(err));
+        if(!transient||attempt===2)throw err;
+        await page.waitForTimeout(900*(attempt+1));
+      }
+    }
+    throw new Error('WordPress GET retry budget exceeded');
   };
   for(const t of targets){
    assert.equal(new Set(t.labels.map(x=>x[0])).size,t.labels.length,'Duplicate label keys');
