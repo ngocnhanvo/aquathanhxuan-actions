@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "2b990bce6f5b1da93b70b5f57123ef58b62ff133",
-  "scope": "ONEPAY_SIGNED_RETURN_WITHOUT_DOMAIN_HELPER",
-  "purpose": "Regression: valid signed OnePay response, correct amount/order, redirect to official Aqua frontend without dependency on get_site_domain; fake callbacks blocked; no real payments",
+  "source_sha": "37805d0f06ff33557a258e8187761409ae7aeab5",
+  "scope": "ONEPAY_CALLBACK_PLUS_ACCOUNT_AND_EXISTING_CUSTOMER",
+  "purpose": "Offline tests: guest OnePay order, account creation with password validation, logged-in customer order association, idempotent retry, HMAC return and paid receipt with no payment/orders",
   "production_order_creation": false,
   "no_real_orders": true
 }
