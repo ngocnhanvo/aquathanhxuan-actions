@@ -1,0 +1,10 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "c3d5714f9ec37e1f1d030524abc852be95cdfb0b",
+  "purpose": "Deploy OrderHistoryPage from WordPress, HMAC signed sessions and customer-scoped Woo order history; move Vitest test out of Astro route",
+  "source_qa_run": 42799262653,
+  "previous_failed_build_run": 42798547592,
+  "wp_history_page": 83821,
+  "no_real_orders": true
+}
