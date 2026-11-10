@@ -36,9 +36,11 @@ jobs:
           php -l source-php/wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php
           php -l source-php/wp-content/themes/vibe-code-theme/inc/checkout/index.php
           php -l source-php/tests/aqua-checkout-order-contract.test.php
+          php -l source-php/tests/aqua-checkout-shipping-contract.test.php
           php source-php/tests/aqua-checkout-preflight.test.php
           php source-php/tests/aqua-checkout-idempotency.test.php
           php source-php/tests/aqua-checkout-order-contract.test.php
+          php source-php/tests/aqua-checkout-shipping-contract.test.php
           php source-php/tests/aqua-onepay-return-safety.test.php
           php source-php/tests/aqua-onepay-context-loader.test.php
           php -l source-php/wp-content/themes/vibe-code-theme/inc/user/login.php
