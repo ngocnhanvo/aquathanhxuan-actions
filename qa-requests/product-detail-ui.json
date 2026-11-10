@@ -1,11 +1,11 @@
 {
   "project": "aquathanhxuan.com",
   "environment": "production",
-  "astro_sha": "99c476a7f3af13717f7294f23e39b31922ea3320",
+  "astro_sha": "b7c393a7cda3116f6ccff1316b7434b0eb4e4f99",
   "php_sha": "54a305357893461b1fc8256e899a424b90840a88",
-  "scope": "Production regression for sticky purchase: main CTA initial hidden guard, cart link single-line desktop/mobile, unchanged cart delegate, bar remains fixed when footer enters viewport; include exact customer URL /san-pham/1443750909 at 1657x921 and 390x844. Read-only Playwright, no cart API mutation.",
-  "attempt": 5,
-  "productionBuildRun": 42726114209,
-  "productionDeployRun": 42726266559,
-  "sourceUnitRun": 42725892069
+  "scope": "Real production footer clearance on product page: fixed bar top above footer copyright bottom by >=8px, dynamic footer margin height, no clipping of View cart, sticky never hides at footer, 4 Woo samples × 1440/390 and exact user URL ×1657/390, no cart writes",
+  "attempt": 6,
+  "productionBuildRun": 42728082469,
+  "productionDeployRun": 42728214191,
+  "sourceUnitRun": 42727975935
 }
