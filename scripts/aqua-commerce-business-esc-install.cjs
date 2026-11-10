@@ -485,6 +485,14 @@ const targets=[
       [
         "order_qr_alt",
         "Mã VietQR thanh toán đơn hàng"
+      ],
+      [
+        "order_thank_you_desc_1",
+        "Mã đơn hàng của bạn là"
+      ],
+      [
+        "order_thank_you_desc_2",
+        "Chúng tôi đã gửi email xác nhận chi tiết tới"
       ]
     ]
   }
@@ -572,6 +580,40 @@ const shortcode = t=>'[table id='+t.table+' /]';
     assert(result.status===200&&result.json?.success===true&&result.json?.table_id===t.table,
       'Native TablePress create/save failed '+t.table+': '+JSON.stringify(result));
     audit.writes.push('Created '+t.table);save();
+    table=await rest('/wp-json/tablepress/v1/table/'+t.table+'?_esc_verify='+Date.now());
+   }
+   // Preserve previously edited values; add only missing Page labels via
+   // native TablePress Editor, with no new Page or table and no key reordering.
+   if(table.status===200 && table.data?.items?.length<t.labels.length){
+    const prior=table.data.items;
+    assert(t.table==='checkout_done_ui_vi','Unexpected label schema expansion '+t.table);
+    assert(prior.every((row,i)=>row.key===t.labels[i]?.[0]&&String(row.label||'').trim()),
+      'Unsafe label migration; existing keys/values differ '+t.table);
+    assert(!String(table.data?.meta?.api||'').trim(),'API-backed tables cannot be migrated as labels');
+    await page.goto(WP+'/wp-admin/admin.php?page=tablepress_edit&table_id='+t.table,
+      {waitUntil:'domcontentloaded',timeout:45000});
+    const nonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+    assert(nonce,'Native table edit nonce missing '+t.table);
+    const grid=[['key','label'],['Mã trường','Nội dung'],
+      ...t.labels.map(([key,label],i)=>[key,i<prior.length?String(prior[i].label):label])];
+    const form=new URLSearchParams();
+    for(const [k,v] of [
+      ['action','tablepress_save_table'],['_ajax_nonce',nonce],
+      ['tablepress[id]',t.table],['tablepress[new_id]',t.table],
+      ['tablepress[name]',t.name],['tablepress[description]','Nội dung giao diện Visual Builder'],
+      ['tablepress[data]',JSON.stringify(grid)],['tablepress[options]','{}'],
+      ['tablepress[visibility]',JSON.stringify({rows:grid.map(()=>1),columns:[1,1]})],
+      ['tablepress[number][rows]',String(grid.length)],['tablepress[number][columns]','2'],
+      ['custom_api',''],['custom_image',''],['custom_cols',''],['custom_rows','']
+    ])form.append(k,v);
+    const result=await page.evaluate(async body=>{
+      const response=await fetch('/wp-admin/admin-ajax.php',{method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body});
+      return {status:response.status,json:await response.json()};
+    },form.toString());
+    assert(result.status===200&&result.json?.success===true&&result.json?.table_id===t.table,
+      'Native label append failed '+t.table);
+    audit.writes.push('Append labels to '+t.table);save();
     table=await rest('/wp-json/tablepress/v1/table/'+t.table+'?_esc_verify='+Date.now());
    }
    assert.equal(table.status,200,'Cannot read native table '+t.table);
