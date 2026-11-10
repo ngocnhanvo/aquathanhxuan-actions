@@ -47,6 +47,13 @@ jobs:
             'src/astro/pages/ResetPassPage.astro',
             'src/astro/pages/LostPassPage.astro',
             'src/astro/pages/SupportPage.astro',
+            'src/astro/components/Support/SupportSection.astro',
+            'src/astro/tablepress/Support_contact.astro',
+            'src/astro/tablepress/Support_complaint.astro',
+            'src/astro/tablepress/Support_dealer.astro',
+            'src/astro/tablepress/Support_policy.astro',
+            'src/astro/tablepress/Support_about.astro',
+            'src/astroutils/CheckoutPage/LoginFormSSG.astro',
             'src/astroutils/CheckoutPage/InfoForm.astro',
             'src/astroutils/CheckoutPage/LoginForm.astro',
             'src/astro/tablepress/Order_history.astro'
@@ -80,6 +87,17 @@ jobs:
           assert(receipt.includes('cell(getStatusLabelKey(order.status))') && receipt.includes('cell(errorKey)'));
           assert(!receipt.includes('mtlang'),'Receipt labels must come from native ESC');
           console.log('AQUA_RECEIPT_ESC_LABELS_PASS');
+          const support=fs.readFileSync('src/astro/pages/SupportPage.astro','utf8');
+          const shellReader=fs.readFileSync('src/lib/wordpress/supportShellLabels.ts','utf8');
+          const section=fs.readFileSync('src/astro/components/Support/SupportSection.astro','utf8');
+          const history=fs.readFileSync('src/astro/pages/OrderHistoryPage.astro','utf8');
+          const guest=fs.readFileSync('src/astroutils/CheckoutPage/LoginFormSSG.astro','utf8');
+          assert(support.includes('readSupportShellLabels') && support.includes('cell("aside_title")'));
+          assert(support.includes('sectionEyebrowSource:cell("section_eyebrow")'));
+          assert(shellReader.includes('data-esc-builder-cell-field') && shellReader.includes('section_eyebrow'));
+          assert(section.includes('sectionEyebrowSource'));
+          assert(history.includes('cell={cell}') && guest.includes('cell("login_text")'));
+          console.log('AQUA_SUPPORT_AND_HISTORY_GUEST_ESC_COORDINATES_PASS');
           console.log('AQUA_COMMERCE_PAGE_LABELS_SOURCE_PASS');
           assert(source.includes('esc-builder-demo-not-a-real-cart'));
           assert(!source.includes('wp-json/wc/v3/orders'));
