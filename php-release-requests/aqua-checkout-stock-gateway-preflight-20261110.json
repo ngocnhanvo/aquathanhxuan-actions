@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "348ddecc54628914be3b5faf503dee8b5be63107",
+  "purpose": "Reject invalid gateway or unavailable stock before creating WooCommerce orders or accounts",
+  "no_orders_qa": true,
+  "astro_build": false
+}
