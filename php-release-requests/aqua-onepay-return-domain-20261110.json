@@ -1,0 +1,11 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "2b990bce6f5b1da93b70b5f57123ef58b62ff133",
+  "purpose": "Ensure paid OnePay orders redirect to verified Aqua frontend order-received without optional get_site_domain helper",
+  "source_qa_run": 42793971806,
+  "astro_build": false,
+  "no_orders_qa": true
+}
