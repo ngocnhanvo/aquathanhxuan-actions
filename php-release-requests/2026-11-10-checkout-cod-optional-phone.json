@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "cbaffc1831a40fc85fc829e0ad2d40025107bdeb",
+  "scope": "Deploy the checkout server validation update: optional phone number, native COD retained; no Astro build"
+}
