@@ -11,5 +11,8 @@
   "repairRun": 42759530760,
   "buildRun": 42759753974,
   "deployRun": 42759851013,
-  "scope": "Require public HTTP 200 and genuine detail for Cubic40 desktop/mobile, source identity/price/stock, verify original working product regression"
+  "scope": "Require public HTTP 200 and genuine detail for Cubic40 desktop/mobile, source identity/price/stock, verify original working product regression",
+  "attempt": 2,
+  "previousRun": 42760257903,
+  "reason": "Fix Node global fetch Response.ok property in QA marker probe; production source and CMS Rewrite unchanged"
 }
