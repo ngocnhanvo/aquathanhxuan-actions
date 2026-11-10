@@ -35,6 +35,9 @@ const getCoupons=c=>(c.coupons||[]).map(x=>String(typeof x==='string'?x:(x.coupo
   assert(addedItems.length===1,'Expected one cart item in disposable session');
   itemKey=addedItems[0].item_key||'';
   assert(itemKey,'CoCart item_key missing; cannot cleanup');
+  const addedSummary={step:'after_add',coupons:getCoupons(added),subtotal:Number(added?.totals?.subtotal||0),discount:Number(added?.totals?.discount_total||0)};
+  console.log('AQUA_CART_ADDED_SUMMARY='+JSON.stringify(addedSummary));
+  result.checks.push(addedSummary);
   result.checks.push({step:'add_cart_item',http:'PASS',productId:82477,itemCount:1});
   save();
   const cart=await get('/api/cart?cart_key='+encodeURIComponent(cartKey));
@@ -42,6 +45,8 @@ const getCoupons=c=>(c.coupons||[]).map(x=>String(typeof x==='string'?x:(x.coupo
   const discount=Number(cart?.totals?.discount_total||0);
   const coupons=getCoupons(cart);
   const expectedDiscount=Math.round(subtotal*0.05);
+  console.log('AQUA_CART_SYNCED_SUMMARY='+JSON.stringify({coupons,subtotal,discount,expectedDiscount}));
+  result.checks.push({step:'after_sync',coupons,subtotal,discount,expectedDiscount});save();
   assert(subtotal>200000,'Test product subtotal did not meet promotion threshold: '+subtotal);
   assert(coupons.includes('aqua-auto-5'),'WooCommerce virtual automatic coupon not applied: '+JSON.stringify(coupons));
   assert(discount>0,'WooCommerce returned no discount');
