@@ -3,11 +3,12 @@
   "action": "DISPOSABLE_CART_ONLY_NO_ORDER",
   "sourceProductId": 266939,
   "targetProductId": 82477,
-  "phpReleaseRun": 42775328127,
+  "phpReleaseRun": 42776578273,
   "nativeCouponId": 83818,
   "nativeCouponPassRun": 42775054145,
   "astroBuildRun": 42775644106,
   "astroSourceSha": "0ac8af50be65a4ead280d2368bd69195c27bcc01",
-  "attempt": 2,
-  "previousRun": 42771889672
+  "attempt": 3,
+  "previousRun": 42775975583,
+  "reason": "Revalidate the existing real WordPress coupon after preserving coupons in CoCart sync; no checkout/order"
 }
