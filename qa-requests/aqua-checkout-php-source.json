@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "e8dd6954e5b69b84cc25d2ebb31d66168847e8f8",
-  "scope": "REAL_WORDPRESS_CUSTOMER_AUTH_ROUTE_AND_CHECKOUT_FIXTURE",
-  "purpose": "Verify newly added custom/v1/login endpoint against real wp_authenticate contract: valid/invalid WordPress credentials, no secret exposure, billing fields, shipping & OnePay fixtures",
+  "source_sha": "f6bf82ab5ee9215b8ad5b84e3f2d26f889833ebd",
+  "scope": "COD_EMPTY_CART_IDEMPOTENCY_SAFE_REPLAY",
+  "purpose": "Verify Woo COD cart-cleared retry safely replays original order without second order or payment; offline PHP fixtures only",
   "production_order_creation": false,
   "no_real_orders": true,
   "previous_live_customer_run": 42802133987
