@@ -1,7 +1,7 @@
 {
   "project": "aquathanhxuan.com",
-  "astro_sha": "b7c393a7cda3116f6ccff1316b7434b0eb4e4f99",
+  "astro_sha": "c465bc2eff875dfdbb65e802f86031fad3e91452",
   "php_sha": "54a305357893461b1fc8256e899a424b90840a88",
-  "scope": "Sticky purchase footer copyright unobstructed, dynamic measured footer reserve after CTA, no wrap, unchanged product commerce fields, scoped Astro compiler",
-  "attempt": 7
+  "scope": "Source Astro compiler product detail+listing+shared RecentlyViewedProducts; same browser-history component; localStorage locale guards, no product or Woo changes; preserve sticky and stock/price regression",
+  "attempt": 8
 }
