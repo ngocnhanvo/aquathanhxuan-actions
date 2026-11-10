@@ -1,8 +1,11 @@
 {
   "project": "aquathanhxuan.com",
   "production": "https://aquathanhxuan.io.vn",
-  "build_sha": "527063756fd57013349fc17e44eebc3617a72016",
-  "build_run": 42780443864,
+  "build_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
+  "build_run": 42781934797,
   "no_orders": true,
-  "no_cart_writes": true
+  "no_cart_writes": true,
+  "attempt": 2,
+  "previous_failed_run": 42781432063,
+  "reason": "Recheck checkout SSR after optional reset-page crash fix"
 }
