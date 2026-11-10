@@ -138,14 +138,20 @@ jobs:
           ftps_install_pid=""
           if ! command -v lftp >/dev/null 2>&1; then
             (
-              sudo apt-get update -qq
-              sudo apt-get install -y -qq --no-install-recommends lftp
+              # Keep apt work independent, but do not let an unavailable mirror
+              # hold the production build step for the whole 45-minute job.
+              timeout --signal=TERM --kill-after=15s 600s bash -c '
+                sudo apt-get update -qq
+                sudo apt-get install -y -qq --no-install-recommends lftp
+              '
             ) > "$RUNNER_TEMP/aquathanhxuan-lftp-install.log" 2>&1 &
             ftps_install_pid=$!
           fi
           # Restore verified pnpm store where available; recreate dependencies
           # from the exact lockfile on every run. Cache miss is still safe.
+          echo "AQUA_BUILD_STAGE=DEPENDENCIES_START $(date -u +%FT%TZ)"
           pnpm install --frozen-lockfile --prefer-offline
+          echo "AQUA_BUILD_STAGE=DEPENDENCIES_EXIT $(date -u +%FT%TZ)"
           python3 - <<'PY'
           import os,re
           kept=[]
@@ -161,20 +167,28 @@ jobs:
           PY
           # Keep original Astro build settings, but pin project identity URLs.
           # Unit tests run separately in non-deploy CI, not in every build.
-          pnpm run build-git
+          echo "AQUA_BUILD_STAGE=ASTRO_START $(date -u +%FT%TZ)"
+          # The Astro CLI can print Complete! while a Node open handle is
+          # still alive. Bound this wait so failures are actionable, not silent.
+          timeout --signal=TERM --kill-after=15s 1200s pnpm run build-git
+          echo "AQUA_BUILD_STAGE=ASTRO_PROCESS_EXIT $(date -u +%FT%TZ)"
           node --check dist/server/entry.mjs
           test -s dist/client/index.html
           test -s dist/server/entry.mjs
           # Generic SSR entrypoint is mandatory.
           test -s dist/server/entry.mjs
+          echo "AQUA_BUILD_STAGE=DIST_CHECKS_PASS $(date -u +%FT%TZ)"
           if [[ -n "$ftps_install_pid" ]]; then
+            echo "AQUA_BUILD_STAGE=FTPS_INSTALL_WAIT_START $(date -u +%FT%TZ)"
             if ! wait "$ftps_install_pid"; then
               cat "$RUNNER_TEMP/aquathanhxuan-lftp-install.log"
               echo "::error::Unable to prepare encrypted FTPS client"
               exit 1
             fi
+            echo "AQUA_BUILD_STAGE=FTPS_INSTALL_WAIT_EXIT $(date -u +%FT%TZ)"
           fi
           command -v lftp >/dev/null 2>&1 || { echo "::error::Missing encrypted FTPS client"; exit 1; }
+          echo "AQUA_BUILD_STAGE=BUILD_STEP_READY $(date -u +%FT%TZ)"
           echo "Build source SHA: $(git rev-parse HEAD) (master)" >> "$GITHUB_STEP_SUMMARY"
       - name: Package only compiled staging output (strictly no .env)
         shell: bash
