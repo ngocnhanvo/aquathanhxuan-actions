@@ -45,6 +45,26 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    const nonceResponse=await page.request.get(WP+'/wp-admin/admin-ajax.php?action=rest-nonce');
    assert.equal(nonceResponse.status(),200,'No WP REST nonce');
    const headers={'X-WP-Nonce':(await nonceResponse.text()).trim()};
+   // The production WordPress API sometimes resets keep-alive sockets while
+   // rebuilding. Read-only GETs may be retried; never replay mutations.
+   const wpGet=async(url)=>{
+     for(let attempt=0;attempt<4;attempt++){
+       try{
+         const response=await page.request.get(url,{headers,timeout:40000,failOnStatusCode:false});
+         if([429,502,503,504].includes(response.status()) && attempt<3){
+           console.log('AQUA_QA_WP_READ_RETRY status='+response.status()+' attempt='+(attempt+1));
+           await page.waitForTimeout(1000*(attempt+1));
+           continue;
+         }
+         return response;
+       }catch(error){
+         if(!/ECONNRESET|socket hang up|ETIMEDOUT|Timeout|ECONNREFUSED/i.test(String(error)) || attempt===3)throw error;
+         console.log('AQUA_QA_WP_READ_RETRY transient attempt='+(attempt+1));
+         await page.waitForTimeout(1000*(attempt+1));
+       }
+     }
+     throw new Error('WordPress read retry budget exceeded');
+   };
    const markerResponse=await page.request.get(FRONT+'/aquathanhxuan-staging-build.json?business_qa='+Date.now());
    assert.equal(markerResponse.status(),200,'Production marker unavailable');
    const marker=await markerResponse.json();
@@ -52,14 +72,12 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    assert.match(String(qaRequest.source_sha||''),/^[a-f0-9]{40}$/,'Unpinned QA source');
    assert.equal(marker.commit,qaRequest.source_sha,'Wrong production Astro source');
    for(const p of pages){
-     const wpRes=await page.request.get(WP+'/wp-json/wp/v2/pages/'+p.id+'?context=edit&_qa='+Date.now(),
-       {headers,timeout:40000});
+     const wpRes=await wpGet(WP+'/wp-json/wp/v2/pages/'+p.id+'?context=edit&_qa='+Date.now());
      assert.equal(wpRes.status(),200,'Missing WordPress Page '+p.slug);
      const wpPage=await wpRes.json();
      assert.equal(wpPage.slug,p.slug,'Page slug changed: '+p.slug);
      assert.equal(wpPage.status,'publish','Unpublished Page: '+p.slug);
-     const tableRes=await page.request.get(WP+'/wp-json/tablepress/v1/table/'+p.table+'?_qa='+Date.now(),
-       {headers,timeout:40000});
+     const tableRes=await wpGet(WP+'/wp-json/tablepress/v1/table/'+p.table+'?_qa='+Date.now());
      assert.equal(tableRes.status(),200,'Native ESC Table unavailable '+p.table);
      const table=await tableRes.json();
      if(p.count){
