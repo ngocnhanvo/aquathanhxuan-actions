@@ -1,0 +1,89 @@
+name: Aqua order history search + ESC Table source QA (NO BUILD)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-order-history-search-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+        working-directory: source
+      - name: Compile table and history components
+        working-directory: source
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import { createRequire } from 'node:module';
+          const require=createRequire(import.meta.url);
+          const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
+          for(const file of [
+            'src/astro/pages/OrderHistoryPage.astro',
+            'src/astro/tablepress/Order_history.astro'
+          ]){
+            const compiled=await transform(fs.readFileSync(file,'utf8'),{filename:file});
+            assert(compiled.code,'Compiler returned no code: '+file);
+            console.log('ASTRO_COMPONENT_COMPILE_PASS='+file);
+          }
+          const page=fs.readFileSync('src/astro/pages/OrderHistoryPage.astro','utf8');
+          const api=fs.readFileSync('src/pages/api/user/order.ts','utf8');
+          const table=fs.readFileSync('src/astro/tablepress/Order_history.astro','utf8');
+          assert(page.includes('order_history_vi')&&page.includes('data-order-labels'));
+          assert(page.includes('id="order-search-form"')&&page.includes('id="order-load-more"'));
+          assert(page.includes('id="order-loading-skeleton"')&&page.includes('loadingSkeleton?.remove()'));
+          assert(table.includes('data-esc-source-field="label"')&&table.includes('data-esc-source-table="order_history_vi"'));
+          assert(api.includes('customerId')&&api.includes('maxSearchPages'));
+          console.log('AQUA_HISTORY_SEARCH_SOURCE_PASS');
+          NODE
+      - name: Test private Woo search pagination and regressions
+        working-directory: source
+        run: pnpm exec vitest run src/lib/utils/orderHistoryApi.test.ts src/lib/utils/signedSession.test.ts src/lib/utils/linkWooOrderCustomer.test.ts
+      - name: Check Astro types against known baseline
+        working-directory: source
+        shell: bash
+        run: |
+          set +e
+          pnpm exec astro check --js-only > astro-check.log 2>&1
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then echo "ASTRO_CHECK_PASS"; exit 0; fi
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          log=re.sub(r'\x1b\[[0-9;]*m','',Path('astro-check.log').read_text())
+          errors=re.findall(r'(?m)^(src/[^\n]+?):\d+:\d+ - error ts\(\d+\):',log)
+          known={
+             'src/context/LanguageContext/index.tsx','src/hooks/use-toast.tsx',
+             'src/lib/marketingTags.ts','src/lib/effects/index.tsx',
+             'src/lib/utils/RelatedPosts.tsx','src/lib/wordpress/builderLivePage.ts',
+             'src/pages/preview/[...slug].astro'
+          }
+          print('ASTRO_CHECK_ERROR_FILES='+str(errors))
+          if len(errors)!=9 or set(errors)-known: raise SystemExit(1)
+          print('ASTRO_CHANGES_TYPECHECK_PASS baseline=9')
+          PY
+      - name: Tested source revision
+        working-directory: source
+        run: git rev-parse HEAD
