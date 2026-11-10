@@ -96,14 +96,20 @@ async function apiPost(path,body){
    return !!el?.querySelector('input[name="payment_method"]');
   },{timeout:20000}).catch(()=>{throw Error('Payment methods did not load from WordPress');});
   const methods=await page.locator('input[name="payment_method"]').evaluateAll(els=>els.map(e=>e.value));
-  const qaConfig=JSON.parse(fs.readFileSync('qa-requests/aqua-checkout-browser-no-order.json','utf8'));
-  assert.equal(typeof qaConfig.expected_bacs,'boolean','Audit must specify WordPress BACS account readiness');
-  assert(methods.includes('onepayus'),'Enabled OnePay gateway missing');
-  assert.equal(methods.includes('bacs'),qaConfig.expected_bacs,
-    'BACS should be selectable only when WordPress has a bank recipient');
-  assert(!methods.includes('cod')&&!methods.includes('cheque'),'Inactive payment method shown');
+  assert.deepEqual(methods,['cod'],'Only native COD may be offered (OnePay temporarily hidden)');
+  assert.equal(await page.locator('#checkout-payment-methods').innerText(),'Thanh toán khi nhận hàng',
+    'Checkout payment label must be clear and localized');
+  assert.equal(await page.locator('input[name="billing_cccd"]').count(),0,'ID document field must not be collected');
+  assert.equal(await page.locator('input[name="billing_chuthe"]').count(),0,'Personal/company selector must be gone');
+  assert.equal(await page.locator('input[name="billing_sodienthoai"]').getAttribute('required'),null,
+    'Phone number must not be required');
+  const positions=await page.locator('#checkout-form input[name^="billing_"]').evaluateAll(els=>
+    els.map(e=>e.getAttribute('name')));
+  assert(positions.indexOf('billing_diachi')<positions.indexOf('billing_state') &&
+         positions.indexOf('billing_diachi')<positions.indexOf('billing_city'),
+         'Address must precede province and district');
   assert(await page.locator('#submit-checkout-btn').isDisabled(),'Checkout should not submit before accepting terms');
-  result.checks.push({stage:'Native Woo gateways & disabled pre-terms submit',status:'PASS',gateways:methods});save();
+  result.checks.push({stage:'COD only, simplified checkout and disabled pre-terms submit',status:'PASS',gateways:methods});save();
   await page.screenshot({path:OUT+'/checkout.png',fullPage:false});
 
   // Exercise the complete browser submit path WITHOUT reaching WordPress:
@@ -121,7 +127,6 @@ async function apiPost(path,body){
   });
   const fields={
    billing_tenchuthe:'Khách QA',
-   billing_sodienthoai:'0900000000',
    billing_email:'checkout-fixture@example.invalid',
    billing_state:'Hà Nội',
    billing_city:'Hà Đông',
@@ -130,7 +135,7 @@ async function apiPost(path,body){
   for(const [name,value] of Object.entries(fields)){
    await page.locator('input[name="'+name+'"]').fill(value);
   }
-  await page.locator('input[name="payment_method"][value="onepayus"]').check();
+  await page.locator('input[name="payment_method"][value="cod"]').check();
   await page.locator('#terms-checkbox').check();
   assert(!(await page.locator('#submit-checkout-btn').isDisabled()),
    'Form should enable after selecting a valid gateway and accepting terms');
@@ -142,7 +147,11 @@ async function apiPost(path,body){
   }
   const first=intercepted[0],second=intercepted[1];
   assert.equal(first.cartKey,cartKey,'Checkout must carry original anonymous Woo cart key');
-  assert.equal(first.payment_method,'onepayus','Checkout must submit selected enabled WordPress gateway');
+  assert.equal(first.payment_method,'cod','Checkout must submit only native COD');
+  assert.equal(first.billing.phone,'','Optional phone must be sent empty when omitted');
+  assert.equal(first.billing.company,'','Organization detail must not be collected');
+  assert.equal(first.billing.cccd,undefined,'Identity document must not be submitted');
+  assert.equal(first.billing.chuthe,undefined,'Buyer category must not be submitted');
   assert.equal(first.billing.email,fields.billing_email,'Checkout email must match input');
   assert.equal(first.billing.address_1,fields.billing_diachi,'Checkout shipping/billing address must match');
   assert.equal(first.billing.state,fields.billing_state,'Checkout province must match input');
