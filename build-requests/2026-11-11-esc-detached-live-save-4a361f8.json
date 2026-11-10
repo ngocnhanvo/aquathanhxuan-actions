@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "4a361f8c39077f820be5bf0f7d93ce421d67ad0f",
+  "purpose": "Fix instantly editable Visual Builder labels rendered outside native TablePress shortcode wrappers",
+  "source_qa_run": 42872941031,
+  "cms_page_run": 42862224453,
+  "no_orders": true
+}
