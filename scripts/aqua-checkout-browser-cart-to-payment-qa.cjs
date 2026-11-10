@@ -132,13 +132,46 @@ async function apiPost(path,body){
    billing_city:'Hà Đông',
    billing_diachi:'Địa chỉ kiểm thử, không giao hàng'
   };
+  // Verify the actual Woo quote path, not a browser-invented shipping fee.
+  // Attach BEFORE filling so the network response cannot be missed.
+  const quoteResponse=page.waitForResponse(response=>{
+   if(!response.url().includes('/api/cart/shipping-quote') || response.request().method()!=='POST')return false;
+   try{
+    const body=response.request().postDataJSON();
+    return body?.cartKey===cartKey && body?.billing?.state===fields.billing_state &&
+      body?.billing?.city===fields.billing_city && body?.billing?.address_1===fields.billing_diachi;
+   }catch{return false;}
+  },{timeout:25000});
   for(const [name,value] of Object.entries(fields)){
    await page.locator('input[name="'+name+'"]').fill(value);
   }
+  const quotedResponse=await quoteResponse;
+  const quote=await quotedResponse.json();
+  assert(quotedResponse.ok() && quote.ok===true && typeof quote.enabled==='boolean' &&
+    typeof quote.required==='boolean' && Array.isArray(quote.packages),
+    'Woo shipping quote must return trusted current-cart rates');
+  const selectedRates={};
+  if(quote.required){
+   assert(quote.packages.length>0 && quote.packages.every(pkg=>Array.isArray(pkg.rates)&&pkg.rates.length>0),
+     'Shipping-enabled checkout must have applicable Woo rates');
+   for(const pkg of quote.packages){
+    const index=String(pkg.package_index);
+    const rate=pkg.rates[0];
+    assert(typeof rate.id==='string' && Number.isFinite(Number(rate.cost)),
+      'Shipping rate must contain Woo server cost');
+    await page.locator('#checkout-shipping-methods input[name="shipping_package_'+index+'"]').first().check();
+    selectedRates[index]=rate.id;
+   }
+  }else{
+   assert.equal(await page.locator('#checkout-shipping-section').isVisible(),false,
+     'Shipping disabled at Woo must not invent fees or options');
+  }
+  result.checks.push({stage:'Live Woo shipping quote bound to destination without creating an order',
+   status:'PASS',enabled:quote.enabled,required:quote.required,rate_packages:quote.packages.length});save();
   await page.locator('input[name="payment_method"][value="cod"]').check();
   await page.locator('#terms-checkbox').check();
-  assert(!(await page.locator('#submit-checkout-btn').isDisabled()),
-   'Form should enable after selecting a valid gateway and accepting terms');
+  await page.waitForFunction(()=>document.querySelector('#submit-checkout-btn')?.disabled===false,
+    null,{timeout:12000}).catch(()=>{throw Error('Submit must enable after Woo quote, valid gateway and terms');});
   for(let attempt=0;attempt<2;attempt++){
    await page.locator('#submit-checkout-btn').click();
    await page.waitForFunction((n)=>document.querySelector('#checkout-error')?.textContent?.includes('QA_ONLY_INTERCEPTED_NO_ORDER')
@@ -147,6 +180,8 @@ async function apiPost(path,body){
   }
   const first=intercepted[0],second=intercepted[1];
   assert.equal(first.cartKey,cartKey,'Checkout must carry original anonymous Woo cart key');
+  assert.deepEqual(first.shipping_methods,selectedRates,
+    'Checkout may submit only Woo-quoted selected rate IDs, never a client shipping amount');
   assert.equal(first.payment_method,'cod','Checkout must submit only native COD');
   assert.equal(first.billing.phone,'','Optional phone must be sent empty when omitted');
   assert.equal(first.billing.company,'','Organization detail must not be collected');
