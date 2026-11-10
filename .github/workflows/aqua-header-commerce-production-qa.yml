@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/aqua-header-commerce-production-qa.yml'
+      - 'scripts/aqua-header-commerce-production-qa.cjs'
 permissions:
   contents: read
 jobs:
