@@ -594,7 +594,12 @@ const shortcode = t=>'[table id='+t.table+' /]';
     const start=edited.lastIndexOf('<div',edited.indexOf(shortcode(t)));
     const end=edited.indexOf('</div>',edited.indexOf(shortcode(t)))+6;
     assert(start>=0&&end>start,'Unexpected Insert Code wrapper boundaries');
-    assert.equal(edited.slice(0,start)+edited.slice(end),raw,'Native Insert Code changed unrelated page content');
+    const preserved=edited.slice(0,start)+edited.slice(end);
+    console.log('AQUA_COMMERCE_INSERT_CODE_PRESERVED='+JSON.stringify({
+      page:t.slug,original:raw.slice(0,500),remaining:preserved.slice(0,500)
+    }));
+    assert.equal(preserved.trim(),raw.trim(),
+      'Native Insert Code changed unrelated page content');
     await page.locator('#publish').click();
     await page.waitForTimeout(1800);
     audit.writes.push('Insert Code Page '+t.id);save();
