@@ -2,14 +2,14 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "5f74a1608c2aeb4eb26e3772d1204ed1dd135a1f",
+  "source_sha": "0f2ef126deb7ecdbb090cd086a4482652a560e5c",
   "scope": "WORDPRESS_COUPON_GROUPS_AND_STACKING",
   "purpose": "Rerun complete offline Woo shipping source fixtures after correcting enabled/disabled quote test phases",
   "production_order_creation": false,
   "no_real_orders": true,
   "previous_live_customer_run": 42802133987,
   "previous_failed_run": 42884934241,
-  "reason": "Verify native WordPress coupon grouping, same-group exclusivity, Tet cross-group stack, threshold selection and admin save nonce",
-  "attempt": 2,
+  "reason": "Regression before production release: WordPress coupon groups and one discovery query per cart calculation",
+  "attempt": 3,
   "date": "2026-11-11"
 }
