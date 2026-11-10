@@ -339,7 +339,13 @@ const targets=[
       [
         "demo_quantity",
         "Số lượng: 1"
-      ]
+      ],
+      ["shipping_title", "Phương thức vận chuyển"],
+      ["shipping_loading", "Đang tải phương thức vận chuyển..."],
+      ["shipping_none", "Không có phương thức vận chuyển phù hợp."],
+      ["shipping_error", "Không thể tải phương thức vận chuyển. Vui lòng thử lại."],
+      ["shipping_select", "Vui lòng chọn phương thức vận chuyển."],
+      ["shipping_package", "Kiện hàng"]
     ]
   },
   {
@@ -573,6 +579,76 @@ const shortcode = t=>'[table id='+t.table+' /]';
       'Native TablePress create/save failed '+t.table+': '+JSON.stringify(result));
     audit.writes.push('Created '+t.table);save();
     table=await rest('/wp-json/tablepress/v1/table/'+t.table+'?_esc_verify='+Date.now());
+   }
+   // Only expand the existing, already-published Checkout UI label table.
+   // Preserve every customer-edited label and key; no order or customer data.
+   if(t.table==='checkout_ui_vi' && table.status===200 &&
+      Array.isArray(table.data?.items) && table.data.items.length<t.labels.length){
+     const existing=table.data.items;
+     const originalCount=59;
+     assert.equal(existing.length,originalCount,'Unexpected Checkout label table size before shipping append');
+     assert.equal(t.labels.length,originalCount+6,'Unexpected Checkout source schema change');
+     for(let i=0;i<originalCount;i++){
+       assert.equal(existing[i].key,t.labels[i][0],'Checkout key mismatch before append, row '+i);
+       assert(String(existing[i].label||'').trim(),'Empty existing Checkout label at row '+i);
+     }
+     const added=t.labels.slice(originalCount);
+     assert.deepEqual(added.map(x=>x[0]),[
+       'shipping_title','shipping_loading','shipping_none',
+       'shipping_error','shipping_select','shipping_package'
+     ],'Unexpected new keys; abort mutation');
+     fs.writeFileSync(OUT+'/checkout-ui-before.json',JSON.stringify({
+       table_id:t.table,original_rows:existing,options:table.data.options||{},
+       recorded_at:new Date().toISOString()
+     },null,2)+'\n');
+     save();
+     await page.goto(WP+'/wp-admin/admin.php?page=tablepress&action=edit&table_id='+t.table,
+       {waitUntil:'domcontentloaded',timeout:45000});
+     const saveNonce=(await page.content()).match(/edit_table:\s*'([^']+)'/)?.[1];
+     assert(saveNonce,'Native Checkout TablePress edit nonce unavailable');
+     const pre=await rest('/wp-json/tablepress/v1/table/'+t.table+'?_esc_before_save='+Date.now());
+     assert.equal(pre.status,200,'Cannot verify Checkout table immediately before write');
+     assert.deepEqual(pre.data.items,existing,'Checkout labels changed during append preflight');
+     const grid=[['key','label'],['Mã trường','Nội dung'],
+       ...existing.map(x=>[x.key,x.label]),...added];
+     const originalVis=pre.data.visibility;
+     const visibility={
+       rows:Array.isArray(originalVis?.rows)&&originalVis.rows.length===originalCount+2
+         ? [...originalVis.rows, ...added.map(()=>1)] : grid.map(()=>1),
+       columns:Array.isArray(originalVis?.columns)&&originalVis.columns.length===2
+         ? originalVis.columns : [1,1]
+     };
+     const form=new URLSearchParams();
+     for(const [key,value] of [
+       ['action','tablepress_save_table'],['_ajax_nonce',saveNonce],
+       ['tablepress[id]',t.table],['tablepress[new_id]',t.table],
+       ['tablepress[name]',String(pre.data.name||t.name)],
+       ['tablepress[description]',String(pre.data.description||'Nội dung giao diện Visual Builder')],
+       ['tablepress[data]',JSON.stringify(grid)],
+       ['tablepress[options]',JSON.stringify(pre.data.options||{})],
+       ['tablepress[visibility]',JSON.stringify(visibility)],
+       ['tablepress[number][rows]',String(grid.length)],['tablepress[number][columns]','2'],
+       ['custom_api',''],['custom_image',''],['custom_cols',''],['custom_rows','']
+     ])form.append(key,value);
+     const write=await page.evaluate(async body=>{
+       const response=await fetch('/wp-admin/admin-ajax.php',{method:'POST',credentials:'same-origin',
+         headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body});
+       return {status:response.status,json:await response.json()};
+     },form.toString());
+     assert(write.status===200 && write.json?.success===true && write.json?.table_id===t.table,
+       'Native Checkout shipping label append failed: '+JSON.stringify(write));
+     audit.writes.push('Append 6 Woo shipping labels to checkout_ui_vi');save();
+     table=await rest('/wp-json/tablepress/v1/table/'+t.table+'?_esc_after_save='+Date.now());
+     assert.equal(table.status,200,'Checkout label write REST readback unavailable');
+     assert.equal(table.data?.items?.length,t.labels.length,'Shipping labels not persisted');
+     for(let i=0;i<originalCount;i++)assert.deepEqual(table.data.items[i],existing[i],
+       'Existing customer-edited Checkout label changed at row '+i);
+     for(let i=0;i<added.length;i++){
+       const row=table.data.items[originalCount+i];
+       assert.equal(row.key,added[i][0]);
+       assert.equal(row.label,added[i][1]);
+     }
+     console.log('AQUA_CHECKOUT_SHIPPING_ESC_APPEND_PASS added=6 preserved=59');
    }
    assert.equal(table.status,200,'Cannot read native table '+t.table);
    assert.equal(table.data?.items?.length,t.labels.length,'Table label count mismatch '+t.table);
