@@ -1,0 +1,36 @@
+name: Aqua WooCommerce coupon groups setup (MF5/MF10, NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-coupon-groups-setup.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-checkout-cms-writes
+  cancel-in-progress: false
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-coupon-groups-setup.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Configure exactly two existing coupons and two groups (no checkout/order)
+        run: node scripts/aqua-coupon-groups-setup.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-coupon-groups-setup
+          path: artifacts/aqua-coupon-groups-setup
+          retention-days: 14
+          if-no-files-found: ignore
