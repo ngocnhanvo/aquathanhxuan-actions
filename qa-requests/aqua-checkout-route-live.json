@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "production": "https://aquathanhxuan.io.vn",
+  "build_sha": "527063756fd57013349fc17e44eebc3617a72016",
+  "build_run": 42780443864,
+  "no_orders": true,
+  "no_cart_writes": true
+}
