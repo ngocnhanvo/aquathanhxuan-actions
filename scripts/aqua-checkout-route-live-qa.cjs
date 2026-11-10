@@ -53,7 +53,11 @@ async function get(path){
   assert.equal(gateway.status,200,'Payment gateway API unavailable');
   const methods=JSON.parse(gateway.body);
   assert(methods.ok===true && Array.isArray(methods.gateways),'Invalid payment methods');
-  assert(methods.gateways.some(m=>m.id==='bacs')&&methods.gateways.some(m=>m.id==='onepayus'), 'Expected enabled WordPress gateways not returned');
+  const qaConfig=JSON.parse(fs.readFileSync('qa-requests/aqua-checkout-route-live.json','utf8'));
+  assert.equal(typeof qaConfig.expected_bacs,'boolean','Audit must specify BACS readiness observed from WP');
+  assert(methods.gateways.some(m=>m.id==='onepayus'),'Enabled OnePay gateway missing');
+  assert.equal(methods.gateways.some(m=>m.id==='bacs'),qaConfig.expected_bacs,
+    'BACS visibility must match WordPress bank account readiness');
   assert(!methods.gateways.some(m=>['cheque','cod'].includes(m.id)), 'Inactive gateways must be hidden');
   checks.push({kind:'Live WooCommerce payment methods',method_ids:methods.gateways.map(m=>m.id),status:'PASS'});
   report.status='PASS';save();
