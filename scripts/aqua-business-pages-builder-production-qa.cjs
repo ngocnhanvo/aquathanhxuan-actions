@@ -30,7 +30,8 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    const unsafe=[];
    page.on('request',r=>{
      const method=r.method(),path=new URL(r.url()).pathname;
-     if(method!=='GET' && /\/api\/(?:cart\/(?:checkout|add|del|update)|user\/(?:lostpass|resetpass|login)|agent\/chat)/.test(path)) {
+     if(method!=='GET' && (/\/api\/(?:cart\/(?:checkout|add|del|update)|user\/(?:lostpass|resetpass|login)|agent\/chat)/.test(path) ||
+       /\/wp-json\/esc-builder\/v1\/(?:save-text|save-page-text|save-image|save-page-image)/.test(path))) {
        unsafe.push({method,path});
        // An accidental mutation must be caught in the report; this runner never
        // sends user credentials/order input into the protected forms.
@@ -194,8 +195,27 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        assert.equal(await page.locator('#esc-vb-edit-row option[value$=":key"]').count(),0,
          'Stable UI label identity is editable '+p.table);
      }
+     // Exercise only the local draft and revert it immediately; never click
+     // Save WordPress. This validates that the selected physical cell is not
+     // merely listed but is enabled for authoring in the real editor.
+     if(p.table==='checkout_ui_vi'){
+       await page.locator('#esc-vb-edit-row').selectOption('58:label');
+       assert.equal(await page.locator('#esc-vb-edit-row').inputValue(),'58:label',
+         'Checkout last label cannot be selected');
+     }
+     const editor=page.locator('#esc-vb-edit-title');
+     await editor.waitFor({state:'visible',timeout:10000});
+     assert.equal(await editor.isEnabled(),true,'Editable cell text area disabled '+p.table);
+     const initial=await editor.inputValue();
+     assert(initial.trim(),'Blank native editable label '+p.table);
+     await editor.fill(initial+' ');
+     await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===false,
+       null,{timeout:12000});
+     await editor.fill(initial);
+     await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===true,
+       null,{timeout:12000});
      audit.pages.push({slug:p.slug,page_id:p.id,table:p.table,states:p.states.length,
-       coordinate:true,selectedField:coords.field,labelCount:p.count||null});
+       coordinate:true,selectedField:coords.field,labelCount:p.count||null,draftReverted:true});
      record();
      console.log('AQUA_BUILDER_PAGE_PASS='+p.slug);
    }
