@@ -19,8 +19,10 @@ const exact = ['custom/v1/lost-password', 'custom/v1/reset-password'];
   const wpRoutes = await fetch(WP+'/wp-json/');
   assert(wpRoutes.ok,'WordPress REST discovery HTTP '+wpRoutes.status);
   const routes = Object.keys((await wpRoutes.json()).routes||{});
-  for(const route of exact){
-    console.log('PASSWORD_WP_ROUTE '+route+'='+routes.includes('/'+route));
+  for(const [i,route] of exact.entries()){
+    const found=routes.includes('/'+route);
+    console.log('RECOVERY_BACKEND_ENDPOINT_'+(i===0?'REQUEST':'RESET')+'='+found);
+    assert(found,'Required existing WordPress password recovery endpoint is missing');
   }
   for(const pathname of target){
     const response=await fetch(SITE+'/'+pathname,{redirect:'manual'});
