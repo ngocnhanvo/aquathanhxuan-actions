@@ -92,10 +92,11 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
            if(state===p.states[0] && vb===null)break;
          }
          if(state!==p.states[0] && vb!==state){
-           // HTML form fallback works even with inline script blocked.
-           console.log('AQUA_BUSINESS_STATE_FORM_FALLBACK='+p.slug+':'+state);
+           // Explicit preview button is safe despite the global form-submit
+           // firewall; it navigates only within the authorized iframe.
+           console.log('AQUA_BUSINESS_STATE_BUTTON_FALLBACK='+p.slug+':'+state);
            await frame.locator('#esc-business-preview-state').selectOption(state);
-           await frame.locator('#esc-business-preview-toolbar button[type="submit"]').click();
+           await frame.locator('#esc-business-preview-apply').click();
            for(let attempt=0;attempt<12;attempt++){
              await page.waitForTimeout(500);
              vb=await frame.locator('#esc-business-preview-state')
