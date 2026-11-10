@@ -1,11 +1,13 @@
 {
   "project": "aquathanhxuan.com",
   "production": "https://aquathanhxuan.io.vn",
-  "build_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
-  "build_run": 42781934797,
+  "build_sha": "fa1fddbd4c7fefcf76f62e168bf11c8bc26b2ead",
+  "build_run": 42785546490,
   "no_orders": true,
   "no_cart_writes": true,
-  "attempt": 2,
+  "attempt": 3,
   "previous_failed_run": 42781432063,
-  "reason": "Recheck checkout SSR after optional reset-page crash fix"
+  "reason": "Confirm checkout routes and OnePay available; BACS hidden because WooCommerce BACS accounts list is empty",
+  "expected_bacs": false,
+  "bacs_audit_run": 42783621660
 }
