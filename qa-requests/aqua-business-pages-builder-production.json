@@ -1,14 +1,14 @@
 {
   "environment": "production",
-  "source_sha": "51fd5a46a6a87f3b2ec032604927ba104341bcb2",
-  "deploy_run": 42860146839,
-  "source_qa_run": 42859669321,
-  "cms_run": 42857479598,
+  "source_sha": "ae2dda4e463e60884c6ddc9a3d7ae3afd118c786",
+  "deploy_run": 42864438315,
+  "source_qa_run": 42864062087,
+  "cms_run": 42862224453,
   "mode": "read-only",
   "pages": 9,
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "v3-exact-production-marker-from-request",
+  "qa_revision": "v4-detached-editing-support-and-history",
   "previous_qa_run": 42858821722
 }
