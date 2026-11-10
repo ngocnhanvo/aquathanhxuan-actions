@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "12fba84d1b4daa44181aa9cc7ad7c17200f10afd",
-  "scope": "IN_MEMORY_ONEPAY_CALLBACK_HMAC_ORDER_AMOUNT_AND_GUEST_CHECKOUT",
-  "purpose": "Verify signature/order/amount binding, no payment status mutation on invalid return, no double processing, paid-only Astro receipt, and existing guest checkout test",
+  "source_sha": "3b57be2c3dfd6a0bf234ae8295027c0315deb01d",
+  "scope": "PHP_ONEPAY_BACKEND_THANKYOU_RETURN_SECURITY",
+  "purpose": "Validate OnePay HMAC/order/amount, paid-only frontend receipt, correct frontend context loader and CoCart guest checkout before PHP deploy",
   "production_order_creation": false,
   "no_real_orders": true
 }
