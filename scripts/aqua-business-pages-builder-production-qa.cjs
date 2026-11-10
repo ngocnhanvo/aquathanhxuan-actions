@@ -68,6 +68,10 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
          'Uneditable/blank UI labels: '+p.table);
      }else{
        assert(Array.isArray(table.items)&&table.items.length>=6,'Support Table has no content '+p.table);
+       const shell=table.items.filter(item=>String(item?.kind||'').toLowerCase()==='shell');
+       assert.equal(shell.length,13,'Missing native support chrome label rows '+p.table);
+       assert.equal(new Set(shell.map(item=>item.title)).size,13,'Duplicate support chrome keys '+p.table);
+       assert(shell.every(item=>String(item.description||'').trim()),'Empty support chrome labels '+p.table);
      }
      const raw=String(wpPage.content?.raw||'');
      assert(raw.includes('[table id='+p.table+' /]'),'Page missing native Insert Code '+p.slug);
@@ -129,6 +133,11 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
          .first().waitFor({state:'visible',timeout:65000});
        assert.equal(await frame.locator('#esc-business-preview-state').count(),0,
          'Ordinary Support Page must use production-like Preview');
+       const eyebrow=frame.locator('.support-section__eyebrow[data-esc-source-table="'+p.table+'"]');
+       await eyebrow.waitFor({state:'visible',timeout:20000});
+       assert.equal(await eyebrow.getAttribute('data-esc-source-field'),'description');
+       const chromeTitle=frame.locator('aside h2[data-esc-source-table="'+p.table+'"]');
+       assert.equal(await chromeTitle.count(),1,'Support sidebar title not ESC-managed '+p.table);
      }
      const target=frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible').first();
      await target.click();
