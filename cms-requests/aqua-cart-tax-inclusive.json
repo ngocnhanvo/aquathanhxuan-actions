@@ -1,0 +1,20 @@
+{
+  "task": "WooCommerce displayed prices already include VAT: do not add tax surcharge",
+  "mode": "CMS_ONLY_NO_ORDER",
+  "scoped_options": [
+    {
+      "id": "woocommerce_prices_include_tax",
+      "value": "yes"
+    },
+    {
+      "id": "woocommerce_tax_display_shop",
+      "value": "incl"
+    },
+    {
+      "id": "woocommerce_tax_display_cart",
+      "value": "incl"
+    }
+  ],
+  "require_disposable_cart_qa": true,
+  "run_date": "2026-11-10"
+}
