@@ -91,16 +91,8 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
     if(typeof value!=='string')return false;
     try{return new URL(value.trim()).protocol==='https:';}catch{return false;}
    })(),
-   payment_url_internal_whitespace:(()=>{
-    const value=paySettings?.onepay_url?.value;
-    return typeof value==='string' && /[\\s]/.test(value.trim());
-   })(),
-   payment_url_host_hint:(()=>{
-    const value=paySettings?.onepay_url?.value;
-    if(typeof value!=='string')return null;
-    const m=value.trim().match(/^https:\\/\\/([^/?#\\s]+)/i);
-    return m?m[1].replace(/[^a-zA-Z0-9.-]/g,'').slice(0,90):null;
-   })(),
+   payment_url_internal_whitespace:typeof paySettings?.onepay_url?.value==='string' &&
+    paySettings.onepay_url.value.trim().includes(' '),
    payment_url_has_https_prefix:typeof paySettings?.onepay_url?.value==='string' &&
     paySettings.onepay_url.value.trim().toLowerCase().startsWith('https://'),
    payment_origin:paymentOrigin
