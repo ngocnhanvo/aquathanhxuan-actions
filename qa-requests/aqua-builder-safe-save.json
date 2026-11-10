@@ -7,7 +7,7 @@
   "key": "demo_quantity",
   "php_source_sha": "9328a023934c78e2054406fed0edb3c11a45fff9",
   "php_release_run": 42867578142,
-  "read_only_nine_page_run": 42868615994,
+  "read_only_nine_page_run": 42874455432,
   "draft_qa_run": 42869519402,
   "write_scope": "one preview-only label, then restore original via Visual Builder",
   "no_customers": true,
@@ -15,8 +15,10 @@
   "no_email": true,
   "no_payment": true,
   "temporary_records": 0,
-  "qa_revision": "v2-diagnose-save-http-and-native-rollback-fallback",
-  "previous_qa_run": 42870673248,
+  "qa_revision": "v3-exact-source-with-detached-overlay-confirm-and-restore",
+  "previous_qa_run": 42873019395,
   "confirmed_cleanup_run": 42871691441,
-  "no_duplicate_record_creation": true
+  "no_duplicate_record_creation": true,
+  "astro_source_sha": "4a361f8c39077f820be5bf0f7d93ce421d67ad0f",
+  "astro_deploy_run": 42873991762
 }
