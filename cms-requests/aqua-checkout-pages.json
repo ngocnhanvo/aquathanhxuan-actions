@@ -1,0 +1,24 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "mode": "create-only-missing",
+  "pages": [
+    {
+      "slug": "cart",
+      "key": "ssr-cart",
+      "action": "CartPage"
+    },
+    {
+      "slug": "checkout",
+      "key": "ssr-checkout",
+      "action": "CheckoutPage"
+    },
+    {
+      "slug": "order-received",
+      "key": "ssr-checkoutdone",
+      "action": "CheckoutDonePage"
+    }
+  ],
+  "rewriteTo": "/ssr/cart/{slug}",
+  "previousAudit": 42769330417
+}
