@@ -56,6 +56,62 @@ async function apiPost(path,body){
   assert(await page.locator('#submit-checkout-btn').isDisabled(),'Checkout should not submit before accepting terms');
   result.checks.push({stage:'Native Woo gateways & disabled pre-terms submit',status:'PASS',gateways:methods});save();
   await page.screenshot({path:OUT+'/checkout.png',fullPage:false});
+
+  // Exercise the complete browser submit path WITHOUT reaching WordPress:
+  // Playwright intercepts POST /api/cart/checkout and returns a mock rejection.
+  // This verifies billing, native gateway selection, terms, and idempotency ID.
+  const intercepted=[];
+  await page.route('**/api/cart/checkout',async route=>{
+   const request=route.request();
+   assert.equal(request.method(),'POST','Checkout must use POST');
+   intercepted.push(request.postDataJSON());
+   await route.fulfill({
+    status:422,contentType:'application/json',
+    body:JSON.stringify({ok:false,msg:'QA_ONLY_INTERCEPTED_NO_ORDER'})
+   });
+  });
+  const fields={
+   billing_tenchuthe:'Khách QA',
+   billing_sodienthoai:'0900000000',
+   billing_email:'checkout-fixture@example.invalid',
+   billing_state:'Hà Nội',
+   billing_city:'Hà Đông',
+   billing_diachi:'Địa chỉ kiểm thử, không giao hàng'
+  };
+  for(const [name,value] of Object.entries(fields)){
+   await page.locator('input[name="'+name+'"]').fill(value);
+  }
+  await page.locator('input[name="payment_method"][value="onepayus"]').check();
+  await page.locator('#terms-checkbox').check();
+  assert(!(await page.locator('#submit-checkout-btn').isDisabled()),
+   'Form should enable after selecting a valid gateway and accepting terms');
+  for(let attempt=0;attempt<2;attempt++){
+   await page.locator('#submit-checkout-btn').click();
+   await page.waitForFunction((n)=>document.querySelector('#checkout-error')?.textContent?.includes('QA_ONLY_INTERCEPTED_NO_ORDER')
+    && document.querySelector('#checkout-error')?.classList?.contains('hidden')===false, null,{timeout:15000});
+   assert.equal(intercepted.length,attempt+1,'Checkout request must be intercepted exactly once per click');
+  }
+  const first=intercepted[0],second=intercepted[1];
+  assert.equal(first.cartKey,cartKey,'Checkout must carry original anonymous Woo cart key');
+  assert.equal(first.payment_method,'onepayus','Checkout must submit selected enabled WordPress gateway');
+  assert.equal(first.billing.email,fields.billing_email,'Checkout email must match input');
+  assert.equal(first.billing.address_1,fields.billing_diachi,'Checkout shipping/billing address must match');
+  assert.equal(first.billing.state,fields.billing_state,'Checkout province must match input');
+  assert(first.terms===true,'Checkout requires consent');
+  assert(/^[a-zA-Z0-9_-]{16,64}$/.test(first.checkout_request_id),'Missing safe idempotency token');
+  assert.equal(first.checkout_request_id,second.checkout_request_id,
+   'Network retry must reuse checkout attempt ID instead of creating a second order');
+  result.checks.push({
+   stage:'Client checkout POST intercepted; retry idempotency',status:'PASS',
+   calls_intercepted:intercepted.length,same_token:true,order_api_called:false
+  });save();
+
+  // Responsive checkout viewport: no form clipping or horizontal overflow.
+  await page.setViewportSize({width:390,height:844});
+  const formBox=await page.locator('#checkout-form').boundingBox();
+  assert(formBox && formBox.x>=-1 && formBox.x+formBox.width<=392,'Checkout form clipped on mobile');
+  await page.screenshot({path:OUT+'/checkout-mobile.png',fullPage:false});
+  result.checks.push({stage:'Mobile checkout form fits viewport',status:'PASS',width:390});save();
   result.status='PASS';
   console.log('AQUA_CART_CHECKOUT_BROWSER_PASS='+JSON.stringify({stages:result.checks,created_orders:0}));
  }catch(e){
