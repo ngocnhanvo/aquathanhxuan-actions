@@ -48,7 +48,7 @@ const getCoupons=c=>(c.coupons||[]).map(x=>String(typeof x==='string'?x:(x.coupo
   console.log('AQUA_CART_SYNCED_SUMMARY='+JSON.stringify({coupons,subtotal,discount,expectedDiscount}));
   result.checks.push({step:'after_sync',coupons,subtotal,discount,expectedDiscount});save();
   assert(subtotal>200000,'Test product subtotal did not meet promotion threshold: '+subtotal);
-  assert(coupons.includes('aqua-auto-5'),'WooCommerce virtual automatic coupon not applied: '+JSON.stringify(coupons));
+  assert(coupons.includes('aqua-auto-5'),'WooCommerce native automatic coupon not applied: '+JSON.stringify(coupons));
   assert(discount>0,'WooCommerce returned no discount');
   assert(Math.abs(discount-expectedDiscount)<=1,
     'Discount does not equal native 5%: actual='+discount+' expected='+expectedDiscount);
