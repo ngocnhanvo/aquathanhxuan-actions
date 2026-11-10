@@ -169,8 +169,12 @@ try {
       const brand = bounds('#header-brandbar > div');
       const search = bounds('#header-desktop-search');
       const logo = bounds('#header-brandbar a[aria-label="Về trang chủ"]');
-      const account = [...document.querySelectorAll('#header-brandbar a')].find((a) => a.textContent?.trim() === 'Tài khoản')?.getBoundingClientRect();
-      const cart = [...document.querySelectorAll('#header-brandbar a')].find((a) => a.textContent?.trim() === 'Giỏ hàng')?.getBoundingClientRect();
+      // Choose the visible header controls by their stable classes. Cart badges
+      // mutate the link text after hydration, and signed-in accounts use a button.
+      const visibleBounds = selector => [...document.querySelectorAll(selector)]
+        .map(el => el.getBoundingClientRect()).find(rect => rect.width > 0 && rect.height > 0);
+      const account = visibleBounds('#header-brandbar .js-user-account-container .js-account-guest, #header-brandbar .js-user-account-container .js-account-toggle');
+      const cart = visibleBounds('#header-brandbar .js-cart-navigation');
       const menu = document.querySelector('#header-navrow');
       if (!brand || !search || !logo || !account || !cart || !menu) return { missingElement: true };
       return {
