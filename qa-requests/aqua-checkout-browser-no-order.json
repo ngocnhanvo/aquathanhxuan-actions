@@ -2,7 +2,7 @@
   "scope": "LIVE_CART_CHECKOUT_ACCOUNT_HISTORY_NO_ORDERS",
   "project": "aquathanhxuan.com",
   "frontend": "https://aquathanhxuan.io.vn",
-  "astro_sha": "c3d5714f9ec37e1f1d030524abc852be95cdfb0b",
+  "astro_sha": "2c1891795dda2b85af0903f19e4dc98b625c3950",
   "routes_run": 42782297740,
   "no_order_creation": true,
   "no_payment_attempt": true,
@@ -10,8 +10,8 @@
   "php_release_run": 42785150060,
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
-  "reason": "QA real anonymous cart, native coupon, checkout form and intercepted submit, WordPress OrderHistoryPage guest login visibility and private order API=401, clean temporary cart",
-  "attempt": 4,
-  "source_qa_run": 42785105749,
-  "astro_deploy_run": 42799520104
+  "reason": "No-order Playwright cart and checkout regression after signed-customer order association deploy",
+  "attempt": 5,
+  "source_qa_run": 42806360718,
+  "astro_deploy_run": 42806700958
 }
