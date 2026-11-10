@@ -1,20 +1,18 @@
-# Aqua Thanh Xuân — continuation from previous conversation (2026-11-11)
+# Aqua Thanh Xuân — coupon MF5 đã khôi phục auto-apply trên production (2026-11-11)
 
-Đã kiểm tra Knowledge, Astro/PHP master, Actions main, commit, workflow log và checkpoint, rồi tiếp tục công việc dở liên quan COD checkout và vận chuyển WooCommerce. Không lặp lại phạm vi 9 trang Visual Builder đã hoàn tất từ phiên trước.
+## Kết quả nhiệm vụ hiện tại
+- Xác định root cause: PHP MU plugin trước đó auto-apply mã cũ `aqua-auto-5`, trong khi coupon đang được quản lý trên WooCommerce là `MF5` (ID 83818).
+- Woo read-only audit run [#42895498607](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42895498607) PASS: coupon `mf5` published, percent `5.00`, minimum `200001.00`, không có `aqua-auto-5` đang publish.
+- PHP master `67fd85976a25f3bffdbe002355fc0f3fbadb7472`: sửa `esc-aqua-cart-promotion.php` lấy coupon theo Woo ID ổn định; thêm dropdown `WooCommerce > Cài đặt > Chung > Khuyến mãi tự động (Aqua Thanh Xuân) > Coupon tự áp dụng` để chọn mã khác/disable từ WordPress. Vẫn dùng WooCommerce native validation, không hard-code mức giảm hoặc minimum.
+- Source QA [#42896508408](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42896508408) PASS; PHP production release [#42896710974](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42896710974) PASS. Không chạy build Astro.
+- Live disposable cart QA [#42896967197](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42896967197) PASS: `mf5`, subtotal 2.700.000đ, giảm 135.000đ, còn 2.565.000đ; cleanup PASS, không đặt đơn thật.
+- Với giỏ 259.000đ trong ảnh của chủ dự án, số tiền dự kiến sau giảm 5% là 246.050đ (trước phí vận chuyển).
+- QA source đã bỏ điều kiện kiểm tra mã hard-code `aqua-auto-5`, giữ kiểm tra đúng một coupon tự động và Woo discount.
+- Checkpoint: `docs/checkpoints/2026-11-11-mf5-coupon-auto-apply.md` (Actions main commit `1076a154aca247f063bc534870d7756ad7b01e0c`).
 
-## Đã hoàn thành và xác minh
-- PHP master: `436a7ea571ec9db5e23b30e820e2d5248d51241f`. Sửa phase bật/tắt trong fixture kiểm thử báo giá vận chuyển, source QA [#42885613310](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42885613310) PASS. PHP production [#42886074121](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42886074121) PASS; `checkout_endpoint.php` được SHA-256 verified, không tự chạy build Astro.
-- Astro master: `089d05c6f9d0b49fa67d7801c9c7248edf2568b1`. Woo shipping quote và phương thức vận chuyển từ Woo; source QA [#42885078315](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42885078315) PASS. Source build sau CMS label [#42888057217](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42888057217), signed deployment [#42888200487](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42888200487) PASS.
-- Bổ sung sáu nhãn giao diện thật `shipping_title`, `shipping_loading`, `shipping_none`, `shipping_error`, `shipping_select`, `shipping_package` vào bảng native ESC `checkout_ui_vi`: 59 → 65 rows; giữ nguyên 59 nhãn gốc, REST readback PASS; CMS run [#42887729026](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42887729026).
-- Safe buyer browser regression [#42888566052](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42888566052) PASS: cart, checkout HTTP 200; ảnh, giá đã gồm VAT và coupon Woo 5%; COD-only; actual Woo shipping quote trả `enabled=false, required=false, packages=[]`; retry idempotency; mobile; guest history protected. Toàn bộ POST tạo order bị Playwright intercept, `created_orders=0`, test cart cleanup PASS.
-- Nine business/support Pages Visual Builder read-only regression [#42889046860](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42889046860) PASS: 9/9 Pages, các Preview states; 65/65 Checkout label options, chọn được physical row 64; row 58 draft/revert; không cho sửa `key`, không save dữ liệu thực.
-- Checkpoint cập nhật trong `docs/checkpoints/2026-11-11-cod-replay-and-shipping-readiness.md` (Actions main commit `4038ae96723b71b223cf60f382b948225cc83e4f`).
-
-## Phần còn dở
-WooCommerce production vẫn tắt vận chuyển (`woocommerce_ship_to_countries=disabled`), chưa có bảng cước và shipping zones được chủ cửa hàng chốt. Vì vậy chưa thể kiểm thử case báo giá thực có phí, các rate phù hợp vùng, hay nghiệp vụ tạo đơn COD thật kèm dòng vận chuyển/thuế/vận hành kho/gửi email. Không tự đặt phí, bật chính sách Woo, hay tạo đơn thật ở production khi chưa được phép.
-
-Hành động tiếp theo khi có chính sách: cấu hình phương thức và phí trong WordPress/WooCommerce theo quyết định chủ sở hữu, chạy QA read-only với báo giá enabled/rates, sau đó chỉ thực hiện test tạo đơn thật trên staging hoặc theo phê duyệt cụ thể và dọn record test đúng quy trình.
+## Phạm vi ngoài nhiệm vụ vẫn dang dở
+- Luồng vận chuyển COD của checkpoint trước vẫn chờ chủ dự án cung cấp chính sách shipping thật; chưa bật shipping hoặc tạo đơn production thử. Không tự thay đổi chính sách giao hàng.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất
