@@ -87,7 +87,7 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    payment_url_configured:configured('onepay_url'),
    payment_url_value_type:typeof paySettings?.onepay_url?.value,
    payment_url_has_https_prefix:typeof paySettings?.onepay_url?.value==='string' &&
-    /^https:\\/\\//i.test(paySettings.onepay_url.value.trim()),
+    paySettings.onepay_url.value.trim().toLowerCase().startsWith('https://'),
    payment_origin:paymentOrigin
   };
   report.checkoutWooSettings=advanced.filter(x=>[
