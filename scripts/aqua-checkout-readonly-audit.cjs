@@ -152,6 +152,26 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
 
   report.coupons=coupons.filter(x=>x.status==='publish').map(x=>({id:x.id,code:x.code,discount_type:x.discount_type,amount:x.amount,minimum_amount:x.minimum_amount,individual_use:x.individual_use}));
   report.pageCandidates=pages.filter(x=>/ssr-cart|ssr-checkout|cart|checkout|thanh-toan|gio-hang/i.test(JSON.stringify(x.acf||{})+' '+x.slug+' '+x.title?.rendered)).map(x=>({id:x.id,slug:x.slug,acf:{key:x.acf?.key,action:x.acf?.action},title:x.title?.rendered}));
+  // Anonymous WordPress backend probes; no Woo order IDs or payment values
+  // are submitted. An invalid fake receipt must never show paid confirmation.
+  const anonymous=await browser.newContext();
+  try{
+   const checkoutResponse=await anonymous.request.get(URL+'/checkout/',{timeout:25000});
+   const checkoutHtml=await checkoutResponse.text();
+   report.backendCheckoutHtml={
+    http:checkoutResponse.status(),
+    has_woocommerce_markup:/woocommerce-checkout|woocommerce-cart|woocommerce-info|wc-block-checkout/i.test(checkoutHtml),
+    has_raw_checkout_shortcode:checkoutHtml.includes('[woocommerce_checkout]'),
+    has_php_fatal:/Fatal error:|Uncaught Error:/i.test(checkoutHtml)
+   };
+   const fakeResponse=await anonymous.request.get(URL+'/checkout/order-received/999999999/?key=invalid',{timeout:25000});
+   const fakeHtml=await fakeResponse.text();
+   report.backendInvalidReceipt={
+    http:fakeResponse.status(),
+    has_payment_success_message:/Payment was successful/i.test(fakeHtml),
+    has_php_fatal:/Fatal error:|Uncaught Error:/i.test(fakeHtml)
+   };
+  }finally{await anonymous.close()}
   report.status='PASS';save();
   console.log('AQUA_CHECKOUT_AUDIT_SUMMARY='+JSON.stringify(report));
  }finally{await browser.close();}
