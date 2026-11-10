@@ -60,6 +60,22 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
   ]);
   report.checkoutRewrites=rewrites.filter(x=>/cart|checkout|order-received/i.test(String(x.acf?.from_link||''))).map(x=>({id:x.id,from:x.acf?.from_link,to:x.acf?.to_link,type:x.acf?.type,match_type:x.acf?.match_type,enable:x.acf?.enable}));
   report.woocommerceCouponSetting=settings.find(x=>x.id==='woocommerce_enable_coupons')?.value??'NOT_RETURNED';
+  // Inventory configured native WooCommerce shipping, never assume a flat
+  // shipping fee or copy ESC.vn's logistics policies into Aqua.
+  const shippingZones=await get('shipping-zones','/wp-json/wc/v3/shipping/zones?per_page=100');
+  report.shippingZones=[];
+  const uniqueZones=[{id:0,name:'Locations not covered by other zones'},...shippingZones];
+  for(const zone of uniqueZones.slice(0,20)){
+   const methods=await get('shipping-methods-'+zone.id,'/wp-json/wc/v3/shipping/zones/'+zone.id+'/methods?per_page=100');
+   report.shippingZones.push({
+    id:zone.id,name:zone.name,
+    methods:methods.map(m=>({id:m.id,method_id:m.method_id,title:m.title,enabled:m.enabled,
+      cost_configured:typeof m.settings?.cost?.value==='string' && m.settings.cost.value.length>0}))
+   });
+  }
+  report.shippingSettings=settings.filter(x=>/shipping|ship_to/.test(String(x.id||'')))
+    .map(x=>({id:x.id,value:x.value}));
+
   report.gateway=gateways.map(x=>({id:x.id,title:x.title,enabled:x.enabled,method_title:x.method_title}));
   report.coupons=coupons.filter(x=>x.status==='publish').map(x=>({id:x.id,code:x.code,discount_type:x.discount_type,amount:x.amount,minimum_amount:x.minimum_amount,individual_use:x.individual_use}));
   report.pageCandidates=pages.filter(x=>/ssr-cart|ssr-checkout|cart|checkout|thanh-toan|gio-hang/i.test(JSON.stringify(x.acf||{})+' '+x.slug+' '+x.title?.rendered)).map(x=>({id:x.id,slug:x.slug,acf:{key:x.acf?.key,action:x.acf?.action},title:x.title?.rendered}));
