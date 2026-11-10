@@ -78,6 +78,12 @@ jobs:
           }
           const form=fs.readFileSync(files[3],'utf8');
           const cart=fs.readFileSync(files[0],'utf8');
+          assert(cart.includes('escapeCartHtml as esc') && cart.includes('safeCartImageUrl'),
+            'Cart should escape Woo item data, coupon labels and images');
+          assert(!cart.includes('amountHtml = c.saving_html') &&
+                 !cart.includes('item?.unit?.[language].toLocaleLowerCase()'),
+            'Cart should reject raw coupon HTML and handle products without a unit');
+
           const login=fs.readFileSync(files[4],'utf8');
           const history=fs.readFileSync(files[6],'utf8');
           assert(history.includes('const esc =') && history.includes('${esc(item.name)}'),'Order history must HTML-escape customer-originated content');
