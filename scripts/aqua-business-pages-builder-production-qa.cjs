@@ -15,7 +15,7 @@ const pages=[
  {id:82714,table:'support_dealer',slug:'dai-ly',states:[]},
  {id:83821,table:'order_history_vi',count:38,slug:'lich-su-mua-hang',states:['orders','empty','guest','loading','error']},
  {id:83808,table:'cart_ui_vi',count:20,slug:'cart',states:['items','empty']},
- {id:83810,table:'checkout_ui_vi',count:59,slug:'checkout',states:['guest','account']},
+ {id:83810,table:'checkout_ui_vi',count:65,slug:'checkout',states:['guest','account']},
  {id:83812,table:'checkout_done_ui_vi',count:34,slug:'order-received',states:['success','error']},
  {id:83827,table:'lost_password_vi',count:12,slug:'quen-mat-khau',states:['form','success','error']},
  {id:83829,table:'reset_password_vi',count:20,slug:'dat-lai-mat-khau',states:['form','invalid','success']}
@@ -199,6 +199,10 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
      // Save WordPress. This validates that the selected physical cell is not
      // merely listed but is enabled for authoring in the real editor.
      if(p.table==='checkout_ui_vi'){
+       await page.locator('#esc-vb-edit-row').selectOption('64:label');
+       assert.equal(await page.locator('#esc-vb-edit-row').inputValue(),'64:label',
+         'New Woo shipping label cannot be selected by physical row');
+       console.log('AQUA_CHECKOUT_SHIPPING_ESC_BUILDER_SELECT_PASS row=64');
        await page.locator('#esc-vb-edit-row').selectOption('58:label');
        assert.equal(await page.locator('#esc-vb-edit-row').inputValue(),'58:label',
          'Checkout last label cannot be selected');
