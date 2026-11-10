@@ -1,0 +1,100 @@
+name: Aqua business pages builder preview source QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-builder-business-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile --prefer-offline
+        working-directory: source
+      - name: Astro compile all business and support page components
+        working-directory: source
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import { createRequire } from 'node:module';
+          const require=createRequire(import.meta.url);
+          const { transform }=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
+          const files=[
+            'src/pages/esc-builder/preview/[pageId].astro',
+            'src/astro/pages/OrderHistoryPage.astro',
+            'src/astro/pages/CartPage.astro',
+            'src/astro/pages/CheckoutPage.astro',
+            'src/astro/pages/CheckoutDonePage.astro',
+            'src/astro/pages/ResetPassPage.astro',
+            'src/astro/pages/LostPassPage.astro',
+            'src/astro/pages/SupportPage.astro',
+            'src/astroutils/CheckoutPage/InfoForm.astro',
+            'src/astroutils/CheckoutPage/LoginForm.astro',
+            'src/astro/tablepress/Order_history.astro'
+          ];
+          for(const file of files){
+            const result=await transform(fs.readFileSync(file,'utf8'),{filename:file});
+            assert(result.code,'No Astro generated code: '+file);
+            console.log('ASTRO_BUILDER_COMPILE_PASS='+file);
+          }
+          const source=fs.readFileSync('src/lib/wordpress/businessPreview.ts','utf8');
+          const preview=fs.readFileSync(files[0],'utf8');
+          assert(preview.includes('getBusinessPreviewState') && preview.includes('esc-business-preview-state'));
+          assert(source.includes('esc-builder-demo-not-a-real-cart'));
+          assert(!source.includes('wp-json/wc/v3/orders'));
+          for(const file of ['src/astro/pages/OrderHistoryPage.astro','src/astro/pages/CartPage.astro',
+           'src/astroutils/CheckoutPage/InfoForm.astro','src/astroutils/CheckoutPage/LoginForm.astro',
+           'src/astro/pages/LostPassPage.astro','src/astro/pages/ResetPassPage.astro']){
+            const data=fs.readFileSync(file,'utf8');
+            assert(data.includes('esc-builder-preview'),'Missing preview side-effect guard: '+file);
+          }
+          console.log('AQUA_BUILDER_BUSINESS_SOURCE_CONTRACT_PASS');
+          NODE
+      - name: Existing order/session and commerce regressions
+        working-directory: source
+        run: pnpm exec vitest run src/lib/utils/orderHistoryApi.test.ts src/lib/utils/signedSession.test.ts src/lib/utils/linkWooOrderCustomer.test.ts
+      - name: Check new TypeScript errors against established baseline
+        working-directory: source
+        shell: bash
+        run: |
+          set +e
+          pnpm exec astro check --js-only > astro-check.log 2>&1
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then echo "ASTRO_CHECK_PASS"; exit 0; fi
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          log=re.sub(r'\x1b\[[0-9;]*m','',Path('astro-check.log').read_text())
+          errors=re.findall(r'(?m)^(src/[^\n]+?):\d+:\d+ - error ts\(\d+\):',log)
+          known={
+             'src/context/LanguageContext/index.tsx','src/hooks/use-toast.tsx',
+             'src/lib/marketingTags.ts','src/lib/effects/index.tsx',
+             'src/lib/utils/RelatedPosts.tsx','src/lib/wordpress/builderLivePage.ts',
+             'src/pages/preview/[...slug].astro'
+          }
+          print('ASTRO_CHECK_ERROR_FILES='+str(errors))
+          if len(errors)!=9 or set(errors)-known: raise SystemExit(1)
+          print('AQUA_BUSINESS_TYPECHECK_DELTA_PASS baseline=9')
+          PY
+      - run: git rev-parse HEAD
+        working-directory: source
