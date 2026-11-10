@@ -3,16 +3,17 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "1f19560a7373fd5f5e234d584ca675f0ae671971",
+  "source_sha": "c3d5714f9ec37e1f1d030524abc852be95cdfb0b",
   "php_release_run": 42771082969,
   "attempt": 2,
   "previousRun": 42771343628,
   "reason": "Fix compiler import resolution in QA harness; no source or production changes",
-  "purpose": "Rerun HMAC session and Woo order privacy regression after canonical base64url MAC fix, plus OrderHistoryPage SSR",
+  "purpose": "Verify HMAC customer session, protected order history, and no Vitest files under Astro src/pages after resolving production build failure",
   "previous_source_qa": 42783821992,
   "no_orders": true,
   "cms_page_run": 42796129841,
   "cms_history_page_run": 42796129841,
   "previous_source_qa_failure": 42797892376,
-  "fixed_case": "Reject alternate base64url representation of HMAC signature"
+  "fixed_case": "Reject alternate base64url representation of HMAC signature",
+  "previous_production_build_failure": 42798682090
 }
