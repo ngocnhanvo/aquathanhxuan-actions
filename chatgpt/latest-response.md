@@ -28,16 +28,13 @@ Các thay đổi đang được triển khai gồm:
 
 WooCommerce đã xác nhận bật COD qua [Actions #42817289132](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42817289132). Mình tiếp tục phần kiểm thử, phát hành PHP/Astro và nghiệm thu giao diện production.
 
-**Đã hoàn tất triển khai lên production và nghiệm thu thành công.**
+**Đã hoàn tất triển khai lên production và nghiệm thu thành công.** Bạn có thể xem tại [trang thanh toán](https://aquathanhxuan.io.vn/checkout).
 
-- [Mở trang thanh toán](https://aquathanhxuan.io.vn/checkout).
-- [Kiểm thử mã nguồn](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818057110): PASS.
-- [Triển khai PHP](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818081582) và [deploy Astro](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637): SUCCESS.
-- [Playwright trên production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818776565): PASS, gồm desktop/mobile, COD duy nhất, form không bắt buộc số điện thoại và địa chỉ đúng thứ tự.
+[Kiểm thử mã nguồn](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818057110) đã PASS; [phát hành PHP](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818081582) và [deploy Astro](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637) đều SUCCESS. [Playwright trên production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818776565) cũng PASS: kiểm tra desktop/mobile, chỉ hiển thị COD, số điện thoại có thể bỏ trống và địa chỉ đúng thứ tự.
 
-**An toàn dữ liệu:** Kiểm thử đã chặn gửi yêu cầu tạo đơn, không tạo đơn hàng hay tài khoản thật; giỏ kiểm thử đã được dọn sạch. Chương trình coupon 5% và giá đã gồm thuế được giữ nguyên.
+**An toàn dữ liệu:** Bài kiểm thử chặn thao tác tạo đơn, không phát sinh đơn hàng hoặc tài khoản thật; giỏ hàng thử đã được dọn sạch. Coupon 5% và giá đã gồm thuế được giữ nguyên.
 
-Đã lưu [checkpoint triển khai](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-cod-simplified.md) và bản phản hồi mới nhất vào repo Actions.
+Đã lưu [checkpoint triển khai](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-cod-simplified.md) cùng bản phản hồi mới nhất trong repo Actions.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
