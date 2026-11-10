@@ -2,9 +2,10 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "6374593a847f2826844413a6719825478bc49992",
-  "scope": "ONEPAY_CALLBACK_PLUS_ACCOUNT_AND_EXISTING_CUSTOMER",
-  "purpose": "Validate guest OnePay, account creation and existing-account checkout, retry, callback and paid receipt. Fix prior test assertion type.",
+  "source_sha": "e8dd6954e5b69b84cc25d2ebb31d66168847e8f8",
+  "scope": "REAL_WORDPRESS_CUSTOMER_AUTH_ROUTE_AND_CHECKOUT_FIXTURE",
+  "purpose": "Verify newly added custom/v1/login endpoint against real wp_authenticate contract: valid/invalid WordPress credentials, no secret exposure, billing fields, shipping & OnePay fixtures",
   "production_order_creation": false,
-  "no_real_orders": true
+  "no_real_orders": true,
+  "previous_live_customer_run": 42802133987
 }
