@@ -47,7 +47,11 @@ async function apiPost(path,body){
    return !!el?.querySelector('input[name="payment_method"]');
   },{timeout:20000}).catch(()=>{throw Error('Payment methods did not load from WordPress');});
   const methods=await page.locator('input[name="payment_method"]').evaluateAll(els=>els.map(e=>e.value));
-  assert(methods.includes('bacs')&&methods.includes('onepayus'),'Expected WordPress BACS and OnePay are missing');
+  const qaConfig=JSON.parse(fs.readFileSync('qa-requests/aqua-checkout-browser-no-order.json','utf8'));
+  assert.equal(typeof qaConfig.expected_bacs,'boolean','Audit must specify WordPress BACS account readiness');
+  assert(methods.includes('onepayus'),'Enabled OnePay gateway missing');
+  assert.equal(methods.includes('bacs'),qaConfig.expected_bacs,
+    'BACS should be selectable only when WordPress has a bank recipient');
   assert(!methods.includes('cod')&&!methods.includes('cheque'),'Inactive payment method shown');
   assert(await page.locator('#submit-checkout-btn').isDisabled(),'Checkout should not submit before accepting terms');
   result.checks.push({stage:'Native Woo gateways & disabled pre-terms submit',status:'PASS',gateways:methods});save();
