@@ -1,0 +1,12 @@
+{
+  "environment": "production",
+  "source_sha": "236a6c5fe84aab844eea4411cf49913b73ea6887",
+  "deploy_run": 42858112065,
+  "source_qa_run": 42857368624,
+  "cms_run": 42857479598,
+  "mode": "read-only",
+  "pages": 9,
+  "no_orders": true,
+  "no_customers": true,
+  "no_email": true
+}
