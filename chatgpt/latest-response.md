@@ -2,25 +2,27 @@
 
 - Ngày: 2026-11-10, Asia/Ho_Chi_Minh.
 - Chế độ code: auto-build; Cổng ghi source: bypass.
-- Repo duy nhất được sửa: `ngocnhanvo/aquathanhxuan-actions` nhánh `main`.
+- Phạm vi: Knowledge chung `ngocnhanvo/knowledge` + Aqua `ngocnhanvo/aquathanhxuan-astro`, `ngocnhanvo/aquathanhxuan-php`, `ngocnhanvo/aquathanhxuan-actions`.
 
 ## Yêu cầu
 
-- Người dùng muốn **tách nhỏ step build** đang gộp để nhìn rõ tiến trình nào bị treo, không dính chùm sau khi Astro in `Complete!`.
-- Run cũ [#42764008554](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42764008554) đã `completed/cancelled` khoảng 06:05Z; step Build bị cancel, Package/FTP/Activate skipped; log không chứng minh được Node process hay apt installer chịu trách nhiệm.
+Chương trình khuyến mãi phải luôn được **quản lý bằng Coupons thật trong WordPress/WooCommerce**; hoàn thiện trường hợp giảm **5% từ 200.000đ**, lưu quy tắc áp dụng chung trong Knowledge.
 
-## Đã triển khai
+## Kết quả
 
-- [Commit `9c0cbdea`](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/9c0cbdea240b1d49a9d350940c44f932e8c434d5) tách trực tiếp **production workflow hiện hữu** `.github/workflows/aquathanhxuan-production-deploy.yml` thành các step riêng: (1) pnpm dependency, (2) canonical .env, (3) Astro build có timeout, (4) dist check, (5) lftp install, (6) staging/SEO, (7) image/static delta, (8) ZIP, (9) ZIP/provenance verify, (10) FTP-TLS upload, (11) signed PHP activation.
-- Không còn background apt/lftp chạy ẩn trong build step; step tuần tự. Mỗi phần build/package có timeout và marker `AQUA_BUILD_STAGE`. Không đổi Astro source, PHP, WordPress data, frontend URL, signing/rollback, source branch policy, concurrency.
-- [Commit `64b094c2`](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/64b094c2c8ddbc8a09b3d6e0542b3128ff8a855f) thêm 4 test chống gộp lại các step, xác minh không bỏ qua `.env`, SEO/ZIP, delta, FTPS và provenance.
-- [Contract CI #42767177715](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42767177715) PASS; [Contract CI #42767248581](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42767248581) **PASS**, 4 regression tests mới và toàn bộ PHP/ZIP/delta offline tests PASS. Không có production build mới, QA contract này không đồng nghĩa `BUILD_SUCCESS` production.
-- [Checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-build-42764008554-stall.md) cập nhật commit `a4bef6872a37b2688367ff394eea07d6dc838fa8`.
+- Knowledge `main`: `stacks/woocommerce-coupon-promotions.md` + README/AGENTS, chuỗi commit kết thúc ở `608788447a13486dbe1087a173aece9a93fc8a66`.
+- WP Admin Marketing → Coupons: code `aqua-auto-5`, **ID 83818**, `publish`, 5% từ >=200.000đ. [Read-after-write PASS #42775054145](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775054145).
+- PHP `master` `bbeae23d8169a8177ab9719eda4cf6040f9d1b8a`: thay virtual hardcoded coupon bằng coupon DB/validator native; sửa CoCart sync không xóa coupon hợp lệ và validator subtotal trước khi WC tính tổng. [PHP release PASS #42777270521](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42777270521).
+- Astro `master` `0ac8af50be65a4ead280d2368bd69195c27bcc01` [đã deploy production PASS #42775644106](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775644106), marker source đã khớp.
+- [Anonymous cart QA #42777458941 PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42777458941): 2.700.000đ, coupon 5%, giảm chính xác 135.000đ trước/sau sync, `CLEANUP=PASS`; không gọi checkout, không tạo đơn hàng.
+- Các điều kiện biên 199.999 / 200.000đ và thay đổi giá trị coupon trong WP được test offline. Quy tắc thay đổi coupon không cần build frontend; no virtual fallback.
 
-## Phản hồi cuối
+## Bước sau
 
-Đã tách bước build thành 11 step độc lập và bỏ lftp nền, vì vậy lần chạy tới GitHub Actions sẽ chỉ đúng bước nào bị treo. Build trước #42764008554 đã kết thúc với kết luận cancelled, không deploy bản mới. Đã QA hợp đồng workflow PASS #42767248581; chưa kích hoạt production build không cần thiết, không khẳng định nguyên nhân chính xác khi run bị cancel.
+Đầu việc quản lý coupon 5% **đã hoàn tất**, không chạy lại các build/QA PASS. Riêng luồng checkout/đặt hàng tổng thể thuộc nhiệm vụ trước chưa được nghiệm thu tạo đơn thật; phải xử lý riêng theo chỉ đạo và chốt an toàn thanh toán.
+
+[Checkpoint đầy đủ](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-native-woocommerce-coupon.md)
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: DONE — hoàn tất yêu cầu tách step
+Trạng thái: DONE — hoàn tất
