@@ -39,6 +39,8 @@ const save = () => fs.writeFileSync(OUT+'/result.json', JSON.stringify(report,nu
   assert(matching.length<=1,'Multiple coupon records match campaign code');
   const expected={code:CODE,discount_type:'percent',amount:'5',minimum_amount:'200000',individual_use:false,exclude_sale_items:false,free_shipping:false};
   const before=matching[0]||null;
+  const equal=(key,actual,wanted)=>['amount','minimum_amount'].includes(key)
+   ? Number(actual)===Number(wanted) : String(actual)===String(wanted);
   report.before=before?{id:before.id,code:before.code,discount_type:before.discount_type,amount:before.amount,minimum_amount:before.minimum_amount,individual_use:before.individual_use,exclude_sale_items:before.exclude_sale_items,free_shipping:before.free_shipping}:null;
   save();
   let coupon=before;
@@ -47,7 +49,7 @@ const save = () => fs.writeFileSync(OUT+'/result.json', JSON.stringify(report,nu
    coupon=await rest('POST','/wp-json/wc/v3/coupons',expected);
    report.changed=1; report.action='CREATE'; report.id=coupon.id; save();
   } else {
-   const differing=Object.fromEntries(Object.entries(expected).filter(([k,v])=>String(coupon[k])!==String(v)));
+   const differing=Object.fromEntries(Object.entries(expected).filter(([k,v])=>!equal(k,coupon[k],v)));
    if(Object.keys(differing).length){
     coupon=await rest('PUT','/wp-json/wc/v3/coupons/'+before.id,differing);
     report.changed=1;report.action='UPDATE';report.id=coupon.id;save();
@@ -56,7 +58,7 @@ const save = () => fs.writeFileSync(OUT+'/result.json', JSON.stringify(report,nu
   assert(Number.isSafeInteger(coupon.id) && coupon.id>0,'Missing real coupon ID');
   const readback=await rest('GET','/wp-json/wc/v3/coupons/'+coupon.id);
   for(const [k,v] of Object.entries(expected)){
-   assert.equal(String(readback[k]),String(v),'Persisted Woo coupon mismatch: '+k);
+   assert(equal(k,readback[k],v),'Persisted Woo coupon mismatch: '+k+' actual='+String(readback[k]).slice(0,35));
   }
   assert.equal(String(readback.code).toLowerCase(),CODE);
   report.after={id:readback.id,code:readback.code,status:readback.status||null,
