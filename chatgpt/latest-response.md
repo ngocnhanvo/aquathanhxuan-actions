@@ -2,25 +2,25 @@
 
 - Ngày: 2026-11-10, Asia/Ho_Chi_Minh.
 - Chế độ code: auto-build; Cổng ghi source: bypass.
-- Run được user phản ánh: https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42764008554, job `129656109478`.
+- Repo duy nhất được sửa: `ngocnhanvo/aquathanhxuan-actions` nhánh `main`.
 
-## Chẩn đoán có bằng chứng
+## Yêu cầu
 
-- Log ảnh người dùng xác nhận `[build] Complete!` lúc 05:45:46 UTC (Astro server built ~36.66s). Tuy nhiên lúc 05:59:57 UTC, GitHub API vẫn báo `in_progress` ở `Build Astro Production (incremental WordPress data cache)`; `Package only compiled staging output` chưa bắt đầu.
-- Workflow production hiện có chạy thêm `pnpm run build-git` (cần thoát process Node), kiểm tra dist và chờ background apt install `lftp` trước khi rời step. Vì live log API trả `BlobNotFound` 404, chưa thể khẳng định tiến trình nào trong hai đang chặn. Không tuyên bố bug Astro cụ thể nếu thiếu chứng cứ process-level.
-- Hai previous successful production builds cùng source SHA `c465bc2eff875dfdbb65e802f86031fad3e91452` qua bước này sau ~56–65 giây kể từ `Complete!`, run tổng khoảng 3 phút. Run hiện tại đã vượt 14 phút, bất thường.
+- Người dùng muốn **tách nhỏ step build** đang gộp để nhìn rõ tiến trình nào bị treo, không dính chùm sau khi Astro in `Complete!`.
+- Run cũ [#42764008554](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42764008554) đã `completed/cancelled` khoảng 06:05Z; step Build bị cancel, Package/FTP/Activate skipped; log không chứng minh được Node process hay apt installer chịu trách nhiệm.
 
-## Đã thực thi, chưa thay source/frontend
+## Đã triển khai
 
-- Commit [0a756dd0](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/0a756dd03a6f2e90d8aca156a65b5934ac172a9a) cập nhật đúng workflow production hiện có để log giai đoạn và giới hạn `pnpm run build-git` 1200s, `lftp` apt setup 600s; không đổi logic build/packaging/FTP/activation, không trigger trùng.
-- [Deploy contract CI #42765336745](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42765336745) **PASS**. Mã cũ được run #42764008554 checkout từ trước, nên sửa workflow không giải phóng run đang chạy.
-- [Checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-build-42764008554-stall.md), commit `38a24b386ab4e06eb849c1684a4eaa45b656f83f`.
+- [Commit `9c0cbdea`](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/9c0cbdea240b1d49a9d350940c44f932e8c434d5) tách trực tiếp **production workflow hiện hữu** `.github/workflows/aquathanhxuan-production-deploy.yml` thành các step riêng: (1) pnpm dependency, (2) canonical .env, (3) Astro build có timeout, (4) dist check, (5) lftp install, (6) staging/SEO, (7) image/static delta, (8) ZIP, (9) ZIP/provenance verify, (10) FTP-TLS upload, (11) signed PHP activation.
+- Không còn background apt/lftp chạy ẩn trong build step; step tuần tự. Mỗi phần build/package có timeout và marker `AQUA_BUILD_STAGE`. Không đổi Astro source, PHP, WordPress data, frontend URL, signing/rollback, source branch policy, concurrency.
+- [Commit `64b094c2`](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/64b094c2c8ddbc8a09b3d6e0542b3128ff8a855f) thêm 4 test chống gộp lại các step, xác minh không bỏ qua `.env`, SEO/ZIP, delta, FTPS và provenance.
+- [Contract CI #42767177715](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42767177715) PASS; [Contract CI #42767248581](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42767248581) **PASS**, 4 regression tests mới và toàn bộ PHP/ZIP/delta offline tests PASS. Không có production build mới, QA contract này không đồng nghĩa `BUILD_SUCCESS` production.
+- [Checkpoint](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-build-42764008554-stall.md) cập nhật commit `a4bef6872a37b2688367ff394eea07d6dc838fa8`.
 
-## Next step
+## Phản hồi cuối
 
-- Kiểm tra kết luận run 42764008554 sau khi nó kết thúc; đọc final log và xác định root cause. Không nói BUILD_SUCCESS/DEPLOY_READY của run này trước khi hoàn tất.
-- Nếu timed out/fail, rerun đúng existing production workflow ở Astro SHA đã xác minh bằng trigger hợp lệ, kiểm tra phase markers, theo dõi deploy/QA; không tạo workflow mới.
+Đã tách bước build thành 11 step độc lập và bỏ lftp nền, vì vậy lần chạy tới GitHub Actions sẽ chỉ đúng bước nào bị treo. Build trước #42764008554 đã kết thúc với kết luận cancelled, không deploy bản mới. Đã QA hợp đồng workflow PASS #42767248581; chưa kích hoạt production build không cần thiết, không khẳng định nguyên nhân chính xác khi run bị cancel.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất yêu cầu tách step
