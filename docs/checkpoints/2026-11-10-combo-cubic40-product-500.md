@@ -17,4 +17,11 @@
 - WordPress production build request commit `7c91c562b86535cce6d5909e86cbd24ef19d2b4b` triggers wrapper [#42759753974](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42759753974) and deploy [#42759851013](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42759851013); running at checkpoint.
 - Next: verify wrapper BUILD_SUCCESS and DEPLOY_READY, downstream deploy SUCCESS, then trigger `qa-requests/combo-cubic40-production.json` for exact user URL desktop 1440/mobile 390 plus existing product regression; inspect screenshot and status 200. Mark DONE only after public URL passes.
 
-Trạng thái: PARTIAL — chưa hoàn tất
+## Kết quả production 200 — PASS
+
+- CMS WordPress Rewrite ID **83801** tạo và readback qua [#42759530760](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42759530760) PASS. No other WP Product/category records changed.
+- Production WordPress build wrapper [#42759753974](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42759753974) **SUCCESS**, exact Astro `master` source `b7c393a7cda3116f6ccff1316b7434b0eb4e4f99`, `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS`. Downstream deployment [#42759851013](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42759851013) **SUCCESS**.
+- QA run #42760257903 failed at **QA script only**: global Node `fetch` response `.ok` is a property, not `.ok()` call; no evidence of site failure. Fixed in Actions commit `3474ecfc82ab6b05aada9748e26986e8e9747fca` without another build.
+- Final production browser QA [#42760645632](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42760645632) **COMPLETED SUCCESS**: public URL `https://aquathanhxuan.io.vn/san-pham/combo-be-cubic-40-sieu-trong` HTTP **200** desktop 1440/mobile 390, true Woo Product ID **82477**, exact source product name, sale **2700000**, regular **3170000**, **instock**, purchase CTA and sticky CTA visible, no JS errors or horizontal overflow. Existing Dennerle product route regression PASS.
+- QA screenshot/report [artifact #13736943381](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42760645632/artifacts/13736943381): 2 screenshots and JSON report.
+- **Trạng thái: DONE — hoàn tất**.
