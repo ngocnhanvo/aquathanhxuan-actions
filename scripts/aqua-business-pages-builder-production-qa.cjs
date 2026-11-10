@@ -81,12 +81,32 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
          if(await frame.locator('#esc-business-preview-state').inputValue()!==state){
            await frame.locator('#esc-business-preview-state').selectOption(state);
          }
-         await frame.locator('#esc-business-preview-state').waitFor({state:'visible',timeout:70000});
-         await frame.locator('#esc-business-preview-state')
-           .evaluate((el,value)=>{if(el.value!==value)throw Error('Preview state mismatch: '+value)},state);
-         const vb=await frame.locator('#esc-business-preview-state')
-           .evaluate(()=>new URLSearchParams(location.search).get('vb_state'));
+         // Navigation may finish after selectOption resolves. Poll the URL of
+         // the iframe, not merely the old select element left during unload.
+         let vb=null;
+         for(let attempt=0;attempt<12;attempt++){
+           await page.waitForTimeout(500);
+           vb=await frame.locator('#esc-business-preview-state')
+             .evaluate(()=>new URLSearchParams(location.search).get('vb_state')).catch(()=>null);
+           if(vb===state)break;
+           if(state===p.states[0] && vb===null)break;
+         }
+         if(state!==p.states[0] && vb!==state){
+           // HTML form fallback works even with inline script blocked.
+           console.log('AQUA_BUSINESS_STATE_FORM_FALLBACK='+p.slug+':'+state);
+           await frame.locator('#esc-business-preview-state').selectOption(state);
+           await frame.locator('#esc-business-preview-toolbar button[type="submit"]').click();
+           for(let attempt=0;attempt<12;attempt++){
+             await page.waitForTimeout(500);
+             vb=await frame.locator('#esc-business-preview-state')
+               .evaluate(()=>new URLSearchParams(location.search).get('vb_state')).catch(()=>null);
+             if(vb===state)break;
+           }
+         }
          if(state!==p.states[0])assert.equal(vb,state,'Preview state navigation failed '+p.slug+':'+state);
+         await frame.locator('#esc-business-preview-state').waitFor({state:'visible',timeout:70000});
+         assert.equal(await frame.locator('#esc-business-preview-state').inputValue(),state,
+           'Preview select mismatch '+p.slug+':'+state);
          const cell=frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-field="label"]:visible').first();
          await cell.waitFor({state:'visible',timeout:25000});
          const source=await cell.evaluate(el=>({
