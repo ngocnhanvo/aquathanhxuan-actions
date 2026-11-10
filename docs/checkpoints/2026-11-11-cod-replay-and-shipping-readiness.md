@@ -34,6 +34,14 @@ Code mode: auto-build; source gateway: bypass
 - Real temporary Woo cart, frontend cart + coupon, checkout COD/form/mobile and history checks; checkout submission was intercepted to ensure **zero real orders and zero payments**. `AQUA_CART_CHECKOUT_CLEANUP=PASS`.
 - This is browser and fixture acceptance, **not** an authorized real Woo COD order + stock/email/receipt/customer ownership lifecycle test.
 
+## Additional PHP shipping implementation inspection (2026-11-11, source only)
+
+- Inspected exact PHP production file `wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php` at `76bfe492e53c30cc3346d3154df4d4a56866d665`.
+- Source stores Woo `set_shipping_*` address fields on the order, but its cart-line construction, coupon and total calculation sections have **no `WC_Order_Item_Shipping` creation or selected Woo shipping rate persisted**. This is a confirmed implementation gap, separate from the existing WooCommerce configuration gap.
+- Read-only production audit `#42878442799` already found `woocommerce_ship_to_countries=disabled`, default shipping zone with zero methods. Turning on a shipping zone without wiring the **customer-selected applicable Woo rate** to the physical order is NOT by itself sufficient.
+- Next independent implementation (only after verifying rate selection contract): use WooCommerce-calculated rates for customer destination; expose available method/rate selection in the existing cart/checkout flow; reject invalid or stale choices server-side; persist the verified native shipping method, title, instance ID, amount and taxes on the order, keeping native coupon/tax totals intact. Cover one/multiple/no applicable rates and idempotent retry with offline PHP fixtures + browser interception. Never invent a flat fee or silently force free shipping. Preserve current production functionality until a verified rollout can be accepted.
+- Production real-order QA still needs business-approved shipping policy and an authorized buyer/test order or isolated staging. **No shipping source changes, CMS writes, new orders, builds or deployments performed during this inspection.**
+
 ## Boundaries and outstanding acceptance
 
 **DONE:** latest 9 Page Visual Builder source, Save/Restore and production QA (see `2026-11-10-business-pages-visual-builder.md`); COD empty-cart retry fix deployed, source fixture + browser regression PASS.
