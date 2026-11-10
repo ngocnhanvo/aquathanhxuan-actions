@@ -41,7 +41,8 @@ jobs:
           const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
           for(const file of [
             'src/astro/pages/OrderHistoryPage.astro',
-            'src/astro/tablepress/Order_history.astro'
+            'src/astro/tablepress/Order_history.astro',
+            'src/astroutils/CheckoutPage/LoginFormSSG.astro'
           ]){
             const compiled=await transform(fs.readFileSync(file,'utf8'),{filename:file});
             assert(compiled.code,'Compiler returned no code: '+file);
@@ -51,6 +52,8 @@ jobs:
           const api=fs.readFileSync('src/pages/api/user/order.ts','utf8');
           const table=fs.readFileSync('src/astro/tablepress/Order_history.astro','utf8');
           assert(page.includes('order_history_vi')&&page.includes('data-order-labels'));
+          assert(page.includes('labels={labels}'),'Order history login copy must originate in ESC Table');
+          assert(fs.readFileSync('src/astroutils/CheckoutPage/LoginFormSSG.astro','utf8').includes('data-login-error={uiLabels.login_error}'));
           assert(page.includes('id="order-search-form"')&&page.includes('id="order-load-more"'));
           assert(page.includes('id="order-loading-skeleton"')&&page.includes('loadingSkeleton?.remove()'));
           assert(table.includes('data-esc-source-field="label"')&&table.includes('data-esc-source-table="order_history_vi"'));
