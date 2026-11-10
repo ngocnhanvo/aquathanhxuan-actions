@@ -48,7 +48,9 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    const markerResponse=await page.request.get(FRONT+'/aquathanhxuan-staging-build.json?business_qa='+Date.now());
    assert.equal(markerResponse.status(),200,'Production marker unavailable');
    const marker=await markerResponse.json();
-   assert.equal(marker.commit,'236a6c5fe84aab844eea4411cf49913b73ea6887','Wrong production Astro source');
+   const qaRequest=JSON.parse(fs.readFileSync('qa-requests/aqua-business-pages-builder-production.json','utf8'));
+   assert.match(String(qaRequest.source_sha||''),/^[a-f0-9]{40}$/,'Unpinned QA source');
+   assert.equal(marker.commit,qaRequest.source_sha,'Wrong production Astro source');
    for(const p of pages){
      const wpRes=await page.request.get(WP+'/wp-json/wp/v2/pages/'+p.id+'?context=edit&_qa='+Date.now(),
        {headers,timeout:40000});
