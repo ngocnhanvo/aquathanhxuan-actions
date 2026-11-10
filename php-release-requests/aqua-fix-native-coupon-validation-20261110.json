@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "bbeae23d8169a8177ab9719eda4cf6040f9d1b8a",
+  "scope": "precalc_woocommerce_coupon_native_validation",
+  "native_coupon_id": 83818,
+  "previous_php_release_run": 42776578273,
+  "reason": "Native WC_Discounts cart subtotal zero before calculation; use detached native items",
+  "no_astro_build": true
+}
