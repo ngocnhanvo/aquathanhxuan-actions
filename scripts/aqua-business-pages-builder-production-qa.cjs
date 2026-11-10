@@ -178,8 +178,17 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        const selected=document.querySelector('#esc-vb-edit-row option:checked');
        return selected?.value===expected;
      },coords.row+':'+coords.field,{timeout:22000});
+     if(p.count){
+       // Every native key/label row must be independently editable, including
+       // checkout labels beyond row 40. Stable lookup keys must never be edited.
+       const labelRows=page.locator('#esc-vb-edit-row option[value$=":label"]');
+       assert.equal(await labelRows.count(),p.count,
+         'Incomplete native label editor rows '+p.table);
+       assert.equal(await page.locator('#esc-vb-edit-row option[value$=":key"]').count(),0,
+         'Stable UI label identity is editable '+p.table);
+     }
      audit.pages.push({slug:p.slug,page_id:p.id,table:p.table,states:p.states.length,
-       coordinate:true,selectedField:coords.field});
+       coordinate:true,selectedField:coords.field,labelCount:p.count||null});
      record();
      console.log('AQUA_BUILDER_PAGE_PASS='+p.slug);
    }
