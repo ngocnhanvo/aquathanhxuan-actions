@@ -1,31 +1,37 @@
 # Phản hồi ChatGPT mới nhất — aquathanhxuan.com
 
 - Ngày: 2026-11-10 (Asia/Ho_Chi_Minh).
+- Source: `ngocnhanvo/aquathanhxuan-astro/master` `2c1891795dda2b85af0903f19e4dc98b625c3950`.
+- PHP: `ngocnhanvo/aquathanhxuan-php/master` `e8dd6954e5b69b84cc25d2ebb31d66168847e8f8`.
+- Knowledge: `ngocnhanvo/knowledge/main` `608788447a13486dbe1087a173aece9a93fc8a66`.
 - Chế độ code: auto-build. Cổng ghi source: bypass.
-- Mục tiêu tiếp tục: hoàn thiện WooCommerce đặt hàng từ sản phẩm → giỏ → coupon → checkout → thanh toán → xác nhận đơn, không làm lại bước đã PASS.
 
-## Chính xác đã làm xong trong lượt mới
+## Đã làm trong phiên mới
 
-1. Kiểm tra lại Knowlege `ngocnhanvo/knowledge/main`, checkpoint checkout và latest-response của Aqua, cùng trạng thái các production pipelines. Các QA giỏ/checkout/route từ lượt trước vẫn PASS; không chạy lại hoặc thay code Astro/PHP cho các phần đó.
-2. Đọc chính sách mua hàng gốc `https://aquathanhxuan.com/huong-dan-mua-hang-o-xa/`: cửa hàng xác nhận tình trạng hàng, phí ship, tổng đơn **trước khi chuyển tiền**. Không áp dữ liệu ngân hàng cũ chưa được chủ shop xác thực.
-3. Thêm live QA khách Woo tạm tại `scripts/aqua-customer-session-live-qa.cjs`, workflow `aqua-customer-session-live-qa.yml`: scope một account tổng hợp, xóa trong finally, không ghi PII/cookie/secrets, không tạo đơn hay thanh toán.
-4. [Run #42802133987](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42802133987) phát hiện thực tế WordPress customer tạo được nhưng Astro login trả HTTP 400. **Cleanup PASS**.
-5. [Read-only WP audit #42802710205](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42802710205) chỉ rõ nguyên nhân: route `/custom/v1/login` **missing**; `/custom/v1/lost-password` và `/custom/v1/reset-password` có đăng ký. Cùng audit: shipping `woocommerce_ship_to_countries=disabled`, zero zones/methods, BACS bank accounts count 0, OnePay enabled / production URL `https://onepay.vn`.
-6. Sửa source PHP `ngocnhanvo/aquathanhxuan-php/master` SHA **`e8dd6954e5b69b84cc25d2ebb31d66168847e8f8`**: thêm `wp-content/themes/vibe-code-theme/inc/user/login.php` đăng ký POST REST, xác thực `wp_authenticate()`, trả ID + Woo billing, generic errors, không ghi cookie/secret. Thêm `tests/aqua-customer-login-contract.test.php`; source QA [#42803470553](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42803470553) **PASS**.
-7. PHP release [#42803579093](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42803579093) **PASS**, xác thực SHA256 path login.php trên WordPress production. Không kích Astro build vì chỉ thay PHP.
-8. Live end-to-end [#42803822254](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42803822254) **SUCCESS**: REST login route đúng; QA Woo customer mới đăng nhập Astro trả 200, cookie v1 HMAC HttpOnly/Secure/SameSite Lax; `/api/user/info` đúng customer ID; `/api/user/order` 200, chỉ đơn của chính khách (tài khoản mới trống), no-store; cookie giả unsigned và cookie ký bị sửa 401; logout → order API 401. **AQUA_CUSTOMER_CLEANUP=PASS, created_orders=0, created_payments=0**. QA PHP + phiên Astro + quyền đơn thực tế đạt.
-9. Checkpoint đầy đủ đã cập nhật tại `docs/checkpoints/2026-11-10-checkout-secure-session-live.md`. Không lặp bài QA đã PASS nếu source không thay đổi.
+1. Kiểm tra lại Knowledge, AGENTS Astro, `chatgpt/latest-response.md`, checkpoint checkout và các run production trước khi ghi. Không lặp QA Woo buyer login đã PASS #42803822254.
+2. Phát hiện lỗ hổng chức năng: Checkout CoCart từ Astro server không mang WP login cookie; Woo order có thể lưu `customer_id=0` cho khách đang đăng nhập Astro, khiến lịch sử đơn theo customer ID không hiển thị.
+3. Source Astro `master` commit `2c1891795dda2b85af0903f19e4dc98b625c3950`: sau checkout, đọc khách qua HMAC signed session; xác nhận Woo `order_id` + `order_key` + `customer_id` bằng Woo REST; chỉ gắn `customer_id` nếu guest, không ghi đè đơn của người khác, kiểm tra read-after-write, idempotent. Không nhận customer ID từ payload client. Thêm 7 unit tests. Guest/coupon không đổi.
+4. [Source QA #42806360718](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42806360718): SUCCESS 22/22 tests PASS, code Astro hợp lệ, không test trong pages route.
+5. [Build WordPress #42806552098](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42806552098): SUCCESS `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS` đúng `2c189179...`, header QA PASS. [Deploy Astro #42806700958](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42806700958): SUCCESS, signed FTPS activation passed.
+6. [Live route QA #42807110476](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42807110476): SUCCESS, cart/checkout/receipt/history HTTP 200; guest/unsigned cookie order API 401; OnePay only; zero orders.
+7. [Live Playwright #42807128609](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42807128609): SUCCESS, real temporary Woo cart, checkout form and idempotency checks (POST intercepted, no order), mobile width 390px pass; `created_orders=0`, `created_accounts=0`, `AQUA_CART_CHECKOUT_CLEANUP=PASS`.
+8. Ghi checkpoint đầy đủ vào [docs/checkpoints/2026-11-10-checkout-secure-session-live.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-secure-session-live.md).
 
-## Toàn luồng còn CHƯA DONE
+## Những chốt E2E chưa hoàn tất
 
-- **Cước vận chuyển:** WooCommerce shipping đang disabled và không có shipping zone/method. Nguồn AQUA gốc yêu cầu cửa hàng xác nhận phí giao hàng và tổng tiền trước chuyển khoản; không thể bịa hoặc tự coi 0đ.
-- **BACS:** chưa có tài khoản ngân hàng được chủ shop xác minh và nhập vào WordPress, frontend tiếp tục ẩn BACS cho an toàn.
-- **OnePay:** môi trường hiện cấu hình production gateway; chưa có giao dịch sandbox với merchant credential test được xác nhận, chưa có E2E thật tạo Woo order → trả kết quả OnePay → paid stock & email & receipt. Không bấm thu tiền thật chỉ để QA. Những kiểm thử OnePay hiện có là no-order browser hoặc in-memory PHP.
-- Khi có mức vận chuyển được duyệt/luồng xác nhận phí và tài khoản ngân hàng hợp lệ, tiếp tục cấu hình trong Woo, nghiệm thu nhánh ship/BACS và sandbox OnePay. Không thay business terms tự ý.
+- WooCommerce shipping disabled, không có shipping zone/method/rates. Site gốc yêu cầu xác nhận hàng, phí vận chuyển và tổng trước khi thanh toán. Không tự đưa phí giả/miễn phí. Phải có chính sách do chủ shop duyệt.
+- BACS không có tài khoản ngân hàng được shop xác minh, frontend chủ động ẩn. Không lấy thông tin từ ESC hoặc tài khoản cũ chưa xác nhận.
+- OnePay hiện chạy URL production, chưa có sandbox/test merchant được phê duyệt; chưa thực hiện transaction thực để nghiệm thu order/payment callback/stock/email/receipt/refund. Không tạo đơn hoặc thu tiền thật mặc định.
+- Liên kết `customer_id` mới đã test fixture và deploy nhưng chưa E2E tạo đơn với khách QA thật, vì việc này phụ thuộc flow thanh toán/shop policy ở trên.
 
-Source Astro production hiện tại: `c3d5714f9ec37e1f1d030524abc852be95cdfb0b` (build/deploy success #42799397565/#42799520104). Source PHP mới: `e8dd6954e5b69b84cc25d2ebb31d66168847e8f8` (release #42803579093).
+## Bước an toàn tiếp theo
 
-[Checkpoint chi tiết](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-secure-session-live.md).
+- Xác nhận chính sách phí ship/luồng shop báo phí rồi mới thanh toán; cấu hình Woo Shipping tương ứng.
+- Nếu muốn BACS, chỉ nhập tài khoản ngân hàng đã được shop xác minh trong WordPress; không hard-code.
+- Thực hiện payment sandbox bằng buyer QA được ủy quyền sau khi có cấu hình OnePay test, kiểm tra callback, stock/email, receipt/history và cleanup theo marker.
+- Không lặp lại các workflow source/route/browser đã PASS nếu source không đổi; tiếp tục từ blockers đúng checkpoint.
+
+**Kết quả phiên này:** source patch + production deploy + source/route/Playwright QA hoàn thành. **Tổng mục tiêu checkout E2E: PARTIAL** vì thiếu xác nhận vận chuyển, bank và sandbox payment.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
