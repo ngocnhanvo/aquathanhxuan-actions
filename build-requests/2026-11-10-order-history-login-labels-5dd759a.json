@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "5dd759aede23c09135a4f4c4f1cc025d347bc398",
+  "purpose": "Release login and account label ESC Table integration for order history",
+  "source_qa_run": 42843409461,
+  "cms_page_run": 42843175445,
+  "no_orders": true
+}
