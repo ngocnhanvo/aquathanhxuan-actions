@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "wordpress": "https://admin.aquathanhxuan.io.vn",
+  "astro_deploy_run": 42799520104,
+  "qa_scope": "CREATE_ONE_RANDOM_WP_SYNTHETIC_CUSTOMER_then_verify_login_cookie_order_privacy_logout_AND_DELETE",
+  "no_orders": true,
+  "no_payments": true,
+  "cleanup_required": true
+}
