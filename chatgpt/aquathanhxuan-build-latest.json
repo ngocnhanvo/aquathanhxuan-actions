@@ -1,6 +1,6 @@
 {
-  "run_id": 42842099856,
-  "request_source_sha": "4d9cbe49e8b5539d8e403013483aaa72d20fa1aa",
+  "run_id": 42843595370,
+  "request_source_sha": "5dd759aede23c09135a4f4c4f1cc025d347bc398",
   "production_step": "failure",
-  "checked_at": "2026-11-10T15:16:41.876Z"
+  "checked_at": "2026-11-10T15:25:17.026Z"
 }
