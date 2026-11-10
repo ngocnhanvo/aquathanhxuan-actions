@@ -105,6 +105,7 @@ jobs:
           php source-php/tests/aqua-checkout-preflight.test.php
           php source-php/tests/aqua-checkout-idempotency.test.php
           php source-php/tests/aqua-checkout-order-contract.test.php
+          php source-php/tests/aqua-onepay-return-safety.test.php
           ! grep -Eqi 'nghiencuukhoahoc|EduResearch Hub' source-php/wp-content/mu-plugins/esc-seo-files.php
           php -l source-php/wp-content/plugins/github-trigger/tests/build-status-regression.php
           php source-php/wp-content/plugins/github-trigger/tests/build-status-regression.php
