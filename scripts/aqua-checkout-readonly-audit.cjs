@@ -2,6 +2,7 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const { URL: ParsedURL } = require('node:url');
 const URL='https://admin.aquathanhxuan.io.vn';
 const FRONT='https://aquathanhxuan.io.vn';
 const OUT='artifacts/aqua-checkout-audit';
@@ -75,7 +76,7 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
   try {
    const urlValue=paySettings?.onepay_url?.value;
    if(typeof urlValue==='string' && urlValue.trim()) {
-    const uri=new URL(urlValue);
+    const uri=new ParsedURL(urlValue);
     paymentOrigin={protocol:uri.protocol,hostname:uri.hostname};
    }
   } catch {}
@@ -89,7 +90,7 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    payment_url_trim_parses:(()=>{
     const value=paySettings?.onepay_url?.value;
     if(typeof value!=='string')return false;
-    try{return new URL(value.trim()).protocol==='https:';}catch{return false;}
+    try{return new ParsedURL(value.trim()).protocol==='https:';}catch{return false;}
    })(),
    payment_url_internal_whitespace:typeof paySettings?.onepay_url?.value==='string' &&
     paySettings.onepay_url.value.trim().includes(' '),
