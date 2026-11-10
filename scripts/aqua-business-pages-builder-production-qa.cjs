@@ -150,7 +150,7 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        tag:el.tagName.toLowerCase(),row:el.getAttribute('data-esc-source-row'),
        field:el.getAttribute('data-esc-source-field'),version:el.getAttribute('data-esc-rendered-version'),
      }));
-     assert.match(coords.row||'',/^\\d+$/,'Missing physical row '+p.slug);
+     assert.match(coords.row||'',/^\d+$/,'Missing physical row '+p.slug);
      assert.match(coords.version||'',/^[a-f0-9]{64}$/,'Missing version '+p.slug);
      assert(coords.field,'Missing exact field '+p.slug);
      await target.click();
