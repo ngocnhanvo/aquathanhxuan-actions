@@ -1,11 +1,13 @@
 {
-  "scope": "AQUA_BACS_BANK_CONFIG_READONLY",
+  "scope": "AQUA_ONEPAY_RETURN_CONFIG_READONLY",
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
   "date": "2026-11-10",
-  "attempt": 6,
-  "reason": "Confirm actual WooCommerce BACS bank settings for Aqua order receipt, no bank account numbers logged",
+  "attempt": 7,
+  "reason": "Verify OnePay merchant configuration status, gateway host/protocol and Woo checkout/thankyou endpoint required for payment callback; no order creation",
   "failed_qa_run": 42776753563,
-  "deploy_run": 42780443864
+  "deploy_run": 42780443864,
+  "browser_qa_run": 42787012776,
+  "php_contract_run": 42786587717
 }
