@@ -74,6 +74,7 @@ jobs:
           assert(!form.includes('ppcp-gateway'),'No hardcoded inactive PayPal');
           assert(form.includes('name="billing_state"')&&form.includes('name="billing_city"'),'Complete address fields');
           assert(form.includes('checkoutSubmitting'),'Duplicate submission blocked');
+          assert(form.includes('checkout_request_id: checkoutToken.token'),'Checkout must send a persistent idempotency token');
           assert(cart.includes('renderCart();'),'Cart must render its initial state');
           assert(payment.includes('item.enabled === true'),'Only configured Woo methods selectable');
           assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('data.order_id'),'Checkout requires confirmed Woo order');
