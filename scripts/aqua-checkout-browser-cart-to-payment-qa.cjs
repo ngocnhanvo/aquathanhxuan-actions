@@ -136,6 +136,23 @@ async function apiPost(path,body){
   assert(formBox && formBox.x>=-1 && formBox.x+formBox.width<=392,'Checkout form clipped on mobile');
   await page.screenshot({path:OUT+'/checkout-mobile.png',fullPage:false});
   result.checks.push({stage:'Mobile checkout form fits viewport',status:'PASS',width:390});save();
+
+  // Buyer account history must be a real WordPress-driven Astro route and
+  // must show a login form to guests, not any other customer's order data.
+  const historyRes=await page.goto(FRONT+'/lich-su-mua-hang',{
+   waitUntil:'domcontentloaded',timeout:30000});
+  assert.equal(historyRes?.status(),200,'Woo account email history URL must work');
+  await page.locator('h1').filter({hasText:'Lịch sử đơn hàng'}).waitFor({timeout:12000});
+  await page.locator('#login-form-wrapper').waitFor({state:'visible',timeout:20000});
+  assert(await page.locator('#login-form').isVisible(),
+   'Anonymous buyer must be shown a WordPress login form, not order data');
+  const privateData=await page.request.get(FRONT+'/api/user/order',{timeout:15000});
+  assert.equal(privateData.status(),401,'Guest order history API must deny access');
+  await page.screenshot({path:OUT+'/history-mobile-guest.png',fullPage:false});
+  result.checks.push({
+   stage:'OrderHistoryPage real CMS route and guest privacy',status:'PASS',
+   http:200,guest_order_api_http:401,guest_login_form_visible:true
+  });save();
   result.status='PASS';
   console.log('AQUA_CART_CHECKOUT_BROWSER_PASS='+JSON.stringify({stages:result.checks,created_orders:0}));
  }catch(e){
