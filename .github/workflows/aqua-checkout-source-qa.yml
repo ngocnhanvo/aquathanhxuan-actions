@@ -67,6 +67,8 @@ jobs:
           }
           const form=fs.readFileSync(files[3],'utf8');
           const cart=fs.readFileSync(files[0],'utf8');
+          const login=fs.readFileSync(files[4],'utf8');
+          assert(login.includes('pageLostPass?.slug'),'Missing WordPress lost-password Page must not crash checkout SSR');
           const payment=fs.readFileSync('src/pages/api/cart/payment-methods.ts','utf8');
           assert(form.includes('/api/cart/payment-methods'),'Checkout must load active gateway list');
           assert(!form.includes('ppcp-gateway'),'No hardcoded inactive PayPal');
