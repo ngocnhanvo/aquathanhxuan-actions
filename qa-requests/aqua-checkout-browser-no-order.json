@@ -2,18 +2,20 @@
   "scope": "LIVE_CART_CHECKOUT_ACCOUNT_HISTORY_NO_ORDERS",
   "project": "aquathanhxuan.com",
   "frontend": "https://aquathanhxuan.io.vn",
-  "astro_sha": "06d58e417dfbd62cbc471755a58c08e58428cfb6",
+  "astro_sha": "3e00ba57d9adfb70d2c5f8658a63ac99f3314098",
   "routes_run": 42807110476,
   "no_order_creation": true,
   "no_payment_attempt": true,
   "cleanup_required": true,
-  "php_release_run": 42785150060,
-  "expected_bacs": false,
-  "bacs_audit_run": 42783621660,
-  "reason": "Add regression for direct /cart without URL cart_key, restore localStorage and refresh Woo product image/prices; no orders",
-  "attempt": 8,
-  "source_qa_run": 42814401425,
-  "astro_deploy_run": 42814669203,
+  "php_release_run": 42818081582,
+  "reason": "Production checkout: remove buyer category and identity number; full name; optional phone; address before locality; COD only (OnePay hidden). Intercept orders.",
+  "attempt": 9,
+  "source_qa_run": 42818057110,
+  "astro_deploy_run": 42818443637,
   "woo_tax_settings_qa_run": 42814147919,
-  "previous_browser_qa_run": 42814974242
+  "previous_browser_qa_run": 42814974242,
+  "cod_gateway_run": 42817289132,
+  "expected_payment_methods": [
+    "cod"
+  ]
 }
