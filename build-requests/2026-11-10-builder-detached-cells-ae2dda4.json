@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "ae2dda4e463e60884c6ddc9a3d7ae3afd118c786",
+  "purpose": "Deploy support shell, order history guest labels and editable detached ESC cells",
+  "source_qa_run": 42864062087,
+  "cms_page_run": 42862224453,
+  "no_orders": true
+}
