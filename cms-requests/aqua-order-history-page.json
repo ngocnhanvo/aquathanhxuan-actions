@@ -1,0 +1,19 @@
+{
+  "project": "aquathanhxuan.com",
+  "wordpress_origin": "https://admin.aquathanhxuan.io.vn",
+  "frontend_origin": "https://aquathanhxuan.io.vn",
+  "slug": "lich-su-mua-hang",
+  "acf": {
+    "key": "ssr-order-history",
+    "action": "OrderHistoryPage",
+    "product_lang": "vi"
+  },
+  "rewrite": {
+    "from": "^/lich-su-mua-hang/?$",
+    "to": "/ssr/cart/lich-su-mua-hang"
+  },
+  "scope": "ONLY_CREATE_OR_REUSE_ONE_CMS_PAGE_AND_ONE_REWRITE",
+  "evidence_failed_route_qa": 42795703238,
+  "no_orders": true,
+  "no_accounts": true
+}
