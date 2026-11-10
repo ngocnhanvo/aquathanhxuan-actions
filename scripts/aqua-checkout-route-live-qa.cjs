@@ -49,6 +49,12 @@ async function get(path){
    assert.equal(response.status,200,'SSR checkout route HTTP '+response.status+' at '+spec.path);
    assert(response.body.includes('<html')||response.body.includes('<!DOCTYPE'), 'Missing HTML at '+spec.path);
   }));
+  const accountCandidates=(data.pages||[]).filter(p=>
+    /orderhistory|order.history|lich-su|tai-khoan|account/i.test(
+      [p.slug,p.key,p.action].map(v=>String(v||'')).join(' ')
+    )).map(p=>({id:p.id,slug:p.slug,key:p.key,action:p.action,lang:p.lang}));
+  console.log('AQUA_ACCOUNT_PAGE_DISCOVERY='+JSON.stringify(accountCandidates));
+  checks.push({kind:'WordPress account Page candidates',pages:accountCandidates});
   const accountPage=await get('/lich-su-mua-hang');
   checks.push({kind:'Customer account-history route',path:'/lich-su-mua-hang',http:accountPage.status});
   assert.equal(accountPage.status,200,
