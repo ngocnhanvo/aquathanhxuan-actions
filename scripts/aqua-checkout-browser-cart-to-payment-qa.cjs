@@ -55,6 +55,20 @@ async function apiPost(path,body){
     gross_subtotal:cartSubtotal,discount:cartDiscount,total:cartTotal
   });save();
   await page.screenshot({path:OUT+'/cart.png',fullPage:false});
+  // Opening /cart directly must restore a previously saved Woo cart key
+  // from browser storage and then refresh product metadata from WordPress.
+  const bareCart=await page.goto(FRONT+'/cart',{waitUntil:'domcontentloaded',timeout:30000});
+  assert.equal(bareCart?.status(),200,'Direct /cart route failed');
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('#cart-list-container img');
+    const prices=[...document.querySelectorAll('#cart-list-container p.font-bold.text-primary')];
+    const total=document.querySelector('#summary-total')?.textContent||'';
+    return img?.complete&&img?.naturalWidth>0&&
+      prices.length>=2&&prices.every(x=>/2[.,]700[.,]000/.test(x.textContent||''))&&
+      /2[.,]565[.,]000/.test(total);
+  },null,{timeout:20000});
+  result.checks.push({stage:'Direct /cart restores image, price, coupon and total from saved browser cart',status:'PASS'});save();
+  await page.screenshot({path:OUT+'/cart-no-key.png',fullPage:false});
   const go=page.locator('#btn-proceed-checkout');
   await go.waitFor({timeout:12000});
   let href=await go.getAttribute('href');
