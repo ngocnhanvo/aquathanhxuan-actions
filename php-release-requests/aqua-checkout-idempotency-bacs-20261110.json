@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "af6fdc9bda1fcc444617e899a73552089771151e",
+  "purpose": "Require a real Woo BACS recipient and enforce idempotent order creation",
+  "no_orders_qa": true,
+  "astro_build": false
+}
