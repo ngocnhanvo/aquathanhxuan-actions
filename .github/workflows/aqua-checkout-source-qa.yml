@@ -1,0 +1,79 @@
+name: Aqua checkout frontend source QA (NO BUILD / NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-checkout-source.json'
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source-astro
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source-astro/pnpm-lock.yaml
+      - name: Verify the exact requested Astro production source
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs'),cp=require('node:child_process');
+          const req=JSON.parse(fs.readFileSync('qa-requests/aqua-checkout-source.json'));
+          const actual=cp.execFileSync('git',['-C','source-astro','rev-parse','HEAD'],{encoding:'utf8'}).trim();
+          if(actual!==req.source_sha)throw Error('Unexpected Astro master SHA: '+actual);
+          console.log('AQUA_CHECKOUT_SOURCE_SHA='+actual);
+          NODE
+      - working-directory: source-astro
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Astro cart, checkout, payment method and receipt source compiler
+        working-directory: source-astro
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {transform} from '@astrojs/compiler';
+          const files=[
+            'src/astro/pages/CartPage.astro',
+            'src/astro/pages/CheckoutPage.astro',
+            'src/astro/pages/CheckoutDonePage.astro',
+            'src/astroutils/CheckoutPage/InfoForm.astro',
+            'src/astroutils/CheckoutPage/LoginForm.astro',
+            'src/astroutils/Header/Cart.astro'
+          ];
+          for (const path of files){
+            const raw=fs.readFileSync(path,'utf8');
+            const out=await transform(raw,{filename:path});
+            assert(out.code,'Compiler did not render '+path);
+            console.log('AQUA_CHECKOUT_ASTRO_COMPILE_PASS='+path);
+          }
+          const form=fs.readFileSync(files[3],'utf8');
+          const cart=fs.readFileSync(files[0],'utf8');
+          const payment=fs.readFileSync('src/pages/api/cart/payment-methods.ts','utf8');
+          assert(form.includes('/api/cart/payment-methods'),'Checkout must load active gateway list');
+          assert(!form.includes('ppcp-gateway'),'No hardcoded inactive PayPal');
+          assert(form.includes('name="billing_state"')&&form.includes('name="billing_city"'),'Complete address fields');
+          assert(form.includes('checkoutSubmitting'),'Duplicate submission blocked');
+          assert(cart.includes('renderCart();'),'Cart must render its initial state');
+          assert(payment.includes('item.enabled === true'),'Only configured Woo methods selectable');
+          assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('data.order_id'),'Checkout requires confirmed Woo order');
+          console.log('AQUA_CHECKOUT_SOURCE_QA_PASS');
+          NODE
+      - name: Existing cart product buttons regression
+        working-directory: source-astro
+        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts
