@@ -66,6 +66,12 @@ jobs:
           const user=read('src/lib/utils/user.ts');
           assert(api.includes('customerId') && !api.includes('&search='),'Private orders must be customer scoped');
           assert(user.includes('verifySignedUserSession'),'Signed sessions required');
+          const history=read(files[4]);
+          assert(history.includes('id="order-loading-skeleton"') && history.includes('Đang tải lịch sử đơn hàng...'),'History skeleton must exist in initial HTML');
+          assert(history.includes('motion-safe:animate-pulse') && history.includes('role="status"'),'Accessible pulsing order placeholders required');
+          assert(history.includes('loadingSkeleton?.remove()') && history.includes('aria-busy", "false"'),'Skeleton must settle on all API outcomes');
+          assert(!history.includes('showLoading()') && !history.includes('hideLoading()'),'Do not replace skeleton with global loading overlay');
+          console.log('AQUA_ORDER_HISTORY_SKELETON_SOURCE_PASS');
           console.log('AQUA_HEADER_COMMERCE_SOURCE_CONTRACT_PASS');
           NODE
       - name: Astro source type checks (exclude confirmed unrelated baseline errors)
