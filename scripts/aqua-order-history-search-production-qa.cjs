@@ -40,7 +40,7 @@ async function run(){
     const labels=JSON.parse(raw||'{}');
     assert.equal(labels.title,'Lịch sử đơn hàng');
     assert.equal(labels.search_label,'Tìm kiếm đơn hàng');
-    assert(Object.keys(labels).length>=28,'WordPress labels must load from complete native ESC Table');
+    assert(Object.keys(labels).length>=38,'WordPress labels must load from complete native ESC Table');
     const search=page.locator('#order-search-query');
     await search.waitFor({state:'visible',timeout:20000});
     await page.getByText('Mã đơn: #111').waitFor({state:'visible'});
@@ -92,6 +92,10 @@ async function run(){
     }));
     await guest.goto(ORIGIN+'/lich-su-mua-hang',{waitUntil:'domcontentloaded',timeout:50000});
     await guest.locator('#login-form-wrapper').waitFor({state:'visible',timeout:15000});
+    await guest.getByText('Tên đăng nhập hoặc Email').waitFor({state:'visible'});
+    assert.equal(await guest.locator('#login-form input[name="username"]').getAttribute('placeholder'),
+      'Nhập email hoặc tên tài khoản');
+    assert.equal(await guest.locator('#login-form a').filter({hasText:'Quên mật khẩu?'}).count(),1);
     assert.equal(await guest.locator('#order-search-form').isVisible(),false,
       'Guest must not see private order search');
     await guest.close();
@@ -121,10 +125,11 @@ async function run(){
       }));
       assert.equal(coords.table,'order_history_vi');
       assert.match(coords.version||'',/^[a-f0-9]{64}$/);
-      assert(coords.count>=28&&coords.labelNodes>=28&&coords.valid,
+      assert(coords.count>=38&&coords.labelNodes>=38&&coords.valid,
         'Builder must expose all label fields with valid row + version coordinates: '+JSON.stringify(coords));
       await block.locator('h1').click();
-      await admin.waitForFunction(()=>Boolean(document.querySelector('#esc-vb-edit-row option[value="0:label"]')),{timeout:20000});
+      await admin.waitForFunction(()=>Boolean(document.querySelector('#esc-vb-edit-row option[value="0:label"]')) &&
+      Boolean(document.querySelector('#esc-vb-edit-row option[value="37:label"]')),null,{timeout:20000});
       assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false);
       console.log('ORDER_HISTORY_ESC_VISUAL_BUILDER_EDITABLE_PASS rows='+coords.labelNodes);
       await admin.screenshot({path:OUT+'/builder-labels.png',fullPage:false});
