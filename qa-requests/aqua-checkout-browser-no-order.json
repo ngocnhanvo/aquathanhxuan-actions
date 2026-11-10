@@ -8,15 +8,17 @@
   "no_payment_attempt": true,
   "cleanup_required": true,
   "php_release_run": 42886074121,
-  "reason": "Verify live Woo shipping quote response and COD checkout selected rate IDs, keeping all checkout POSTs intercepted and temporary cart cleaned.",
-  "attempt": 11,
+  "reason": "Recheck verified Checkout SSR and Woo quote after restoring six native checkout UI ESC labels (59 preserved, 65 total) and signed Astro redeployment.",
+  "attempt": 12,
   "source_qa_run": 42885078315,
-  "astro_deploy_run": 42886734754,
+  "astro_deploy_run": 42888200487,
   "woo_tax_settings_qa_run": 42814147919,
-  "previous_browser_qa_run": 42814974242,
+  "previous_browser_qa_run": 42887181154,
   "cod_gateway_run": 42817289132,
   "expected_payment_methods": [
     "cod"
   ],
-  "shipping_php_source_qa_run": 42885613310
+  "shipping_php_source_qa_run": 42885613310,
+  "cms_esc_labels_run": 42887729026,
+  "previous_browser_qa_issue": "checkout navigation HTTP2 protocol error before ESC-label CMS append"
 }
