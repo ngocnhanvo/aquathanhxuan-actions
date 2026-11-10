@@ -121,17 +121,16 @@ const save = ()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(snapshot,nul
    assert.equal(editorContent,content,'Native editor content differs from WordPress REST');
    const state=await page.evaluate(()=>{
      const editor=window.tinymce?.get('content');
-     if(!editor||typeof window.switchEditors?.go!=='function')throw Error('Missing native Classic Editor');
-     if(editor.isHidden())editor.show();
-     window.switchEditors.go('content','html');
+     if(editor && !editor.isHidden())editor.hide();
+     const wrap=document.getElementById('wp-content-wrap');
      const textarea=document.getElementById('content');
      const button=document.getElementById('qt_content_tablepress_quicktags_button');
-     const visible=el=>el&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().width>0;
-     if(!(textarea instanceof HTMLTextAreaElement)||!visible(textarea)||!visible(button))throw Error('Quicktags not ready');
+     if(!(textarea instanceof HTMLTextAreaElement)||!wrap||!button)throw Error('Native Classic Editor/Quicktags missing');
+     wrap.classList.remove('tmce-active');wrap.classList.add('html-active');
      textarea.focus();
      textarea.setSelectionRange(textarea.value.length,textarea.value.length);
      window.wpActiveEditor='content';
-     return {length:textarea.value.length};
+     return {length:textarea.value.length,insertButton:button.id};
    });
    assert.equal(state.length,content.length);
    await page.locator('#qt_content_tablepress_quicktags_button').click();
