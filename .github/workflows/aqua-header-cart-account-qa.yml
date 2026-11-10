@@ -1,0 +1,79 @@
+name: Aqua header account and live cart source QA (NO BUILD / NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-header-cart-account-qa.yml'
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Checkout Aqua Astro master
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+      - name: Install frozen dependencies
+        working-directory: source
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Static validate header, mobile and commerce controls
+        working-directory: source
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import { createRequire } from 'node:module';
+          const require=createRequire(import.meta.url);
+          const { transform }=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
+          const files=[
+            'src/astro/components/Layout/Header.astro',
+            'src/astro/components/Menu/Mobile.astro',
+            'src/astroutils/Header/Cart.astro',
+            'src/astroutils/Header/UserAccount.astro',
+            'src/astro/pages/OrderHistoryPage.astro'
+          ];
+          for (const path of files) {
+            const source=fs.readFileSync(path,'utf8');
+            const result=await transform(source,{filename:path});
+            assert(result.code,'Compiler output missing: '+path);
+            console.log('COMPILE_PASS='+path);
+          }
+          const read=path=>fs.readFileSync(path,'utf8');
+          const h=read(files[0]), m=read(files[1]), c=read(files[2]), u=read(files[3]);
+          assert(h.includes('page.key === "ssr-cart"'),'Header must use Woo cart SSR route');
+          assert(h.includes('UserAccount accountUrl={accountUrl}') && h.includes('showLabel'),'Desktop account and unified cart must render');
+          assert(h.includes('iconOnly'),'Mobile header account must use same signed session control');
+          assert(m.includes('showLabel') && !m.includes('href={cartUrl}'),'Mobile menu must not split cart label and icon');
+          assert(c.includes('data-base-href') && c.includes('cart:updated') && c.includes('searchParams.delete("cart_key")'),'Cart must sync badge/key and clear stale key');
+          assert(c.includes('showLabel') && c.includes('js-cart-badge'),'Cart icon and text must share one live link');
+          assert(u.includes('/api/user/info') && u.includes('/api/user/logout') && u.includes('textContent = name'),'Account must read signed session, logout and safely render profile');
+          const api=read('src/pages/api/user/order.ts');
+          const user=read('src/lib/utils/user.ts');
+          assert(api.includes('customerId') && !api.includes('&search='),'Private orders must be customer scoped');
+          assert(user.includes('verifySignedUserSession'),'Signed sessions required');
+          console.log('AQUA_HEADER_COMMERCE_SOURCE_CONTRACT_PASS');
+          NODE
+      - name: Astro source type checks
+        working-directory: source
+        run: pnpm exec astro check --js-only
+      - name: Existing cart, login and order privacy regression
+        working-directory: source
+        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/utils/signedSession.test.ts src/lib/utils/orderHistoryApi.test.ts src/lib/utils/linkWooOrderCustomer.test.ts src/lib/utils/escapeCartHtml.test.ts
+      - name: Publish tested source SHA
+        working-directory: source
+        run: git rev-parse HEAD
