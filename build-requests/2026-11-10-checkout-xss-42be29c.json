@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "42be29cc0ef94492b11ff34e0af477a5968e28b5",
+  "purpose": "Deploy checkout dynamic HTML escaping and variation/coupon XSS guards; keep Woo cart/coupon/payment semantics unchanged",
+  "source_qa_run": 42808903097,
+  "no_real_orders": true
+}
