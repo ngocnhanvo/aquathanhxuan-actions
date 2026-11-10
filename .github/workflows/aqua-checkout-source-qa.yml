@@ -104,11 +104,19 @@ jobs:
           assert(form.includes('checkoutSubmitting'),'Duplicate submission blocked');
           assert(form.includes('checkout_request_id: checkoutToken.token'),'Checkout must send a persistent idempotency token');
           assert(cart.includes('renderCart();'),'Cart must render its initial state');
-          assert(payment.includes('item.enabled === true'),'Only configured Woo methods selectable');
-          assert(payment.includes('bacsReady') && payment.includes('/payment_gateways/bacs'),
-            'BACS must be hidden until WordPress has a real bank recipient');
-          assert(payment.includes('item.id !== "bacs" || bacsReady'),
-            'Only validated bank account can enable BACS');
+          assert(payment.includes('gateway?.enabled === true') && payment.includes('/payment_gateways/cod'),
+            'Only the enabled native WooCommerce COD gateway is offered');
+          assert(!payment.includes('/payment_gateways/bacs') && !payment.includes('/payment_gateways/onepay'),
+            'Do not offer online or bank gateways during COD-only rollout');
+          assert(!form.includes('name="billing_chuthe"') && !form.includes('name="billing_cccd"'),
+            'Personal/organization selection and ID number inputs must be removed');
+          assert(form.indexOf('name="billing_diachi"') < form.indexOf('name="billing_state"'),
+            'Street address must appear before province and district');
+          assert(!/name="billing_sodienthoai"[\\s\\S]*?required/.test(form.split('name="billing_sodienthoai"')[1]?.split('/>')[0] || ''),
+            'Phone is optional');
+          const checkoutProxy=fs.readFileSync('src/pages/api/cart/checkout.ts','utf8');
+          assert(!checkoutProxy.includes('!billing.phone') && checkoutProxy.includes('payment_method !== "cod"'),
+            'Server checkout must accept empty phone and limit payment to COD');
           assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('data.order_id'),'Checkout requires confirmed Woo order');
           assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('checkout_request_id,'),'CoCart proxy must forward idempotency token');
           console.log('AQUA_CHECKOUT_SOURCE_QA_PASS');
