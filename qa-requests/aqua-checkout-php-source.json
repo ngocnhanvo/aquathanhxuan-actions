@@ -2,14 +2,14 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "67fd85976a25f3bffdbe002355fc0f3fbadb7472",
-  "scope": "NATIVE_WOO_SHIPPING_SELECTION_AND_QUOTE",
+  "source_sha": "5f74a1608c2aeb4eb26e3772d1204ed1dd135a1f",
+  "scope": "WORDPRESS_COUPON_GROUPS_AND_STACKING",
   "purpose": "Rerun complete offline Woo shipping source fixtures after correcting enabled/disabled quote test phases",
   "production_order_creation": false,
   "no_real_orders": true,
   "previous_live_customer_run": 42802133987,
   "previous_failed_run": 42884934241,
-  "reason": "Verify MF5 coupon by stable Woo ID 83818, 200001 minimum, rename and auto-apply before production PHP deployment",
-  "attempt": 1,
+  "reason": "Verify native WordPress coupon grouping, same-group exclusivity, Tet cross-group stack, threshold selection and admin save nonce",
+  "attempt": 2,
   "date": "2026-11-11"
 }
