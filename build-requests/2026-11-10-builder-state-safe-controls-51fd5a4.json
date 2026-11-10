@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "51fd5a46a6a87f3b2ec032604927ba104341bcb2",
+  "purpose": "Publish safe Visual Builder preview state switching without weakening form firewall",
+  "source_qa_run": 42859669321,
+  "cms_page_run": 42857479598,
+  "no_orders": true
+}
