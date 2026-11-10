@@ -161,6 +161,10 @@ const shortcode = t=>'[table id='+t.table+' /]';
    assert.equal(pageAfter.status,200,'WordPress Page readback failed');
    assert.equal(pageAfter.data.acf?.action,t.action);
    const output=String(pageAfter.data.content?.raw||'');
+   console.log('AQUA_PASSWORD_PAGE_READBACK='+JSON.stringify({
+     id:t.id,shortcode:shortcode(t),rawSuffix:output.slice(-850),originalLength:raw.length,
+     newLength:output.length,contains:output.includes(shortcode(t))
+   }));
    assert.equal([...output.matchAll(new RegExp('\\[table\\s+id=[\\x22\\x27]?'+t.table+'[\\x22\\x27]?\\s*\\/\\]','gi'))].length,1,
      'Native shortcode absent/duplicated '+t.table);
    console.log('AQUA_BUSINESS_ESC_PAGE_PASS='+t.slug+' rows='+t.labels.length);
