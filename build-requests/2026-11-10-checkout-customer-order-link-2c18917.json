@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "2c1891795dda2b85af0903f19e4dc98b625c3950",
+  "purpose": "Deploy verified signed-customer Woo order association after headless CoCart checkout; preserve cart discounts and gateway settings",
+  "source_qa_run": 42806360718,
+  "no_real_orders": true
+}
