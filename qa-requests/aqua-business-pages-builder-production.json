@@ -9,8 +9,8 @@
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "v8-support-multi-eyebrow-verify-nine-pages",
-  "previous_qa_run": 42867884395,
+  "qa_revision": "v9-draft-revert-all-pages-and-last-checkout-label",
+  "previous_qa_run": 42868615994,
   "php_release_run": 42867578142,
   "expected_editable_label_counts": {
     "order_history_vi": 38,
