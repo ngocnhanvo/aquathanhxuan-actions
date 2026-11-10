@@ -1,0 +1,11 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "d9679529f23560ac8850ac62893328335e19089f",
+  "scope": "preserve_native_wp_coupons_in_cocart",
+  "coupon_id": 83818,
+  "prior_failed_qa_run": 42775975583,
+  "no_astro_build": true
+}
