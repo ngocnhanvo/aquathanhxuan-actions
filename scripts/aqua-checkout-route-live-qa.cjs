@@ -59,6 +59,23 @@ async function get(path){
   checks.push({kind:'Customer account-history route',path:'/lich-su-mua-hang',http:accountPage.status});
   assert.equal(accountPage.status,200,
    'Account link in WooCommerce new-account emails must open published Astro history route');
+  const anonymousOrders=await get('/api/user/order');
+  assert.equal(anonymousOrders.status,401,'Unsigned visitor must not read Woo customer orders');
+  checks.push({kind:'Guest order history API access denied',http:401,status:'PASS'});
+
+  // This forged cookie contains a completely synthetic ID; no real customer
+  // is queried. Historical unsigned JSON must fail before reaching Woo API.
+  const forgedSession=encodeURIComponent(JSON.stringify({
+    user:{id:999999,name:'SYNTHETIC_QA_ONLY',email:'synthetic@example.invalid'}
+  }));
+  const forgedResponse=await fetch(FRONT+'/api/user/order',{
+    headers:{Cookie:'esc_user_session='+forgedSession,'Cache-Control':'no-cache'},
+    signal:AbortSignal.timeout(15000)
+  });
+  assert.equal(forgedResponse.status,401,
+    'User ID inside an unsigned cookie must never authorize Woo order history');
+  checks.push({kind:'Forged unsigned session rejected',http:401,status:'PASS'});
+
   const gateway=await get('/api/cart/payment-methods');
   assert.equal(gateway.status,200,'Payment gateway API unavailable');
   const methods=JSON.parse(gateway.body);
