@@ -2,10 +2,11 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "58f8fde24040d04fccd0301dd6af411a1645eb5d",
+  "source_sha": "436a7ea571ec9db5e23b30e820e2d5248d51241f",
   "scope": "NATIVE_WOO_SHIPPING_SELECTION_AND_QUOTE",
-  "purpose": "Verify CoCart shipping rate quotes, fresh rate validation, tax/lines and original COD idempotency tests offline",
+  "purpose": "Rerun complete offline Woo shipping source fixtures after correcting enabled/disabled quote test phases",
   "production_order_creation": false,
   "no_real_orders": true,
-  "previous_live_customer_run": 42802133987
+  "previous_live_customer_run": 42802133987,
+  "previous_failed_run": 42884934241
 }
