@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "ab93adec272cee6a19a5fda7ab4e1e95e2001eea",
+  "purpose": "Publish client-side persistent checkout request ID across network retries",
+  "source_qa_run": 42783409847,
+  "no_orders": true
+}
