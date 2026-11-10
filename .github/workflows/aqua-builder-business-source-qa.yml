@@ -60,9 +60,11 @@ jobs:
           const preview=fs.readFileSync(files[0],'utf8');
           assert(preview.includes('getBusinessPreviewState') && preview.includes('esc-business-preview-state'));
           assert(preview.includes('<script is:inline>'),'State switch must run as inline DOM-ready script');
-          assert(preview.includes('id="esc-business-preview-toolbar" action={Astro.url.pathname} method="get"'));
-          assert(preview.includes('form.requestSubmit()') && preview.includes('type="submit"'));
-          console.log('AQUA_BUILDER_STATE_GET_FALLBACK_PASS');
+          assert(preview.includes('id="esc-business-preview-apply" type="button"'));
+          assert(preview.includes('picker.addEventListener("change", show)') && preview.includes('apply.addEventListener("click", show)'));
+          assert(preview.includes('url.searchParams.set("vb_state", picker.value)'));
+          assert(preview.includes("form-action 'none'"),'Builder form submission firewall must remain in place');
+          console.log('AQUA_BUILDER_SAFE_STATE_CONTROLS_PASS');
           const cart=fs.readFileSync('src/astro/pages/CartPage.astro','utf8');
           const checkout=fs.readFileSync('src/astro/pages/CheckoutPage.astro','utf8');
           assert(cart.includes('readBusinessPageLabels') && cart.includes('cart_ui_'));
