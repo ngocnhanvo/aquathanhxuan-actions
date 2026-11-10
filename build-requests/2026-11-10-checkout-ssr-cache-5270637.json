@@ -1,0 +1,7 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "527063756fd57013349fc17e44eebc3617a72016",
+  "purpose": "Publish WordPress-discovered cart/checkout/receipt SSR Page cache; remove ESC residue and hardcoded coupon label",
+  "source_qa_run": 42780202889
+}
