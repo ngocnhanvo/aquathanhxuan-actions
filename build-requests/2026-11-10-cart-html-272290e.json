@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "272290ec59be5687ed88101422408d42a2f333bf",
+  "purpose": "Deploy cart HTML XSS hardening and missing variation-unit fix; retains Woo coupon and checkout semantics",
+  "source_qa_run": 42809623082,
+  "no_real_orders": true
+}
