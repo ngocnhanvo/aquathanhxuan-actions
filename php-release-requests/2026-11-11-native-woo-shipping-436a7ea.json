@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "436a7ea571ec9db5e23b30e820e2d5248d51241f",
+  "purpose": "Deploy Woo-backed checkout shipping quotes, native order shipping lines and validated rate IDs; retain existing totals with shipping disabled",
+  "source_qa_run": 42885613310,
+  "frontend_qa_run": 42885078315,
+  "no_orders_qa": true,
+  "astro_build": false
+}
