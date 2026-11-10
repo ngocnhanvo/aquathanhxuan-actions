@@ -3,13 +3,14 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "736c9936129c67fc169393044283c48f0d7886fe",
+  "source_sha": "5080cffaa9e36db7242842df867ac9e4f1bf2216",
   "php_release_run": 42771082969,
   "attempt": 2,
   "previousRun": 42771343628,
   "reason": "Fix compiler import resolution in QA harness; no source or production changes",
-  "purpose": "Compile restored WordPress OrderHistoryPage SSR, verify client HTML escaping, and regress checkout cart/payment/source and coupon tests",
+  "purpose": "Security QA: authenticated HMAC Astro session, signed cookie issuance and validation, deny forged legacy cookie in customer orders, customer-specific Woo order filter, OrderHistoryPage HTML sanitization, SSR source",
   "previous_source_qa": 42783821992,
   "no_orders": true,
-  "cms_page_run": 42796129841
+  "cms_page_run": 42796129841,
+  "cms_history_page_run": 42796129841
 }
