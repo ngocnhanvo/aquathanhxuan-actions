@@ -14,5 +14,9 @@
   "no_orders": true,
   "no_email": true,
   "no_payment": true,
-  "temporary_records": 0
+  "temporary_records": 0,
+  "qa_revision": "v2-diagnose-save-http-and-native-rollback-fallback",
+  "previous_qa_run": 42870673248,
+  "confirmed_cleanup_run": 42871691441,
+  "no_duplicate_record_creation": true
 }
