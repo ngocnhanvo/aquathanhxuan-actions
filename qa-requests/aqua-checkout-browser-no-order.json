@@ -1,8 +1,8 @@
 {
-  "scope": "BROWSER_CART_CHECKOUT_ACCOUNT_INTERCEPTED_NO_ORDERS",
+  "scope": "LIVE_CART_CHECKOUT_ACCOUNT_HISTORY_NO_ORDERS",
   "project": "aquathanhxuan.com",
   "frontend": "https://aquathanhxuan.io.vn",
-  "astro_sha": "fa1fddbd4c7fefcf76f62e168bf11c8bc26b2ead",
+  "astro_sha": "c3d5714f9ec37e1f1d030524abc852be95cdfb0b",
   "routes_run": 42782297740,
   "no_order_creation": true,
   "no_payment_attempt": true,
@@ -10,8 +10,8 @@
   "php_release_run": 42785150060,
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
-  "reason": "Intercept guest + new-account checkout POST to verify form password, Woo customer data, anti-duplicate checkout token, no account/order creation, cleanup and mobile viewport",
-  "attempt": 3,
+  "reason": "QA real anonymous cart, native coupon, checkout form and intercepted submit, WordPress OrderHistoryPage guest login visibility and private order API=401, clean temporary cart",
+  "attempt": 4,
   "source_qa_run": 42785105749,
-  "astro_deploy_run": 42785546490
+  "astro_deploy_run": 42799520104
 }
