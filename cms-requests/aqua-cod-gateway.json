@@ -1,0 +1,9 @@
+{
+  "project": "aquathanhxuan",
+  "scope": "woocommerce_cod_gateway_enabled_only",
+  "desired": {
+    "id": "cod",
+    "enabled": true
+  },
+  "no_order_creation": true
+}
