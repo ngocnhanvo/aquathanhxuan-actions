@@ -1,0 +1,36 @@
+name: Aqua Cubic 40 single Product Rewrite repair
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/combo-cubic40-rewrite.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-remaining-catalog-writes
+  cancel-in-progress: false
+jobs:
+  write-one-rewrite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-combo-cubic40-route-repair.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Create only source-verified missing WordPress Product Rewrite
+        run: node scripts/aqua-combo-cubic40-route-repair.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-combo-cubic40-route-repair
+          path: artifacts/aqua-combo-cubic40-rewrite
+          retention-days: 14
+          if-no-files-found: ignore
