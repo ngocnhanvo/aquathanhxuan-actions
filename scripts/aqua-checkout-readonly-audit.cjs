@@ -51,15 +51,46 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    report.checks.push({key,status:r.status(),isArray:Array.isArray(data)});
    return Array.isArray(data)?data:[];
   }
-  const [gateways,coupons,pages,settings,rewrites]=await Promise.all([
+  const [gateways,coupons,pages,settings,rewrites,advanced]=await Promise.all([
    get('gateways','/wp-json/wc/v3/payment_gateways'),
    get('coupons','/wp-json/wc/v3/coupons?per_page=100'),
    get('pages','/wp-json/wp/v2/pages?per_page=100&status=publish&context=edit'),
    get('settings','/wp-json/wc/v3/settings/general'),
-   get('rewrite','/wp-json/wp/v2/chuyen-huong-link?context=edit&status=publish&per_page=100')
+   get('rewrite','/wp-json/wp/v2/chuyen-huong-link?context=edit&status=publish&per_page=100'),
+   get('advanced','/wp-json/wc/v3/settings/advanced')
   ]);
   report.checkoutRewrites=rewrites.filter(x=>/cart|checkout|order-received/i.test(String(x.acf?.from_link||''))).map(x=>({id:x.id,from:x.acf?.from_link,to:x.acf?.to_link,type:x.acf?.type,match_type:x.acf?.match_type,enable:x.acf?.enable}));
   report.woocommerceCouponSetting=settings.find(x=>x.id==='woocommerce_enable_coupons')?.value??'NOT_RETURNED';
+  // OnePay uses WooCommerce get_return_url($order) and processes signed
+  // gateway responses on the backend Woo thankyou hook. Never log merchant
+  // credentials, even with a WordPress admin session.
+  const onepayResponse=await page.request.get(URL+'/wp-json/wc/v3/payment_gateways/onepayus',{headers,timeout:30000});
+  const onepay=onepayResponse.ok()?await onepayResponse.json():null;
+  const paySettings=onepay?.settings||{};
+  const configured=(key)=>{
+   const value=paySettings?.[key]?.value;
+   return typeof value==='string' && value.trim().length>0;
+  };
+  let paymentOrigin=null;
+  try {
+   const urlValue=paySettings?.onepay_url?.value;
+   if(typeof urlValue==='string' && urlValue.trim()) {
+    const uri=new URL(urlValue);
+    paymentOrigin={protocol:uri.protocol,hostname:uri.hostname};
+   }
+  } catch {}
+  report.onepayReadiness={
+   http:onepayResponse.status(),enabled:onepay?.enabled??null,
+   merchant_id_configured:configured('merchant_id'),
+   access_code_configured:configured('merchant_access_code'),
+   secure_secret_configured:configured('secure_secret'),
+   payment_origin:paymentOrigin
+  };
+  report.checkoutWooSettings=advanced.filter(x=>[
+   'woocommerce_checkout_page_id','woocommerce_cart_page_id',
+   'woocommerce_myaccount_page_id','woocommerce_checkout_order_received_endpoint'
+  ].includes(String(x.id))).map(x=>({id:x.id,value:x.value}));
+
   // Inventory configured native WooCommerce shipping, never assume a flat
   // shipping fee or copy ESC.vn's logistics policies into Aqua.
   const shippingZones=await get('shipping-zones','/wp-json/wc/v3/shipping/zones?per_page=100');
