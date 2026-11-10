@@ -106,6 +106,30 @@ async function apiPost(path,body){
    calls_intercepted:intercepted.length,same_token:true,order_api_called:false
   });save();
 
+  // Create-account form follows the exact same checkout payload path, but
+  // Playwright intercepts the request BEFORE it reaches any Woo API.
+  // No WordPress customer, email or payment is created in this test.
+  await page.locator('#createaccount').check();
+  const passwordInput=page.locator('#account_password');
+  await passwordInput.waitFor({state:'visible',timeout:8000});
+  const fakePassword='QA_ONLY_example_password_123';
+  await passwordInput.fill(fakePassword);
+  const accountResponse=page.waitForResponse(res=>
+    res.url().includes('/api/cart/checkout') &&
+    res.request().method()==='POST',{timeout:15000});
+  await page.locator('#submit-checkout-btn').click();
+  await accountResponse;
+  assert.equal(intercepted.length,3,'Account checkbox should send exactly one checkout POST');
+  assert.equal(intercepted[2].create_account,true,'Account checkbox must be carried through checkout');
+  assert.equal(intercepted[2].account_password,fakePassword,'Account password must be carried only in POST');
+  assert.equal(intercepted[2].checkout_request_id,first.checkout_request_id,
+   'Account preference update must not create a new checkout attempt for the same cart');
+  assert.equal(intercepted[2].billing.email,fields.billing_email,'Account email must match billing email');
+  result.checks.push({
+    stage:'Account-creation checkout POST intercepted',status:'PASS',
+    created_accounts:0,password_sent_via_post:true,same_cart_token:true
+  });save();
+
   // Responsive checkout viewport: no form clipping or horizontal overflow.
   await page.setViewportSize({width:390,height:844});
   const formBox=await page.locator('#checkout-form').boundingBox();
