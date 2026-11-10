@@ -1,15 +1,15 @@
 {
   "project": "aquathanhxuan.com",
   "production": "https://aquathanhxuan.io.vn",
-  "build_sha": "2c1891795dda2b85af0903f19e4dc98b625c3950",
-  "build_run": 42806552098,
+  "build_sha": "272290ec59be5687ed88101422408d42a2f333bf",
+  "build_run": 42809711850,
   "no_orders": true,
   "no_cart_writes": true,
-  "attempt": 7,
+  "attempt": 8,
   "previous_failed_run": 42781432063,
-  "reason": "Verify production SSR cart/checkout/order-history and signed customer privacy after new confirmed order ownership linking deploy",
+  "reason": "Recheck cart, checkout, receipt and private order history after production cart/checkout HTML escaping update",
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
-  "source_qa_run": 42806360718,
-  "deploy_run": 42806700958
+  "source_qa_run": 42809623082,
+  "deploy_run": 42809847081
 }
