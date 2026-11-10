@@ -42,7 +42,8 @@ async function requestInfo(page,url){
    page.on('requestfailed',req=>failedRequests.push({url:req.url().slice(0,180),failure:req.failure()}));
    page.on('response',res=>{if(res.status()>=400&&httpErrors.length<18)httpErrors.push({status:res.status(),url:res.url().slice(0,180)})});
    const info=await requestInfo(page,PUBLIC+'/san-pham/'+SLUG);
-   output.public.push({width,...info,exceptions:exceptions.slice(0,12),failedRequests:failedRequests.slice(0,12),httpErrors:httpErrors.slice(0,18)});
+   const ssr=await requestInfo(page,PUBLIC+'/ssr/products/'+SLUG+'/detail?curUrl='+encodeURIComponent('/san-pham/'+SLUG));
+   output.public.push({width,...info,directSsr:ssr,exceptions:exceptions.slice(0,12),failedRequests:failedRequests.slice(0,12),httpErrors:httpErrors.slice(0,18)});
    await page.screenshot({path:DIR+'/public-'+width+'.png',fullPage:true,timeout:50000}).catch(()=>{});
    console.log('CUBIC40_PUBLIC='+JSON.stringify(output.public.at(-1)).slice(0,2800));
    await context.close();save();
@@ -83,6 +84,24 @@ async function requestInfo(page,url){
     })):[],error:!response.ok()?(await response.text()).slice(0,350):null};
    }catch(e){output.cms[key]={error:errorString(e)};}
   }
+
+  const rules=[];
+  for(let n=1;n<=20;n++){
+   const response=await admin.request.get(WP+'/wp-json/wp/v2/chuyen-huong-link?context=edit&status=any&per_page=100&page='+n,{headers,timeout:40000});
+   if(response.status()===400)break;
+   assert.equal(response.status(),200,'Native Rewrite pagination HTTP');
+   const rows=await response.json();
+   for(const row of rows){
+    const a=row.acf||{};
+    const from=String(a.from_link||'');
+    let match=false;
+    try{match=new RegExp(from).test('/san-pham/'+SLUG)}catch{}
+    if(match)rules.push({id:row.id,status:row.status,title:row.title?.rendered,from,to:a.to_link,
+      type:a.type,matchType:a.match_type,enable:a.enable});
+   }
+   if(rows.length<100)break;
+  }
+  output.cms.rewriteMatches=rules;
   await admin.close();
   output.status='DIAGNOSTIC_COMPLETE';save();
   console.log('CUBIC40_CMS='+JSON.stringify(output.cms).slice(0,5000));
