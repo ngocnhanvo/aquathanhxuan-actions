@@ -1,25 +1,19 @@
-# ChatGPT latest-response — aquathanhxuan.com
+# Aqua Thanh Xuân — continuation from previous conversation (2026-11-11)
 
-- Ngày: 2026-11-11 (Asia/Ho_Chi_Minh)
-- Project: aquathanhxuan.com
-- Astro production/master: `4a361f8c39077f820be5bf0f7d93ce421d67ad0f` (không thay đổi)
-- PHP production/master: `76bfe492e53c30cc3346d3154df4d4a56866d665` (không thay đổi)
-- Actions/main checkpoint update: `11514d9f0fd116bd39aa1902156d514af7d6e205`
-- Chế độ code: auto-build
-- Cổng ghi source: bypass
-- Trạng thái: PARTIAL — chưa hoàn tất
+Đã kiểm tra Knowledge, Astro/PHP master, Actions main, commit, workflow log và checkpoint, rồi tiếp tục công việc dở liên quan COD checkout và vận chuyển WooCommerce. Không lặp lại phạm vi 9 trang Visual Builder đã hoàn tất từ phiên trước.
 
-## Phản hồi gửi người dùng
+## Đã hoàn thành và xác minh
+- PHP master: `436a7ea571ec9db5e23b30e820e2d5248d51241f`. Sửa phase bật/tắt trong fixture kiểm thử báo giá vận chuyển, source QA [#42885613310](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42885613310) PASS. PHP production [#42886074121](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42886074121) PASS; `checkout_endpoint.php` được SHA-256 verified, không tự chạy build Astro.
+- Astro master: `089d05c6f9d0b49fa67d7801c9c7248edf2568b1`. Woo shipping quote và phương thức vận chuyển từ Woo; source QA [#42885078315](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42885078315) PASS. Source build sau CMS label [#42888057217](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42888057217), signed deployment [#42888200487](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42888200487) PASS.
+- Bổ sung sáu nhãn giao diện thật `shipping_title`, `shipping_loading`, `shipping_none`, `shipping_error`, `shipping_select`, `shipping_package` vào bảng native ESC `checkout_ui_vi`: 59 → 65 rows; giữ nguyên 59 nhãn gốc, REST readback PASS; CMS run [#42887729026](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42887729026).
+- Safe buyer browser regression [#42888566052](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42888566052) PASS: cart, checkout HTTP 200; ảnh, giá đã gồm VAT và coupon Woo 5%; COD-only; actual Woo shipping quote trả `enabled=false, required=false, packages=[]`; retry idempotency; mobile; guest history protected. Toàn bộ POST tạo order bị Playwright intercept, `created_orders=0`, test cart cleanup PASS.
+- Nine business/support Pages Visual Builder read-only regression [#42889046860](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42889046860) PASS: 9/9 Pages, các Preview states; 65/65 Checkout label options, chọn được physical row 64; row 58 draft/revert; không cho sửa `key`, không save dữ liệu thực.
+- Checkpoint cập nhật trong `docs/checkpoints/2026-11-11-cod-replay-and-shipping-readiness.md` (Actions main commit `4038ae96723b71b223cf60f382b948225cc83e4f`).
 
-Đã khôi phục đúng repo HEAD, workflow và checkpoint. Chín trang Visual Builder đã DONE, PHP COD empty-cart replay được deploy và fixture/Playwright QA đều PASS: #42879378090, #42879526175, #42879839001. Không triển khai lại thành phần đã PASS.
+## Phần còn dở
+WooCommerce production vẫn tắt vận chuyển (`woocommerce_ship_to_countries=disabled`), chưa có bảng cước và shipping zones được chủ cửa hàng chốt. Vì vậy chưa thể kiểm thử case báo giá thực có phí, các rate phù hợp vùng, hay nghiệp vụ tạo đơn COD thật kèm dòng vận chuyển/thuế/vận hành kho/gửi email. Không tự đặt phí, bật chính sách Woo, hay tạo đơn thật ở production khi chưa được phép.
 
-**Điểm còn dở:** Woo production hiện tắt shipping (`woocommerce_ship_to_countries=disabled`) và default shipping zone không có methods. Đọc trực tiếp `checkout_endpoint.php` xác nhận order đã lưu `set_shipping_*` địa chỉ nhưng không tạo `WC_Order_Item_Shipping` hay lưu phương thức/cước vận chuyển được chọn. Đây là khoảng trống triển khai, không đơn thuần là thiếu cấu hình.
-
-Đã cập nhật checkpoint [2026-11-11-cod-replay-and-shipping-readiness.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-11-cod-replay-and-shipping-readiness.md) với phần phân tích shipping và các tiêu chí cần làm tiếp. Commit tài liệu: [11514d9f](https://github.com/ngocnhanvo/aquathanhxuan-actions/commit/11514d9f0fd116bd39aa1902156d514af7d6e205). Không tạo đơn/khách hàng thật, ghi WordPress, build Astro hay deploy PHP mới.
-
-**Bước tiếp theo:** sau khi chủ sở hữu cung cấp chính sách phí vận chuyển, tích hợp rate lấy từ chính WooCommerce theo địa chỉ vào checkout, persist native shipping lines/taxes, test fixture + Playwright, triển khai theo workflow production hiện hữu và nghiệm thu một đơn COD thật được phê duyệt trong môi trường cho phép.
-
-**Blocker:** chính sách/phí vận chuyển chưa được quyết định và chưa có phê duyệt đơn COD QA thật tác động tồn kho/email. Không tự gán miễn phí/cước cố định hoặc tạo đơn production. Cần chủ sở hữu xác nhận chính sách vận chuyển và môi trường/tài khoản QA phù hợp.
+Hành động tiếp theo khi có chính sách: cấu hình phương thức và phí trong WordPress/WooCommerce theo quyết định chủ sở hữu, chạy QA read-only với báo giá enabled/rates, sau đó chỉ thực hiện test tạo đơn thật trên staging hoặc theo phê duyệt cụ thể và dọn record test đúng quy trình.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
