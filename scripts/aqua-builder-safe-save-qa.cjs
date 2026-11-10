@@ -82,7 +82,7 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        .includes('Đã lưu WordPress.'),null,{timeout:12000});
    }catch(error){
      audit.ui_feedback=String(await page.locator('#esc-vb-edit-feedback').textContent().catch(()=>'')).
-       replace(/\\s+/g,' ').slice(0,250);
+       replace(/\s+/g,' ').slice(0,250);
      record();
      throw Error('Editor did not acknowledge canonical Save');
    }
@@ -103,7 +103,7 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    }
    const newGrid=grid.map(row=>[...row]);
    newGrid[idx+2][1]=original;
-   const editNonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+   const editNonce=(await page.content()).match(/edit_table:\s*'([^']+)'/)?.[1];
    assert(editNonce,'Cannot read native TablePress editing nonce');
    const form=new URLSearchParams();
    for(const [key,value] of [
@@ -173,7 +173,7 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
          try{
            await write(marker,original);
          }catch(error){
-           audit.ui_restore_error=String(error?.message||error).split('\\n')[0].slice(0,180);
+           audit.ui_restore_error=String(error?.message||error).split('\n')[0].slice(0,180);
            record();
            await restoreNative();
          }
