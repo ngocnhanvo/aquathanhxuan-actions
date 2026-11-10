@@ -9,6 +9,6 @@
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "v4-detached-editing-support-and-history",
-  "previous_qa_run": 42858821722
+  "qa_revision": "v5-non-navigation-exact-physical-cell",
+  "previous_qa_run": 42864837415
 }
