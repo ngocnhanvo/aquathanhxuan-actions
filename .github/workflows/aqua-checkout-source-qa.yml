@@ -103,6 +103,22 @@ jobs:
           assert(form.includes('name="billing_state"')&&form.includes('name="billing_city"'),'Complete address fields');
           assert(form.includes('checkoutSubmitting'),'Duplicate submission blocked');
           assert(form.includes('checkout_request_id: checkoutToken.token'),'Checkout must send a persistent idempotency token');
+          const shippingQuote=fs.readFileSync('src/pages/api/cart/shipping-quote.ts','utf8');
+          const checkoutProxy=fs.readFileSync('src/pages/api/cart/checkout.ts','utf8');
+          const checkoutPage=fs.readFileSync(files[1],'utf8');
+          assert(shippingQuote.includes('namespace: "shipping-quote"') &&
+            shippingQuote.includes('encodeURIComponent(cartKey)') &&
+            shippingQuote.includes('cache: "no-store"'),
+            'Shipping quotes must use the buyer CoCart session and Woo checkout callback');
+          assert(form.includes('/api/cart/shipping-quote') && form.includes('shipping_methods: shippingRequired') &&
+            form.includes('shippingPackages.every') && form.includes('shippingAddress'),
+            'Checkout must use live Woo rates and require a method per shipping package');
+          assert(checkoutProxy.includes('shipping_methods') &&
+            checkoutProxy.includes('payment_method !== "cod"'),
+            'Checkout proxy must forward only method IDs and preserve COD-only policy');
+          assert(checkoutPage.includes('"shipping_title"') &&
+            checkoutPage.includes('"shipping_none"'),
+            'Shipping headings/messages must use editable native ESC Table labels');
           assert(cart.includes('renderCart();'),'Cart must render its initial state');
           assert(payment.includes('gateway?.enabled === true') && payment.includes('/payment_gateways/cod'),
             'Only the enabled native WooCommerce COD gateway is offered');
@@ -114,7 +130,6 @@ jobs:
             'Street address must appear before province and district');
           assert(!/name="billing_sodienthoai"[\\s\\S]*?required/.test(form.split('name="billing_sodienthoai"')[1]?.split('/>')[0] || ''),
             'Phone is optional');
-          const checkoutProxy=fs.readFileSync('src/pages/api/cart/checkout.ts','utf8');
           assert(!checkoutProxy.includes('!billing.phone') && checkoutProxy.includes('payment_method !== "cod"'),
             'Server checkout must accept empty phone and limit payment to COD');
           assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('data.order_id'),'Checkout requires confirmed Woo order');
