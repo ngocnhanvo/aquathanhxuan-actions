@@ -109,4 +109,4 @@ jobs:
           NODE
       - name: Existing cart product buttons regression
         working-directory: source-astro
-        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/wordpress/pages/ssrActionAudit.test.ts src/lib/utils/signedSession.test.ts src/lib/utils/orderHistoryApi.test.ts
+        run: pnpm exec vitest run src/astroreact/productCardCart.test.ts src/lib/wordpress/pages/ssrActionAudit.test.ts src/lib/utils/signedSession.test.ts src/lib/utils/orderHistoryApi.test.ts src/lib/utils/linkWooOrderCustomer.test.ts
