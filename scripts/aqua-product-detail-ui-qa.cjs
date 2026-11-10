@@ -227,6 +227,15 @@ async function run(){
     assert.equal(footerSticky.ariaHidden,'false','Sticky CTA hidden at footer '+slug+' '+width);
     assert(Math.abs(footerSticky.bottom-footerSticky.viewport)<=2,
       'Sticky CTA moved at footer '+slug+' '+width+' '+JSON.stringify(footerSticky));
+    const footerClearance=await page.evaluate(()=>{
+      const bar=document.getElementById('product-sticky-purchase').getBoundingClientRect();
+      const copyright=document.querySelector('[data-aqua-footer-copyright]').getBoundingClientRect();
+      const footer=document.getElementById('footer-contact');
+      return {gap:bar.top-copyright.bottom,footerMargin:parseFloat(getComputedStyle(footer).marginBottom),
+        barHeight:bar.height,copyrightBottom:copyright.bottom,stickyTop:bar.top};
+    });
+    assert(footerClearance.gap>=8 && footerClearance.footerMargin>=footerClearance.barHeight+8,
+      'Sticky CTA obscures footer copyright '+slug+' '+width+' '+JSON.stringify(footerClearance));
     console.log('PRODUCT_PURCHASE_STICKY_PASS='+JSON.stringify({slug,width,initialHidden:true,beforeOriginalHidden:true,afterOriginalVisible:true,stickyVisibleOnDescription:true,footerVisible:true,cartOneLine:true,delegatedClick:true}));
     assert.deepEqual(errors,[],'Browser errors '+slug);
     await ctx.close();
@@ -277,13 +286,22 @@ async function run(){
       'Reported route cart text wrap or overflow '+width+' '+JSON.stringify(geometry));
     assert(Math.abs(geometry.stickyBottom-geometry.viewportBottom)<=2&&geometry.footerVisible,
       'Reported route sticky bar must remain fixed over footer '+width+' '+JSON.stringify(geometry));
+    const footerClearance=await page.evaluate(()=>{
+      const bar=document.getElementById('product-sticky-purchase').getBoundingClientRect();
+      const copyright=document.querySelector('[data-aqua-footer-copyright]').getBoundingClientRect();
+      const footer=document.getElementById('footer-contact');
+      return {gap:bar.top-copyright.bottom,footerMargin:parseFloat(getComputedStyle(footer).marginBottom),
+        barHeight:bar.height,copyrightBottom:copyright.bottom,stickyTop:bar.top};
+    });
+    assert(footerClearance.gap>=8 && footerClearance.footerMargin>=footerClearance.barHeight+8,
+      'Reported route copyright obscured by fixed CTA '+width+' '+JSON.stringify(footerClearance));
     const horizontalOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
     assert(horizontalOverflow<=3,'Reported route horizontal overflow '+width+' '+horizontalOverflow);
     const screenshot='reported-sticky-1443750909-'+width+'.png';
     await page.screenshot({path:DIR+'/'+screenshot,fullPage:false});
     report.screenshots.push(screenshot);
-    report.directStickyRoute.push({width,url,geometry,horizontalOverflow,passed:true});
-    console.log('REPORTED_PRODUCT_STICKY_FOOTER_PASS='+JSON.stringify({width,geometry}));
+    report.directStickyRoute.push({width,url,geometry,footerClearance,horizontalOverflow,passed:true});
+    console.log('REPORTED_PRODUCT_STICKY_FOOTER_PASS='+JSON.stringify({width,geometry,footerClearance}));
    }finally{await context.close()}
   }
   report.status='QA_PASS';
