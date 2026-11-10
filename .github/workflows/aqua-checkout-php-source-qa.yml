@@ -41,4 +41,6 @@ jobs:
           php source-php/tests/aqua-checkout-order-contract.test.php
           php source-php/tests/aqua-onepay-return-safety.test.php
           php source-php/tests/aqua-onepay-context-loader.test.php
+          php -l source-php/wp-content/themes/vibe-code-theme/inc/user/login.php
+          php source-php/tests/aqua-customer-login-contract.test.php
           echo 'AQUA_PHP_CHECKOUT_SOURCE_QA=PASS no_real_orders=true'
