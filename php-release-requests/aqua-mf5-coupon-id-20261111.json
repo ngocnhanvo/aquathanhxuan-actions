@@ -1,0 +1,14 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "67fd85976a25f3bffdbe002355fc0f3fbadb7472",
+  "scope": "native_auto_coupon_mf5_stable_id_83818",
+  "coupon_id": 83818,
+  "reason": "Fix WooCommerce automatic coupon after change from aqua-auto-5 to MF5; code now resolves native coupon by stable ID with WordPress settings selection",
+  "preflight_qa_run": 42896508408,
+  "wordpress_coupon_audit_run": 42895498607,
+  "no_astro_build": true,
+  "no_orders": true
+}
