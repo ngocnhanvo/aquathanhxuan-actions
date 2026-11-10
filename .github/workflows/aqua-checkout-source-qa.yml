@@ -72,11 +72,11 @@ jobs:
           const history=fs.readFileSync(files[6],'utf8');
           assert(history.includes('const esc =') && history.includes('${esc(item.name)}'),'Order history must HTML-escape customer-originated content');
           const session=fs.readFileSync('src/lib/utils/user.ts','utf8');
-          const login=fs.readFileSync('src/pages/api/user/login.ts','utf8');
+          const loginApi=fs.readFileSync('src/pages/api/user/login.ts','utf8');
           const orders=fs.readFileSync('src/pages/api/user/order.ts','utf8');
           assert(session.includes('verifySignedUserSession') && !session.includes('JSON.parse(decoded)'),
             'All Astro authentication must reject unsigned cookies');
-          assert(login.includes('issueSignedUserSession'),
+          assert(loginApi.includes('issueSignedUserSession'),
             'A successful WordPress login must issue an HMAC-signed cookie');
           assert(!orders.includes('&search=') && orders.includes('customerId'),
             'Woo order history must be scoped to a verified numeric customer ID');
