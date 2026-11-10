@@ -3,10 +3,10 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "06d58e417dfbd62cbc471755a58c08e58428cfb6",
+  "source_sha": "3e00ba57d9adfb70d2c5f8658a63ac99f3314098",
   "php_release_run": 42771082969,
-  "attempt": 6,
-  "reason": "Ensure cart images, nonzero unit/line prices, tax-inclusive cart and checkout presentation",
+  "attempt": 7,
+  "reason": "COD-only checkout, simplified billing, optional phone and address field ordering",
   "purpose": "Compile Astro cart + checkout and rerun existing security/cart regression without creating orders",
   "previous_source_qa": 42809623082,
   "no_orders": true,
@@ -14,5 +14,6 @@
   "cms_history_page_run": 42796129841,
   "previous_source_qa_failure": 42797892376,
   "fixed_case": "Reject alternate base64url representation of HMAC signature",
-  "previous_production_build_failure": 42798682090
+  "previous_production_build_failure": 42798682090,
+  "php_source_sha": "cbaffc1831a40fc85fc829e0ad2d40025107bdeb"
 }
