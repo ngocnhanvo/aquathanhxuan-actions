@@ -1,0 +1,9 @@
+{
+  "project": "aquathanhxuan.com",
+  "mode": "READ_ONLY",
+  "target": "https://aquathanhxuan.io.vn/san-pham/combo-be-cubic-40-sieu-trong",
+  "source": "https://aquathanhxuan.com/san-pham/combo-be-cubic-40-sieu-trong/",
+  "wordpress": "https://admin.aquathanhxuan.io.vn",
+  "astroMaster": "b7c393a7cda3116f6ccff1316b7434b0eb4e4f99",
+  "scope": "Check public desktop/mobile DOM and error, original store Woo Product and target published Woo Product, identify mismatch before writing data or building"
+}
