@@ -194,7 +194,7 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
   // Playwright API failures append a request call-log with authenticated
   // Cookie/X-WP-Nonce headers. Do not persist those headers into artifacts,
   // workflow stdout or the public repository Actions history.
-  audit.error=String(e?.message||e).split('\\n')[0].slice(0,350);
+  audit.error=String(e?.message||e).split('\n')[0].slice(0,350);
   record();
   console.error('AQUA_BUILDER_NINE_PAGES_QA_FAIL '+audit.error);
   process.exitCode=1;
