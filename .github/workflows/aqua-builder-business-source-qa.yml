@@ -60,6 +60,9 @@ jobs:
           const preview=fs.readFileSync(files[0],'utf8');
           assert(preview.includes('getBusinessPreviewState') && preview.includes('esc-business-preview-state'));
           assert(preview.includes('<script is:inline>'),'State switch must run as inline DOM-ready script');
+          assert(preview.includes('id="esc-business-preview-toolbar" action={Astro.url.pathname} method="get"'));
+          assert(preview.includes('form.requestSubmit()') && preview.includes('type="submit"'));
+          console.log('AQUA_BUILDER_STATE_GET_FALLBACK_PASS');
           const cart=fs.readFileSync('src/astro/pages/CartPage.astro','utf8');
           const checkout=fs.readFileSync('src/astro/pages/CheckoutPage.astro','utf8');
           assert(cart.includes('readBusinessPageLabels') && cart.includes('cart_ui_'));
