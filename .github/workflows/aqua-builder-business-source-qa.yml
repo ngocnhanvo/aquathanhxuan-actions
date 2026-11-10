@@ -71,6 +71,11 @@ jobs:
           assert(preview.includes('picker.addEventListener("change", show)') && preview.includes('apply.addEventListener("click", show)'));
           assert(preview.includes('url.searchParams.set("vb_state", picker.value)'));
           assert(preview.includes("form-action 'none'"),'Builder form submission firewall must remain in place');
+          assert(preview.includes('verifiedDetachedEscCell'),'Business label click must be verified outside shortcode wrapper');
+          assert(preview.includes('loadedVersions[tableId]!==version') && preview.includes('discoveredTextFields[tableId]?.includes(field)'));
+          assert(preview.includes('detached.node.setAttribute("data-esc-builder-selected"'));
+          assert(preview.includes('source:"ESC Table"') && preview.includes('row:detached.row'));
+          console.log('AQUA_BUILDER_DETACHED_ESC_CELL_SOURCE_PASS');
           console.log('AQUA_BUILDER_SAFE_STATE_CONTROLS_PASS');
           const cart=fs.readFileSync('src/astro/pages/CartPage.astro','utf8');
           const checkout=fs.readFileSync('src/astro/pages/CheckoutPage.astro','utf8');
