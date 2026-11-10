@@ -106,6 +106,10 @@ const save=()=>fs.writeFileSync(PATH+'/report.json',JSON.stringify(report,null,2
    item.group=groups[0].slug;item.auto_apply=true;
    save();
   }
+  const groupsAdmin=await page.goto(ORIGIN+'/wp-admin/edit-tags.php?taxonomy=esc_coupon_group&post_type=shop_coupon',{waitUntil:'domcontentloaded',timeout:60000});
+  assert(groupsAdmin&&groupsAdmin.ok(),'WooCommerce coupon group management page unavailable');
+  assert(await page.locator('#tag-name').count()===1,'Coupon group admin create/edit form missing');
+  report.admin_group_page='PASS';
   report.status='PASS';save();
   console.log('AQUA_COUPON_GROUP_SETUP_PASS='+JSON.stringify(report));
  }finally{await browser.close();}
