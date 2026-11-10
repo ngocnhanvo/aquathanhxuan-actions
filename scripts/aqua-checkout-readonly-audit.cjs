@@ -123,6 +123,20 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
   }
 
 
+  // Confirm the actual WordPress authentication routes required by Astro.
+  // No credentials and no user data are sent to these endpoint probes.
+  const indexResponse=await page.request.get(URL+'/wp-json/',{timeout:30000});
+  const wpIndex=indexResponse.ok()?await indexResponse.json():{};
+  const routeIndex=wpIndex?.routes||{};
+  report.userAuthRoutes={index_http:indexResponse.status()};
+  for(const route of ['/custom/v1/login','/custom/v1/lost-password','/custom/v1/reset-password']){
+   const methods=routeIndex?.[route]?.methods;
+   report.userAuthRoutes[route]={
+     registered:Array.isArray(methods),
+     post_enabled:Array.isArray(methods)&&methods.includes('POST'),
+     methods:Array.isArray(methods)?methods.filter(m=>['GET','POST'].includes(m)):[]
+   };
+  }
   // Inventory configured native WooCommerce shipping, never assume a flat
   // shipping fee or copy ESC.vn's logistics policies into Aqua.
   const shippingZones=await get('shipping-zones','/wp-json/wc/v3/shipping/zones?per_page=100');
