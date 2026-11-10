@@ -9,6 +9,15 @@
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "v6-readonly-wp-retries-and-exact-cell",
-  "previous_qa_run": 42865720978
+  "qa_revision": "v7-php-editor-80-labels-and-exact-selection",
+  "previous_qa_run": 42866090559,
+  "php_release_run": 42867578142,
+  "expected_editable_label_counts": {
+    "order_history_vi": 38,
+    "cart_ui_vi": 20,
+    "checkout_ui_vi": 59,
+    "checkout_done_ui_vi": 34,
+    "lost_password_vi": 12,
+    "reset_password_vi": 20
+  }
 }
