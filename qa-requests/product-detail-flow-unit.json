@@ -1,7 +1,7 @@
 {
   "project": "aquathanhxuan.com",
-  "astro_sha": "99c476a7f3af13717f7294f23e39b31922ea3320",
+  "astro_sha": "b7c393a7cda3116f6ccff1316b7434b0eb4e4f99",
   "php_sha": "54a305357893461b1fc8256e899a424b90840a88",
-  "scope": "Product detail sticky CTA remains visible at footer, view cart label single line, purchase-handler preserved; Astro compiler + PHP REST and price/stock regression",
-  "attempt": 6
+  "scope": "Sticky purchase footer copyright unobstructed, dynamic measured footer reserve after CTA, no wrap, unchanged product commerce fields, scoped Astro compiler",
+  "attempt": 7
 }
