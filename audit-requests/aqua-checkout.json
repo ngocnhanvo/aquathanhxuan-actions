@@ -1,10 +1,10 @@
 {
-  "scope": "AQUA_READONLY_SSR_PAGE_CACHE_DIAGNOSTIC",
+  "scope": "AQUA_READ_ONLY_SHIPPING_CHECKOUT",
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
   "date": "2026-11-10",
-  "attempt": 3,
-  "reason": "Read-only verify exported Astro page-*.json and cms-common SSR routes after external/internal 404",
+  "attempt": 4,
+  "reason": "Read WooCommerce shipping zone/method configuration and cart-to-checkout SSR route readiness; no orders",
   "failed_qa_run": 42776753563
 }
