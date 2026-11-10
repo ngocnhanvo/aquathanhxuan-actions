@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "76bfe492e53c30cc3346d3154df4d4a56866d665",
-  "scope": "COD_EMPTY_CART_IDEMPOTENCY_SAFE_REPLAY",
-  "purpose": "Retest COD replay after preserving invalid checkout preflight precedence; offline fixtures, no FTP or orders",
+  "source_sha": "0b9e1f41feb62f783d5bdb118bb223bf3a0c4dca",
+  "scope": "NATIVE_WOO_SHIPPING_SERVER_CONTRACT",
+  "purpose": "Offline shipping selection/rates/lines regression plus existing COD idempotency fixtures; no FTP or orders",
   "production_order_creation": false,
   "no_real_orders": true,
   "previous_live_customer_run": 42802133987
