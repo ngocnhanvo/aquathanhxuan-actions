@@ -79,7 +79,7 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    record();
    try{
      await page.waitForFunction(()=>String(document.querySelector('#esc-vb-edit-feedback')?.textContent||'')
-       .includes('Đã lưu WordPress.'),null,{timeout:12000});
+       .includes('Đã lưu WordPress'),null,{timeout:12000});
    }catch(error){
      audit.ui_feedback=String(await page.locator('#esc-vb-edit-feedback').textContent().catch(()=>'')).
        replace(/\s+/g,' ').slice(0,250);
@@ -87,6 +87,13 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
      throw Error('Editor did not acknowledge canonical Save');
    }
    await expectLabel(after);
+   // The user edits the visible Page, so a Save is not accepted unless the
+   // verified native cell also reflects the committed value immediately.
+   const live=page.frameLocator('#esc-vb-frame')
+     .locator('[data-esc-source-type="esc_table"][data-esc-source-table="'+TABLE+'"]'+
+       '[data-esc-source-row="'+idx+'"][data-esc-source-field="label"]:visible').first();
+   await live.filter({hasText:after}).waitFor({state:'visible',timeout:12000});
+   assert.equal((await live.innerText()).trim(),after,'Live Builder label not updated after Save');
  };
  const restoreNative=async()=>{
    const current=await table();
