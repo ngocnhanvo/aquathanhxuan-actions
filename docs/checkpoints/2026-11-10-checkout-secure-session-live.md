@@ -55,6 +55,17 @@
 
 **Overall project status: PARTIAL — chưa hoàn tất**, despite the successfully deployed UI, HMAC auth and no-order QA. See earlier checkpoint `docs/checkpoints/2026-11-10-cart-to-checkout-audit.md`.
 
+## Tiếp tục: liên kết đơn Woo với khách Astro đã đăng nhập (10/11/2026)
+
+- Nguyên nhân phát hiện: `/api/cart/checkout` từ Astro đẩy sang CoCart bằng server-to-server, không mang WordPress browser auth; PHP `Checkout_Callback` chỉ nhận customer ID khi `is_user_logged_in()`. Kết quả có thể là `customer_id=0` cho buyer đã đăng nhập Astro HMAC; `/api/user/order` theo customer ID sẽ không thấy đơn. Đây là **rủi ro xác định bằng đối chiếu source**, chưa có sản phẩm thử tạo đơn thật để xác nhận hành vi production.
+- Astro `master` commit **`2c1891795dda2b85af0903f19e4dc98b625c3950`**: tạo `src/lib/utils/linkWooOrderCustomer.ts`; sau khi CoCart xác nhận Woo order ID/key, server đọc ID khách từ session HMAC đã xác thực, GET order qua Woo REST, kiểm tra `order_key` và `customer_id` trước khi PUT `customer_id` nếu đơn guest. Từ chối giành đơn đang thuộc user khác; không nhận customer ID do client khai báo; read-after-write và retry idempotent. Logged-in buyer không được đồng thời yêu cầu `create_account`. Guest checkout và coupon không đổi.
+- Added `src/lib/utils/linkWooOrderCustomer.test.ts` (7 fixture cases, no orders). [Source QA #42806360718](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42806360718) **SUCCESS**, Astro compiler PASS, **22/22 tests PASS**, không chứa `*.test.*` trong Astro route.
+- [WordPress production build #42806552098](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42806552098) **SUCCESS**: `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS commit=2c189179...`, header QA PASS. Downstream [Astro deploy #42806700958](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42806700958) **SUCCESS**, actual source SHA matched and signed FTP staging activation/rollback contract passed.
+- [Live route QA #42807110476](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42807110476) **SUCCESS**: 4 CMS SSR pages/routes `/cart`, `/checkout`, `/order-received`, `/lich-su-mua-hang` HTTP 200, anonymous and forged unsigned sessions `/api/user/order` HTTP 401; live Woo gateway `onepayus`; 0 created orders/cart items.
+- [Live browser Playwright #42807128609](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42807128609) **SUCCESS**: real Woo cart/checkout, idempotency request token, frontend validation and account-create form intercepted, OnePay only, mobile width 390px pass. `created_orders=0`, `created_accounts=0`, `AQUA_CART_CHECKOUT_CLEANUP=PASS`.
+- **Chưa E2E verified:** signed user + real newly created Woo order ownership (new code covered by fixture tests only); actual shipping rates/lines (Woo shipping disabled), BACS verified account (count zero), OnePay approved sandbox transaction and paid callback, stock/email/receipt, refunds. Không tạo đơn/thu tiền thật trong production để thử.
+- **Next:** owner-confirmed shipping policy and Woo configuration; only use BACS with verified WP bank recipients; use approved OnePay test merchant/sandbox and authorized dedicated buyer for true order→payment→stock/email→private history/receipt QA. Until then do not report full checkout E2E DONE. No source change planned without new grounded business info.
+
 Chế độ code: auto-build
 Cổng ghi source: bypass
 Trạng thái: PARTIAL — chưa hoàn tất
