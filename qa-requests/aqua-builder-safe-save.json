@@ -1,0 +1,18 @@
+{
+  "environment": "production",
+  "mode": "controlled-one-cell-reversible",
+  "project": "aquathanhxuan.com",
+  "page_id": 83810,
+  "table_id": "checkout_ui_vi",
+  "key": "demo_quantity",
+  "php_source_sha": "9328a023934c78e2054406fed0edb3c11a45fff9",
+  "php_release_run": 42867578142,
+  "read_only_nine_page_run": 42868615994,
+  "draft_qa_run": 42869519402,
+  "write_scope": "one preview-only label, then restore original via Visual Builder",
+  "no_customers": true,
+  "no_orders": true,
+  "no_email": true,
+  "no_payment": true,
+  "temporary_records": 0
+}
