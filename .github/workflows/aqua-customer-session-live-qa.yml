@@ -1,0 +1,38 @@
+name: Aqua temporary customer signed-session end-to-end (CLEANUP / NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-customer-session-live.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-customer-session-live-qa
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate QA script without creating accounts
+        run: node --check scripts/aqua-customer-session-live-qa.cjs
+      - name: Reuse preinstalled Playwright Chromium
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Create one synthetic buyer, assert access controls, clean up
+        run: node scripts/aqua-customer-session-live-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-customer-session-live-qa
+          path: artifacts/aqua-customer-session-qa
+          if-no-files-found: ignore
+          retention-days: 14
