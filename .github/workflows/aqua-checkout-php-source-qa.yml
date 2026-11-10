@@ -34,9 +34,11 @@ jobs:
         run: |
           set -euo pipefail
           php -l source-php/wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php
+          php -l source-php/wp-content/themes/vibe-code-theme/inc/checkout/index.php
           php -l source-php/tests/aqua-checkout-order-contract.test.php
           php source-php/tests/aqua-checkout-preflight.test.php
           php source-php/tests/aqua-checkout-idempotency.test.php
           php source-php/tests/aqua-checkout-order-contract.test.php
           php source-php/tests/aqua-onepay-return-safety.test.php
+          php source-php/tests/aqua-onepay-context-loader.test.php
           echo 'AQUA_PHP_CHECKOUT_SOURCE_QA=PASS no_real_orders=true'
