@@ -5,9 +5,9 @@
   "build_run": 42785546490,
   "no_orders": true,
   "no_cart_writes": true,
-  "attempt": 4,
+  "attempt": 5,
   "previous_failed_run": 42781432063,
-  "reason": "Read-only verify Woo account email history link route plus cart/checkout/order receipt and OnePay-only gateway",
+  "reason": "Discover published WordPress account OrderHistoryPage slug/key from cms-common before fixing Woo account email 404",
   "expected_bacs": false,
   "bacs_audit_run": 42783621660,
   "source_qa_run": 42794755129
