@@ -1,10 +1,10 @@
 {
-  "scope": "AQUA_READONLY_CART_CHECKOUT_ROUTE_DIAGNOSTIC",
+  "scope": "AQUA_READONLY_SSR_PAGE_CACHE_DIAGNOSTIC",
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
   "date": "2026-11-10",
-  "attempt": 2,
-  "reason": "Check exact external vs internal SSR cart checkout routes and WordPress rewrite records against ESC reference; read-only",
+  "attempt": 3,
+  "reason": "Read-only verify exported Astro page-*.json and cms-common SSR routes after external/internal 404",
   "failed_qa_run": 42776753563
 }
