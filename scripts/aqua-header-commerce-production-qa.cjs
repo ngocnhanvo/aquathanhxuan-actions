@@ -58,6 +58,21 @@ async function main() {
     const accountHref = await accountGuest.getAttribute('href');
     assert(accountHref && !accountHref.startsWith('http'), 'Account should stay on frontend');
     const accountResponse = await page.goto(new URL(accountHref,origin).href,{waitUntil:'domcontentloaded',timeout:45000});
+    if (!accountResponse || accountResponse.status() !== 200) {
+      console.log('ACCOUNT_ROUTE_DIAGNOSTIC path=' + new URL(accountHref,origin).pathname
+        + ' http_status=' + (accountResponse?.status() ?? 'NONE'));
+      for (const candidate of ['/lich-su-don-hang','/tai-khoan','/my-account','/order-history','/account','/don-hang','/cart']) {
+        const probe=await page.request.get(origin+candidate,{timeout:10000});
+        console.log('ACCOUNT_CANDIDATE_ROUTE ' + candidate + ' HTTP_' + probe.status());
+      }
+      const wpUrl='https://admin.aquathanhxuan.io.vn/wp-json/wp/v2/pages?per_page=100&_fields=id,slug,title,acf,status';
+      const wpRes=await page.request.get(wpUrl,{timeout:15000});
+      if (wpRes.ok()) {
+        const all=await wpRes.json();
+        const matches=all.filter(x=>/t[aà]i kho[aả]n|l[iị]ch s[uử]|order|account|đ[oơ]n h[aà]ng/i.test(x.slug+' '+x.title?.rendered+' '+x.acf?.key+' '+x.acf?.action));
+        console.log('WORDPRESS_ACCOUNT_PAGES=' + JSON.stringify(matches.map(x=>({id:x.id,slug:x.slug,title:x.title?.rendered,key:x.acf?.key,action:x.acf?.action})).slice(0,20)));
+      } else console.log('WORDPRESS_PUBLIC_PAGES_HTTP_'+wpRes.status());
+    }
     assert(accountResponse && accountResponse.status() === 200, 'Customer account route must be HTTP 200');
     await page.locator('#login-form-wrapper').waitFor({state:'visible',timeout:25000});
     await page.locator('#login-form').waitFor({state:'visible',timeout:10000});
