@@ -23,7 +23,25 @@ try {
   const page = await context.newPage();
 
   const loginUrl = new URL('/wp-login.php', wpUrl).toString();
-  await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+  // WordPress may intermittently stall on wp-login.php while ACF/Woo
+  // background requests run. Retry only navigation; do not bypass auth or
+  // trigger another build. Keep a hard finite retry bound.
+  let loginNavigationSucceeded = false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 35_000 });
+      loginNavigationSucceeded = true;
+      console.log('WORDPRESS_LOGIN_NAVIGATION=PASS attempt=' + attempt);
+      break;
+    } catch (error) {
+      console.log('WORDPRESS_LOGIN_NAVIGATION_RETRY attempt=' + attempt +
+        ' error=' + safeText(error?.message).slice(0, 130));
+      if (attempt < 3) await sleep(3_000);
+    }
+  }
+  if (!loginNavigationSucceeded) {
+    throw new Error('WORDPRESS_LOGIN_NAVIGATION_FAILED_AFTER_3_ATTEMPTS');
+  }
 
   if (await page.locator('#user_login').count()) {
     await page.locator('#user_login').fill(username);
