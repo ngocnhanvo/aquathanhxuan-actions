@@ -26,7 +26,8 @@ const LABELS=[
  ['phone_prefix','Gọi'],
  ['zalo_link','Trao đổi qua Zalo'],
  ['facebook_link','Facebook Aqua Thanh Xuân'],
- ['address_title','Địa chỉ liên hệ']
+ ['address_title','Địa chỉ liên hệ'],
+ ['section_eyebrow','Aqua Thanh Xuân']
 ];
 const expectedFields=['kind','title','description','lucide-icon'];
 const OUT='artifacts/aqua-support-shell';
