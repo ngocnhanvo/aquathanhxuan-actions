@@ -1,0 +1,9 @@
+{
+  "project": "aquathanhxuan.com",
+  "source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "dcfd03efeebb24b8912e3af7109666d129cf5fef",
+  "scope": "IN_MEMORY_GUEST_ONEPAY_ORDER_COUPON_NO_REAL_ORDERS",
+  "purpose": "Simulate successful checkout, verify real Woo coupon copying, billing and shipping address, gateway redirect, idempotent replay; no Woo DB writes",
+  "production_order_creation": false
+}
