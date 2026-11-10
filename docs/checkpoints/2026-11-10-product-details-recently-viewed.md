@@ -21,4 +21,13 @@
 - `scripts/aqua-product-detail-ui-qa.cjs` bổ sung kiểm tra end-to-end read-only: ở sản phẩm đầu empty state; mở sản phẩm thứ hai, xem sản phẩm đầu, không hiện sản phẩm hiện tại, có ảnh/tên/link, không tràn ngang desktop 1440/mobile 390; kiểm tra hồi quy 4 Woo Products cùng sticky/footer.
 - Bước tiếp: chờ `BUILD_SUCCESS/DEPLOY_READY` + deployment success exact SHA; cập nhật `qa-requests/product-detail-ui.json` và chạy public Playwright QA; chốt DONE chỉ khi result true.
 
-Trạng thái: PARTIAL — chưa hoàn tất
+## Kết quả production cuối cùng
+
+- WordPress wrapper production [#42761913327](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42761913327) **COMPLETED SUCCESS**: `SOURCE_SHA_VERIFIED=c465bc2eff875dfdbb65e802f86031fad3e91452`, `BUILD_SUCCESS=PASS`, `DEPLOY_READY=PASS` exact pinned SHA.
+- Downstream Astro deploy [#42762007229](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42762007229) **COMPLETED SUCCESS**, existing signed deployment/rollback pipeline.
+- Independent read-only Playwright [#42762366243](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42762366243) **COMPLETED SUCCESS** with `DETAIL_DEPLOY_READY` exact commit. Verified 1440px desktop and 390px mobile with real Product sequence Dennerle (target ID 82481) → Atman (target ID 82725): prior Product link `/san-pham/phan-nen-dennerle-scapers-soil-4lit` rendered, current Product excluded, first-page empty state, horizontal overflow 0. New marker `DETAIL_RECENTLY_VIEWED_PASS` emitted twice.
+- Existing regressions: 4 Woo Products × 2 viewports = 8/8 stock, price, CTA + footer checks, plus 2 reported sticky/footer direct URL checks. Total screenshots **24**; no failing QA steps.
+- Screenshot/report artifact [#13738750054](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42762366243/artifacts/13738750054), includes `recently-viewed-detail-1440.png` and `recently-viewed-detail-390.png`.
+- No PHP/WordPress changes. One Astro `master` source SHA, existing production pipeline only.
+
+**Trạng thái: DONE — hoàn tất**
