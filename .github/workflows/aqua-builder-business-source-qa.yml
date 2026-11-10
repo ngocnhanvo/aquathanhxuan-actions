@@ -70,6 +70,11 @@ jobs:
           assert(!infoForm.includes('mtlangCheckout'),'Checkout must use WordPress ESC labels');
           assert(infoForm.includes('cell("billing_title")') && infoForm.includes('cell("submit_button")'));
           console.log('AQUA_CHECKOUT_INFO_FORM_ESC_LABELS_PASS');
+          const receipt=fs.readFileSync('src/astro/pages/CheckoutDonePage.astro','utf8');
+          assert(receipt.includes('checkout_done_ui_') && receipt.includes('readBusinessPageLabels'));
+          assert(receipt.includes('cell(getStatusLabelKey(order.status))') && receipt.includes('cell(errorKey)'));
+          assert(!receipt.includes('mtlang'),'Receipt labels must come from native ESC');
+          console.log('AQUA_RECEIPT_ESC_LABELS_PASS');
           console.log('AQUA_COMMERCE_PAGE_LABELS_SOURCE_PASS');
           assert(source.includes('esc-builder-demo-not-a-real-cart'));
           assert(!source.includes('wp-json/wc/v3/orders'));
