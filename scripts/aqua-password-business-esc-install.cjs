@@ -157,10 +157,20 @@ const shortcode = t=>'[table id='+t.table+' /]';
     await page.waitForTimeout(1800);
     audit.writes.push('Insert Code Page '+t.id);save();
    }
-   const pageAfter=await rest('/wp-json/wp/v2/pages/'+t.id+'?context=edit');
-   assert.equal(pageAfter.status,200,'WordPress Page readback failed');
-   assert.equal(pageAfter.data.acf?.action,t.action);
-   const output=String(pageAfter.data.content?.raw||'');
+   let pageAfter;
+   let output='';
+   // WordPress page edits can be saved before its REST object cache invalidates.
+   // Re-query with a unique URL; never falsely report failed Insert Code or
+   // insert a duplicate while the native save is still propagating.
+   for(let attempt=0;attempt<7;attempt++){
+     pageAfter=await rest('/wp-json/wp/v2/pages/'+t.id+
+       '?context=edit&_esc_verify='+Date.now()+'_'+attempt);
+     assert.equal(pageAfter.status,200,'WordPress Page readback failed');
+     assert.equal(pageAfter.data.acf?.action,t.action);
+     output=String(pageAfter.data.content?.raw||'');
+     if(output.includes(shortcode(t)))break;
+     if(attempt<6)await page.waitForTimeout(2000);
+   }
    console.log('AQUA_PASSWORD_PAGE_READBACK='+JSON.stringify({
      id:t.id,shortcode:shortcode(t),rawSuffix:output.slice(-850),originalLength:raw.length,
      newLength:output.length,contains:output.includes(shortcode(t))
