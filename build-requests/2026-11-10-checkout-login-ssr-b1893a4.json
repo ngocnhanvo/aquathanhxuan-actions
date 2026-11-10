@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
+  "purpose": "Fix checkout SSR optional password-reset Page access (old route closed connection)",
+  "source_qa_run": 42781729566,
+  "previous_build_run": 42780443864
+}
