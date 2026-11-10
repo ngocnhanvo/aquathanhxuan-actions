@@ -77,6 +77,10 @@ jobs:
           assert(file.includes('id="product-sticky-purchase"'));
           assert(file.includes('stickyActionBtn?.addEventListener("click", () => mainActionBtn?.click())'),'Sticky CTA must delegate to existing cart handler');
           assert(file.includes('classList.toggle("product-sticky-visible", visible)'));
+          assert(file.includes('const visible = hasScrolledPastActions;'),'Sticky CTA must remain visible at footer after in-page actions');
+          assert(!file.includes('footerVisible'),'Do not hide fixed purchase bar when footer enters viewport');
+          assert(file.includes('sm:min-w-[390px] lg:min-w-[420px]'),'Sticky CTA button group must fit single-line cart copy');
+          assert(file.includes('id="sticky-add-to-cart-label" class="whitespace-nowrap"'),'Sticky add-to-cart label must not wrap');
           assert(file.includes('stockStatus === "outofstock"'));
           console.log('AQUA_PRODUCT_PURCHASE_STRUCTURE_PASS');
           JS
