@@ -3,12 +3,13 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "fa1fddbd4c7fefcf76f62e168bf11c8bc26b2ead",
+  "source_sha": "736c9936129c67fc169393044283c48f0d7886fe",
   "php_release_run": 42771082969,
   "attempt": 2,
   "previousRun": 42771343628,
   "reason": "Fix compiler import resolution in QA harness; no source or production changes",
-  "purpose": "Verify checkout token proxy, WordPress-only BACS bank readiness, SSR Cart and payment flow",
+  "purpose": "Compile restored WordPress OrderHistoryPage SSR, verify client HTML escaping, and regress checkout cart/payment/source and coupon tests",
   "previous_source_qa": 42783821992,
-  "no_orders": true
+  "no_orders": true,
+  "cms_page_run": 42796129841
 }
