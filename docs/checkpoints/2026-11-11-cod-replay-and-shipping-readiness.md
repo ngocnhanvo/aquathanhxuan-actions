@@ -68,3 +68,12 @@ Status: PARTIAL — real order/shipping acceptance remains open.
 - The WooCommerce production shipping policy is still disabled by latest read-only audit `#42878442799`; neither new code nor CMS label append enables methods or invents fees. A real COD order/stock/mail lifecycle acceptance still requires owner-approved shipping policy and explicitly authorized test buyer/order or isolated staging.
 
 Next action: verify #42888057217 and downstream production deploy result/source marker; trigger `qa-requests/aqua-checkout-browser-no-order.json` and inspect result. If browser QA fails, read the failed step and fix, not declare DONE. Retain safety boundary: no real COD orders or shipping policy change without owner approval.
+
+## Production checkout recovery and safe buyer QA — confirmed
+
+- Woo shipping UI CMS data fixed: native installer run `#42887729026` PASS with **65 Checkout UI labels** and all 59 earlier WordPress-edited labels preserved; no key renamed/overwritten. Its source script is now idempotent for already-extended 65-row table.
+- Required post-CMS Astro build `#42888057217` completed **SUCCESS**; signed Astro deploy `#42888200487` completed **SUCCESS** and `SIGNED_UNZIP_SUCCESS`. Source remains Astro master `089d05c6f9d0b49fa67d7801c9c7248edf2568b1`; PHP deployed source remains `436a7ea571ec9db5e23b30e820e2d5248d51241f` (only fixture commit after endpoint code).
+- Live buyer browser QA (after CMS+Astro redeploy) `#42888566052` **SUCCESS**. It exercised real temporary Woo cart, correct gross/VAT-inclusive product amount 2,700,000 VND, Woo coupon discount 135,000 VND, total 2,565,000 VND, cart and checkout HTTP 200, COD only, actual Woo quote `enabled=false, required=false, packages=[]`, network submit/retry with same token intercepted, create-account submit intercepted, mobile width 390, guest order-history privacy 401. Explicit result `created_orders=0`; `AQUA_CART_CHECKOUT_CLEANUP=PASS`.
+- Read-only 9-Page Visual Builder production QA now checks native Checkout labels count 65 (including selection of physical row 64) while retaining detached live draft/revert row 58. Run `#42889046860` was started after this patch; confirm final status and correct failures before claiming Visual Builder acceptance.
+
+**Still gated:** Woo production shipping policy remains disabled (read-only audit `#42878442799`), no approved shipping methods/rates; no authorized real COD order/stock/email/buyer receipt end-to-end test. These decisions cannot be invented. No real orders or customers were created by the tests in this continuation.
