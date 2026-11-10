@@ -16,6 +16,13 @@ const exact = ['custom/v1/lost-password', 'custom/v1/reset-password'];
     id:x.id,slug:x.slug,key:x.acf?.key,action:x.acf?.action,
     content_present:!!x.content?.rendered,status:x.status
   }))));
+  const infoRes=await fetch(WP+'/wp-json/wp/v2/thong-tin-chung?per_page=20&status=publish&_fields=id,acf'); 
+  assert(infoRes.ok,'WordPress public Info endpoint failed');
+  const info=await infoRes.json();
+  console.log('RECOVERY_PUBLIC_FRONTEND_DOMAINS='+JSON.stringify(info.map(x=>({
+    id:x.id,lang:x.acf?.product_lang?.value||x.acf?.product_lang||'vi',
+    domain:x.acf?.domain
+  }))));
   const wpRoutes = await fetch(WP+'/wp-json/');
   assert(wpRoutes.ok,'WordPress REST discovery HTTP '+wpRoutes.status);
   const routes = Object.keys((await wpRoutes.json()).routes||{});
