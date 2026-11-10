@@ -1,0 +1,37 @@
+name: Aqua native WooCommerce coupon (single campaign)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-native-coupon.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-checkout-cms-writes
+  cancel-in-progress: false
+jobs:
+  coupon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check coupon setup script
+        run: node --check scripts/aqua-native-coupon-setup.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Create or verify real WooCommerce coupon only, no orders
+        run: node scripts/aqua-native-coupon-setup.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-native-coupon
+          path: artifacts/aqua-native-coupon
+          retention-days: 14
+          if-no-files-found: ignore
