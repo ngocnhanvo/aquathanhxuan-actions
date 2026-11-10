@@ -16,6 +16,25 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    const r=await page.goto(FRONT+path,{waitUntil:'domcontentloaded',timeout:35000}).catch(e=>null);
    report.routes.push({path,status:r?.status()||0,url:page.url(),h1:await page.locator('h1').first().textContent().catch(()=>null)});
   }
+  // Diagnose whether the compiled SSR route pages are present in runtime's
+  // published WordPress Page cache. This is read-only and contains no cart data.
+  report.ssrPageCache={};
+  const baseline=await page.request.get(FRONT+'/data/cms-common.json',{timeout:25000,headers:{'Cache-Control':'no-cache'}});
+  report.ssrPageCache.commonHttp=baseline.status();
+  if(baseline.ok()){
+   const json=await baseline.json().catch(()=>null);
+   const rows=Array.isArray(json?.pages)?json.pages:[];
+   report.ssrPageCache.keys=rows.filter(x=>['ssr-cart','ssr-checkout','ssr-checkoutdone'].includes(x.key))
+    .map(x=>({id:x.id,key:x.key,slug:x.slug,action:x.action}));
+  }
+  report.ssrPageCache.files=[];
+  for(const slug of ['cart','checkout','order-received']){
+   const resp=await page.request.get(FRONT+'/data/page-'+slug+'.json',{timeout:25000,headers:{'Cache-Control':'no-cache'}});
+   const row={slug,http:resp.status(),key:null,action:null};
+   if(resp.ok()){const json=await resp.json().catch(()=>null);row.key=json?.key||null;row.action=json?.action||null;}
+   report.ssrPageCache.files.push(row);
+  }
+  save();
   await page.goto(URL+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:40000});
   if(await page.locator('#user_login').count()){
    assert(process.env.WP_ADMIN_USERNAME&&process.env.WP_ADMIN_PASSWORD,'WP secrets missing');
