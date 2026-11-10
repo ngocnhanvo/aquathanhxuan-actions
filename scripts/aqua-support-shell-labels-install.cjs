@@ -1,6 +1,7 @@
 'use strict';
 // WRITE_SCOPE: append 'shell' label rows only to these three existing native ESC
-// Tables: support_contact, support_complaint and support_dealer. Never write
+// Tables: support_contact, support_complaint, support_dealer, support_policy,
+// support_about. Never write
 // WordPress Pages, customers, orders, coupons, payment methods, or other Tables.
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -9,7 +10,9 @@ const WP='https://admin.aquathanhxuan.io.vn';
 const TARGETS=[
  {id:82718,table:'support_contact',slug:'lien-he'},
  {id:82716,table:'support_complaint',slug:'khieu-nai'},
- {id:82714,table:'support_dealer',slug:'dai-ly'}
+ {id:82714,table:'support_dealer',slug:'dai-ly'},
+ {id:82710,table:'support_policy',slug:'chinh-sach-doi-tra-hang'},
+ {id:82712,table:'support_about',slug:'gioi-thieu'}
 ];
 const LABELS=[
  ['breadcrumb_home','Trang chủ'],
