@@ -1,10 +1,11 @@
 {
-  "scope": "AQUA_READ_ONLY_SHIPPING_CHECKOUT",
+  "scope": "AQUA_POST_DEPLOY_CHECKOUT_ROUTES_READ_ONLY",
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
   "date": "2026-11-10",
-  "attempt": 4,
-  "reason": "Read WooCommerce shipping zone/method configuration and cart-to-checkout SSR route readiness; no orders",
-  "failed_qa_run": 42776753563
+  "attempt": 5,
+  "reason": "Verify three WordPress SSR Page caches and public cart/checkout/order-received routes after source 5270637 production deploy run 42780443864",
+  "failed_qa_run": 42776753563,
+  "deploy_run": 42780443864
 }
