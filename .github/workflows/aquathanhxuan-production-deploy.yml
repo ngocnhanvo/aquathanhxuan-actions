@@ -127,31 +127,23 @@ jobs:
           key: aquathanhxuan-prod-dot-cache-v2-${{ runner.os }}-${{ github.run_id }}
           restore-keys: |
             aquathanhxuan-prod-dot-cache-v2-${{ runner.os }}-
-      - name: Build Astro Production (incremental WordPress data cache)
+      # A separate GitHub Actions step for each potentially blocking process.
+      # FTPS installation is now sequential, not an invisible background wait.
+      - name: Install locked Astro dependencies
+        timeout-minutes: 12
         shell: bash
         working-directory: source
         run: |
           set -euo pipefail
-          # Fresh GitHub runners install lftp on every run. Start that install
-          # alongside pnpm/Astro rather than serializing it after packaging.
-          # Deployment remains blocked until install succeeds and lftp exists.
-          ftps_install_pid=""
-          if ! command -v lftp >/dev/null 2>&1; then
-            (
-              # Keep apt work independent, but do not let an unavailable mirror
-              # hold the production build step for the whole 45-minute job.
-              timeout --signal=TERM --kill-after=15s 600s bash -c '
-                sudo apt-get update -qq
-                sudo apt-get install -y -qq --no-install-recommends lftp
-              '
-            ) > "$RUNNER_TEMP/aquathanhxuan-lftp-install.log" 2>&1 &
-            ftps_install_pid=$!
-          fi
-          # Restore verified pnpm store where available; recreate dependencies
-          # from the exact lockfile on every run. Cache miss is still safe.
           echo "AQUA_BUILD_STAGE=DEPENDENCIES_START $(date -u +%FT%TZ)"
-          pnpm install --frozen-lockfile --prefer-offline
+          timeout --signal=TERM --kill-after=15s 660s pnpm install --frozen-lockfile --prefer-offline
           echo "AQUA_BUILD_STAGE=DEPENDENCIES_EXIT $(date -u +%FT%TZ)"
+      - name: Prepare canonical WordPress build environment
+        timeout-minutes: 3
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
           python3 - <<'PY'
           import os,re
           kept=[]
@@ -165,32 +157,44 @@ jobs:
           with open('.env','w',encoding='utf8') as out:
               out.write('\n'.join(kept).rstrip()+'\n')
           PY
-          # Keep original Astro build settings, but pin project identity URLs.
-          # Unit tests run separately in non-deploy CI, not in every build.
+          echo "AQUA_BUILD_STAGE=CANONICAL_ENV_READY $(date -u +%FT%TZ)"
+      - name: Build Astro Production (incremental WordPress data cache)
+        timeout-minutes: 22
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
           echo "AQUA_BUILD_STAGE=ASTRO_START $(date -u +%FT%TZ)"
-          # The Astro CLI can print Complete! while a Node open handle is
-          # still alive. Bound this wait so failures are actionable, not silent.
+          # An open Node handle can remain after Astro prints Complete!.
           timeout --signal=TERM --kill-after=15s 1200s pnpm run build-git
           echo "AQUA_BUILD_STAGE=ASTRO_PROCESS_EXIT $(date -u +%FT%TZ)"
+      - name: Validate compiled Astro dist output
+        timeout-minutes: 3
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
           node --check dist/server/entry.mjs
           test -s dist/client/index.html
           test -s dist/server/entry.mjs
-          # Generic SSR entrypoint is mandatory.
-          test -s dist/server/entry.mjs
           echo "AQUA_BUILD_STAGE=DIST_CHECKS_PASS $(date -u +%FT%TZ)"
-          if [[ -n "$ftps_install_pid" ]]; then
-            echo "AQUA_BUILD_STAGE=FTPS_INSTALL_WAIT_START $(date -u +%FT%TZ)"
-            if ! wait "$ftps_install_pid"; then
-              cat "$RUNNER_TEMP/aquathanhxuan-lftp-install.log"
-              echo "::error::Unable to prepare encrypted FTPS client"
-              exit 1
-            fi
-            echo "AQUA_BUILD_STAGE=FTPS_INSTALL_WAIT_EXIT $(date -u +%FT%TZ)"
+          echo "Build source SHA: $(git rev-parse HEAD) (master)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Install encrypted FTPS client
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "AQUA_BUILD_STAGE=FTPS_INSTALL_START $(date -u +%FT%TZ)"
+          if ! command -v lftp >/dev/null 2>&1; then
+            timeout --signal=TERM --kill-after=15s 600s bash -c '
+              sudo apt-get update -qq
+              sudo apt-get install -y -qq --no-install-recommends lftp
+            '
           fi
           command -v lftp >/dev/null 2>&1 || { echo "::error::Missing encrypted FTPS client"; exit 1; }
-          echo "AQUA_BUILD_STAGE=BUILD_STEP_READY $(date -u +%FT%TZ)"
-          echo "Build source SHA: $(git rev-parse HEAD) (master)" >> "$GITHUB_STEP_SUMMARY"
-      - name: Package only compiled staging output (strictly no .env)
+          echo "AQUA_BUILD_STAGE=FTPS_INSTALL_EXIT $(date -u +%FT%TZ)"
+      - name: Prepare staging files and SEO metadata (strictly no .env)
+        timeout-minutes: 6
         shell: bash
         working-directory: source
         run: |
@@ -269,15 +273,36 @@ jobs:
           test ! -e deploy/.env
           test -s deploy/server/entry.mjs
           test -s deploy/client/index.html
+          echo "AQUA_BUILD_STAGE=PREPARE_STAGING_FILES_AND_SEO_METADATA_STRICTLY_NO_ENV__PASS $(date -u +%FT%TZ)"
+      - name: Compute signed reusable image/static deltas
+        timeout-minutes: 8
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
           # Image and public static reuse only remove bytes from the ZIP
           # after a signed PHP inventory proves both hash and size unchanged.
           # server/ SSR, index.html and SEO files remain in every release.
           # PHP restores every reused byte into verified staging BEFORE swap.
           python3 ../actions-hub/scripts/aquathanhxuan-image-delta-package.py
           python3 ../actions-hub/scripts/aquathanhxuan-static-delta-package.py
+          echo "AQUA_BUILD_STAGE=COMPUTE_SIGNED_REUSABLE_IMAGE_STATIC_DELTAS_PASS $(date -u +%FT%TZ)"
+      - name: Create compiled staging ZIP
+        timeout-minutes: 8
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
           cd deploy
           zip -q -r ../upload/aquathanhxuan-astro.zip .
           cd ..
+          echo "AQUA_BUILD_STAGE=CREATE_COMPILED_STAGING_ZIP_PASS $(date -u +%FT%TZ)"
+      - name: Verify staging ZIP security and source provenance
+        timeout-minutes: 3
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
           python3 - <<'PY'
           import json
           import os
@@ -328,6 +353,7 @@ jobs:
                   raise RuntimeError('Root/client provenance markers differ')
           print('PASS: ZIP contains dev server/client and provenance, no private environment file.')
           PY
+          echo "AQUA_BUILD_STAGE=VERIFY_STAGING_ZIP_SECURITY_AND_SOURCE_PROVENANCE_PASS $(date -u +%FT%TZ)"
       - name: Upload compiled staging archive by FTP-TLS
         shell: bash
         run: bash actions-hub/scripts/aquathanhxuan-resumable-ftp.sh
