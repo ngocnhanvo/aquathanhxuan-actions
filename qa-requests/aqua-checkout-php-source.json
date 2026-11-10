@@ -2,8 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "dcfd03efeebb24b8912e3af7109666d129cf5fef",
-  "scope": "IN_MEMORY_GUEST_ONEPAY_ORDER_COUPON_NO_REAL_ORDERS",
-  "purpose": "Simulate successful checkout, verify real Woo coupon copying, billing and shipping address, gateway redirect, idempotent replay; no Woo DB writes",
-  "production_order_creation": false
+  "source_sha": "12fba84d1b4daa44181aa9cc7ad7c17200f10afd",
+  "scope": "IN_MEMORY_ONEPAY_CALLBACK_HMAC_ORDER_AMOUNT_AND_GUEST_CHECKOUT",
+  "purpose": "Verify signature/order/amount binding, no payment status mutation on invalid return, no double processing, paid-only Astro receipt, and existing guest checkout test",
+  "production_order_creation": false,
+  "no_real_orders": true
 }
