@@ -1,0 +1,126 @@
+'use strict';
+// READ ONLY: inspect live native ESC Tables and Builder states. No saving, orders,
+// passwords, email requests, customer sessions, coupons, gateways or CMS writes.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {chromium}=require('playwright');
+const WP='https://admin.aquathanhxuan.io.vn';
+const FRONT='https://aquathanhxuan.io.vn';
+const OUT='artifacts/aqua-business-pages-builder';
+const pages=[
+ {id:83821,table:'order_history_vi',count:38,slug:'lich-su-mua-hang',states:['orders','empty','guest','loading','error']},
+ {id:83808,table:'cart_ui_vi',count:20,slug:'cart',states:['items','empty']},
+ {id:83810,table:'checkout_ui_vi',count:59,slug:'checkout',states:['guest','account']},
+ {id:83812,table:'checkout_done_ui_vi',count:34,slug:'order-received',states:['success','error']},
+ {id:83827,table:'lost_password_vi',count:12,slug:'quen-mat-khau',states:['form','success','error']},
+ {id:83829,table:'reset_password_vi',count:20,slug:'dat-lai-mat-khau',states:['form','invalid','success']},
+ {id:82718,table:'support_contact',slug:'lien-he',states:[]},
+ {id:82716,table:'support_complaint',slug:'khieu-nai',states:[]},
+ {id:82714,table:'support_dealer',slug:'dai-ly',states:[]}
+];
+fs.mkdirSync(OUT,{recursive:true});
+const audit={result:'STARTED',pages:[],blockedWrites:[]};
+const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2)+'\n');
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ try{
+   const page=await browser.newPage({viewport:{width:1440,height:900}});
+   const unsafe=[];
+   page.on('request',r=>{
+     const method=r.method(),path=new URL(r.url()).pathname;
+     if(method!=='GET' && /\/api\/(?:cart\/(?:checkout|add|del|update)|user\/(?:lostpass|resetpass|login)|agent\/chat)/.test(path)) {
+       unsafe.push({method,path});
+       // An accidental mutation must be caught in the report; this runner never
+       // sends user credentials/order input into the protected forms.
+     }
+   });
+   await page.goto(WP+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:60000});
+   if(await page.locator('#user_login').count()){
+     assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD,'WP secrets missing');
+     await page.locator('#user_login').fill(process.env.WP_ADMIN_USERNAME);
+     await page.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
+     await page.locator('#wp-submit').click();
+   }
+   await page.waitForURL(u=>u.pathname.startsWith('/wp-admin/'),{timeout:50000});
+   const nonceResponse=await page.request.get(WP+'/wp-admin/admin-ajax.php?action=rest-nonce');
+   assert.equal(nonceResponse.status(),200,'No WP REST nonce');
+   const headers={'X-WP-Nonce':(await nonceResponse.text()).trim()};
+   const markerResponse=await page.request.get(FRONT+'/aquathanhxuan-staging-build.json?business_qa='+Date.now());
+   assert.equal(markerResponse.status(),200,'Production marker unavailable');
+   const marker=await markerResponse.json();
+   assert.equal(marker.commit,'236a6c5fe84aab844eea4411cf49913b73ea6887','Wrong production Astro source');
+   for(const p of pages){
+     const wpRes=await page.request.get(WP+'/wp-json/wp/v2/pages/'+p.id+'?context=edit&_qa='+Date.now(),
+       {headers,timeout:40000});
+     assert.equal(wpRes.status(),200,'Missing WordPress Page '+p.slug);
+     const wpPage=await wpRes.json();
+     assert.equal(wpPage.slug,p.slug,'Page slug changed: '+p.slug);
+     assert.equal(wpPage.status,'publish','Unpublished Page: '+p.slug);
+     const tableRes=await page.request.get(WP+'/wp-json/tablepress/v1/table/'+p.table+'?_qa='+Date.now(),
+       {headers,timeout:40000});
+     assert.equal(tableRes.status(),200,'Native ESC Table unavailable '+p.table);
+     const table=await tableRes.json();
+     if(p.count){
+       assert.equal(table.items?.length,p.count,'Label row count mismatch '+p.table);
+       assert(table.items.every(item=>String(item.key||'').trim()&&String(item.label||'').trim()),
+         'Uneditable/blank UI labels: '+p.table);
+     }else{
+       assert(Array.isArray(table.items)&&table.items.length>=6,'Support Table has no content '+p.table);
+     }
+     const raw=String(wpPage.content?.raw||'');
+     assert(raw.includes('[table id='+p.table+' /]'),'Page missing native Insert Code '+p.slug);
+     await page.goto(WP+'/wp-admin/edit.php?post_type=page&page=esc-visual-builder&esc_vb_page='+p.id,
+       {waitUntil:'domcontentloaded',timeout:65000});
+     const frame=page.frameLocator('#esc-vb-frame');
+     if(p.states.length){
+       await frame.locator('#esc-business-preview-state').waitFor({state:'visible',timeout:70000});
+       const states=await frame.locator('#esc-business-preview-state option')
+          .evaluateAll(nodes=>nodes.map(x=>x.value));
+       assert.deepEqual(states,p.states,'Incorrect Builder states '+p.slug);
+       for(const state of p.states){
+         if(await frame.locator('#esc-business-preview-state').inputValue()!==state){
+           await frame.locator('#esc-business-preview-state').selectOption(state);
+         }
+         await frame.locator('#esc-business-preview-state').waitFor({state:'visible',timeout:70000});
+         await frame.locator('#esc-business-preview-state')
+           .evaluate((el,value)=>{if(el.value!==value)throw Error('Preview state mismatch: '+value)},state);
+         const vb=await frame.locator('#esc-business-preview-state')
+           .evaluate(()=>new URLSearchParams(location.search).get('vb_state'));
+         if(state!==p.states[0])assert.equal(vb,state,'Preview state navigation failed '+p.slug+':'+state);
+         const cell=frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-field="label"]:visible').first();
+         await cell.waitFor({state:'visible',timeout:25000});
+         const source=await cell.evaluate(el=>({
+           table:el.getAttribute('data-esc-source-table'),
+           version:el.getAttribute('data-esc-rendered-version'),
+           row:el.getAttribute('data-esc-source-row'),
+           field:el.getAttribute('data-esc-source-field')
+         }));
+         assert.equal(source.table,p.table);
+         assert.match(source.version||'',/^[a-f0-9]{64}$/,'No live Table version '+p.table);
+         assert.match(source.row||'',/^\d+$/);
+         assert.equal(source.field,'label');
+         console.log('AQUA_BUSINESS_STATE_PASS='+p.slug+':'+state);
+       }
+     }else{
+       await frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible')
+         .first().waitFor({state:'visible',timeout:65000});
+       assert.equal(await frame.locator('#esc-business-preview-state').count(),0,
+         'Ordinary Support Page must use production-like Preview');
+     }
+     const target=frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible').first();
+     await target.click();
+     // A selected physical cell must be resolvable in the existing Visual Builder.
+     await page.waitForFunction(()=>Boolean(document.querySelector('#esc-vb-edit-row option:checked')),
+       null,{timeout:22000});
+     audit.pages.push({slug:p.slug,page_id:p.id,table:p.table,states:p.states.length,coordinate:true});
+     record();
+     console.log('AQUA_BUILDER_PAGE_PASS='+p.slug);
+   }
+   assert.deepEqual(unsafe,[],'Visual Builder attempted mutations: '+JSON.stringify(unsafe));
+   audit.blockedWrites=unsafe;
+   audit.result='PASS';
+   record();
+   console.log('AQUA_BUILDER_NINE_PAGES_QA_PASS pages=9 readonly=true');
+ }finally{await browser.close();}
+})().catch(e=>{audit.result='FAIL';audit.error=String(e.stack||e).slice(0,1500);record();
+ console.error('AQUA_BUILDER_NINE_PAGES_QA_FAIL '+audit.error);process.exitCode=1;});
