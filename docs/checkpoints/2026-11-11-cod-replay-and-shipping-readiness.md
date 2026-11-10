@@ -53,4 +53,18 @@ Code mode: auto-build; source gateway: bypass
 
 Next safe action once prerequisites are available: configure actual shipping policy in Woo with owner-approved data and run one authorized COD test order with idempotency token, linked account, receipt and stock/email/clean rollback. **Never silently create an order or fake bank/shipping data.**
 
-Status: PARTIAL — real order/shipping acceptance remains open. 
+Status: PARTIAL — real order/shipping acceptance remains open.
+
+## Continuation — verified 2026-11-11 02:xx (Asia/Ho_Chi_Minh)
+
+- Actual new source since previous checkpoint: Astro master `089d05c6f9d0b49fa67d7801c9c7248edf2568b1` includes live Woo shipping quote proxy, rate choice and SSR ESC labels; PHP master prior `58f8fde2` includes `WC_Order_Item_Shipping` and server-side per-destination rate verification.
+- PHP source regression `#42884934241` failed because OFFLINE fixture initialized shipping disabled then asserted an enabled shipping quote. Fixture fixed (enabled quote first, disabled legacy scenario second and fixture counters reset) as PHP commit `436a7ea571ec9db5e23b30e820e2d5248d51241f`. Exact source QA `#42885613310` **SUCCESS**. Astro source QA `#42885078315` **SUCCESS**.
+- PHP production release `#42886074121` **SUCCESS**, `checkout_endpoint.php sha256_verified=PASS`, `files_checked=21`, `no_astro_build=PASS`. No real buyer/order records created.
+- First Astro production deployment `#42886734754` **SUCCESS** at source `089d05c6`, WordPress build orchestration `#42886550983` **SUCCESS**. This alone does **not** pass buyer checkout QA.
+- Critical missing CMS labels surfaced during SSR audit: `readBusinessPageLabels()` strictly requires new 6 keys `shipping_title/shipping_loading/shipping_none/shipping_error/shipping_select/shipping_package`; the installed native `checkout_ui_vi` originally had 59 keys. The existing CMS installer now safely appends ONLY these six if exact 59-row prefix matches, preserves every previous key/label and checks REST readback. Native CMS run `#42887729026` **SUCCESS**: `AQUA_CHECKOUT_SHIPPING_ESC_APPEND_PASS added=6 preserved=59`, checkout rows=65, cart=20, receipt=34. No other CMS writes in this append.
+- Initial new Playwright no-real-order run `#42887181154` failed at checkout navigation `net::ERR_HTTP2_PROTOCOL_ERROR` *before* exercising new shipping quote, consistent with missing required runtime ESC labels; this is a test failure and must not be called QA PASS. Its temporary Woo cart cleanup passed.
+- A new source-pinned WordPress production build `#42888057217` has been requested **after** the native CMS label append; at this checkpoint it is in progress. Verify downstream signed Astro deployment and exact source marker before rerunning buyer browser QA.
+- The existing no-order Playwright script now validates live `/api/cart/shipping-quote` response and selected Woo rate IDs; it intercepts **all** order submission POSTs. Re-trigger only after the CMS-label rebuild is DEPLOY_READY; inspect logs and cleanup.
+- The WooCommerce production shipping policy is still disabled by latest read-only audit `#42878442799`; neither new code nor CMS label append enables methods or invents fees. A real COD order/stock/mail lifecycle acceptance still requires owner-approved shipping policy and explicitly authorized test buyer/order or isolated staging.
+
+Next action: verify #42888057217 and downstream production deploy result/source marker; trigger `qa-requests/aqua-checkout-browser-no-order.json` and inspect result. If browser QA fails, read the failed step and fix, not declare DONE. Retain safety boundary: no real COD orders or shipping policy change without owner approval.
