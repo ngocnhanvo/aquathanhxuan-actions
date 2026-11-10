@@ -10,7 +10,7 @@ fs.mkdirSync(evidence, { recursive: true });
 
 async function verifyCart(page, scope) {
   const links = page.locator('.js-cart-navigation');
-  await links.first().waitFor();
+  await links.first().waitFor({state:'attached'});
   const count = await links.count();
   assert(count >= 2, 'Expected shared header and mobile menu cart controls');
   await page.evaluate(() => {
@@ -114,7 +114,7 @@ async function main() {
     const mobResponse=await mobilePage.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:45000});
     assert(mobResponse && mobResponse.ok(),'Mobile homepage must load');
     await verifyCart(mobilePage,'mobile');
-    await mobilePage.locator('#header-brandbar .js-user-account-container .js-account-guest').first().waitFor({state:'visible'});
+    await mobilePage.locator('#header-brandbar .js-user-account-container .js-account-guest:visible').first().waitFor({state:'visible'});
     await mobilePage.screenshot({path:evidence+'/mobile-home.png',fullPage:false});
     console.log('MOBILE_ACCOUNT_AND_CART_PASS');
     await mobile.close();
