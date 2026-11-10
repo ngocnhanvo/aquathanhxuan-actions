@@ -217,9 +217,8 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        await editor.fill(initial+' [NHÁP QA]');
        await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===false,
          null,{timeout:12000});
-       await live.getByText(initial+' [NHÁP QA]',{exact:true}).waitFor({state:'visible',timeout:14000}).catch(async()=>{
-         assert.equal((await live.innerText()).trim(),initial+' [NHÁP QA]','Detached preview did not render WordPress label draft');
-       });
+       await live.filter({hasText:initial+' [NHÁP QA]'}).waitFor({state:'visible',timeout:14000});
+       assert.equal((await live.innerText()).trim(),initial+' [NHÁP QA]','Detached preview did not render WordPress label draft');
        await editor.fill(initial);
        await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===true,
          null,{timeout:12000});
