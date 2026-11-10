@@ -1,6 +1,6 @@
 'use strict';
-// WRITE_SCOPE: only lost_commerce_vi/reset_commerce_vi native ESC Tables and
-// WordPress Pages #83827/#83829. No order, customer, mail, coupon or commerce mutations.
+// WRITE_SCOPE: only cart_ui_vi/checkout_ui_vi/checkout_done_ui_vi native ESC Tables and
+// WordPress Pages #83808/#83810/#83812. No Woo order, customer, coupon, gateway or payment mutations.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { chromium } = require('playwright');
@@ -125,7 +125,7 @@ const targets=[
         "Nhập tài khoản hoặc email..."
       ],
       [
-        "login_commerce",
+        "login_password",
         "Nhập mật khẩu"
       ],
       [
@@ -137,7 +137,7 @@ const targets=[
         "Ghi nhớ mật khẩu"
       ],
       [
-        "login_lost_commerce",
+        "login_lost_password",
         "Quên mật khẩu?"
       ],
       [
@@ -185,11 +185,11 @@ const targets=[
         "Nhập email ở trên..."
       ],
       [
-        "billing_account_commerce",
+        "billing_account_password",
         "Mật khẩu mới *"
       ],
       [
-        "billing_account_commerce_placeholder",
+        "billing_account_password_placeholder",
         "Nhập mật khẩu cho tài khoản mới"
       ],
       [
@@ -491,7 +491,7 @@ const targets=[
 ];
 const OUT='artifacts/aqua-commerce-esc';
 fs.mkdirSync(OUT,{recursive:true});
-assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_commerce,'WP admin secret unavailable');
+assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD,'WP admin secret unavailable');
 const audit={status:'STARTED',writes:[],targets:targets.map(t=>({id:t.id,table:t.table}))};
 const save=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2)+'\n');
 const shortcode = t=>'[table id='+t.table+' /]';
@@ -503,7 +503,7 @@ const shortcode = t=>'[table id='+t.table+' /]';
   await page.goto(WP+'/wp-login.php',{waitUntil:'domcontentloaded',timeout:60000});
   if(await page.locator('#user_login').count()){
    await page.locator('#user_login').fill(process.env.WP_ADMIN_USERNAME);
-   await page.locator('#user_pass').fill(process.env.WP_ADMIN_commerce);
+   await page.locator('#user_pass').fill(process.env.WP_ADMIN_PASSWORD);
    await page.locator('#wp-submit').click();
   }
   await page.waitForURL(u=>u.pathname.startsWith('/wp-admin/'),{timeout:45000});
@@ -613,7 +613,7 @@ const shortcode = t=>'[table id='+t.table+' /]';
      if(output.includes(shortcode(t)))break;
      if(attempt<6)await page.waitForTimeout(2000);
    }
-   console.log('AQUA_commerce_PAGE_READBACK='+JSON.stringify({
+   console.log('AQUA_COMMERCE_PAGE_READBACK='+JSON.stringify({
      id:t.id,shortcode:shortcode(t),rawSuffix:output.slice(-850),originalLength:raw.length,
      newLength:output.length,contains:output.includes(shortcode(t))
    }));
@@ -622,7 +622,7 @@ const shortcode = t=>'[table id='+t.table+' /]';
    console.log('AQUA_BUSINESS_ESC_PAGE_PASS='+t.slug+' rows='+t.labels.length);
   }
   audit.status='PASS';save();
-  console.log('AQUA_BUSINESS_ESC_INSTALL_PASS pages='+targets.length);
+  console.log('AQUA_COMMERCE_ESC_INSTALL_PASS pages='+targets.length);
  }finally{await browser.close();}
 })().catch(err=>{audit.status='FAIL';audit.error=String(err.stack||err).slice(0,1600);save();
- console.error('AQUA_BUSINESS_ESC_INSTALL_FAIL '+audit.error);process.exitCode=1;});
+ console.error('AQUA_COMMERCE_ESC_INSTALL_FAIL '+audit.error);process.exitCode=1;});
