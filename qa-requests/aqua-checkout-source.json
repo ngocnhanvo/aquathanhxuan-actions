@@ -3,12 +3,12 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "ab93adec272cee6a19a5fda7ab4e1e95e2001eea",
+  "source_sha": "c44d3b1d7e80afd73402e5579c936c1b095b6823",
   "php_release_run": 42771082969,
   "attempt": 2,
   "previousRun": 42771343628,
   "reason": "Fix compiler import resolution in QA harness; no source or production changes",
-  "purpose": "Verify browser-persistent checkout idempotency token and existing cart/SSR routes",
-  "previous_source_qa": 42781729566,
+  "purpose": "Verify persisted checkout token in browser and forwarding through Astro CoCart proxy",
+  "previous_source_qa": 42783409847,
   "no_orders": true
 }
