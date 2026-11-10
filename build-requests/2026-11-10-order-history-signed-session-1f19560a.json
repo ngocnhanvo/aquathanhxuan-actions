@@ -1,0 +1,10 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "1f19560a7373fd5f5e234d584ca675f0ae671971",
+  "purpose": "Publish WordPress OrderHistoryPage /lich-su-mua-hang, signed Astro HttpOnly sessions and strict customer-owned Woo order API",
+  "source_qa_run": 42798279872,
+  "cms_page_run": 42796129841,
+  "previous_failed_wp_login_run": 42796663270,
+  "no_orders": true
+}
