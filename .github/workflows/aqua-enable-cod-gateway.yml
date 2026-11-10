@@ -1,0 +1,36 @@
+name: Aqua enable native WooCommerce COD gateway (CMS ONLY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-cod-gateway.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-cod-gateway-settings
+  cancel-in-progress: false
+jobs:
+  enable-cod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-enable-cod-gateway.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Enable only native COD and verify readback
+        run: node scripts/aqua-enable-cod-gateway.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-cod-gateway-result
+          path: artifacts/aqua-cod-gateway
+          if-no-files-found: ignore
+          retention-days: 14
