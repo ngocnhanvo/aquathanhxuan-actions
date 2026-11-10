@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "e8dd6954e5b69b84cc25d2ebb31d66168847e8f8",
+  "purpose": "Publish native WordPress custom/v1/login endpoint used by Astro user/login and signed order history",
+  "source_qa_run": 42803470553,
+  "route_audit_run": 42802710205,
+  "no_orders_qa": true,
+  "astro_build": false
+}
