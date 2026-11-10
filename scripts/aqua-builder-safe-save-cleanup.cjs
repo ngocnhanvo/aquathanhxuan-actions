@@ -6,10 +6,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const WP='https://admin.aquathanhxuan.io.vn';
 const ID=83810,TABLE='checkout_ui_vi',KEY='demo_quantity';
-const ORIGINAL='Số lượng: 1', MARKER='Số lượng: 1 [QA-42870673248]';
+const SOURCE_RUN=String(process.env.AQUA_RECOVERY_SOURCE_RUN_ID||'42870673248');
+assert(/^\d+$/.test(SOURCE_RUN),'Invalid controlled QA run ID');
+const ORIGINAL='Số lượng: 1', MARKER=ORIGINAL+' [QA-'+SOURCE_RUN+']';
 const OUT='artifacts/aqua-builder-save-cleanup';
 fs.mkdirSync(OUT,{recursive:true});
-const audit={status:'STARTED',table:TABLE,key:KEY,source_run:42870673248,
+const audit={status:'STARTED',table:TABLE,key:KEY,source_run:SOURCE_RUN,
   changed:0,skipped_unchanged:0,temporary_created:0,cleanup_remaining:1};
 const save=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2)+'\n');
 assert(process.env.WP_ADMIN_USERNAME&&process.env.WP_ADMIN_PASSWORD,'WordPress auth unavailable');
