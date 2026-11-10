@@ -139,12 +139,29 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        const chromeTitle=frame.locator('aside h2[data-esc-source-table="'+p.table+'"]');
        assert.equal(await chromeTitle.count(),1,'Support sidebar title not ESC-managed '+p.table);
      }
-     const target=frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible').first();
+     // Prefer a visible, non-navigating text cell. Clicking the first cell
+     // of Checkout lands on the breadcrumb <li><a>, which the Builder rightly
+     // intercepts as navigation rather than text editing.
+     const headline=frame.locator('h1[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible, h2[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible, .support-section__eyebrow[data-esc-source-table="'+p.table+'"]:visible').first();
+     const target=(await headline.count()) ? headline :
+       frame.locator('[data-esc-source-table="'+p.table+'"][data-esc-source-row]:visible:not(a):not(li):not(button):not(input)').first();
+     await target.waitFor({state:'visible',timeout:25000});
+     const coords=await target.evaluate(el=>({
+       tag:el.tagName.toLowerCase(),row:el.getAttribute('data-esc-source-row'),
+       field:el.getAttribute('data-esc-source-field'),version:el.getAttribute('data-esc-rendered-version'),
+     }));
+     assert.match(coords.row||'',/^\\d+$/,'Missing physical row '+p.slug);
+     assert.match(coords.version||'',/^[a-f0-9]{64}$/,'Missing version '+p.slug);
+     assert(coords.field,'Missing exact field '+p.slug);
      await target.click();
-     // A selected physical cell must be resolvable in the existing Visual Builder.
-     await page.waitForFunction(()=>Boolean(document.querySelector('#esc-vb-edit-row option:checked')),
-       null,{timeout:22000});
-     audit.pages.push({slug:p.slug,page_id:p.id,table:p.table,states:p.states.length,coordinate:true});
+     // Verify the actual cell selection, not merely that any default option
+     // is selected in the WordPress editor.
+     await page.waitForFunction(expected=>{
+       const selected=document.querySelector('#esc-vb-edit-row option:checked');
+       return selected?.value===expected;
+     },coords.row+':'+coords.field,{timeout:22000});
+     audit.pages.push({slug:p.slug,page_id:p.id,table:p.table,states:p.states.length,
+       coordinate:true,selectedField:coords.field});
      record();
      console.log('AQUA_BUILDER_PAGE_PASS='+p.slug);
    }
