@@ -13,6 +13,8 @@ assert.equal(request.mode,'controlled-one-cell-reversible');
 assert.equal(request.page_id,ID);assert.equal(request.table_id,TABLE);
 assert.equal(request.key,KEY);
 assert.equal(request.php_source_sha,'9328a023934c78e2054406fed0edb3c11a45fff9');
+assert.match(String(request.astro_source_sha||''),/^[a-f0-9]{40}$/,'Unpinned Astro production SHA');
+assert.equal(request.astro_source_sha,'4a361f8c39077f820be5bf0f7d93ce421d67ad0f');
 assert(process.env.WP_ADMIN_USERNAME && process.env.WP_ADMIN_PASSWORD);
 assert(/^\d+$/.test(process.env.GITHUB_RUN_ID||''));
 fs.mkdirSync(OUT,{recursive:true});
@@ -148,6 +150,11 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    const nonceRes=await page.request.get(WP+'/wp-admin/admin-ajax.php?action=rest-nonce');
    assert.equal(nonceRes.status(),200);
    nonce=(await nonceRes.text()).trim();
+   const productionMarker=await page.request.get('https://aquathanhxuan.io.vn/aquathanhxuan-staging-build.json?save_qa='+Date.now(),
+     {timeout:35000,failOnStatusCode:false});
+   assert.equal(productionMarker.status(),200,'Astro production marker unavailable');
+   const deployed=await productionMarker.json();
+   assert.equal(deployed.commit,request.astro_source_sha,'Deployed Astro version differs from approved QA');
    const p=await rest(WP+'/wp-json/wp/v2/pages/'+ID+'?context=edit');
    assert(p.status==='publish'&&p.slug==='checkout'&&p.acf?.action==='CheckoutPage');
    assert(String(p.content?.raw||'').includes('[table id='+TABLE+' /]'));
