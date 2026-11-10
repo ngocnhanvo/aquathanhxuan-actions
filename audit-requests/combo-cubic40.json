@@ -5,5 +5,7 @@
   "source": "https://aquathanhxuan.com/san-pham/combo-be-cubic-40-sieu-trong/",
   "wordpress": "https://admin.aquathanhxuan.io.vn",
   "astroMaster": "b7c393a7cda3116f6ccff1316b7434b0eb4e4f99",
-  "scope": "Check public desktop/mobile DOM and error, original store Woo Product and target published Woo Product, identify mismatch before writing data or building"
+  "scope": "Read-only root cause HTTP 500: compare public Rewrite vs direct Astro /ssr/products/<slug>/detail, retrieve exact native WordPress Rewrite matching original Product slug and source/target Woo catalog",
+  "attempt": 2,
+  "previousRun": 42758709944
 }
