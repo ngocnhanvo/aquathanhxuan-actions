@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "37805d0f06ff33557a258e8187761409ae7aeab5",
+  "source_sha": "6374593a847f2826844413a6719825478bc49992",
   "scope": "ONEPAY_CALLBACK_PLUS_ACCOUNT_AND_EXISTING_CUSTOMER",
-  "purpose": "Offline tests: guest OnePay order, account creation with password validation, logged-in customer order association, idempotent retry, HMAC return and paid receipt with no payment/orders",
+  "purpose": "Validate guest OnePay, account creation and existing-account checkout, retry, callback and paid receipt. Fix prior test assertion type.",
   "production_order_creation": false,
   "no_real_orders": true
 }
