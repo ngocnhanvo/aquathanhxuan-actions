@@ -1,0 +1,31 @@
+name: Aqua browser buyer cart to payment QA (NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-checkout-browser-no-order.json'
+permissions:
+  contents: read
+jobs:
+  browse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate browser QA code
+        run: node --check scripts/aqua-checkout-browser-cart-to-payment-qa.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Real cart and checkout without order creation
+        run: node scripts/aqua-checkout-browser-cart-to-payment-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-browser-cart-checkout-no-orders
+          path: artifacts/aqua-browser-cart-checkout
+          if-no-files-found: ignore
+          retention-days: 14
