@@ -304,6 +304,55 @@ async function run(){
     console.log('REPORTED_PRODUCT_STICKY_FOOTER_PASS='+JSON.stringify({width,geometry,footerClearance}));
    }finally{await context.close()}
   }
+  // New shared RecentlyViewedProducts section: real browser navigation, no Woo cart writes.
+  report.recentlyViewed=[];
+  const firstViewedSlug='phan-nen-dennerle-scapers-soil-4lit';
+  const secondViewedSlug='may-sui-khi-atman-hp-12000';
+  for(const width of [1440,390]){
+    const ctx=await browser.newContext({viewport:{width,height:width===1440?900:844}});
+    try {
+      const page=await ctx.newPage();
+      const firstUrl=FRONT+'/san-pham/'+firstViewedSlug;
+      const secondUrl=FRONT+'/san-pham/'+secondViewedSlug;
+      const firstResponse=await page.goto(firstUrl,{waitUntil:'domcontentloaded',timeout:60000});
+      assert.equal(firstResponse?.status(),200,'First viewed Product HTTP '+width);
+      const section=page.locator('#recently-viewed');
+      assert.equal(await section.count(),1,'Viewed section missing on product detail '+width);
+      await page.waitForFunction(()=>{
+        const current=document.querySelector('#data-content-wrapper')?.getAttribute('data-product-id');
+        const saved=JSON.parse(localStorage.getItem('aquathanhxuan:recent-products:v1')||'[]');
+        return saved.some(item=>item.id===current);
+      },null,{timeout:7000});
+      const firstId=await page.locator('#data-content-wrapper').getAttribute('data-product-id');
+      assert.equal(await page.locator('#recently-viewed-list > a').count(),0,'Detail must not display its own Product '+width);
+      assert(await page.locator('#recently-viewed-empty').isVisible(),'First Product should show history empty state '+width);
+
+      const nextResponse=await page.goto(secondUrl,{waitUntil:'domcontentloaded',timeout:60000});
+      assert.equal(nextResponse?.status(),200,'Second viewed Product HTTP '+width);
+      await page.waitForFunction(url=>
+        [...document.querySelectorAll('#recently-viewed-list > a')].some(a=>a.getAttribute('href')===url)
+      ,firstUrl.replace(FRONT,''),{timeout:8000});
+      const secondId=await page.locator('#data-content-wrapper').getAttribute('data-product-id');
+      assert.notEqual(firstId,secondId,'Two different Product IDs required for history QA');
+      const cardUrls=await page.locator('#recently-viewed-list > a').evaluateAll(nodes=>nodes.map(a=>a.getAttribute('href')));
+      assert(cardUrls.includes('/san-pham/'+firstViewedSlug),'Previously viewed Product link missing '+width);
+      assert(!cardUrls.includes('/san-pham/'+secondViewedSlug),'Current Product incorrectly included '+width);
+      assert.equal(await page.locator('#recently-viewed-empty').isVisible(),false,'Empty state should hide when a previous Product exists '+width);
+      const title=await page.locator('#recently-viewed-title').innerText();
+      assert.equal(title,'SẢN PHẨM ĐÃ XEM','Recently viewed VI heading '+width);
+      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+      assert(overflow<=3,'Recently viewed layout horizontal overflow '+width+' '+overflow);
+      await page.locator('#recently-viewed').scrollIntoViewIfNeeded();
+      const screenshot='recently-viewed-detail-'+width+'.png';
+      await page.screenshot({path:DIR+'/'+screenshot,fullPage:false});
+      report.screenshots.push(screenshot);
+      const record={width,firstId,secondId,previousHref:cardUrls[0],currentExcluded:true,horizontalOverflow:overflow,screenshot};
+      report.recentlyViewed.push(record);
+      console.log('DETAIL_RECENTLY_VIEWED_PASS='+JSON.stringify(record));
+    } finally {
+      await ctx.close();
+    }
+  }
   report.status='QA_PASS';
   report.completedAt=new Date().toISOString();persist();
   console.log('DETAIL_PRODUCT_UI_QA_PASS='+JSON.stringify({count:report.samples.length,viewports:[1440,390],screenshots:report.screenshots.length,sha:request.astro_sha}));
