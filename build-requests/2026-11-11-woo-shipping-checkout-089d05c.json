@@ -1,0 +1,10 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "089d05c6f9d0b49fa67d7801c9c7248edf2568b1",
+  "purpose": "Deploy Woo-native checkout shipping quote/selection UI after verified PHP callback release",
+  "source_qa_run": 42885078315,
+  "php_source_qa_run": 42885613310,
+  "php_release_run": 42886074121,
+  "no_orders": true
+}
