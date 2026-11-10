@@ -1,0 +1,15 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "source_sha": "b7c393a7cda3116f6ccff1316b7434b0eb4e4f99",
+  "mode": "read-only-production-qa",
+  "productUrl": "https://aquathanhxuan.io.vn/san-pham/combo-be-cubic-40-sieu-trong",
+  "slug": "combo-be-cubic-40-sieu-trong",
+  "nativeRewriteId": 83801,
+  "sourceProductId": 266939,
+  "targetProductId": 82477,
+  "repairRun": 42759530760,
+  "buildRun": 42759753974,
+  "deployRun": 42759851013,
+  "scope": "Require public HTTP 200 and genuine detail for Cubic40 desktop/mobile, source identity/price/stock, verify original working product regression"
+}
