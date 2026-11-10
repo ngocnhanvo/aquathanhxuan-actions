@@ -96,7 +96,7 @@ let browser,admin,customerId=0,nonce='';
    assert.equal(ordersResponse.status(),200,'Signed account unable to access its own empty history');
    const orderData=await ordersResponse.json();
    assert(orderData.ok===true&&Array.isArray(orderData.orders)&&orderData.orders.length===0,
-    'New customer's order history must be empty');
+    'New buyer order history must be empty');
    assert.match(ordersResponse.headers()['cache-control']||'',/no-store/);
    result.checks.push({check:'Signed customer can access own empty orders, no-store',status:'PASS'});save();
 
