@@ -163,6 +163,7 @@ async function apiPost(path,body){
     selectedRates[index]=rate.id;
    }
   }else{
+   await page.locator('#checkout-shipping-section').waitFor({state:'hidden',timeout:12000});
    assert.equal(await page.locator('#checkout-shipping-section').isVisible(),false,
      'Shipping disabled at Woo must not invent fees or options');
   }
