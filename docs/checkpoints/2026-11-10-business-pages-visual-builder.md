@@ -22,12 +22,24 @@ Mode: auto-build; source gateway: bypass
 - PHP release 42867578142 PASS; site-config.php deployed with FTPS SHA-256 verification, other PHP files unchanged, all predefined project regressions PASS.
 - Read-only nine-page browser QA on deployed PHP and Astro: run 42867884395 in progress at last checkpoint. QA now verifies all label options and disallows key column, physical editor row/field/version, Preview states and no Woo/customer/email requests.
 
-## Remaining gates
-- Obtain final nine-page Playwright result; if FAIL inspect the exact stage and patch only root cause, rerun until passing.
-- Verify real WordPress Save behavior only if a permitted nonproduction reversible test is defined; never change customer-edited labels in production for QA.
-- Once QA passes, update this checkpoint and actions chatgpt/latest-response.md with DONE and exact evidence.
+## Detached ESC label Save root cause and fix (2026-11-11)
+- Controlled Save run 42873019395 confirmed native REST HTTP 200, saved=true, but Preview did not apply the text; error feedback was `Đã lưu WordPress, nhưng không tìm thấy chữ tương ứng...`. Native independent cleanup completed, `cleanup_remaining=0`.
+- Root cause: Astro generic `patchAutoText` only searched inside `[data-tablepress-preview]` while Page-owned business label cells live outside it (checkout H1, form, receipt, support shell).
+- Astro fix `4a361f8c39077f820be5bf0f7d93ce421d67ad0f`: `patchDetachedEscText` patches draft and committed text for exact live-verified `table_id + physical_row + field + rendered_version`; supports multiple visible appearances and reversible local drafts, no DOM text guessing. Strict PHP edit guards remain intact.
+- Source QA 42872941031 PASS (Astro compile, regressions, baseline typecheck).
+- WordPress production build 42873812125 PASS; signed Astro deploy 42873991762 PASS. Astro production `4a361f8c39077f820be5bf0f7d93ce421d67ad0f`.
+- Independent browser QA 42874455432 PASS, 9/9 Pages, all Preview states, select exact physical field, 59 Checkout labels (including row 58), key immutable. Specifically `AQUA_CHECKOUT_DETACHED_ESC_DRAFT_REVERT_PASS row=58`: input draft updated actual iframe text instantly, and reverting reset the visible text without any WordPress write.
+- Controlled one-cell Save/Restore QA 42875159644 PASS: `AQUA_BUILDER_CONTROLLED_SAVE_PASS` on `checkout_ui_vi` row 58 field `label`; canonical REST readback and live Builder updated; `AQUA_BUILDER_CONTROLLED_RESTORE_PASS`; `AQUA_BUILDER_CONTROLLED_SAVE_RESTORE_PASS changed=1 restored=1 cleanup_remaining=0`. No other TablePress rows changed.
+- Knowledge rule updated at `ngocnhanvo/knowledge` commit `0a316918e9de25c531d06cffd487b7411c72c11e` for detached ESC source coordinates, draft and Save verification, cleanup.
+- No fake orders, customer changes, payment changes, password resets, email deliveries, WooCommerce mutation or temporary records.
+
+## Operations
+- Admin: https://admin.aquathanhxuan.io.vn/wp-admin/edit.php?post_type=page&page=esc-visual-builder
+- Live website: https://aquathanhxuan.io.vn
+- For future Page label additions: extend native TablePress via Insert Code/native editor; source key immutable; guard `TableID + row + field + version`, readback after Save and safe preview actions.
+- No pending work in the nine-Page Visual Builder acceptance scope. This does not assert that every future Page, all WooCommerce business flows, or unrelated Visual Builder features have been audited.
 
 ## Boundaries
-Never create test orders, send emails, reset passwords, alter coupons/payments/customers, bypass the PHP-managed production build, or change arbitrary WordPress tables. Read-only QA and source/deploy outcomes are separate evidence gates.
+Never create test orders, send emails, reset passwords, alter coupons/payments/customers, bypass PHP-managed production build, or modify arbitrary WordPress tables. Source QA, CMS authoring, build/deploy, read-only browser QA and reversible Save evidence are separate gates.
 
-Status: PARTIAL — nine-page production Visual Builder acceptance pending.
+Status: DONE — nine-Page native ESC Visual Builder implementation and acceptance complete; controlled QA content restored.
