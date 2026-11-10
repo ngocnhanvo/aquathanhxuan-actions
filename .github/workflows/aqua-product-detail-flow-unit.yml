@@ -80,6 +80,9 @@ jobs:
           assert(file.includes('const visible = hasScrolledPastActions;'),'Sticky CTA must remain visible at footer after in-page actions');
           assert(!file.includes('footerVisible'),'Do not hide fixed purchase bar when footer enters viewport');
           assert(file.includes('sm:min-w-[390px] lg:min-w-[420px]'),'Sticky CTA button group must fit single-line cart copy');
+          assert(file.includes('body.product-has-sticky-purchase #footer-contact'),'Product footer must reserve scroll area for fixed CTA');
+          assert(file.includes('document.body.classList.add("product-has-sticky-purchase")'),'Footer reserve must be activated on product detail page');
+          assert(file.includes('margin-bottom: calc(var(--product-sticky-height, 105px) + 12px)'),'Footer reserve must follow measured CTA height');
           assert(file.includes('id="sticky-add-to-cart-label" class="whitespace-nowrap"'),'Sticky add-to-cart label must not wrap');
           assert(file.includes('stockStatus === "outofstock"'));
           console.log('AQUA_PRODUCT_PURCHASE_STRUCTURE_PASS');
