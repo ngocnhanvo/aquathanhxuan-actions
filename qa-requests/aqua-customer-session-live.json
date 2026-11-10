@@ -6,5 +6,8 @@
   "qa_scope": "CREATE_ONE_RANDOM_WP_SYNTHETIC_CUSTOMER_then_verify_login_cookie_order_privacy_logout_AND_DELETE",
   "no_orders": true,
   "no_payments": true,
-  "cleanup_required": true
+  "cleanup_required": true,
+  "attempt": 2,
+  "previous_failure": 42801757653,
+  "reason": "Rerun corrected JS syntax QA using one synthetic Woo user and mandatory cleanup"
 }
