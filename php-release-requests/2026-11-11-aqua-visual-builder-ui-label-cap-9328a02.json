@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "9328a023934c78e2054406fed0edb3c11a45fff9",
+  "purpose": "Permit safe editing of up to 80 native key/label UI strings with key column read-only; ordinary tables remain capped at 40",
+  "no_orders_qa": true,
+  "astro_build": false
+}
