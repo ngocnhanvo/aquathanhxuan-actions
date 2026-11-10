@@ -1,0 +1,27 @@
+name: Aqua checkout production routes QA (READ ONLY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-checkout-route-live.json'
+permissions:
+  contents: read
+jobs:
+  routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate read-only checkout route QA syntax
+        run: node --check scripts/aqua-checkout-route-live-qa.cjs
+      - name: Inspect CMS SSR caches, routes, and live payment methods
+        run: node scripts/aqua-checkout-route-live-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-checkout-route-live-qa
+          path: artifacts/aqua-checkout-route-live
+          if-no-files-found: ignore
+          retention-days: 14
