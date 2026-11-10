@@ -1,27 +1,28 @@
-# Aqua Thanh Xuân — WordPress-native coupon migration (2026-11-10)
+# Checkpoint — WooCommerce coupon thật, 10/11/2026
 
-## Goal
+## Trạng thái xác minh
 
-All WooCommerce promotions must be administrable via actual **Marketing → Coupons** records. Current campaign `aqua-auto-5`: 5% from **≥200,000 VND**. Do not create real orders during QA.
+- **DONE**: Quy tắc chung mọi dự án WooCommerce được đưa vào `ngocnhanvo/knowledge` `main`, file `stacks/woocommerce-coupon-promotions.md`, và liên kết từ README/AGENTS. Knowledge commit mới nhất của chuỗi: `608788447a13486dbe1087a173aece9a93fc8a66`.
+- **DONE**: Coupon thật trên `admin.aquathanhxuan.io.vn`, ID `83818`, code `aqua-auto-5`, trạng thái `publish`, `percent=5`, `minimum_amount=200000.00`, `exclude_sale_items=false`. Created once then verified with no-op REUSE: [coupon run #42775054145](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775054145). WooCommerce setting `woocommerce_enable_coupons=yes` verified [audit #42776912852](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42776912852).
+- **DONE**: WordPress/PHP master `bbeae23d8169a8177ab9719eda4cf6040f9d1b8a`. MU auto coupon bridge uses persisted `WC_Coupon` and native `WC_Discounts`; no hardcoded rate/threshold or virtual coupon filter. Pre-calculation validator uses detached Woo items because `WC_Cart::get_displayed_subtotal()` is zero immediately after `reset_totals()`. CoCart `sync-coupons-db` preserves preexisting native/manual coupons and no longer checks zero discount before totals recalc. Unit contracts PHP PASS.
+- **DONE**: Production PHP FTPS deployment [#42777270521](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42777270521), verified protected upload. No Astro build from PHP upload.
+- **DONE**: Astro source master `0ac8af50be65a4ead280d2368bd69195c27bcc01` deployed through WordPress-triggered production workflow [trigger #42775519145](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775519145) → [deploy #42775644106](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775644106). Marker `DEPLOY_READY=PASS` for exact SHA and header QA PASS.
+- **DONE**: Actual anonymous CoCart cart [QA #42777458941](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42777458941), no orders: Product 82477, subtotal 2,700,000 VND, native coupon `aqua-auto-5`, discount 135,000 VND exactly 5% both after add and after sync, `AQUA_CART_PROMOTION_PASS`, `AQUA_CART_CLEANUP=PASS`. Woo total includes tax and other Woo calculations; amount paid is not equal to subtotal-discount alone.
+- **DONE**: Offline boundary contract tests at <200,000 and exactly 200,000 (inclusive), and configuration change scenarios, preserving manual coupon, expiry, sale/individual and deleted native record.
 
-## Completed
+## Timeline / root cause
 
-- Shared policy: `ngocnhanvo/knowledge` main `stacks/woocommerce-coupon-promotions.md`, README and AGENTS, latest commit `608788447a13486dbe1087a173aece9a93fc8a66`.
-- Coupon created in WordPress, ID **83818**, code `aqua-auto-5`, publish, percent=5, minimum_amount=200000, includes sale items, stackable. Read-after-write PASS [run 42775054145](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775054145). First setup run 42774714799 failed only on treating `5.00` vs `5` as different; second run REUSE changed=0.
-- PHP source master `4ee0532935166732c0423afa1fb5edfc0a0019ce`: removed virtual coupon filter and hardcoded 5%/200001; now validates persisted WC_Coupon via WC_Discounts and syncs only managed auto-code; native Woo validates expiry/minimum, usage and product restrictions. Unit contract PASS.
-- PHP FTPS production release PASS [run 42775328127](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775328127). Installed modified MU plugin with verified SHA256; no Astro build.
-- Latest Astro master `0ac8af50be65a4ead280d2368bd69195c27bcc01` fixes CoCart add-item string `id`, needed because previous anonymous cart QA [run 42771889672](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42771889672) failed `rest_invalid_param` on id type when old Astro production was live.
+1. Initial real cart QA #42771889672 failed because deployed Astro sent CoCart ID as integer; Astro 0ac8af5 fixed string ID and production build deployed it.
+2. QA #42775975583 and #42776753563 failed because CoCart reset the applied coupons in sync-coupons-db before native calculation.
+3. After CoCart preserve fix, QA #42776962551 still showed 0 coupon even directly after add. Reading Woo core revealed `WC_Discounts($cart)` in `woocommerce_before_calculate_totals` evaluates minimum against cart subtotal not yet calculated (0). Repaired by native `set_items` with current server-owned prices.
+4. QA #42777458941 PASS and disposable session cleaned. No order placement was performed.
 
-## In progress
+## Guardrails
 
-- Requested WordPress-triggered production Astro build to publish latest Astro source: [build request](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/build-requests/2026-11-10-native-coupon-checkout-0ac8af5.json), [trigger run 42775519145](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42775519145). Must inspect exact downstream deployment run and its conclusion, marker source SHA, QA.
+- Do not restore virtual coupons or hardcode rate/minimum in PHP/Astro. Marketing changes happen through WP WooCommerce Coupons and should work without rebuilding Astro.
+- Do not rerun passed build, PHP deploy, or anonymous cart QA without a new change.
+- Separate the current user request (coupon management) from prior unfinished buyer checkout/order work: no real order has been placed by this migration.
 
-## Next deterministic steps
+## Final status
 
-1. Poll run 42775519145 and its linked downstream Astro production run; do not duplicate trigger or assume started means PASS.
-2. On confirmed deploy of Astro master 0ac8af5, update `qa-requests/aqua-checkout-live-cart.json` (single change) to retrigger existing no-order disposable cart QA. Fix script only when grounded in logs, never retry ambiguous add, always cleanup.
-3. Verify actual CoCart cart discount 5% and coupon code `aqua-auto-5`, empty cart after test, no real order. If useful test exact 200k boundary with controlled local fixtures (PHP contract already PASS).
-4. After QA record final result and update `chatgpt/latest-response.md`, with source SHA, run IDs, and flags.
-5. If failure, state exact stage and keep `Trạng thái: PARTIAL — chưa hoàn tất`.
-
-Source gateway bypass; code mode auto-build. No promotions should be defined as virtual coupons in PHP again.
+`CODE_READY` / `CMS_COUPON_PERSISTED` / `PHP_DEPLOYED` / `ASTRO_DEPLOYED` / `ANONYMOUS_CART_PROMOTION_QA_PASS` / `CLEANUP_PASS`.
