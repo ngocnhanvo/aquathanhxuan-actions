@@ -84,12 +84,36 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    merchant_id_configured:configured('merchant_id'),
    access_code_configured:configured('merchant_access_code'),
    secure_secret_configured:configured('secure_secret'),
+   payment_url_configured:configured('onepay_url'),
+   payment_url_value_type:typeof paySettings?.onepay_url?.value,
+   payment_url_has_https_prefix:typeof paySettings?.onepay_url?.value==='string' &&
+    /^https:\\/\\//i.test(paySettings.onepay_url.value.trim()),
    payment_origin:paymentOrigin
   };
   report.checkoutWooSettings=advanced.filter(x=>[
    'woocommerce_checkout_page_id','woocommerce_cart_page_id',
    'woocommerce_myaccount_page_id','woocommerce_checkout_order_received_endpoint'
   ].includes(String(x.id))).map(x=>({id:x.id,value:x.value}));
+  // WooCommerce get_return_url() targets the configured *backend* checkout Page,
+  // which may intentionally differ from Astro's published SSR Page. The Woo
+  // callback must be able to execute native thankyou hooks on that backend Page.
+  report.backendWooPages=[];
+  for(const id of [...new Set(report.checkoutWooSettings
+    .filter(x=>['woocommerce_checkout_page_id','woocommerce_cart_page_id'].includes(x.id))
+    .map(x=>Number(x.value)).filter(Number.isSafeInteger).filter(x=>x>0))]){
+   const pRes=await page.request.get(URL+'/wp-json/wp/v2/pages/'+id+'?context=edit',{headers,timeout:30000});
+   const pageData=pRes.ok()?await pRes.json():null;
+   const content=String(pageData?.content?.raw||pageData?.content?.rendered||'');
+   report.backendWooPages.push({
+    id,http:pRes.status(),status:pageData?.status||null,
+    slug:pageData?.slug||null,
+    has_woocommerce_checkout_shortcode:content.includes('[woocommerce_checkout]'),
+    has_woocommerce_checkout_block:content.includes('wp:woocommerce/checkout'),
+    has_woocommerce_cart_shortcode:content.includes('[woocommerce_cart]'),
+    has_woocommerce_cart_block:content.includes('wp:woocommerce/cart')
+   });
+  }
+
 
   // Inventory configured native WooCommerce shipping, never assume a flat
   // shipping fee or copy ESC.vn's logistics policies into Aqua.
