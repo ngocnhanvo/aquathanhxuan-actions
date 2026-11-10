@@ -75,6 +75,11 @@ jobs:
           assert(preview.includes('loadedVersions[tableId]!==version') && preview.includes('discoveredTextFields[tableId]?.includes(field)'));
           assert(preview.includes('detached.node.setAttribute("data-esc-builder-selected"'));
           assert(preview.includes('source:"ESC Table"') && preview.includes('row:detached.row'));
+          assert(preview.includes('function patchDetachedEscText(tableId,row,field,original,value,draft=false)'), 'Detached cell update must use verified coordinates');
+          assert(preview.includes('verifiedDetachedEscCell(element)') && preview.includes('verified.row===row && verified.field===field'));
+          assert(preview.includes('return 1 + patchDetachedEscText(tableId,row,field,original,value,draft);'));
+          assert(preview.includes('return patchDetachedEscText(tableId,row,field,original,value,draft);'));
+          console.log('AQUA_BUILDER_DETACHED_ESC_DRAFT_SAVE_SOURCE_PASS');
           console.log('AQUA_BUILDER_DETACHED_ESC_CELL_SOURCE_PASS');
           console.log('AQUA_BUILDER_SAFE_STATE_CONTROLS_PASS');
           const cart=fs.readFileSync('src/astro/pages/CartPage.astro','utf8');
