@@ -1,21 +1,22 @@
 {
-  "scope": "POST_PHP_RELEASE_COD_NO_ORDER_PRODUCTION_REGRESSION",
+  "scope": "POST_NATIVE_WOO_SHIPPING_NO_ORDER_PRODUCTION_REGRESSION",
   "project": "aquathanhxuan.com",
   "frontend": "https://aquathanhxuan.io.vn",
-  "astro_sha": "4a361f8c39077f820be5bf0f7d93ce421d67ad0f",
+  "astro_sha": "089d05c6f9d0b49fa67d7801c9c7248edf2568b1",
   "routes_run": 42807110476,
   "no_order_creation": true,
   "no_payment_attempt": true,
   "cleanup_required": true,
-  "php_release_run": 42879526175,
-  "reason": "Verify live cart, native Woo coupon, COD-only checkout, optional phone, signed history and mobile after idempotent empty-cart replay PHP patch. Intercept all order POSTs.",
-  "attempt": 10,
-  "source_qa_run": 42818057110,
-  "astro_deploy_run": 42818443637,
+  "php_release_run": 42886074121,
+  "reason": "Verify live Woo shipping quote response and COD checkout selected rate IDs, keeping all checkout POSTs intercepted and temporary cart cleaned.",
+  "attempt": 11,
+  "source_qa_run": 42885078315,
+  "astro_deploy_run": 42886734754,
   "woo_tax_settings_qa_run": 42814147919,
   "previous_browser_qa_run": 42814974242,
   "cod_gateway_run": 42817289132,
   "expected_payment_methods": [
     "cod"
-  ]
+  ],
+  "shipping_php_source_qa_run": 42885613310
 }
