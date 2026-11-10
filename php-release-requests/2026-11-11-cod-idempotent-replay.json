@@ -1,0 +1,10 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "76bfe492e53c30cc3346d3154df4d4a56866d665",
+  "purpose": "Deploy verified COD idempotency replay after Woo clears checkout cart",
+  "no_orders_qa": true,
+  "astro_build": false
+}
