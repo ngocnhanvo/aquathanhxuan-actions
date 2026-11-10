@@ -64,6 +64,7 @@ jobs:
           const checkout=fs.readFileSync('src/astro/pages/CheckoutPage.astro','utf8');
           assert(cart.includes('readBusinessPageLabels') && cart.includes('cart_ui_'));
           assert(checkout.includes('readBusinessPageLabels') && checkout.includes('checkout_ui_'));
+          assert(!checkout.includes('pages={pages} labels={t} cell={cell} />'),'Unmigrated InfoForm must not receive unsupported props');
           console.log('AQUA_COMMERCE_PAGE_LABELS_SOURCE_PASS');
           assert(source.includes('esc-builder-demo-not-a-real-cart'));
           assert(!source.includes('wp-json/wc/v3/orders'));
