@@ -9,6 +9,6 @@
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "state-safe-url-and-button-v2",
+  "qa_revision": "v3-exact-production-marker-from-request",
   "previous_qa_run": 42858821722
 }
