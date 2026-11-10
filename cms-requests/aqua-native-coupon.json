@@ -1,0 +1,9 @@
+{
+  "project": "aquathanhxuan.com",
+  "scope": "ONLY_WOO_COUPON_aqua-auto-5",
+  "code": "aqua-auto-5",
+  "discount_type": "percent",
+  "amount": "5",
+  "minimum_amount": "200000",
+  "no_orders": true
+}
