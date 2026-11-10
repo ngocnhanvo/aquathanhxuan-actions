@@ -1,0 +1,29 @@
+name: Aqua buyer cart promotion disposable QA (NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-checkout-live-cart.json'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check scripts/aqua-checkout-live-cart-qa.cjs
+      - name: Create temporary anonymous cart, check coupon, then empty it
+        run: node scripts/aqua-checkout-live-cart-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-checkout-live-cart-qa
+          path: artifacts/aqua-checkout-live-cart
+          retention-days: 14
+          if-no-files-found: ignore
