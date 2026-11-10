@@ -1,0 +1,36 @@
+name: Aqua checkout pages and Rewrite setup
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-checkout-pages.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-checkout-cms-writes
+  cancel-in-progress: false
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-checkout-pages-install.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Create or verify only three Woo buyer Pages and Rewrite records
+        run: node scripts/aqua-checkout-pages-install.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-checkout-pages-setup
+          path: artifacts/aqua-checkout-pages
+          retention-days: 14
+          if-no-files-found: ignore
