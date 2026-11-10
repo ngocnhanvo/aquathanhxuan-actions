@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "f329d38f4f1b8062a0b1f1e8b01ec1b8084e9ce4",
+  "purpose": "Publish native editable support chrome and guest order-history form labels",
+  "source_qa_run": 42861731661,
+  "cms_page_run": 42862224453,
+  "no_orders": true
+}
