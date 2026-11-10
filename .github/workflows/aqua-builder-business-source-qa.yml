@@ -67,6 +67,19 @@ jobs:
             const data=fs.readFileSync(file,'utf8');
             assert(data.includes('esc-builder-preview'),'Missing preview side-effect guard: '+file);
           }
+          const labelModule=fs.readFileSync('src/lib/wordpress/businessPageLabels.ts','utf8');
+          assert(labelModule.includes('data-esc-rendered-version'));
+          for(const [file,table] of [
+            ['src/astro/pages/LostPassPage.astro','lost_password_'],
+            ['src/astro/pages/ResetPassPage.astro','reset_password_']
+          ]){
+            const text=fs.readFileSync(file,'utf8');
+            assert(text.includes('readBusinessPageLabels') && text.includes(table));
+            assert(text.includes('data-business-labels') && text.includes('{...cell('));
+            assert(!text.includes('const isEnglish ='),'Hard-coded Page locale labels: '+file);
+            assert(!text.includes('english ?'),'Hard-coded script labels: '+file);
+            console.log('AQUA_BUSINESS_LABELS_ESC_SOURCE_PASS='+file);
+          }
           console.log('AQUA_BUILDER_BUSINESS_SOURCE_CONTRACT_PASS');
           NODE
       - name: Existing order/session and commerce regressions
