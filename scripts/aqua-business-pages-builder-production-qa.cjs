@@ -151,7 +151,12 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
          .first().waitFor({state:'visible',timeout:65000});
        assert.equal(await frame.locator('#esc-business-preview-state').count(),0,
          'Ordinary Support Page must use production-like Preview');
-       const eyebrow=frame.locator('.support-section__eyebrow[data-esc-source-table="'+p.table+'"]');
+       // A support Page can have multiple content sections, each with its
+       // own eyebrow. Confirm at least one exact editable source, not a
+       // single matching DOM node for the entire Page.
+       const eyebrows=frame.locator('.support-section__eyebrow[data-esc-source-table="'+p.table+'"]');
+       assert((await eyebrows.count())>=1,'Support eyebrow source missing '+p.table);
+       const eyebrow=eyebrows.first();
        await eyebrow.waitFor({state:'visible',timeout:20000});
        assert.equal(await eyebrow.getAttribute('data-esc-source-field'),'description');
        const chromeTitle=frame.locator('aside h2[data-esc-source-table="'+p.table+'"]');
