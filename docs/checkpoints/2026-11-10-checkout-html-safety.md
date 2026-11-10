@@ -43,3 +43,15 @@
 3. With sandbox OnePay merchant and an authorized temporary QA buyer, test end-to-end order → callback → payment status → stock/email → receipt/private history with cleanup marker. Continue from this checkpoint, do not rerun already PASS source/route/browser jobs unless source or relevant CMS config changes.
 
 **Overall:** `PARTIAL — chưa hoàn tất`; code hardening + production release + no-order QA `PASS`; full shipping and real-payment E2E still blocked on shop business decision and approved sandbox credentials.
+
+## Resume verification — 2026-11-10 18:54 ICT
+
+- Verified current `knowledge/main` = `608788447a13486dbe1087a173aece9a93fc8a66`, Astro `master` = `272290ec59be5687ed88101422408d42a2f333bf`, PHP `master` = `e8dd6954e5b69b84cc25d2ebb31d66168847e8f8`. No new app commits since prior checkpoint.
+- Latest production Deploy #42809847081, route QA #42810188503, browser no-order QA #42810194245 all `completed/success` with successful recorded job steps. Do not rerun unless relevant source/CMS state changes.
+- Source verification: `wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php` (shipping address setters lines 383–392, line item/coupon setup, total calculation at 466, gateway payment at 556). There is no `WC_Order_Item_Shipping` entry in checkout order creation. Absence of rate configuration is independently supported by live Woo audit in earlier checkpoint.
+- Existing OnePAY signed-return safety guard `inc/checkout/index.php` validates HMAC, order ID and amount before vendor callback, with offline test `aqua-onepay-return-safety.test.php`. No direct callback test transaction has been performed.
+- This resume pass performed read-only inspection. No cart/order/account generated, no payment attempted, no application source modified, no production deploy triggered.
+- Dependency: shop owner must choose Woo Shipping zones/methods and confirmed checkout total **or** explicitly authorize order confirmation before payment; test/sandbox merchant required for real E2E. Until that decision, do not change checkout business logic, invent a shipping rate, issue real charges or report paid E2E PASS.
+- Resume next: after policy decision, implement Woo shipping line/confirmation sequence and associated no-order fixture QA, then deploy through existing production pipeline, finally signed gateway sandbox test with authorized test buyer.
+
+**Status: PARTIAL — awaiting shipping/payment business confirmation.**
