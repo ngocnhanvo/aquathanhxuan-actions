@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "6947a835d7fdc9d7aefc25f8a049b875498fe423",
+  "scope": "Deploy only allowlisted PHP changes for 5% automatic Woo coupon and verified checkout order totals/addresses; no Astro build"
+}
