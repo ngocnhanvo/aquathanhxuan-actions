@@ -55,6 +55,13 @@ let browser,admin,customerId=0,nonce='';
        ' code='+String(data?.code||'').slice(0,60));
    return data;
   }
+  const index=await admin.request.get(WP+'/wp-json/',{timeout:20000});
+  assert(index.ok(),'WordPress API index must be reachable');
+  const routes=(await index.json()).routes||{};
+  assert(Array.isArray(routes['/custom/v1/login']?.methods) &&
+    routes['/custom/v1/login'].methods.includes('POST'),
+    'WordPress custom/v1/login POST endpoint is missing; refuse to create a temporary customer');
+  result.checks.push({check:'WordPress REST customer login POST route registered',status:'PASS'});save();
   const list=await woo('GET','/wp-json/wc/v3/customers?email='+encodeURIComponent(email));
   assert(Array.isArray(list)&&list.length===0,'QA marker already exists; aborting to protect real records');
   const created=await woo('POST','/wp-json/wc/v3/customers',{
