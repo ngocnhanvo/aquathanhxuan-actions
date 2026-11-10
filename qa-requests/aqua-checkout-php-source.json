@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "3b57be2c3dfd6a0bf234ae8295027c0315deb01d",
-  "scope": "PHP_ONEPAY_BACKEND_THANKYOU_RETURN_SECURITY",
-  "purpose": "Validate OnePay HMAC/order/amount, paid-only frontend receipt, correct frontend context loader and CoCart guest checkout before PHP deploy",
+  "source_sha": "2b990bce6f5b1da93b70b5f57123ef58b62ff133",
+  "scope": "ONEPAY_SIGNED_RETURN_WITHOUT_DOMAIN_HELPER",
+  "purpose": "Regression: valid signed OnePay response, correct amount/order, redirect to official Aqua frontend without dependency on get_site_domain; fake callbacks blocked; no real payments",
   "production_order_creation": false,
   "no_real_orders": true
 }
