@@ -1,0 +1,11 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "6374593a847f2826844413a6719825478bc49992",
+  "purpose": "Fix Woo account email link to public Astro and preserve signed OnePay return; account/login checkout fixture QA passed",
+  "source_qa_run": 42794755129,
+  "no_orders_qa": true,
+  "astro_build": false
+}
