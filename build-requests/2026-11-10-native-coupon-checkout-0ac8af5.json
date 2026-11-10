@@ -1,0 +1,7 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "0ac8af50be65a4ead280d2368bd69195c27bcc01",
+  "purpose": "Publish latest safe cart add ID fix and checkout UI to verify WooCommerce native coupon",
+  "php_release_run": 42775328127
+}
