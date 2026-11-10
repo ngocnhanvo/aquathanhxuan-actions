@@ -3,5 +3,11 @@
   "action": "DISPOSABLE_CART_ONLY_NO_ORDER",
   "sourceProductId": 266939,
   "targetProductId": 82477,
-  "phpReleaseRun": 42771082969
+  "phpReleaseRun": 42775328127,
+  "nativeCouponId": 83818,
+  "nativeCouponPassRun": 42775054145,
+  "astroBuildRun": 42775644106,
+  "astroSourceSha": "0ac8af50be65a4ead280d2368bd69195c27bcc01",
+  "attempt": 2,
+  "previousRun": 42771889672
 }
