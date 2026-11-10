@@ -65,10 +65,69 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
    const editor=await selectEditor(before);
    await editor.fill(after);
    assert.equal(await page.locator('#esc-vb-edit-save').isEnabled(),true,'Save button disabled');
+   const responsePromise=page.waitForResponse(r=>
+     r.request().method()==='POST' &&
+     r.url().includes('/wp-json/esc-builder/v1/save-text'),{timeout:30000}).catch(()=>null);
    await page.locator('#esc-vb-edit-save').click();
-   await page.waitForFunction(()=>String(document.querySelector('#esc-vb-edit-feedback')?.textContent||'')
-     .includes('Đã lưu WordPress.'),null,{timeout:35000});
+   const response=await responsePromise;
+   if(response){
+     const body=await response.json().catch(()=>({}));
+     audit.last_save_http=response.status();
+     audit.last_save_code=String(body?.code||'none').slice(0,80);
+     audit.last_save_saved=Boolean(body?.saved);
+   }else audit.last_save_http='NO_RESPONSE';
+   record();
+   try{
+     await page.waitForFunction(()=>String(document.querySelector('#esc-vb-edit-feedback')?.textContent||'')
+       .includes('Đã lưu WordPress.'),null,{timeout:12000});
+   }catch(error){
+     audit.ui_feedback=String(await page.locator('#esc-vb-edit-feedback').textContent().catch(()=>'')).
+       replace(/\\s+/g,' ').slice(0,250);
+     record();
+     throw Error('Editor did not acknowledge canonical Save');
+   }
    await expectLabel(after);
+ };
+ const restoreNative=async()=>{
+   const current=await table();
+   assert.equal(current.items?.[idx]?.label,marker,'Restore source changed concurrently');
+   await page.goto(WP+'/wp-admin/admin.php?page=tablepress&action=edit&table_id='+TABLE,
+     {waitUntil:'domcontentloaded',timeout:60000});
+   await page.waitForFunction(()=>Boolean(window.tp?.editor?.getData),null,{timeout:22000});
+   const grid=await page.evaluate(()=>window.tp.editor.getData());
+   assert.equal(grid.length,base.length+2);
+   assert.deepEqual(grid[0],['key','label']);
+   for(let i=0;i<base.length;i++){
+     assert.equal(grid[i+2][0],base[i].key,'Native key mismatch on rollback');
+     assert.equal(grid[i+2][1],current.items[i].label,'Native label mismatch on rollback');
+   }
+   const newGrid=grid.map(row=>[...row]);
+   newGrid[idx+2][1]=original;
+   const editNonce=(await page.content()).match(/edit_table:\\s*'([^']+)'/)?.[1];
+   assert(editNonce,'Cannot read native TablePress editing nonce');
+   const form=new URLSearchParams();
+   for(const [key,value] of [
+     ['action','tablepress_save_table'],['_ajax_nonce',editNonce],
+     ['tablepress[id]',TABLE],['tablepress[new_id]',TABLE],
+     ['tablepress[name]',String(current.name||TABLE)],
+     ['tablepress[description]',String(current.description||'')],
+     ['tablepress[data]',JSON.stringify(newGrid)],
+     ['tablepress[options]',JSON.stringify(current.options||{})],
+     ['tablepress[visibility]',JSON.stringify(current.visibility||{
+       rows:newGrid.map(()=>1),columns:[1,1]})],
+     ['tablepress[number][rows]',String(newGrid.length)],
+     ['tablepress[number][columns]','2'],
+     ['custom_api',''],['custom_image',''],['custom_cols',''],['custom_rows','']
+   ])form.append(key,value);
+   const result=await page.evaluate(async body=>{
+     const res=await fetch('/wp-admin/admin-ajax.php',{method:'POST',
+       credentials:'same-origin',
+       headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body});
+     return {status:res.status,json:await res.json()};
+   },form.toString());
+   assert(result.status===200&&result.json?.success===true&&result.json?.table_id===TABLE,
+     'Native TablePress rollback failed');
+   await expectLabel(original);
  };
  try{
    page=await browser.newPage({viewport:{width:1440,height:900}});
@@ -111,7 +170,13 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
        const current=await table();
        const value=current.items?.[idx]?.label;
        if(value===marker){
-         await write(marker,original);
+         try{
+           await write(marker,original);
+         }catch(error){
+           audit.ui_restore_error=String(error?.message||error).split('\\n')[0].slice(0,180);
+           record();
+           await restoreNative();
+         }
          audit.restored=1;
        }else if(value!==original){
          throw Error('Concurrent source edit: cannot safely restore a different value');
