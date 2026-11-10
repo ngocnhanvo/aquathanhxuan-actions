@@ -3,12 +3,12 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "527063756fd57013349fc17e44eebc3617a72016",
+  "source_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
   "php_release_run": 42771082969,
   "attempt": 2,
   "previousRun": 42771343628,
   "reason": "Fix compiler import resolution in QA harness; no source or production changes",
-  "purpose": "Verify SSR cache registry discovery, cart, checkout, payment and receipt changes before production build",
-  "previous_source_qa": 42771739176,
+  "purpose": "Verify missing optional WordPress lost-password Page no longer breaks checkout SSR",
+  "previous_source_qa": 42780202889,
   "no_orders": true
 }
