@@ -1,0 +1,30 @@
+name: Aqua Cubic 40 production product page QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/combo-cubic40-production.json'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-combo-cubic40-production-qa.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Verify original product, public detail and existing product route on desktop and mobile
+        run: node scripts/aqua-combo-cubic40-production-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-combo-cubic40-production
+          path: artifacts/aqua-combo-cubic40-production
+          if-no-files-found: ignore
+          retention-days: 14
