@@ -154,7 +154,9 @@ const save = ()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(snapshot,nul
   const verify=await rest('/wp-json/wp/v2/pages/'+PAGE_ID+'?context=edit');
   assert.equal(verify.status,200);
   const finalText=String(verify.data.content?.raw||'');
-  assert.equal(finalText.split(shortcode).length-1,1,'Published Page shortcode missing or duplicated');
+  const matches=[...finalText.matchAll(/\[table\s+id=['"]?order_history_vi['"]?\s*\/\]/gi)];
+  console.log('ORDER_HISTORY_PAGE_READBACK='+JSON.stringify({length:finalText.length,shortcodes:matches.length,last:finalText.slice(-950)}));
+  assert.equal(matches.length,1,'Published Page shortcode missing or duplicated');
   assert.equal(verify.data.acf?.action,'OrderHistoryPage');
   snapshot.result='PASS';save();
   console.log('ORDER_HISTORY_ESC_CMS_PASS table='+TABLE+' page='+PAGE_ID+' writes='+snapshot.writes.length);
