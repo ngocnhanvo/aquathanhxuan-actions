@@ -13,6 +13,12 @@ async function test(){
     const page=await context.newPage();
     const home=await page.goto(ORIGIN+'/lich-su-mua-hang',{waitUntil:'domcontentloaded',timeout:50000});
     assert.equal(home.status(),200,'Account history should load');
+    await page.locator('#login-form').waitFor({state:'visible',timeout:15000});
+    console.log('RECOVERY_ACCOUNT_ANCHORS='+JSON.stringify(await page.locator('#login-form a').evaluateAll(links=>links.map(a=>({text:a.textContent?.trim(),path:a.getAttribute('href')})))));
+    for(const slug of ['quen-mat-khau','dat-lai-mat-khau']) {
+      const probe=await page.request.get(ORIGIN+'/'+slug,{timeout:20000});
+      console.log('RECOVERY_PAGE_PROBE_'+slug+'='+probe.status());
+    }
     const link=page.locator('#login-form a[href*="quen-mat-khau"]');
     await link.waitFor({state:'visible',timeout:25000});
     assert.equal(new URL(await link.getAttribute('href'),ORIGIN).pathname,'/quen-mat-khau');
