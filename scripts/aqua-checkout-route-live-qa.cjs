@@ -49,6 +49,10 @@ async function get(path){
    assert.equal(response.status,200,'SSR checkout route HTTP '+response.status+' at '+spec.path);
    assert(response.body.includes('<html')||response.body.includes('<!DOCTYPE'), 'Missing HTML at '+spec.path);
   }));
+  const accountPage=await get('/lich-su-mua-hang');
+  checks.push({kind:'Customer account-history route',path:'/lich-su-mua-hang',http:accountPage.status});
+  assert.equal(accountPage.status,200,
+   'Account link in WooCommerce new-account emails must open published Astro history route');
   const gateway=await get('/api/cart/payment-methods');
   assert.equal(gateway.status,200,'Payment gateway API unavailable');
   const methods=JSON.parse(gateway.body);
