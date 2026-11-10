@@ -9,6 +9,6 @@
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "v5-non-navigation-exact-physical-cell",
-  "previous_qa_run": 42864837415
+  "qa_revision": "v6-readonly-wp-retries-and-exact-cell",
+  "previous_qa_run": 42865720978
 }
