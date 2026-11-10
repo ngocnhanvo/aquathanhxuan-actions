@@ -26,11 +26,24 @@ jobs:
       - run: node --check scripts/aqua-builder-safe-save-qa.cjs
       - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
       - name: Save and restore one preview-only ESC label; assert exact REST readback
+        id: edit
         run: node scripts/aqua-builder-safe-save-qa.cjs
+      - name: Fail-closed independent native cleanup after any Save QA failure
+        if: ${{ always() && steps.edit.outcome == 'failure' }}
+        env:
+          AQUA_RECOVERY_SOURCE_RUN_ID: ${{ github.run_id }}
+        run: node scripts/aqua-builder-safe-save-cleanup.cjs
       - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: aqua-builder-controlled-save-restore
           path: artifacts/aqua-builder-safe-save/
           if-no-files-found: error
+          retention-days: 14
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-builder-failclosed-native-cleanup
+          path: artifacts/aqua-builder-save-cleanup/
+          if-no-files-found: ignore
           retention-days: 14
