@@ -1,0 +1,11 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "089d05c6f9d0b49fa67d7801c9c7248edf2568b1",
+  "purpose": "Rebuild Woo shipping checkout after native ESC Table received 6 required labels (65 total)",
+  "source_qa_run": 42885078315,
+  "php_release_run": 42886074121,
+  "cms_esc_labels_run": 42887729026,
+  "previous_deploy_run": 42886734754,
+  "no_orders": true
+}
