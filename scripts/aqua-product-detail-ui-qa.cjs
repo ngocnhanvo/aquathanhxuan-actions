@@ -235,6 +235,57 @@ async function run(){
    }
    report.samples.push(row);persist();
   }
+  // Exact customer-reported route and desktop viewport (original screenshot).
+  // This checks the real page in addition to the four Woo source-backed samples.
+  report.directStickyRoute=[];
+  for(const width of [1657,390]){
+   const context=await browser.newContext({viewport:{width,height:width===1657?921:844}});
+   try{
+    const page=await context.newPage();
+    const url=FRONT+'/san-pham/1443750909';
+    const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+    assert.equal(response?.status(),200,'Reported direct Product detail HTTP '+width);
+    const primary=page.locator('#product-purchase-actions');
+    const sticky=page.locator('#product-sticky-purchase');
+    assert.equal(await primary.count(),1,'Direct Product primary CTA '+width);
+    assert.equal(await sticky.count(),1,'Direct Product sticky CTA '+width);
+    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='true');
+    await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
+    await page.waitForFunction(()=>{
+     const bar=document.getElementById('product-sticky-purchase');
+     if(!bar)return false;
+     const b=bar.getBoundingClientRect();
+     return bar.classList.contains('is-visible') && bar.getAttribute('aria-hidden')==='false'
+       && getComputedStyle(bar).position==='fixed' && Math.abs(b.bottom-innerHeight)<=2;
+    },null,{timeout:8000});
+    const geometry=await sticky.locator('a[href]').evaluate(link=>{
+     const label=link.querySelector('span');
+     const bar=document.getElementById('product-sticky-purchase');
+     const rect=bar.getBoundingClientRect();
+     const footer=document.querySelector('footer')?.getBoundingClientRect();
+     return {
+      nowrap:label?getComputedStyle(label).whiteSpace==='nowrap':false,
+      lineBoxes:label?.getClientRects().length||0,
+      overflow:link.scrollWidth-link.clientWidth,
+      stickyBottom:rect.bottom,
+      viewportBottom:innerHeight,
+      footerVisible:footer?.top<innerHeight,
+      text:label?.textContent?.trim()||''
+     };
+    });
+    assert(geometry.nowrap&&geometry.lineBoxes===1&&geometry.overflow<=2,
+      'Reported route cart text wrap or overflow '+width+' '+JSON.stringify(geometry));
+    assert(Math.abs(geometry.stickyBottom-geometry.viewportBottom)<=2&&geometry.footerVisible,
+      'Reported route sticky bar must remain fixed over footer '+width+' '+JSON.stringify(geometry));
+    const horizontalOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+    assert(horizontalOverflow<=3,'Reported route horizontal overflow '+width+' '+horizontalOverflow);
+    const screenshot='reported-sticky-1443750909-'+width+'.png';
+    await page.screenshot({path:DIR+'/'+screenshot,fullPage:false});
+    report.screenshots.push(screenshot);
+    report.directStickyRoute.push({width,url,geometry,horizontalOverflow,passed:true});
+    console.log('REPORTED_PRODUCT_STICKY_FOOTER_PASS='+JSON.stringify({width,geometry}));
+   }finally{await context.close()}
+  }
   report.status='QA_PASS';
   report.completedAt=new Date().toISOString();persist();
   console.log('DETAIL_PRODUCT_UI_QA_PASS='+JSON.stringify({count:report.samples.length,viewports:[1440,390],screenshots:report.screenshots.length,sha:request.astro_sha}));
