@@ -3,5 +3,8 @@
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
-  "date": "2026-11-10"
+  "date": "2026-11-10",
+  "attempt": 1,
+  "reason": "Read native coupon and WooCommerce coupon setting after CoCart promo QA failure",
+  "failed_qa_run": 42776753563
 }
