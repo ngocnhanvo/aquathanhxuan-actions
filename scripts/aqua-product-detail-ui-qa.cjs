@@ -195,9 +195,39 @@ async function run(){
     const stickyShot='sticky-'+slug+'-'+width+'.png';
     await page.screenshot({path:DIR+'/'+stickyShot,fullPage:false});
     report.screenshots.push(stickyShot);
+    // Sticky cart copy must stay on one line, including narrower desktop layouts.
+    const cartButtonLayout=await sticky.locator('a[href]').evaluate(link=>{
+      const label=link.querySelector('span');
+      if(!label)throw Error('Sticky view-cart text label missing');
+      return {
+        nowrap:getComputedStyle(label).whiteSpace==='nowrap',
+        lineBoxes:label.getClientRects().length,
+        overflow:link.scrollWidth-link.clientWidth,
+        text:label.textContent?.trim()||'',
+      };
+    });
+    assert(cartButtonLayout.nowrap && cartButtonLayout.lineBoxes===1 && cartButtonLayout.overflow<=2,
+      'View cart must stay single-line without clipping '+slug+' '+width+' '+JSON.stringify(cartButtonLayout));
+
+    // Footer entry must not toggle the bar off/on; keep it at the viewport bottom.
     await page.locator('footer').scrollIntoViewIfNeeded();
-    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='true',{timeout:5000});
-    console.log('PRODUCT_PURCHASE_STICKY_PASS='+JSON.stringify({slug,width,initialHidden:true,beforeOriginalHidden:true,afterOriginalVisible:true,stickyVisibleOnDescription:true,footerHidden:true,delegatedClick:true}));
+    await page.waitForFunction(()=>document.getElementById('product-sticky-purchase')?.getAttribute('aria-hidden')==='false',{timeout:5000});
+    await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));
+    await page.waitForFunction(()=>{
+      const bar=document.getElementById('product-sticky-purchase');
+      if(!bar)return false;
+      const rect=bar.getBoundingClientRect();
+      return bar.classList.contains('is-visible') && bar.getAttribute('aria-hidden')==='false' &&
+        getComputedStyle(bar).position==='fixed' && Math.abs(rect.bottom-innerHeight)<=2;
+    },null,{timeout:5000});
+    const footerSticky=await page.evaluate(()=>{
+      const bar=document.getElementById('product-sticky-purchase').getBoundingClientRect();
+      return {top:bar.top,bottom:bar.bottom,viewport:innerHeight,ariaHidden:document.getElementById('product-sticky-purchase').getAttribute('aria-hidden')};
+    });
+    assert.equal(footerSticky.ariaHidden,'false','Sticky CTA hidden at footer '+slug+' '+width);
+    assert(Math.abs(footerSticky.bottom-footerSticky.viewport)<=2,
+      'Sticky CTA moved at footer '+slug+' '+width+' '+JSON.stringify(footerSticky));
+    console.log('PRODUCT_PURCHASE_STICKY_PASS='+JSON.stringify({slug,width,initialHidden:true,beforeOriginalHidden:true,afterOriginalVisible:true,stickyVisibleOnDescription:true,footerVisible:true,cartOneLine:true,delegatedClick:true}));
     assert.deepEqual(errors,[],'Browser errors '+slug);
     await ctx.close();
     row.screenshots.push(screenshot);
