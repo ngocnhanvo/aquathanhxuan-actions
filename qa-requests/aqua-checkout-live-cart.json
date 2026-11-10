@@ -3,12 +3,12 @@
   "action": "DISPOSABLE_CART_ONLY_NO_ORDER",
   "sourceProductId": 266939,
   "targetProductId": 82477,
-  "phpReleaseRun": 42777270521,
+  "phpReleaseRun": 42896710974,
   "nativeCouponId": 83818,
   "nativeCouponPassRun": 42775054145,
   "astroBuildRun": 42775644106,
   "astroSourceSha": "0ac8af50be65a4ead280d2368bd69195c27bcc01",
-  "attempt": 5,
+  "attempt": 6,
   "previousRun": 42776962551,
-  "reason": "Verify native WooCommerce coupon with pre-total subtotal correction, no orders"
+  "reason": "Verify deployed MF5 native WooCommerce 5% auto coupon in disposable cart (NO ORDERS), with renamed-code-safe QA"
 }
