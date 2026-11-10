@@ -26,6 +26,7 @@ FILES = (
     "wp-content/mu-plugins/esc-aqua-cart-promotion.php",
     "wp-content/themes/vibe-code-theme/inc/cart/cart_endpoint.php",
     "wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php",
+    "wp-content/themes/vibe-code-theme/inc/checkout/index.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.php",
     "wp-content/plugins/github-trigger/products/endpoint.php",
     "wp-content/plugins/github-trigger/vcs-build-trigger.js",
