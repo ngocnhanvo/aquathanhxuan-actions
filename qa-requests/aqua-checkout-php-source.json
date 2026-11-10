@@ -2,9 +2,9 @@
   "project": "aquathanhxuan.com",
   "source_repo": "ngocnhanvo/aquathanhxuan-php",
   "source_branch": "master",
-  "source_sha": "51014c0459400a8c5741b6aea0dcf3b07d69bf81",
-  "scope": "NATIVE_WOO_SHIPPING_SERVER_CONTRACT",
-  "purpose": "Retest native Woo shipping contract after adding offline WordPress filter stub",
+  "source_sha": "58f8fde24040d04fccd0301dd6af411a1645eb5d",
+  "scope": "NATIVE_WOO_SHIPPING_SELECTION_AND_QUOTE",
+  "purpose": "Verify CoCart shipping rate quotes, fresh rate validation, tax/lines and original COD idempotency tests offline",
   "production_order_creation": false,
   "no_real_orders": true,
   "previous_live_customer_run": 42802133987
