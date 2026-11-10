@@ -9,8 +9,8 @@
   "no_orders": true,
   "no_customers": true,
   "no_email": true,
-  "qa_revision": "v7-php-editor-80-labels-and-exact-selection",
-  "previous_qa_run": 42866090559,
+  "qa_revision": "v8-support-multi-eyebrow-verify-nine-pages",
+  "previous_qa_run": 42867884395,
   "php_release_run": 42867578142,
   "expected_editable_label_counts": {
     "order_history_vi": 38,
