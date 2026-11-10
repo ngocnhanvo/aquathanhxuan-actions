@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "6400fccb29df970ec911f33b1bd44b3739a80733",
+  "purpose": "Render loading skeleton immediately for Woo order history and settle it after API result",
+  "source_qa_run": 42837357222,
+  "no_orders": true
+}
