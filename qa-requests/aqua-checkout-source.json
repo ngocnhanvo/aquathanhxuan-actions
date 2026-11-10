@@ -3,12 +3,12 @@
   "mode": "NO_LIVE_ORDER",
   "source_repo": "ngocnhanvo/aquathanhxuan-astro",
   "branch": "master",
-  "source_sha": "b1893a47b52ff2db2947f37d6234e7496f807c71",
+  "source_sha": "ab93adec272cee6a19a5fda7ab4e1e95e2001eea",
   "php_release_run": 42771082969,
   "attempt": 2,
   "previousRun": 42771343628,
   "reason": "Fix compiler import resolution in QA harness; no source or production changes",
-  "purpose": "Verify missing optional WordPress lost-password Page no longer breaks checkout SSR",
-  "previous_source_qa": 42780202889,
+  "purpose": "Verify browser-persistent checkout idempotency token and existing cart/SSR routes",
+  "previous_source_qa": 42781729566,
   "no_orders": true
 }
