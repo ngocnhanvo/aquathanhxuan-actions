@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "3b57be2c3dfd6a0bf234ae8295027c0315deb01d",
+  "purpose": "Verify OnePay signed return HMAC matches order ID and amount before payment status update; return paid customers to Astro receipt",
+  "source_qa_run": 42790410351,
+  "woo_checkout_pages_run": 42788844918,
+  "no_real_orders_qa": true,
+  "astro_build": false
+}
