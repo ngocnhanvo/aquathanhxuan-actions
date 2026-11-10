@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "4d9cbe49e8b5539d8e403013483aaa72d20fa1aa",
+  "purpose": "Deploy order history search, pagination and native ESC Table labels",
+  "source_qa_run": 42841871088,
+  "cms_page_run": 42841389141,
+  "no_orders": true
+}
