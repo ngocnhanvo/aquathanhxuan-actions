@@ -57,7 +57,8 @@ jobs:
             'src/astro/pages/CheckoutDonePage.astro',
             'src/astroutils/CheckoutPage/InfoForm.astro',
             'src/astroutils/CheckoutPage/LoginForm.astro',
-            'src/astroutils/Header/Cart.astro'
+            'src/astroutils/Header/Cart.astro',
+            'src/astro/pages/OrderHistoryPage.astro'
           ];
           for (const path of files){
             const raw=fs.readFileSync(path,'utf8');
@@ -68,6 +69,8 @@ jobs:
           const form=fs.readFileSync(files[3],'utf8');
           const cart=fs.readFileSync(files[0],'utf8');
           const login=fs.readFileSync(files[4],'utf8');
+          const history=fs.readFileSync(files[6],'utf8');
+          assert(history.includes('const esc =') && history.includes('${esc(item.name)}'),'Order history must HTML-escape customer-originated content');
           assert(login.includes('pageLostPass?.slug'),'Missing WordPress lost-password Page must not crash checkout SSR');
           const payment=fs.readFileSync('src/pages/api/cart/payment-methods.ts','utf8');
           assert(form.includes('/api/cart/payment-methods'),'Checkout must load active gateway list');
