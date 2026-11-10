@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "fa1fddbd4c7fefcf76f62e168bf11c8bc26b2ead",
+  "purpose": "Hide BACS when WooCommerce bank account list is empty; preserve OnePAY and idempotent cart checkout",
+  "source_qa_run": 42785105749,
+  "php_release_run": 42785150060
+}
