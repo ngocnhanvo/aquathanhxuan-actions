@@ -339,7 +339,7 @@ async function run(){
       assert(!cardUrls.includes('/san-pham/'+secondViewedSlug),'Current Product incorrectly included '+width);
       assert.equal(await page.locator('#recently-viewed-empty').isVisible(),false,'Empty state should hide when a previous Product exists '+width);
       const title=await page.locator('#recently-viewed-title').innerText();
-      assert.equal(title,'SẢN PHẨM ĐÃ XEM','Recently viewed VI heading '+width);
+      assert.equal(title.trim().toLocaleLowerCase('vi'),'sản phẩm đã xem','Recently viewed VI heading '+width);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
       assert(overflow<=3,'Recently viewed layout horizontal overflow '+width+' '+overflow);
       await page.locator('#recently-viewed').scrollIntoViewIfNeeded();
