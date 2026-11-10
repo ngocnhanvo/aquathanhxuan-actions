@@ -12,7 +12,7 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try {
   const page=await browser.newPage();
-  for(const path of ['/cart','/cart/','/checkout','/checkout/','/gio-hang','/gio-hang/','/thanh-toan','/thanh-toan/']){
+  for(const path of ['/cart','/cart/','/checkout','/checkout/','/order-received','/gio-hang','/gio-hang/','/thanh-toan','/thanh-toan/','/ssr/cart/cart','/ssr/cart/checkout','/ssr/cart/order-received']){
    const r=await page.goto(FRONT+path,{waitUntil:'domcontentloaded',timeout:35000}).catch(e=>null);
    report.routes.push({path,status:r?.status()||0,url:page.url(),h1:await page.locator('h1').first().textContent().catch(()=>null)});
   }
@@ -32,12 +32,14 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
    report.checks.push({key,status:r.status(),isArray:Array.isArray(data)});
    return Array.isArray(data)?data:[];
   }
-  const [gateways,coupons,pages,settings]=await Promise.all([
+  const [gateways,coupons,pages,settings,rewrites]=await Promise.all([
    get('gateways','/wp-json/wc/v3/payment_gateways'),
    get('coupons','/wp-json/wc/v3/coupons?per_page=100'),
    get('pages','/wp-json/wp/v2/pages?per_page=100&status=publish&context=edit'),
-   get('settings','/wp-json/wc/v3/settings/general')
+   get('settings','/wp-json/wc/v3/settings/general'),
+   get('rewrite','/wp-json/wp/v2/chuyen-huong-link?context=edit&status=publish&per_page=100')
   ]);
+  report.checkoutRewrites=rewrites.filter(x=>/cart|checkout|order-received/i.test(String(x.acf?.from_link||''))).map(x=>({id:x.id,from:x.acf?.from_link,to:x.acf?.to_link,type:x.acf?.type,match_type:x.acf?.match_type,enable:x.acf?.enable}));
   report.woocommerceCouponSetting=settings.find(x=>x.id==='woocommerce_enable_coupons')?.value??'NOT_RETURNED';
   report.gateway=gateways.map(x=>({id:x.id,title:x.title,enabled:x.enabled,method_title:x.method_title}));
   report.coupons=coupons.filter(x=>x.status==='publish').map(x=>({id:x.id,code:x.code,discount_type:x.discount_type,amount:x.amount,minimum_amount:x.minimum_amount,individual_use:x.individual_use}));
