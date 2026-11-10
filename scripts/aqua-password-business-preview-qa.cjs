@@ -57,6 +57,12 @@ const targets=[
     for(const state of t.states){
       await picker.selectOption(state);
       await frame.locator('#esc-business-preview-state').waitFor({state:'visible',timeout:60000});
+      if(state!==t.states[0]){
+        await admin.waitForTimeout(1000);
+        const locationSearch=await frame.locator('html').evaluate(() => location.search);
+        assert.equal(new URLSearchParams(locationSearch).get('vb_state'),state,
+          'Preview state URL did not update '+t.slug+':'+state);
+      }
       const selected=await frame.locator('#esc-business-preview-state').inputValue();
       assert.equal(selected,state,'Preview state did not change '+t.slug+':'+state);
       const attr=await frame.locator('h1').first().evaluate(el=>({
@@ -72,7 +78,8 @@ const targets=[
       console.log('AQUA_PASSWORD_BUILDER_STATE_PASS='+t.slug+':'+state);
     }
     await frame.locator('h1').first().click();
-    await admin.locator('#esc-vb-edit-title').waitFor({state:'visible',timeout:25000});
+    await admin.waitForFunction(() => Boolean(document.querySelector('#esc-vb-edit-row option[value="0:label"]')),
+      null,{timeout:25000});
     assert.equal(await admin.locator('#esc-vb-edit-title').isDisabled(),false,'ESC cell not editable');
     await admin.screenshot({path:OUT+'/'+t.slug+'-builder.png',fullPage:false});
     console.log('AQUA_PASSWORD_BUILDER_CELL_PASS='+t.slug);
