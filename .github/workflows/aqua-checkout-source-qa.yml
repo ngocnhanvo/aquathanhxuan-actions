@@ -78,6 +78,7 @@ jobs:
           assert(cart.includes('renderCart();'),'Cart must render its initial state');
           assert(payment.includes('item.enabled === true'),'Only configured Woo methods selectable');
           assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('data.order_id'),'Checkout requires confirmed Woo order');
+          assert(fs.readFileSync('src/pages/api/cart/checkout.ts','utf8').includes('checkout_request_id,'),'CoCart proxy must forward idempotency token');
           console.log('AQUA_CHECKOUT_SOURCE_QA_PASS');
           NODE
       - name: Existing cart product buttons regression
