@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_sha": "06d58e417dfbd62cbc471755a58c08e58428cfb6",
+  "purpose": "Cart product images and prices plus tax-inclusive Woo totals in cart and checkout; preserve native coupon",
+  "source_qa_run": 42814401425,
+  "woo_tax_settings_qa_run": 42814147919,
+  "no_real_orders": true
+}
