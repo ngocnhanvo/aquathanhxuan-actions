@@ -87,7 +87,7 @@ const save = ()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(snapshot,nul
    const result=await page.evaluate(async data=>{
      const res=await fetch('/wp-admin/admin-ajax.php',{method:'POST',credentials:'same-origin',
        headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:data});
-     return {status:res.status(),json:await res.json()};
+     return {status:res.status,json:await res.json()};
    },form.toString());
    assert(result.status===200 && result.json?.success===true && result.json?.table_id===TABLE,
      'Save native TablePress failed: '+JSON.stringify(result));
