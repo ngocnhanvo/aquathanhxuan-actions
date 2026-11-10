@@ -110,6 +110,8 @@ jobs:
           php source-php/tests/aqua-onepay-context-loader.test.php
           php -l source-php/wp-content/themes/vibe-code-theme/inc/user/login.php
           php source-php/tests/aqua-customer-login-contract.test.php
+          php -l source-php/wp-content/themes/vibe-code-theme/inc/user/lostpass.php
+          php source-php/tests/aqua-password-recovery.test.php
           ! grep -Eqi 'nghiencuukhoahoc|EduResearch Hub' source-php/wp-content/mu-plugins/esc-seo-files.php
           php -l source-php/wp-content/plugins/github-trigger/tests/build-status-regression.php
           php source-php/wp-content/plugins/github-trigger/tests/build-status-regression.php
