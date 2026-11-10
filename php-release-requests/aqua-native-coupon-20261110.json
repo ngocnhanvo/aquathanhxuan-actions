@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "4ee0532935166732c0423afa1fb5edfc0a0019ce",
+  "purpose": "Use published WooCommerce coupon as the sole source of automatic 5 percent promotion",
+  "coupon_id": 83818,
+  "coupon_code": "aqua-auto-5",
+  "coupon_setup_run": 42775054145,
+  "no_astro_build": true
+}
