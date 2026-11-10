@@ -208,6 +208,25 @@ const record=()=>fs.writeFileSync(OUT+'/result.json',JSON.stringify(audit,null,2
      assert.equal(await editor.isEnabled(),true,'Editable cell text area disabled '+p.table);
      const initial=await editor.inputValue();
      assert(initial.trim(),'Blank native editable label '+p.table);
+     if(p.table==='checkout_ui_vi'){
+       const live=frame.locator('[data-esc-source-type="esc_table"]'+
+         '[data-esc-source-table="checkout_ui_vi"][data-esc-source-row="58"]'+
+         '[data-esc-source-field="label"]:visible').first();
+       await live.waitFor({state:'visible',timeout:20000});
+       assert.equal((await live.innerText()).trim(),initial,'Demo label source differs from editor');
+       await editor.fill(initial+' [NHÁP QA]');
+       await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===false,
+         null,{timeout:12000});
+       await live.getByText(initial+' [NHÁP QA]',{exact:true}).waitFor({state:'visible',timeout:14000}).catch(async()=>{
+         assert.equal((await live.innerText()).trim(),initial+' [NHÁP QA]','Detached preview did not render WordPress label draft');
+       });
+       await editor.fill(initial);
+       await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===true,
+         null,{timeout:12000});
+       await page.waitForTimeout(250);
+       assert.equal((await live.innerText()).trim(),initial,'Detached ESC draft revert failed');
+       console.log('AQUA_CHECKOUT_DETACHED_ESC_DRAFT_REVERT_PASS row=58');
+     }
      await editor.fill(initial+' ');
      await page.waitForFunction(()=>document.querySelector('#esc-vb-edit-save')?.disabled===false,
        null,{timeout:12000});
