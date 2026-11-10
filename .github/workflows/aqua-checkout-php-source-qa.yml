@@ -1,0 +1,41 @@
+name: Aqua checkout PHP source regression QA (NO FTP / NO ORDERS)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-checkout-php-source.json'
+permissions:
+  contents: read
+jobs:
+  php-fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source-php
+          persist-credentials: false
+      - name: Verify requested PHP master source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(node -p "require('./qa-requests/aqua-checkout-php-source.json').source_sha")"
+          actual="$(git -C source-php rev-parse HEAD)"
+          test "$actual" = "$expected"
+          echo "AQUA_PHP_CHECKOUT_SOURCE_SHA=$actual"
+      - name: Checkout PHP lint and in-memory contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l source-php/wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php
+          php -l source-php/tests/aqua-checkout-order-contract.test.php
+          php source-php/tests/aqua-checkout-preflight.test.php
+          php source-php/tests/aqua-checkout-idempotency.test.php
+          php source-php/tests/aqua-checkout-order-contract.test.php
+          echo 'AQUA_PHP_CHECKOUT_SOURCE_QA=PASS no_real_orders=true'
