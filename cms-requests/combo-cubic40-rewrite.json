@@ -1,0 +1,14 @@
+{
+  "project": "aquathanhxuan.com",
+  "mode": "apply-one-native-rewrite",
+  "scope": "single verified Product slug only; no product edit, no category edit",
+  "sourceProductId": 266939,
+  "targetProductId": 82477,
+  "slug": "combo-be-cubic-40-sieu-trong",
+  "from": "^/san-pham/(combo-be-cubic-40-sieu-trong)/?$",
+  "to": "/ssr/products/$1/detail",
+  "diagnosticRun": 42759007728,
+  "sourceHttp": 200,
+  "publicHttpBefore": 500,
+  "directSsrHttp": 200
+}
