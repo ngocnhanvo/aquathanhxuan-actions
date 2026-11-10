@@ -1,13 +1,14 @@
 {
-  "scope": "AQUA_ONEPAY_RETURN_CONFIG_READONLY",
+  "scope": "AQUA_ONEPAY_CALLBACK_PAGE_CONTENT_READONLY",
   "source": "https://aquathanhxuan.com/cart/",
   "target": "https://aquathanhxuan.io.vn",
   "purpose": "inspect published Woo payments, coupons, route slugs without modifying orders or settings",
   "date": "2026-11-10",
-  "attempt": 7,
-  "reason": "Verify OnePay merchant configuration status, gateway host/protocol and Woo checkout/thankyou endpoint required for payment callback; no order creation",
+  "attempt": 8,
+  "reason": "Compare configured Woo backend checkout Page with Astro checkout SSR Page, verify shortcode/blocks for OnePay return handling and safe URL configuration flags",
   "failed_qa_run": 42776753563,
   "deploy_run": 42780443864,
   "browser_qa_run": 42787012776,
-  "php_contract_run": 42786587717
+  "php_contract_run": 42786587717,
+  "previous_audit_run": 42787729538
 }
