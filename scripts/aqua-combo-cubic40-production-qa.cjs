@@ -19,7 +19,7 @@ async function main(){
    const r=await fetch(BASE+'/aquathanhxuan-staging-build.json?t='+Date.now(),{
     signal:AbortSignal.timeout(9000),headers:{'Cache-Control':'no-cache'}
    });
-   if(r.ok())marker=String((await r.json()).commit||'');
+   if(r.ok)marker=String((await r.json()).commit||'');
    if(marker===SHA)break;
   }catch(e){marker=String(e).slice(0,100)}
   if(attempt<11)await sleep(10000);
