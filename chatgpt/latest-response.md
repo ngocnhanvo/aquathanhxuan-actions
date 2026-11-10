@@ -1,22 +1,44 @@
-# Aqua Thanh Xuân — Latest response 10/11/2026: ảnh và giá giỏ hàng /cart, giá đã gồm thuế
+# ChatGPT latest-response — aquathanhxuan.com
 
-**Yêu cầu hiện tại hoàn tất và nghiệm thu trên production:** user chụp màn hình `/cart` thiếu ảnh, đơn giá và thành tiền = 0; tổng tiền cộng thêm VAT. Astro master `06d58e417dfbd62cbc471755a58c08e58428cfb6` đã sửa CoCart mapping ảnh/giá, refresh trên `/cart` kể cả khi không có query cart_key, hỗ trợ cập nhật giỏ và checkout theo giá gộp VAT, không render VAT surcharge. Woo Admin đã xác minh 3 setting giá VAT-inclusive; giữ nguyên native coupon `aqua-auto-5`.
+- Thời điểm: 2026-11-10 (Asia/Ho_Chi_Minh)
+- Project: aquathanhxuan.com
+- Repository: ngocnhanvo/aquathanhxuan-actions
+- Branch: main
+- Astro master SHA: 3e00ba57d9adfb70d2c5f8658a63ac99f3314098
+- PHP master SHA: cbaffc1831a40fc85fc829e0ad2d40025107bdeb
+- COD Woo readback: PASS #42817289132
+- Source QA: PASS #42818057110
+- PHP release: SUCCESS #42818081582
+- Astro trigger: SUCCESS #42818312059
+- Astro deploy: SUCCESS #42818443637
+- Browser Playwright: PASS #42818776565, cleanup PASS, orders 0
+- Latest-response lưu: SAVED (được xác minh bởi commit cập nhật file)
 
-**Giá trị Woo được xác nhận bằng kiểm thử:** combo 82477 giá 2.700.000đ, coupon giảm 135.000đ, tổng phải trả 2.565.000đ, ship 0, không có VAT cộng thêm; Woo vẫn tính/report VAT nội bộ.
+## Nguyên văn phản hồi gửi người dùng
 
-| Công đoạn | Kết quả |
-|---|---|
-| [CMS Woo VAT settings + QA #42814147919](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814147919) | SUCCESS, cleanup PASS |
-| [Astro source QA #42814401425](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814401425) | SUCCESS |
-| [Production trigger #42814543204](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814543204) | SUCCESS |
-| [Production deploy #42814669203](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814669203) | SUCCESS |
-| [Playwright production #42814974242](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814974242) | SUCCESS, ảnh/tất cả giá, checkout, cleanup |
-| [Playwright direct /cart #42815362692](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42815362692) | SUCCESS, URL không có query cart_key, localStorage restore, cleanup |
+Mình đã cập nhật mã nguồn checkout và **bật thành công phương thức COD trong WooCommerce**.
 
-Checkpoint chi tiết: [docs/checkpoints/2026-11-10-cart-image-tax-inclusive.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-cart-image-tax-inclusive.md).
+Các thay đổi đang được triển khai gồm:
 
-**Chưa hoàn tất phần rộng hơn của checkout E2E:** chính sách shipping/chi phí vận chuyển, BACS cần tài khoản ngân hàng được xác minh, OnePay sandbox/paid receipt/stock/email chưa thử giao dịch. Không tạo đơn thật trong QA giỏ hàng.
+1. Bỏ lựa chọn **Cá nhân / Tổ chức** và trường **CCCD/MSDN**.
+2. Đổi nhãn thành **Họ và tên \***.
+3. **Số điện thoại không bắt buộc**, kể cả khi gửi đơn về backend WordPress.
+4. Chỉ cho phép chọn **Thanh toán khi nhận hàng (COD)** trên website mới; giữ cấu hình OnePay trong WordPress để sử dụng lại khi cần.
+5. Đưa trường **Địa chỉ** lên trước **Tỉnh/Thành phố** và **Quận/Huyện/Phường**.
+
+WooCommerce đã xác nhận bật COD qua [Actions #42817289132](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42817289132). Mình tiếp tục phần kiểm thử, phát hành PHP/Astro và nghiệm thu giao diện production.
+
+**Đã hoàn tất triển khai lên production và nghiệm thu thành công.**
+
+- [Mở trang thanh toán](https://aquathanhxuan.io.vn/checkout).
+- [Kiểm thử mã nguồn](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818057110): PASS.
+- [Triển khai PHP](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818081582) và [deploy Astro](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818443637): SUCCESS.
+- [Playwright trên production](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42818776565): PASS, gồm desktop/mobile, COD duy nhất, form không bắt buộc số điện thoại và địa chỉ đúng thứ tự.
+
+**An toàn dữ liệu:** Kiểm thử đã chặn gửi yêu cầu tạo đơn, không tạo đơn hàng hay tài khoản thật; giỏ kiểm thử đã được dọn sạch. Chương trình coupon 5% và giá đã gồm thuế được giữ nguyên.
+
+Đã lưu [checkpoint triển khai](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-cod-simplified.md) và bản phản hồi mới nhất vào repo Actions.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: PARTIAL — chưa hoàn tất
+Trạng thái: DONE — hoàn tất
