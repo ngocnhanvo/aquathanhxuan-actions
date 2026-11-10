@@ -70,7 +70,42 @@ try {
     pending: Number(window.vcsBuild?.pending_count || 0),
   }));
   if (!config.configured) throw new Error('WORDPRESS_BUILD_NOT_CONFIGURED');
-  if (config.active) throw new Error('WORDPRESS_BUILD_ALREADY_ACTIVE; refusing duplicate trigger');
+  if (config.active) {
+    // The initial_active flag is a snapshot. WordPress reconciles completed
+    // GitHub runs only when its nonce-protected status endpoint is called.
+    // Never clear a lock or start a second build while the live status is active.
+    let released = false;
+    for (let attempt=0;attempt<4;attempt++) {
+      const live = await page.evaluate(async () => {
+        const cfg = window.vcsBuild;
+        const body = new URLSearchParams({
+          action: 'vcs_check_build_status', nonce: String(cfg?.nonce || '')
+        });
+        const res = await fetch(cfg?.ajax_url || '/wp-admin/admin-ajax.php', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          body
+        });
+        const payload = await res.json().catch(() => null);
+        return { ok: res.ok && payload?.success===true,
+          status: String(payload?.data?.status || ''),
+          active: payload?.data?.build_active===true };
+      });
+      console.log(`WORDPRESS_BUILD_LIVE_RECHECK status=${live.status} active=${live.active} attempt=${attempt+1}`);
+      if (live.ok && !live.active && ['idle','success','error'].includes(live.status)) {
+        released = true;
+        break;
+      }
+      if (live.ok && live.active && live.status === 'loading') {
+        throw new Error('WORDPRESS_BUILD_ALREADY_ACTIVE; live run in progress');
+      }
+      if (attempt<3) await sleep(2000);
+    }
+    if (!released) throw new Error('WORDPRESS_BUILD_ALREADY_ACTIVE; live status did not release');
+    await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+    const stillActive = await page.evaluate(() => Boolean(window.vcsBuild?.initial_active));
+    if (stillActive) throw new Error('WORDPRESS_BUILD_ALREADY_ACTIVE; lock persisted after reconciliation');
+  }
   console.log(`WORDPRESS_BUILD_PREFLIGHT=PASS pending_count=${config.pending}`);
 
   const force = page.locator('#vcs-force-build');
