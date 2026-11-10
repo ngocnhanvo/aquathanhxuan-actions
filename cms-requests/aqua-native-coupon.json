@@ -5,5 +5,8 @@
   "discount_type": "percent",
   "amount": "5",
   "minimum_amount": "200000",
-  "no_orders": true
+  "no_orders": true,
+  "attempt": 2,
+  "previous_run": 42774714799,
+  "reason": "Verify persisted coupon using numeric amount normalization; do not duplicate"
 }
