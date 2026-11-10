@@ -1,0 +1,21 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "scope": "MF5_MF10_GROUP_ONLY",
+  "source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "0f2ef126deb7ecdbb090cd086a4482652a560e5c",
+  "php_release_run": 42902204133,
+  "target_coupons": [
+    "mf5",
+    "mf10"
+  ],
+  "groups": [
+    "Giá trị đơn hàng",
+    "Tết"
+  ],
+  "stack_mode": "cross_group",
+  "no_orders": true,
+  "no_products_modified": true,
+  "temporary_created": 0
+}
