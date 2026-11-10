@@ -1,34 +1,21 @@
-# Đã khôi phục checkpoint mới nhất — 10/11/2026
+# Aqua Thanh Xuân — Latest response 10/11/2026: ảnh và giá giỏ hàng /cart, giá đã gồm thuế
 
-Mình đã đối chiếu các repo Aqua Thanh Xuân với `chatgpt/latest-response.md`. Trạng thái hiện tại:
+**Yêu cầu hiện tại hoàn tất và nghiệm thu trên production:** user chụp màn hình `/cart` thiếu ảnh, đơn giá và thành tiền = 0; tổng tiền cộng thêm VAT. Astro master `06d58e417dfbd62cbc471755a58c08e58428cfb6` đã sửa CoCart mapping ảnh/giá, refresh trên `/cart` kể cả khi không có query cart_key, hỗ trợ cập nhật giỏ và checkout theo giá gộp VAT, không render VAT surcharge. Woo Admin đã xác minh 3 setting giá VAT-inclusive; giữ nguyên native coupon `aqua-auto-5`.
 
-| Repository | Commit mới nhất |
+**Giá trị Woo được xác nhận bằng kiểm thử:** combo 82477 giá 2.700.000đ, coupon giảm 135.000đ, tổng phải trả 2.565.000đ, ship 0, không có VAT cộng thêm; Woo vẫn tính/report VAT nội bộ.
+
+| Công đoạn | Kết quả |
 |---|---|
-| Astro `master` | `272290ec` |
-| WordPress/PHP `master` | `e8dd6954` |
-| Knowledge `main` | `60878844` |
-| Actions `main` tại thời điểm bắt đầu | `b0fa3bf4` |
+| [CMS Woo VAT settings + QA #42814147919](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814147919) | SUCCESS, cleanup PASS |
+| [Astro source QA #42814401425](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814401425) | SUCCESS |
+| [Production trigger #42814543204](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814543204) | SUCCESS |
+| [Production deploy #42814669203](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814669203) | SUCCESS |
+| [Playwright production #42814974242](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42814974242) | SUCCESS, ảnh/tất cả giá, checkout, cleanup |
+| [Playwright direct /cart #42815362692](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42815362692) | SUCCESS, URL không có query cart_key, localStorage restore, cleanup |
 
-**Phần đã hoàn thành và triển khai production:**
+Checkpoint chi tiết: [docs/checkpoints/2026-11-10-cart-image-tax-inclusive.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-cart-image-tax-inclusive.md).
 
-- Thêm sản phẩm, xem và cập nhật giỏ hàng.
-- Tự động áp dụng coupon WooCommerce giảm 5% từ 200.000đ.
-- Trang checkout, nhập thông tin khách hàng và tạo tài khoản.
-- Bảo vệ phiên đăng nhập, lịch sử đơn hàng và chống gửi đơn trùng.
-- Sửa lỗi escape HTML/XSS trong giỏ hàng và checkout.
-
-Các lần kiểm thử cuối được ghi nhận thành công:
-- [Source QA — 26/26 tests PASS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42809623082).
-- [Production deploy — SUCCESS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42809847081).
-- [Playwright giỏ hàng và checkout — SUCCESS](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42810194245).
-
-**Phần chưa nghiệm thu:** Vận chuyển chưa có cấu hình phí, BACS chưa có tài khoản nhận tiền được xác minh và OnePay chưa có sandbox để kiểm thử giao dịch thực. Vì vậy chưa thể xác nhận toàn bộ luồng thanh toán thực tế đã hoàn tất.
-
-**Kiểm tra bổ sung trong lượt tiếp tục:** Đọc lại `checkout_endpoint.php`: các trường địa chỉ giao hàng được lưu nhưng chưa tạo dòng phí vận chuyển khi tính tổng Woo và gọi OnePay. Đối chiếu thêm `inc/checkout/index.php` cho thấy đã có bộ kiểm HMAC, đúng order ID và số tiền cho callback OnePay, nhưng chưa có giao dịch sandbox E2E. Đọc lại các job Actions cuối: `completed/success`.
-
-Đã lưu bằng chứng vào [checkpoint cập nhật](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-10-checkout-html-safety.md), commit `7c5a76c7`. Không sửa source Astro/PHP, không chạy lại build đã PASS, không tạo order/account/giao dịch thật.
-
-**Cần quyết định của chủ shop:** (1) cấu hình shipping zone/method/rate WooCommerce để thu tổng tiền gồm ship ngay; hoặc (2) quy trình xác nhận cước/tổng đơn trước khi gửi yêu cầu thanh toán. BACS chỉ mở khi có tài khoản ngân hàng được xác minh; cần OnePay sandbox hoặc tài khoản test được phê duyệt để nghiệm thu callback/paid receipt/stock/email/đơn hàng. Chưa đủ điều kiện phát hành thay đổi thanh toán an toàn.
+**Chưa hoàn tất phần rộng hơn của checkout E2E:** chính sách shipping/chi phí vận chuyển, BACS cần tài khoản ngân hàng được xác minh, OnePay sandbox/paid receipt/stock/email chưa thử giao dịch. Không tạo đơn thật trong QA giỏ hàng.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
