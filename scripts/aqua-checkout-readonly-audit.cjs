@@ -77,6 +77,16 @@ const save=()=>fs.writeFileSync(OUT+'/audit.json',JSON.stringify(report,null,2)+
     .map(x=>({id:x.id,value:x.value}));
 
   report.gateway=gateways.map(x=>({id:x.id,title:x.title,enabled:x.enabled,method_title:x.method_title}));
+  // Only public-facing BACS bank names/count, never log account numbers.
+  const bacsResponse=await page.request.get(URL+'/wp-json/wc/v3/payment_gateways/bacs',{headers,timeout:30000});
+  const bacs=bacsResponse.ok()?await bacsResponse.json():null;
+  const bankAccounts=Array.isArray(bacs?.settings?.accounts?.value)?bacs.settings.accounts.value:[];
+  report.bacsAccountSettings={
+   http:bacsResponse.status(),enabled:bacs?.enabled??null,
+   count:bankAccounts.length,
+   bankNames:bankAccounts.map(x=>String(x.bank_name||'').slice(0,100))
+  };
+
   report.coupons=coupons.filter(x=>x.status==='publish').map(x=>({id:x.id,code:x.code,discount_type:x.discount_type,amount:x.amount,minimum_amount:x.minimum_amount,individual_use:x.individual_use}));
   report.pageCandidates=pages.filter(x=>/ssr-cart|ssr-checkout|cart|checkout|thanh-toan|gio-hang/i.test(JSON.stringify(x.acf||{})+' '+x.slug+' '+x.title?.rendered)).map(x=>({id:x.id,slug:x.slug,acf:{key:x.acf?.key,action:x.acf?.action},title:x.title?.rendered}));
   report.status='PASS';save();
