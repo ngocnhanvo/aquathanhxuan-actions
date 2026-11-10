@@ -1,0 +1,32 @@
+name: Aqua header customer and cart production browser QA (READ ONLY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-header-commerce-production-qa.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify browser script syntax
+        run: node --check scripts/aqua-header-commerce-production-qa.cjs
+      - name: Use matching installed browser driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Run production desktop/mobile browser checks without orders
+        run: node scripts/aqua-header-commerce-production-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-header-commerce-browser-evidence
+          path: artifacts/aqua-header-commerce/
+          if-no-files-found: ignore
+          retention-days: 7
