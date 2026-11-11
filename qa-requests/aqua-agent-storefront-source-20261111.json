@@ -1,7 +1,7 @@
 {
   "project": "aquathanhxuan.com",
   "astro_sha": "a41f9af898f11ca7dbf357aeb1f972d34efaf7db",
-  "php_sha": "42da9afaaa421f663c4085e594d3d46adbd20eb1",
-  "scope": "aqua_agent_product_advice_offline_fixture_and_storefront_source_regression",
+  "php_sha": "0610ae4b1017b43b0a4bf4729db9793681f600c1",
+  "scope": "aqua_agent_product_advice_catalog_no_suitability_claim_fixture",
   "read_only": true
 }
