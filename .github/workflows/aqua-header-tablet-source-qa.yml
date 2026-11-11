@@ -1,0 +1,50 @@
+name: Aqua header responsive source QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-header-tablet-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  compile-header:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          path: astro
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: {version: 9.15.9, run_install: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: pnpm, cache-dependency-path: astro/pnpm-lock.yaml}
+      - name: Install locked packages
+        working-directory: astro
+        run: pnpm install --frozen-lockfile
+      - name: Confirm exact source and compile header components
+        working-directory: astro
+        run: |
+          test "$(git rev-parse HEAD)" = "53bf9cf226b28fdecae47fa658fb6882ce5eebe3"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {createRequire} from 'node:module';
+          const require=createRequire(import.meta.url);
+          const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
+          for(const file of ['src/astro/components/Layout/Header.astro','src/astroutils/Header/UserAccount.astro','src/astroutils/Header/Cart.astro']){
+            const s=fs.readFileSync(file,'utf8');
+            assert((await transform(s,{filename:file})).code,'Astro compilation failed: '+file);
+            console.log('HEADER_COMPILE_PASS='+file);
+          }
+          const header=fs.readFileSync('src/astro/components/Layout/Header.astro','utf8');
+          assert(header.includes('grid-template-columns: minmax(185px, 1fr) minmax(0, 620px) minmax(185px, 1fr)'),'Centered desktop grid missing');
+          assert(header.includes('position: static;')&&header.includes('justify-self: stretch;'),'Search must participate in desktop layout');
+          assert(header.includes('max-width: 1279px')&&header.includes('.js-account-label'),'Compact account must have an explicit breakpoint');
+          assert(header.includes('<UserAccount')&&header.includes('<Cart'),'Existing account/cart components must remain functional');
+          console.log('HEADER_RESPONSIVE_SOURCE_PASS');
+          JS
