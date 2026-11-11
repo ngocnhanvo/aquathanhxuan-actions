@@ -15,6 +15,20 @@ function decode(s){
   .replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&apos;|&#039;/gi,"'")
   .replace(/&nbsp;/gi,' ').replace(/\s+/g,' ').trim();
 }
+// Additional independent old-domain pages verified by live web retrieval
+// on 2026-11-11 (9 source fetches timed out in the batch audit).
+const verifiedWebTitles={
+ '/danh-muc/may-loc/may-loc-fksc':'FKSC – AQua Thanh Xuân',
+ '/danh-muc/thuong-hieu/neo':'NEO – AQua Thanh Xuân',
+ '/danh-muc/nen-cho-be-thuy-sinh/phan-nen-chihiros':'Chihiros – AQua Thanh Xuân',
+ '/danh-muc/nen-cho-be-thuy-sinh/vu-aqua':'Vũ Aqua – AQua Thanh Xuân',
+ '/danh-muc/nen-cho-be-thuy-sinh/phan-nen-dennerle':'Dennerle – AQua Thanh Xuân',
+ '/danh-muc/co2/binh-co2':'Bình CO2 – AQua Thanh Xuân',
+ '/danh-muc/co2/van-co2':'Van CO2 – AQua Thanh Xuân',
+ '/danh-muc/co2/khac':'Phụ kiện CO2 – AQua Thanh Xuân',
+ '/danh-muc/cay-va-ca-thuy-sinh':'Cây và cá thủy sinh – AQua Thanh Xuân',
+};
+
 function buildSeoManifest(report){
  assert(Array.isArray(report.entries)&&report.entries.length===88,'Expected 88 audited legacy categories');
  assert(Array.isArray(report.wp_categories)&&report.wp_categories.length>=80,'Missing independent Woo category inventory');
@@ -41,8 +55,8 @@ function buildSeoManifest(report){
   const slug=newPath.split('/').at(-1);
   const term=termsBySlug.get(slug);
   assert(term&&term.id>0,'Unknown WooCommerce term for '+newPath);
-  const sourceTitle=decode(entry.old?.title);
-  const verified=entry.old?.status===200 && sourceTitle.length>0;
+  const sourceTitle=decode(entry.old?.title) || verifiedWebTitles[oldPath] || '';
+  const verified=(entry.old?.status===200 && sourceTitle.length>0) || Boolean(verifiedWebTitles[oldPath]);
   const title=verified?sourceTitle:
     (sourceGroup?entry.label:entry.label.toUpperCase())+' – AQua Thanh Xuân';
   const groupLabel=parent||term.name;
