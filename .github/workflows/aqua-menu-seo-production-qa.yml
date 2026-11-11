@@ -1,0 +1,36 @@
+name: Aqua menu SEO and 301 production QA (READ ONLY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-menu-seo-production.json'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: aqua-menu-seo-audit
+          run-id: 42935108364
+          github-token: ${{ github.token }}
+          path: seo-report
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check scripts/aqua-menu-seo-production-qa.cjs
+      - name: Test 88 legacy redirects and original SEO metadata against production
+        run: node scripts/aqua-menu-seo-production-qa.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-menu-seo-production-qa
+          path: artifacts/aqua-menu-seo-production
+          if-no-files-found: ignore
+          retention-days: 21
