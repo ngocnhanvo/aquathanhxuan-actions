@@ -1,18 +1,14 @@
-# Aqua Thanh Xuân — sửa banner tối ở breakpoint 767–768px (2026-11-11)
+# Aqua Thanh Xuân — sửa header responsive 926px, 1032px và desktop rộng (2026-11-11)
 
-## Đã xử lý
-- Tiếp nhận ảnh chụp trang chủ production DevTools khoảng 767×760, banner nền tối nhưng còn nút điều hướng/chấm slider.
-- Phát hiện nguồn HTML đặt `source` desktop `min-width:768px` và mobile `max-width:767px`, trong khi fallback `img` là GIF trong suốt. Sửa điều kiện desktop thành `not all and (max-width: 767px)` để phủ toàn bộ độ rộng không phải mobile, kể cả trường hợp độ rộng CSS nằm giữa hai mốc.
-- Astro `ngocnhanvo/aquathanhxuan-astro` branch `master`: `b208b9f82c669953ec6685e740f539ee4c21e046`.
-- Source QA [#42941509621](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941509621) PASS (Astro compile + 4 Vitest).
-- WordPress Build Website trigger [#42941605066](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941605066) PASS, existing deploy [#42941711725](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941711725) PASS.
-- Production Playwright QA [#42941999424](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941999424) PASS, đúng marker source. 390px và 767px chỉ hiện mobile hero; 768px, 1024px, 1440px hiện desktop hero; ảnh active tải được; điều hướng desktop và ẩn controls mobile đúng; screenshot artifact `aqua-home00-fractional-qa`.
-- Chi tiết & hạn chế phép đo fractional iframe ở `docs/checkpoints/2026-11-11-home00-fractional-banner.md`.
-
-## Ghi chú QA
-- Trường hợp iframe style 767.5px được Chromium làm tròn thành layoutWidth 768px, vì vậy QA không tuyên bố đã tái hiện lỗi đúng subpixel trong trình duyệt của người báo lỗi. Lỗi khoảng trống media-query đã được đóng bằng điều kiện bù nhau; nếu vẫn đen cần lấy `currentSrc`, `naturalWidth`, network và browser zoom thực tế.
-- Không chỉnh CMS, banner thật, logic checkout hay pipeline deploy.
-- Không làm lại công việc menu SEO/redirect đã hoàn tất trước đó.
+## Hoàn tất production
+- Dựa trên ba ảnh chụp của chủ dự án, sửa chồng lấn tìm kiếm / tài khoản / giỏ hàng ở màn hình tablet/desktop nhỏ.
+- Astro `src/astro/components/Layout/Header.astro`: cột grid đối xứng ở >=900px giúp search được canh chính giữa nhưng không chồng controls; 900–1279px tài khoản chỉ hiện icon (vẫn giữ menu tài khoản + tên user khi mở), 1280–1399px tên tối đa 92px, từ 1400px bình thường. Giỏ hàng và badge luôn hiển thị, mobile không đổi.
+- Repo `ngocnhanvo/aquathanhxuan-astro` `master`, commit `53bf9cf226b28fdecae47fa658fb6882ce5eebe3`.
+- Source QA [#42943189971](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42943189971) PASS.
+- WordPress build [#42943294721](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42943294721) PASS, production deploy [#42943396629](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42943396629) PASS.
+- Production Chromium QA [#42944057918](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42944057918) PASS với 900, 926, 1032, 1200, 1279, 1280, 1440, 1600px và mobile 390px. Search luôn centerOffset=0; khoảng cách logo/search, search/account, account/cart đạt; tên user dài thử bằng identity giả lập; không ghi CMS hoặc đặt đơn hàng.
+- Screenshot artifact `aqua-header-tablet-production-qa`; lưu chi tiết `docs/checkpoints/2026-11-11-header-responsive-926-1032.md`.
+- Các tác vụ của chat trước (banner hero và menu SEO) đã PASS, không thực hiện lại.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
