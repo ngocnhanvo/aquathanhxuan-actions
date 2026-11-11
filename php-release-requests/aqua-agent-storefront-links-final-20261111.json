@@ -1,0 +1,13 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "f7d743c41bc7f6e54bfc594ed39396a2792e5a28",
+  "scope": "agent_full_storefront_link_regression",
+  "reason": "Fix catalog categories, products, comparisons, materials, promotions, menu and payment links; automated PHP fixture gate",
+  "source_qa_request_commit": "5537f47cd6b4fec08d082e73c64399ace4cf1871",
+  "supersedes_request": "php-release-requests/aqua-agent-storefront-links-20261111.json",
+  "no_astro_build": true,
+  "no_orders": true
+}
