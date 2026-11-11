@@ -1,16 +1,16 @@
-# Aqua Thanh Xuân — MF5 coupon note in cart (2026-11-11)
+# Aqua Thanh Xuân — Đối chiếu SEO menu và sửa redirect cũ (2026-11-11)
 
-## Completed
-- Owner requested a note under MF5 in cart; MF10 has been temporarily deleted and must **not** be recreated.
-- WordPress native MF5 coupon ID 83818 description now reads `Giảm 5% cho đơn hàng trên 200.000đ`, corrected from `Giảm 5% với đơn hàng trên 200.000 nghìn`. CMS writer [#42927997388](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42927997388) PASS, updated only coupon description, 5% and minimum 200001 unchanged, MF10 published_count 0 (READ_ONLY_NO_RECREATE).
-- Astro master `75ebf52676494f2e06de5f8f303a32c95af2be43`: `cartCouponNotes.ts` retrieves applied coupon descriptions via server-side WooCommerce REST with no-store and credentials confined to backend. `/api/cart` returns separate `couponNotes`; CartPage renders escaped note beneath code label, preserves CoCart totals and dynamics.
-- Source QA [#42927646723](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42927646723) PASS 31/31 Vitest, Astro compile.
-- WordPress production trigger [#42928271426](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42928271426) PASS; Astro deploy [#42928382632](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42928382632) PASS.
-- Production disposable-cart/browser QA [#42928683329](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42928683329) PASS. MF5 only, subtotal 259000, discount 12950, note visible on desktop/mobile, MF10 absent; cleanup PASS, orders_created=0, cleanup_remaining=0.
-- Checkpoint `docs/checkpoints/2026-11-11-mf5-cart-note.md` (Actions main commit `851e2abba3a816232409af66a0d1d4703f86f9c2`).
+## Hoàn tất trên production aquathanhxuan.io.vn
+- Kiểm kê 88 URL danh mục gốc từ `https://aquathanhxuan.com/` (menu 11 nhóm, 86 mục + 2 category phụ), đối chiếu WordPress Header và danh mục WooCommerce thật. Audit [#42935108364](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42935108364) PASS; 9 title nguồn không đọc được trong batch đã xác minh độc lập sau đó, kết quả `source_unverified=0`.
+- WordPress CMS: lưu Yoast taxonomy SEO title khớp đúng `<title>` của từng URL nguồn và SEO meta description tự viết khi nguồn thiếu, quản lý native `wpseo_taxonomy_meta` qua category editor; tạo đúng 88 WordPress CPT `chuyen-huong-link` (301 Exact) từ `/danh-muc/... ` sang `/san-pham/...` trên host mới, không hard-code Astro.
+- Pilot [#42936671513](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42936671513) PASS; bulk [#42936896916](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42936896916) PASS (87 SEO + 87 redirect, 1 mỗi loại từ pilot); idempotent [#42938820017](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42938820017) PASS (sửa đúng 1 SEO title cuối, redirect writes 0, redirect skips 88).
+- Astro master giữ nguyên `75ebf52676494f2e06de5f8f303a32c95af2be43`, build WordPress [#42939070832](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42939070832) PASS, deploy production [#42939167832](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42939167832) PASS.
+- QA độc lập [#42939469959](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42939469959): **88/88 PASS** cho HTTP redirect 301, Location đúng, trang đích 200, SEO title nguồn, SEO description lưu, canonical; failures 0. Ví dụ: `https://aquathanhxuan.io.vn/danh-muc/thuong-hieu` → 301 → `https://aquathanhxuan.io.vn/san-pham/thuong-hieu`.
+- Checkpoint: `docs/checkpoints/2026-11-11-menu-seo-redirect.md`, Actions main commit `f214c2cfb96e7db78c267303ab9a4f330a302536`.
 
-## Merchant management
-WordPress Marketing → Coupons → MF5 (ID 83818) → Mô tả (Description). Further description edits flow to cart dynamically on refresh; no source edit/build required. Avoid running prior MF10 group setup scripts while MF10 is deleted.
+## Lưu ý ranh giới domain gốc
+- Domain gốc `aquathanhxuan.com` do hosting cũ vận hành độc lập, chưa tự forward sang domain mới; QA 4 URL gốc trả 200, không có Location. Phần **domain-level forwarding** muốn triển khai cần quyền hosting/WordPress của **máy chủ .com**, không thể thay bằng rule CPT bên WordPress mới.
+- Scope yêu cầu theo ví dụ (đường dẫn cũ trên domain mới, SEO danh mục) đã hoàn tất. Không tự khẳng định redirect toàn domain cũ.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
