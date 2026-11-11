@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "0610ae4b1017b43b0a4bf4729db9793681f600c1",
+  "scope": "agent_catalog_advice_no_unverified_compatibility_claim",
+  "reason": "Align catalog wording with evidence-only aquarium advice; exact source QA passed",
+  "source_qa_run": 42949987879,
+  "no_astro_build": true,
+  "no_orders": true
+}
