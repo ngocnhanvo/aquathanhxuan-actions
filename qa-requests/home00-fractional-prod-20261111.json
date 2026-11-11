@@ -1,0 +1,16 @@
+{
+  "project": "aquathanhxuan.com",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "expected_source_sha": "b208b9f82c669953ec6685e740f539ee4c21e046",
+  "deployment_run_id": 42941711725,
+  "wordPress_build_run_id": 42941605066,
+  "viewports": [
+    "390x844",
+    "767x760",
+    "767.5x760",
+    "768x760",
+    "1024x768",
+    "1440x900"
+  ],
+  "scope": "read_only_hero_fractional_media_query_and_visual_screenshots"
+}
