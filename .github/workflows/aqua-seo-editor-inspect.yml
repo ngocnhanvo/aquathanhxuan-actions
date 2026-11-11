@@ -1,0 +1,33 @@
+name: Aqua WordPress SEO and redirect editors inspect (READ ONLY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'audit-requests/aqua-seo-editor-inspect.json'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-seo-editor-inspect.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Inspect existing Woo SEO fields and redirect CPT API without writes
+        run: node scripts/aqua-seo-editor-inspect.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-seo-editor-inspect
+          path: artifacts/aqua-seo-editor-inspect
+          retention-days: 14
+          if-no-files-found: ignore
