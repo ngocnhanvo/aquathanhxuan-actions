@@ -1,0 +1,95 @@
+name: Aqua agent storefront source QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-agent-storefront-source-20261111.json'
+permissions:
+  contents: read
+jobs:
+  source:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+          path: astro
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+          path: php
+      - name: Pin both source revisions
+        run: |
+          python3 - <<'PY'
+          import json,subprocess
+          q=json.load(open('qa-requests/aqua-agent-storefront-source-20261111.json'))
+          for name in ('astro','php'):
+            actual=subprocess.check_output(['git','-C',name,'rev-parse','HEAD'],text=True).strip()
+            assert actual==q[name+'_sha'], f'{name} HEAD drift: {actual}'
+            print('AGENT_SOURCE_SHA_PASS='+name+':'+actual)
+          PY
+      - uses: pnpm/action-setup@v4
+        with: {version: 9.15.9, run_install: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: pnpm, cache-dependency-path: astro/pnpm-lock.yaml}
+      - name: Install frontend dependencies
+        working-directory: astro
+        run: pnpm install --frozen-lockfile
+      - name: Compile chat UI and validate client safety
+        working-directory: astro
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {createRequire} from 'node:module';
+          const require=createRequire(import.meta.url);
+          const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
+          const file='src/astro/components/Tool/ContactWidget.astro';
+          const code=fs.readFileSync(file,'utf8');
+          assert((await transform(code,{filename:file})).code,'Agent Astro compile failed');
+          for(const text of ['data-welcome-message={welcomeMessage}','Trợ lý thủy sinh','sanitizeAgentHtml','new URL(href, window.location.href)','"/api/agent/history-clear"','method: "POST"','response.ok || !data?.reply']){
+            assert(code.includes(text),'Missing Agent contract: '+text);
+          }
+          assert(!code.includes('/api/agent/history-clear?'),'Legacy GET clear still present');
+          assert(!code.includes('getChatSessionId()'),'Browser-minted pseudo session must not be used');
+          assert(code.includes('bg-[#332B8E]')&&code.includes('1BB4DF'),'Aqua visual palette not applied');
+          console.log('AQUA_AGENT_ASTRO_SOURCE_PASS');
+          JS
+      - name: PHP syntax and commerce guidance
+        run: |
+          set -euo pipefail
+          for file in \
+            php/wp-content/mu-plugins/esc-agent/src/Core/Planner.php \
+            php/wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php \
+            php/wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php \
+            php/wp-content/mu-plugins/esc-agent/src/Skills/ContactSkill.php \
+            php/wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php; do
+              php -l "$file"
+          done
+          php <<'PHP'
+          <?php
+          require 'php/wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php';
+          $prompt=\EscAgent\Core\AgentSynthesisPrompt::text();
+          foreach(['thủy sinh','giỏ hàng','coupon','WooCommerce'] as $term) {
+             if (mb_stripos($prompt,$term)===false) throw new RuntimeException("Missing storefront term: $term");
+          }
+          function get_posts($args) { return []; }
+          function get_option($key,$default='') { return $key==='blogname'?'Aqua Thanh Xuân':$default; }
+          function get_terms($args) { return [(object)['name'=>'Đèn thủy sinh','slug'=>'den'],(object)['name'=>'Máy lọc','slug'=>'may-loc']]; }
+          require 'php/wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php';
+          $skill=new \EscAgent\Skills\CompanySkill();
+          $company=$skill->execute('get',[]);
+          if(!str_contains($company,'Đèn thủy sinh') || !str_contains($company,'Máy lọc')) throw new RuntimeException('WordPress taxonomy missing');
+          echo "AQUA_AGENT_PHP_SOURCE_PASS\n";
+          PHP
