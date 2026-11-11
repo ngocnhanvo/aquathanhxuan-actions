@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "42da9afaaa421f663c4085e594d3d46adbd20eb1",
+  "scope": "agent_core_storefront_advice_copy_only",
+  "reason": "Remove gift/bulk-language from Aqua aquarium advice; source fixture and Astro regression passed",
+  "source_qa_run": 42949614726,
+  "no_astro_build": true,
+  "no_orders": true
+}
