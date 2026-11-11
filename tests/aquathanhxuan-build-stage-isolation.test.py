@@ -23,12 +23,12 @@ class ProductionBuildStepsContract(unittest.TestCase):
             "Prepare canonical WordPress build environment",
             "Build Astro Production (incremental WordPress data cache)",
             "Validate compiled Astro dist output",
-            "Install encrypted FTPS client",
+            "Validate built-in Python FTPS upload client",
             "Prepare staging files and SEO metadata (strictly no .env)",
             "Compute signed reusable image/static deltas",
             "Create compiled staging ZIP",
             "Verify staging ZIP security and source provenance",
-            "Upload compiled staging archive by FTP-TLS",
+            "Upload compiled staging archive by Python FTP_TLS",
             "Verify provenance and activate staging bundle using signed PHP rollback",
         ]
         self.assertEqual([x for x in ORDER if x in required], required)
@@ -36,7 +36,7 @@ class ProductionBuildStepsContract(unittest.TestCase):
         for name in required[:9]:
             self.assertIn("timeout-minutes:", STEPS[name], name)
 
-    def test_astro_and_ftp_install_cannot_hide_each_other(self):
+    def test_astro_and_python_ftps_preflight_are_separate_and_bounded(self):
         astro = STEPS["Build Astro Production (incremental WordPress data cache)"]
         dependencies = STEPS["Install locked Astro dependencies"]
         ftps = STEPS["Install encrypted FTPS client"]
@@ -45,8 +45,9 @@ class ProductionBuildStepsContract(unittest.TestCase):
         self.assertIn("timeout --signal=TERM --kill-after=15s 1200s pnpm run build-git", astro)
         self.assertIn("AQUA_BUILD_STAGE=ASTRO_PROCESS_EXIT", astro)
         self.assertNotIn("apt-get", astro)
-        self.assertIn("sudo apt-get install", ftps)
-        self.assertIn("AQUA_BUILD_STAGE=FTPS_INSTALL_EXIT", ftps)
+        self.assertIn("python3 -m py_compile", ftps)
+        self.assertIn("AQUA_BUILD_STAGE=PYTHON_FTPS_READY", ftps)
+        self.assertNotIn("apt-get", TEXT)
         self.assertNotIn("ftps_install_pid", TEXT)
         self.assertNotIn('wait "$ftps_install_pid"', TEXT)
 
@@ -71,7 +72,9 @@ class ProductionBuildStepsContract(unittest.TestCase):
     def test_production_deploy_transport_remains_signed(self):
         upload = STEPS["Upload compiled staging archive by FTP-TLS"]
         activate = STEPS["Verify provenance and activate staging bundle using signed PHP rollback"]
-        self.assertIn("aquathanhxuan-resumable-ftp.sh", upload)
+        self.assertIn("aquathanhxuan-resumable-ftps.py", upload)
+        self.assertIn("timeout --signal=TERM --kill-after=10s 360s", upload)
+        self.assertIn("AQUA_BUILD_STAGE=PYTHON_FTPS_UPLOAD_EXIT", upload)
         self.assertIn("aquathanhxuan-remote-unzip.py unpack", activate)
         self.assertIn("cancel-in-progress: false", TEXT)
         self.assertIn("repository_dispatch:", TEXT)
