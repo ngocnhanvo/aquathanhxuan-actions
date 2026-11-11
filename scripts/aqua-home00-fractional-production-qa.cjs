@@ -1,5 +1,8 @@
 'use strict';
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const output='artifacts/home00-fractional-qa';
+fs.mkdirSync(output,{recursive:true});
 const {chromium}=require('playwright');
 const expectedSha='b208b9f82c669953ec6685e740f539ee4c21e046';
 const origin='https://aquathanhxuan.io.vn';
@@ -44,6 +47,7 @@ const origin='https://aquathanhxuan.io.vn';
           assert(data.src.includes('cropped-banner'),'Wrong desktop banner at '+width);
         }
         assert.deepEqual(errors,[],'Unexpected page script exception at '+width);
+        await hero.screenshot({path:output+'/hero-'+width+'x'+height+'.png'});
         console.log('HERO_PRODUCTION_VIEWPORT_PASS='+JSON.stringify({viewport:width+'x'+height,...data}));
       }finally{await page.close()}
     }
@@ -71,6 +75,7 @@ const origin='https://aquathanhxuan.io.vn';
       });
       assert.equal(value.patchedDesktopMedia,!value.mobileMedia,'Inverse media condition must cover every viewport');
       assert(value.naturalWidth>10&&!value.image.startsWith('data:'),'Fractional width cannot show transparent pixel');
+      await frame.locator('[data-aqua-home-hero]').screenshot({path:output+'/hero-767.5x760.png'});
       console.log('HERO_FRACTIONAL_VIEWPORT_PASS='+JSON.stringify(value));
     }finally{await page.close()}
     console.log('HOME00_FRACTIONAL_PRODUCTION_QA=PASS');
