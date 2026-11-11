@@ -20,7 +20,7 @@ jobs:
     env:
       WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
       WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
-      SEO_PILOT_ONLY: ${{ fromJSON('["false","true"]')[github.event.head_commit.message == 'Pilot original SEO redirect'] }}
+      SEO_PILOT_ONLY: ${{ contains(github.event.head_commit.message, 'Pilot original SEO redirect') }}
     steps:
       - uses: actions/checkout@v4
         with:
