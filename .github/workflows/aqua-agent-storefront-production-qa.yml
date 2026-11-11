@@ -1,0 +1,33 @@
+name: Aqua agent storefront production chat QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-agent-storefront-prod-20261111.json'
+permissions:
+  contents: read
+jobs:
+  test-chat-ui:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Verify script syntax
+        run: node --check scripts/aqua-agent-storefront-production-qa.cjs
+      - name: Install matching browser driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Production chat UI and WordPress history QA
+        run: node scripts/aqua-agent-storefront-production-qa.cjs
+      - name: Upload chat viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-agent-storefront-qa
+          path: artifacts/aqua-agent-storefront/
+          if-no-files-found: ignore
+          retention-days: 7
