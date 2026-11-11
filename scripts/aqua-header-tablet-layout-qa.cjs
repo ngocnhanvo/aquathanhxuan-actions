@@ -46,7 +46,7 @@ const snapshot=()=> {
       }));
       try{
         await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:60000});
-        await page.locator('#header-brandbar .js-account-toggle').waitFor({state:'visible',timeout:18000});
+        await page.locator('#header-desktop-search + div .js-account-toggle').waitFor({state:'visible',timeout:18000});
         await page.waitForTimeout(100);
         const data=await page.evaluate(snapshot);
         assert.equal(data.searchDisplay,'flex','Desktop search unavailable at '+width);
