@@ -74,6 +74,8 @@ jobs:
             php/wp-content/mu-plugins/esc-agent/src/Core/Agent.php \
             php/wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php \
             php/wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php \
+            php/wp-content/mu-plugins/esc-agent/src/Skills/ProductDetailSkill.php \
+            php/wp-content/mu-plugins/esc-agent/src/Skills/PromotionSkill.php \
             php/wp-content/mu-plugins/esc-agent/src/Skills/ContactSkill.php \
             php/wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php; do
               php -l "$file"
