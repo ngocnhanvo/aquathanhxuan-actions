@@ -1,16 +1,18 @@
-# Aqua Thanh Xuân — Đối chiếu SEO menu và sửa redirect cũ (2026-11-11)
+# Aqua Thanh Xuân — sửa banner tối ở breakpoint 767–768px (2026-11-11)
 
-## Hoàn tất trên production aquathanhxuan.io.vn
-- Kiểm kê 88 URL danh mục gốc từ `https://aquathanhxuan.com/` (menu 11 nhóm, 86 mục + 2 category phụ), đối chiếu WordPress Header và danh mục WooCommerce thật. Audit [#42935108364](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42935108364) PASS; 9 title nguồn không đọc được trong batch đã xác minh độc lập sau đó, kết quả `source_unverified=0`.
-- WordPress CMS: lưu Yoast taxonomy SEO title khớp đúng `<title>` của từng URL nguồn và SEO meta description tự viết khi nguồn thiếu, quản lý native `wpseo_taxonomy_meta` qua category editor; tạo đúng 88 WordPress CPT `chuyen-huong-link` (301 Exact) từ `/danh-muc/... ` sang `/san-pham/...` trên host mới, không hard-code Astro.
-- Pilot [#42936671513](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42936671513) PASS; bulk [#42936896916](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42936896916) PASS (87 SEO + 87 redirect, 1 mỗi loại từ pilot); idempotent [#42938820017](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42938820017) PASS (sửa đúng 1 SEO title cuối, redirect writes 0, redirect skips 88).
-- Astro master giữ nguyên `75ebf52676494f2e06de5f8f303a32c95af2be43`, build WordPress [#42939070832](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42939070832) PASS, deploy production [#42939167832](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42939167832) PASS.
-- QA độc lập [#42939469959](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42939469959): **88/88 PASS** cho HTTP redirect 301, Location đúng, trang đích 200, SEO title nguồn, SEO description lưu, canonical; failures 0. Ví dụ: `https://aquathanhxuan.io.vn/danh-muc/thuong-hieu` → 301 → `https://aquathanhxuan.io.vn/san-pham/thuong-hieu`.
-- Checkpoint: `docs/checkpoints/2026-11-11-menu-seo-redirect.md`, Actions main commit `f214c2cfb96e7db78c267303ab9a4f330a302536`.
+## Đã xử lý
+- Tiếp nhận ảnh chụp trang chủ production DevTools khoảng 767×760, banner nền tối nhưng còn nút điều hướng/chấm slider.
+- Phát hiện nguồn HTML đặt `source` desktop `min-width:768px` và mobile `max-width:767px`, trong khi fallback `img` là GIF trong suốt. Sửa điều kiện desktop thành `not all and (max-width: 767px)` để phủ toàn bộ độ rộng không phải mobile, kể cả trường hợp độ rộng CSS nằm giữa hai mốc.
+- Astro `ngocnhanvo/aquathanhxuan-astro` branch `master`: `b208b9f82c669953ec6685e740f539ee4c21e046`.
+- Source QA [#42941509621](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941509621) PASS (Astro compile + 4 Vitest).
+- WordPress Build Website trigger [#42941605066](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941605066) PASS, existing deploy [#42941711725](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941711725) PASS.
+- Production Playwright QA [#42941999424](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42941999424) PASS, đúng marker source. 390px và 767px chỉ hiện mobile hero; 768px, 1024px, 1440px hiện desktop hero; ảnh active tải được; điều hướng desktop và ẩn controls mobile đúng; screenshot artifact `aqua-home00-fractional-qa`.
+- Chi tiết & hạn chế phép đo fractional iframe ở `docs/checkpoints/2026-11-11-home00-fractional-banner.md`.
 
-## Lưu ý ranh giới domain gốc
-- Domain gốc `aquathanhxuan.com` do hosting cũ vận hành độc lập, chưa tự forward sang domain mới; QA 4 URL gốc trả 200, không có Location. Phần **domain-level forwarding** muốn triển khai cần quyền hosting/WordPress của **máy chủ .com**, không thể thay bằng rule CPT bên WordPress mới.
-- Scope yêu cầu theo ví dụ (đường dẫn cũ trên domain mới, SEO danh mục) đã hoàn tất. Không tự khẳng định redirect toàn domain cũ.
+## Ghi chú QA
+- Trường hợp iframe style 767.5px được Chromium làm tròn thành layoutWidth 768px, vì vậy QA không tuyên bố đã tái hiện lỗi đúng subpixel trong trình duyệt của người báo lỗi. Lỗi khoảng trống media-query đã được đóng bằng điều kiện bù nhau; nếu vẫn đen cần lấy `currentSrc`, `naturalWidth`, network và browser zoom thực tế.
+- Không chỉnh CMS, banner thật, logic checkout hay pipeline deploy.
+- Không làm lại công việc menu SEO/redirect đã hoàn tất trước đó.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
