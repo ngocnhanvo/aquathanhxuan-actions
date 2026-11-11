@@ -1,0 +1,13 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "75ebf52676494f2e06de5f8f303a32c95af2be43",
+  "scope": "show_wordpress_coupon_description_in_cart",
+  "source_qa_run": 42927646723,
+  "mf5_wp_description_run": 42927997388,
+  "no_mf10_recreation": true,
+  "reason": "Deploy cart coupon note from WordPress native WooCommerce description"
+}
