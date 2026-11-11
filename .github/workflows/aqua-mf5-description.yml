@@ -1,0 +1,36 @@
+name: Aqua MF5 coupon note (ONLY coupon 83818)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-mf5-description.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-checkout-cms-writes
+  cancel-in-progress: false
+jobs:
+  description:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-mf5-description.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Update only MF5 coupon note and inspect MF10 read-only
+        run: node scripts/aqua-mf5-description.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-mf5-description
+          path: artifacts/aqua-mf5-description
+          retention-days: 14
+          if-no-files-found: ignore
