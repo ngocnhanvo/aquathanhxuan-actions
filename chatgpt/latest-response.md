@@ -1,25 +1,63 @@
-# Aqua Thanh Xuân — điều chỉnh Chat với Agent theo cửa hàng thủy sinh (2026-11-11)
+# ChatGPT latest response — Aqua Thanh Xuân
+- Thời điểm: 2026-11-11, Asia/Ho_Chi_Minh (phiên tiếp nối bắt đầu 09:44)
+- Project: aquathanhxuan.com
+- Repository lưu: ngocnhanvo/aquathanhxuan-actions
+- Branch: main
+- Checkpoint đã xác minh: docs/checkpoints/2026-11-11-continuation-handoff.md (commit 2270a553fb6f163782d84d435679a1f666bcdf99)
+- Đã đọc bản latest-response trước khi xử lý lượt mới.
+- Kết quả: các ticket banner/header/agent mới nhất đã deploy và QA PASS; chưa có source thay đổi mới. Cross-domain old-host redirect, shipping/real COD order và live LLM acceptance vẫn mở.
 
-## Đã làm và phát hành
-- Frontend Astro `ngocnhanvo/aquathanhxuan-astro` `master` commit `a41f9af898f11ca7dbf357aeb1f972d34efaf7db`:
-  - Đổi màu popup tư vấn/chat sang tím–cyan, tiêu đề “Trợ lý thủy sinh”, lời chào dựa trên tên cửa hàng do WordPress cung cấp; gợi ý khách hỏi sản phẩm, giá, khuyến mãi, đặt hàng.
-  - Bỏ lời hứa “Hỗ trợ 24/7” chưa được nguồn xác nhận.
-  - Sửa làm mới cuộc trò chuyện dùng POST đúng API; chỉ làm mới sau phản hồi thành công. Đồng bộ session dùng cookie HttpOnly do server tạo; bỏ session ID giả từ localStorage.
-  - Render Markdown an toàn, lọc HTML/script/attribute nguy hiểm, giữ link HTTPS tới sản phẩm.
-- Backend PHP `ngocnhanvo/aquathanhxuan-php` `master` commit `10b6e584c6f7afd59702bee1b4cb438dd1e81fda`: cập nhật Planner/Synthesis để tư vấn bán lẻ thủy sinh dùng WooCommerce, coupon thật, không suy đoán giá/tồn kho/độ tương thích/liều lượng hoặc khuyến mãi; bỏ yêu cầu logo/MOQ kiểu đơn quà tặng; CompanySkill giới thiệu danh mục thật từ WooCommerce.
+---
 
-## Kết quả kiểm thử và phát hành
-- QA source [#42946287879](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42946287879): PASS (Astro compiler + PHP syntax + fixture taxonomy).
-- PHP release [#42946448388](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42946448388): PASS, xác thực SHA-256 trên 5 file Agent, các file khác không đổi.
-- WordPress Build Website [#42946934192](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42946934192): PASS.
-- Astro deploy [#42947043396](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42947043396): PASS.
-- Production Playwright [#42947322544](https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42947322544): PASS tại 390×844, 926×760, 1440×900; test live GET lịch sử khách mới, mở chat, lời chào Aqua, phản hồi giả lập, lọc HTML nguy hiểm, xóa/mới hội thoại POST. Screenshot artifact `aqua-agent-storefront-qa`.
+## 1. Đã khôi phục trạng thái dự án Aqua Thanh Xuân
 
-## Giới hạn đã ghi nhận
-- QA chat không gửi tin nhắn thật tới LLM production để tránh ghi hội thoại thử nghiệm/tồn dư log vào WordPress. Vì vậy trạng thái model live và chất lượng từng câu trả lời LLM chưa được đo trực tiếp, dù prompts đã deploy và UI/API đọc lịch sử hoạt động.
-- Lịch sử được soft-clear theo cơ chế WordPress hiện tại, không bị xóa khỏi admin.
-- Checkpoint: `docs/checkpoints/2026-11-11-aqua-agent-storefront.md`. Không tạo đơn hàng, tài khoản hoặc CMS test record.
+Mình đã đọc `chatgpt/latest-response.md`, đối chiếu commit mới nhất trên GitHub và kiểm tra lịch sử GitHub Actions.
+
+<box gap={2}>
+  <row align="center" justify="between">
+    **Frontend Astro — `master`**
+    <badge color="success">Đã triển khai</badge>
+  </row>
+  <text color="secondary" size="xs">Commit `a41f9af898f1` — 11/11/2026, 09:23 giờ Việt Nam</text>
+  <row align="center" justify="between">
+    **Backend WordPress/PHP — `master`**
+    <badge color="success">Đã triển khai</badge>
+  </row>
+  <text color="secondary" size="xs">Commit `10b6e584c6f7` — 11/11/2026, 09:26</text>
+  <row align="center" justify="between">
+    **Actions — `main`**
+    <badge color="success">QA đạt</badge>
+  </row>
+  <text color="secondary" size="xs">Commit `cafb4497a720` — 11/11/2026, 09:42</text>
+</box>
+
+Đối chiếu các công việc của phiên trước:
+
+| Hạng mục | Kết quả ghi nhận |
+|---|---|
+| Banner bị đen tại breakpoint 767–768px | Đã sửa, build và QA production PASS |
+| Header bị chồng lấn tại 926–1032px | Đã sửa, QA 9 kích thước màn hình PASS |
+| Chat với Agent cho Aqua Thanh Xuân | Đã cập nhật frontend, PHP và phát hành |
+| Kiểm thử Chat Agent | Giao diện, session và API lịch sử PASS; chưa kiểm thử câu trả lời LLM thật |
+
+Workflow production gần nhất <Link url="https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42947043396" title="#42947043396"/> và Playwright QA <Link url="https://github.com/ngocnhanvo/aquathanhxuan-actions/actions/runs/42947322544" title="#42947322544"/> đều thành công.
+
+Như vậy, ba lỗi được giao ở phiên gần nhất có bằng chứng đã triển khai. Mình sẽ tiếp tục rà soát những phần chưa được xác minh đầy đủ, thay vì sửa lại các phần đã PASS.
+
+## 2. Những việc còn mở
+
+- **Chuyển hướng domain cũ:** 88/88 đường dẫn `/danh-muc/...` trên `.io.vn` đã được QA đạt. Tuy nhiên, `aquathanhxuan.com` vẫn phục vụ website cũ. Muốn chuyển hướng toàn bộ sang `.io.vn` cần quyền cấu hình hosting/DNS hoặc WordPress của domain cũ.
+- **Thanh toán COD:** Code, coupon, giá sau thuế và luồng checkout an toàn đã kiểm thử. Còn thiếu chính sách phí vận chuyển chính thức và nghiệm thu một đơn thật có kiểm soát.
+- **AI Agent:** Đã kiểm thử giao diện và API, nhưng chưa có bằng chứng xác nhận chất lượng trả lời từ LLM production.
+
+Mình cũng xác nhận cả ba repo hiện không có pull request đang mở. Không có thay đổi source mới nào cần phát hành chỉ để kiểm thử lại những phần đã PASS.
+
+## 3. Đã lưu checkpoint tiếp nối
+
+Checkpoint: [2026-11-11-continuation-handoff.md](https://github.com/ngocnhanvo/aquathanhxuan-actions/blob/main/docs/checkpoints/2026-11-11-continuation-handoff.md) — commit `2270a553`.
+
+Các bước kỹ thuật đã có thể làm đều được đối chiếu. Phần còn lại phụ thuộc quyền quản trị hosting `.com`, chính sách vận chuyển và cho phép kiểm thử đơn hàng/LLM thực tế; mình không thay đổi production hoặc tạo dữ liệu khách hàng để ép kết quả PASS.
 
 Chế độ code: auto-build
 Cổng ghi source: bypass
-Trạng thái: DONE — hoàn tất
+Trạng thái: PARTIAL — chưa hoàn tất
