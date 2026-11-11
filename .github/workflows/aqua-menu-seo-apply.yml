@@ -1,0 +1,44 @@
+name: Aqua menu SEO and 301 redirects apply (WordPress CMS only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-menu-seo-apply.json'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: aqua-checkout-cms-writes
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+      SEO_PILOT_ONLY: ${{ fromJSON('["false","true"]')[github.event.head_commit.message == 'Pilot original SEO redirect'] }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: aqua-menu-seo-audit
+          run-id: 42935108364
+          github-token: ${{ github.token }}
+          path: seo-report
+      - run: node --check scripts/aqua-menu-seo-mapping.cjs && node --check scripts/aqua-menu-seo-apply.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Native Woo category Yoast and URL rule with exact original mapping
+        run: node scripts/aqua-menu-seo-apply.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-menu-seo-apply
+          path: artifacts/aqua-menu-seo-apply
+          retention-days: 21
+          if-no-files-found: ignore
