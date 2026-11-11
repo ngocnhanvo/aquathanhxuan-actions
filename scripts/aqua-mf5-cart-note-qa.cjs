@@ -45,8 +45,7 @@ async function post(path,body){
   assert(await page.locator('#summary-coupons-accordion').getByText('Giảm 5% cho đơn hàng trên 200.000đ',{exact:true}).isVisible(),'Description hidden on mobile');
   await page.screenshot({path:OUT+'/cart-mobile.png',fullPage:false});
   result.browser='PASS desktop_and_mobile';
-  result.status='PASS';save();
-  console.log('AQUA_MF5_NOTE_PASS='+JSON.stringify(result));
+  save();
  }catch(e){
   result.status='FAIL';result.error=String(e.message||e).slice(0,400);
   console.error('AQUA_MF5_NOTE_FAIL='+result.error);process.exitCode=1;
@@ -58,6 +57,10 @@ async function post(path,body){
     const remaining=Array.isArray(deleted?.items)?deleted.items:Object.values(deleted?.items||{});
     assert(remaining.length===0,'Disposable cart cleanup incomplete');
     result.cleanup='PASS';
+    if(result.browser==='PASS desktop_and_mobile'&&result.api){
+      result.status='PASS';
+      console.log('AQUA_MF5_NOTE_PASS='+JSON.stringify({...result,cleanup:'PASS'}));
+    }
    }catch(e){result.cleanup='FAIL';result.cleanup_remaining=1;process.exitCode=1;console.error('AQUA_MF5_NOTE_CLEANUP_FAIL='+String(e.message||e).slice(0,140));}
   }else{result.cleanup='NOT_POSSIBLE_NO_CART_KEY';result.cleanup_remaining=1;process.exitCode=1;}
   save();
