@@ -1,0 +1,33 @@
+name: Aqua Home00 fractional viewport production QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/home00-fractional-prod-20261111.json'
+permissions:
+  contents: read
+jobs:
+  verify-production-hero:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Syntax-check browser QA
+        run: node --check scripts/aqua-home00-fractional-production-qa.cjs
+      - name: Use preinstalled Chromium, install matching Playwright JS driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Check exact source and mobile/desktop/fractional widths
+        run: node scripts/aqua-home00-fractional-production-qa.cjs
+      - name: Save banner screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-home00-fractional-qa
+          path: artifacts/home00-fractional-qa/
+          if-no-files-found: ignore
+          retention-days: 7
