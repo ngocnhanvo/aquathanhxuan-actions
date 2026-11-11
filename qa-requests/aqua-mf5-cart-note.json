@@ -1,0 +1,13 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "expected_astro_sha": "75ebf52676494f2e06de5f8f303a32c95af2be43",
+  "deployment_run": 42928382632,
+  "source_qa_run": 42927646723,
+  "expected_coupon": "mf5",
+  "expected_note": "Giảm 5% cho đơn hàng trên 200.000đ",
+  "no_mf10_recreation": true,
+  "no_orders": true,
+  "scope": "live_mf5_note_cart_and_cleanup"
+}
