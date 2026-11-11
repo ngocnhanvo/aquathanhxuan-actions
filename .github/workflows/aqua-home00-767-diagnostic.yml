@@ -25,14 +25,14 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
             try{
-              for(const [width,height] of [[767,760],[768,760],[390,844],[1440,900]]){
+              for(const [width,height,query] of [[767,760,''],[767,760,'?heroqa='+Date.now()],[768,760,''],[390,844,'']]){
                 const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:2});
                 const failures=[];
                 const images=[];
                 page.on('pageerror',e=>failures.push(String(e).slice(0,300)));
                 page.on('response',r=>{if(r.request().resourceType()==='image')images.push({status:r.status(),url:r.url().slice(0,180)});});
                 try{
-                  await page.goto('https://aquathanhxuan.io.vn/?heroqa='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
+                  await page.goto('https://aquathanhxuan.io.vn/'+query,{waitUntil:'domcontentloaded',timeout:60000});
                   await page.locator('[data-aqua-home-hero]').waitFor({state:'visible',timeout:20000});
                   await page.waitForTimeout(2500);
                   const state=await page.evaluate(()=>{
@@ -48,11 +48,11 @@ jobs:
                         const pic=s.querySelector('picture');
                         return {index:i,audience:s.dataset.audience,active:s.dataset.active,initialMobile:s.dataset.initialMobile,visibility:getComputedStyle(s).visibility,opacity:getComputedStyle(s).opacity,src:img?.getAttribute('src'),currentSrc:img?.currentSrc,naturalWidth:img?.naturalWidth,naturalHeight:img?.naturalHeight,picture:pic?.innerHTML?.slice(0,1300)};
                       }),
-                      arrowsVisible:getComputedStyle(root.querySelector('[data-hero-next]')).display,
+                      arrowsVisible:getComputedStyle(root.querySelector('[data-hero-next]')).display, heroHeight:root.querySelector('.aqua-hero__viewport')?.getBoundingClientRect()?.height, mediaMobile:matchMedia('(max-width:767px)').matches, viewport:innerWidth,
                       dots:[...root.querySelectorAll('[data-hero-dot]')].map(d=>({active:d.dataset.active,hidden:d.hidden}))
                     }
                   });
-                  console.log('HERO_767_DIAG '+width+'x'+height+' '+JSON.stringify({state,imageResponses:images,pageErrors:failures}));
+                  console.log('HERO_767_DIAG '+width+'x'+height+' '+(query?'uncached':'root')+' '+JSON.stringify({state,imageResponses:images,pageErrors:failures}));
                   if(width===767 && (!state.slides.some(s=>s.active==='true' && s.naturalWidth>10))) process.exitCode=1;
                 }catch(e){console.error('HERO_767_ERROR '+width+'x'+height+' '+String(e));process.exitCode=1;}
                 finally{await page.close();}
