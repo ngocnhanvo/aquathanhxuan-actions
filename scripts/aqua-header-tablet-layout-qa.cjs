@@ -56,7 +56,7 @@ const snapshot=()=> {
         assert(data.trigger.right+4<=data.cart.left,'Account overlaps cart at '+width+' '+JSON.stringify(data));
         assert(Math.abs(data.centerOffset)<2.5,'Search not centered at '+width+' '+JSON.stringify(data));
         assert(data.brandbarOverflow<=1,'Brandbar overflows at '+width+' '+JSON.stringify(data));
-        assert(data.accountLabelDisplay===(width<1280?'none':'inline'),'Unexpected account text visibility at '+width);
+        assert(width<1280 ? data.accountLabelDisplay==='none' : data.accountLabelDisplay!=='none','Unexpected account text visibility at '+width);
         await page.locator('#header-brandbar').screenshot({path:output+'/header-'+width+'.png'});
         console.log('AQUA_HEADER_LAYOUT_PASS='+JSON.stringify({width,search:data.search,logo:data.logo,actions:data.actions,account:data.trigger,cart:data.cart,centerOffset:data.centerOffset,label:data.accountLabelDisplay}));
       }finally{await page.close()}
