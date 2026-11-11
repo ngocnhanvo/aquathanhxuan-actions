@@ -1,0 +1,15 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_origin": "https://aquathanhxuan.com",
+  "expected_astro_source_sha": "75ebf52676494f2e06de5f8f303a32c95af2be43",
+  "deploy_run": 42939167832,
+  "build_request_run": 42939070832,
+  "wp_apply_run": 42936896916,
+  "wp_recheck_run": 42938820017,
+  "source_audit_run": 42935108364,
+  "legacy_category_paths": 88,
+  "scope": "source_title_and_generated_description_plus_301_canonical_checks",
+  "no_writes": true
+}
