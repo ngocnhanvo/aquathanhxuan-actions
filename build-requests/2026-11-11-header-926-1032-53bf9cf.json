@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "53bf9cf226b28fdecae47fa658fb6882ce5eebe3",
+  "scope": "responsive_header_tablet_account_cart_search",
+  "source_qa_run": 42943189971,
+  "reason": "Resolve header overlap at 926px and 1032px while retaining centered search and CMS branding",
+  "no_orders": true
+}
