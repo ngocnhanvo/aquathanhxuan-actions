@@ -1,0 +1,17 @@
+{
+  "project": "aquathanhxuan.com",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "expected_astro_sha": "a41f9af898f11ca7dbf357aeb1f972d34efaf7db",
+  "php_release_run": 42946448388,
+  "wordpress_build_run": 42946934192,
+  "astro_deploy_run": 42947043396,
+  "scope": "agent_widget_branding_open_close_history_clear_and_safe_markdown",
+  "viewports": [
+    "390x844",
+    "926x760",
+    "1440x900"
+  ],
+  "synthetic_chat_response": true,
+  "no_real_orders": true,
+  "no_cms_chat_writes": true
+}
