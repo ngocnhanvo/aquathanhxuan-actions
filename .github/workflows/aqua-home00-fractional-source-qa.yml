@@ -1,0 +1,46 @@
+name: Aqua Home00 fractional breakpoint source QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-home00-fractional-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  compile-and-test:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          path: astro
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: {version: 9.15.9, run_install: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24', cache: pnpm, cache-dependency-path: astro/pnpm-lock.yaml}
+      - name: Install locked Astro dependencies
+        working-directory: astro
+        run: pnpm install --frozen-lockfile
+      - name: Compile hero and assert inverse source media
+        working-directory: astro
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import {transform} from '@astrojs/compiler';
+          const path='src/astro/tablepress/Home_00.astro';
+          const source=fs.readFileSync(path,'utf8');
+          const output=await transform(source,{filename:path});
+          assert(output.code,'Astro hero compile failed');
+          assert(source.includes('media={desktopOnly ? "not all and (max-width: 767px)" : "(max-width: 767px)"}'),'Desktop source must invert mobile media');
+          assert(source.includes('window.matchMedia("(max-width: 767px)")'),'Slider must use the same mobile boundary');
+          console.log('HOME00_FRACTIONAL_COMPILE_PASS');
+          JS
+      - name: Test native home00 data/slide mapping
+        working-directory: astro
+        run: pnpm exec vitest run src/lib/wordpress/tablepress/home00.test.ts
