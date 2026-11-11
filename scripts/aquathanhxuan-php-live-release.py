@@ -26,6 +26,7 @@ FILES = (
     "wp-content/mu-plugins/esc-aqua-cart-promotion.php",
     # Storefront agent prompts and product/company/contact skills (same signed FTPS rollback).
     "wp-content/mu-plugins/esc-agent/src/Core/Planner.php",
+    "wp-content/mu-plugins/esc-agent/src/Core/Agent.php",
     "wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php",
     "wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php",
     "wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php",
