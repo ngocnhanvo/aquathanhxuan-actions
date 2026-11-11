@@ -37,7 +37,7 @@ const snapshot=()=> {
   console.log('AQUA_HEADER_SOURCE_PASS='+marker.commit);
   const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   try{
-    for(const width of [900,926,1032,1200,1279,1280,1440]){
+    for(const width of [900,926,1032,1200,1279,1280,1440,1600]){
       const page=await browser.newPage({viewport:{width,height:760},deviceScaleFactor:2});
       page.on('pageerror',e=>console.log('PAGE_ERROR '+width+' '+String(e).slice(0,150)));
       await page.route('**/api/user/info',route=>route.fulfill({
