@@ -15,5 +15,8 @@
     "old_domain_status",
     "WordPress_Header_menu"
   ],
-  "no_writes": true
+  "no_writes": true,
+  "attempt": 2,
+  "previous_run": 42934358348,
+  "reason": "Follow 301 trailing-slash redirects on source to read original titles/meta; read real WordPress product category SEO"
 }
