@@ -1,0 +1,11 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "write_scope": "woocommerce_coupon_id_83818_description_only",
+  "source": "WooCommerce native coupon description",
+  "coupon_id": 83818,
+  "expected_coupon_code": "mf5",
+  "no_mf10_recreation": true,
+  "no_orders": true,
+  "reason": "Show an editable MF5 explanation below coupon code in Astro cart; do not change promotion terms"
+}
