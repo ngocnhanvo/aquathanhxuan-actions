@@ -1,0 +1,9 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "mode": "PILOT_FIRST",
+  "write_scope": "term_id_1767_and_exact_redirect_danh-muc-thuong-hieu",
+  "origin_report_run": 42935108364,
+  "reason": "Verify WordPress Yoast term save and ACF redirect post readback before full menu migration",
+  "no_order_changes": true
+}
