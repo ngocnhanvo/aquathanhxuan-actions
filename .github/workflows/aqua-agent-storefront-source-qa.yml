@@ -71,12 +71,14 @@ jobs:
           set -euo pipefail
           for file in \
             php/wp-content/mu-plugins/esc-agent/src/Core/Planner.php \
+            php/wp-content/mu-plugins/esc-agent/src/Core/Agent.php \
             php/wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php \
             php/wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php \
             php/wp-content/mu-plugins/esc-agent/src/Skills/ContactSkill.php \
             php/wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php; do
               php -l "$file"
           done
+          php php/tests/aqua-agent-advice.test.php
           php <<'PHP'
           <?php
           require 'php/wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php';
