@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'qa-requests/aqua-header-tablet-prod-20261111.json'
+      - 'scripts/aqua-header-tablet-layout-qa.cjs'
 permissions:
   contents: read
 jobs:
