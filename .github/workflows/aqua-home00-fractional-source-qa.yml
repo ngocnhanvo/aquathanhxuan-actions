@@ -32,7 +32,9 @@ jobs:
           node --input-type=module <<'JS'
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
-          import {transform} from '@astrojs/compiler';
+          import {createRequire} from 'node:module';
+          const require=createRequire(import.meta.url);
+          const {transform}=await import(require.resolve('@astrojs/compiler',{paths:[require.resolve('astro/package.json')]}));
           const path='src/astro/tablepress/Home_00.astro';
           const source=fs.readFileSync(path,'utf8');
           const output=await transform(source,{filename:path});
