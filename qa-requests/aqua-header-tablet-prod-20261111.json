@@ -1,0 +1,21 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend": "https://aquathanhxuan.io.vn",
+  "expected_source_sha": "53bf9cf226b28fdecae47fa658fb6882ce5eebe3",
+  "production_run_id": 42943396629,
+  "wordpress_build_run_id": 42943294721,
+  "source_qa_run_id": 42943189971,
+  "viewports": [
+    390,
+    900,
+    926,
+    1032,
+    1200,
+    1279,
+    1280,
+    1440
+  ],
+  "scope": "read_only_header_search_account_cart_overlap",
+  "synthetic_user": true
+}
