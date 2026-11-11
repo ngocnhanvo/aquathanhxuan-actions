@@ -30,6 +30,8 @@ FILES = (
     "wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php",
     "wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php",
     "wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php",
+    "wp-content/mu-plugins/esc-agent/src/Skills/ProductDetailSkill.php",
+    "wp-content/mu-plugins/esc-agent/src/Skills/PromotionSkill.php",
     "wp-content/mu-plugins/esc-agent/src/Skills/ContactSkill.php",
     "wp-content/themes/vibe-code-theme/inc/cart/cart_endpoint.php",
     "wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php",
