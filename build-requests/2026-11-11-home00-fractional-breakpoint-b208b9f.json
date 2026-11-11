@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "b208b9f82c669953ec6685e740f539ee4c21e046",
+  "scope": "home00_responsive_hero_fractional_viewport_gap_fix",
+  "source_qa_run": 42941509621,
+  "reason": "Fix blank hero between 767 and 768 CSS pixels; preserve existing CMS slides and responsive download policy",
+  "no_orders": true
+}
