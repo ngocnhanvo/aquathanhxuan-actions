@@ -1,9 +1,10 @@
 {
   "project": "aquathanhxuan.com",
   "environment": "production",
-  "mode": "PILOT_FIRST",
-  "write_scope": "term_id_1767_and_exact_redirect_danh-muc-thuong-hieu",
+  "mode": "APPLY_ALL_VERIFIED_MENU_CATEGORIES",
+  "write_scope": "88 existing product_cat Yoast SEO fields and 88 exact 301 WordPress routing records",
   "origin_report_run": 42935108364,
-  "reason": "Verify WordPress Yoast term save and ACF redirect post readback before full menu migration",
-  "no_order_changes": true
+  "reason": "Pilot succeeded; apply all original menu SEO title and descriptions and exact new-domain legacy paths; do not change old domain hosting or products",
+  "no_order_changes": true,
+  "pilot_run": 42936671513
 }
