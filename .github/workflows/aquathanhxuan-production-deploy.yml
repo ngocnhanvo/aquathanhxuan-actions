@@ -128,7 +128,7 @@ jobs:
           restore-keys: |
             aquathanhxuan-prod-dot-cache-v2-${{ runner.os }}-
       # A separate GitHub Actions step for each potentially blocking process.
-      # FTPS installation is now sequential, not an invisible background wait.
+      # Python stdlib FTPS needs no APT packages or lftp background installer.
       - name: Install locked Astro dependencies
         timeout-minutes: 12
         shell: bash
@@ -179,20 +179,13 @@ jobs:
           test -s dist/server/entry.mjs
           echo "AQUA_BUILD_STAGE=DIST_CHECKS_PASS $(date -u +%FT%TZ)"
           echo "Build source SHA: $(git rev-parse HEAD) (master)" >> "$GITHUB_STEP_SUMMARY"
-      - name: Install encrypted FTPS client
-        timeout-minutes: 12
+      - name: Validate built-in Python FTPS upload client
+        timeout-minutes: 1
         shell: bash
         run: |
           set -euo pipefail
-          echo "AQUA_BUILD_STAGE=FTPS_INSTALL_START $(date -u +%FT%TZ)"
-          if ! command -v lftp >/dev/null 2>&1; then
-            timeout --signal=TERM --kill-after=15s 600s bash -c '
-              sudo apt-get update -qq
-              sudo apt-get install -y -qq --no-install-recommends lftp
-            '
-          fi
-          command -v lftp >/dev/null 2>&1 || { echo "::error::Missing encrypted FTPS client"; exit 1; }
-          echo "AQUA_BUILD_STAGE=FTPS_INSTALL_EXIT $(date -u +%FT%TZ)"
+          python3 -m py_compile actions-hub/scripts/aquathanhxuan-resumable-ftps.py
+          echo "AQUA_BUILD_STAGE=PYTHON_FTPS_READY $(date -u +%FT%TZ)"
       - name: Prepare staging files and SEO metadata (strictly no .env)
         timeout-minutes: 6
         shell: bash
@@ -354,9 +347,14 @@ jobs:
           print('PASS: ZIP contains dev server/client and provenance, no private environment file.')
           PY
           echo "AQUA_BUILD_STAGE=VERIFY_STAGING_ZIP_SECURITY_AND_SOURCE_PROVENANCE_PASS $(date -u +%FT%TZ)"
-      - name: Upload compiled staging archive by FTP-TLS
+      - name: Upload compiled staging archive by Python FTP_TLS
+        timeout-minutes: 7
         shell: bash
-        run: bash actions-hub/scripts/aquathanhxuan-resumable-ftp.sh
+        run: |
+          set -euo pipefail
+          echo "AQUA_BUILD_STAGE=PYTHON_FTPS_UPLOAD_START $(date -u +%FT%TZ)"
+          timeout --signal=TERM --kill-after=10s 360s python3 -u actions-hub/scripts/aquathanhxuan-resumable-ftps.py
+          echo "AQUA_BUILD_STAGE=PYTHON_FTPS_UPLOAD_EXIT $(date -u +%FT%TZ)"
       - name: Verify provenance and activate staging bundle using signed PHP rollback
         shell: bash
         run: python3 actions-hub/scripts/aquathanhxuan-remote-unzip.py unpack
