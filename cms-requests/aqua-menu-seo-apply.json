@@ -4,7 +4,9 @@
   "mode": "APPLY_ALL_VERIFIED_MENU_CATEGORIES",
   "write_scope": "88 existing product_cat Yoast SEO fields and 88 exact 301 WordPress routing records",
   "origin_report_run": 42935108364,
-  "reason": "Pilot succeeded; apply all original menu SEO title and descriptions and exact new-domain legacy paths; do not change old domain hosting or products",
+  "reason": "Idempotent verification second pass: existing 88 Woo taxonomy SEO records and 88 301 links; no duplicate writes",
   "no_order_changes": true,
-  "pilot_run": 42936671513
+  "pilot_run": 42936671513,
+  "attempt": 2,
+  "previous_run": 42936896916
 }
