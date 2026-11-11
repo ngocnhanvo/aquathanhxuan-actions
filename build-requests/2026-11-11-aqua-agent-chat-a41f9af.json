@@ -1,0 +1,13 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "a41f9af898f11ca7dbf357aeb1f972d34efaf7db",
+  "scope": "aqua_agent_chat_branding_clear_history_markdown_safety",
+  "php_release_run": 42946448388,
+  "source_qa_run": 42946287879,
+  "reason": "Publish Aqua Thanh Xuan agent widget branding and correct cookie-backed chat controls",
+  "no_orders": true
+}
