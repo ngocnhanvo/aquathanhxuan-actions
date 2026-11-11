@@ -53,7 +53,11 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
    assert(target&&target.slug===item.term_slug,'Taxonomy mismatch for '+item.new_path);
    const beforeTitle=String(target.seoTitle||'').trim();
    const beforeDesc=String(target.seoDescription||'').trim();
-   const wantedTitle=beforeTitle||item.title;
+   // The first audit timed out on 9 old pages. They were independently
+   // verified later; replace only our known provisional root title.
+   const provisionalTitle=item.old_path==='/danh-muc/cay-va-ca-thuy-sinh'
+    ? 'SINH VẬT – AQua Thanh Xuân' : '';
+   const wantedTitle=(!beforeTitle||beforeTitle===provisionalTitle)?item.title:beforeTitle;
    const wantedDesc=beforeDesc||item.description;
    if(beforeTitle===wantedTitle&&beforeDesc===wantedDesc){
     report.skipped.seo.push({id:item.term_id,slug:item.term_slug,reason:'Already configured'});
@@ -67,7 +71,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
    const original=await page.locator('#hidden_wpseo_title').inputValue();
    const originalDesc=await page.locator('#hidden_wpseo_desc').inputValue();
    // Never overwrite a saved/meaningful Yoast term value. Re-check editor source.
-   if(original.trim() && original.trim()!==wantedTitle) throw Error('Yoast title changed concurrently '+item.term_id);
+   if(original.trim() && original.trim()!==wantedTitle && original.trim()!==provisionalTitle) throw Error('Yoast title changed concurrently '+item.term_id);
    if(originalDesc.trim() && originalDesc.trim()!==wantedDesc) throw Error('Yoast description changed concurrently '+item.term_id);
    // WordPress category editor posts native form fields. Don't navigate other tabs.
    await page.evaluate(({title,description})=>{
