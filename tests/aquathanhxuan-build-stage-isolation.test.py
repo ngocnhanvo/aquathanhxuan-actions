@@ -39,7 +39,7 @@ class ProductionBuildStepsContract(unittest.TestCase):
     def test_astro_and_python_ftps_preflight_are_separate_and_bounded(self):
         astro = STEPS["Build Astro Production (incremental WordPress data cache)"]
         dependencies = STEPS["Install locked Astro dependencies"]
-        ftps = STEPS["Install encrypted FTPS client"]
+        ftps = STEPS["Validate built-in Python FTPS upload client"]
         self.assertIn("pnpm install --frozen-lockfile --prefer-offline", dependencies)
         self.assertNotIn("pnpm run build-git", dependencies)
         self.assertIn("timeout --signal=TERM --kill-after=15s 1200s pnpm run build-git", astro)
@@ -70,7 +70,7 @@ class ProductionBuildStepsContract(unittest.TestCase):
         self.assertIn("Archive provenance marker mismatch", check)
 
     def test_production_deploy_transport_remains_signed(self):
-        upload = STEPS["Upload compiled staging archive by FTP-TLS"]
+        upload = STEPS["Upload compiled staging archive by Python FTP_TLS"]
         activate = STEPS["Verify provenance and activate staging bundle using signed PHP rollback"]
         self.assertIn("aquathanhxuan-resumable-ftps.py", upload)
         self.assertIn("timeout --signal=TERM --kill-after=10s 360s", upload)
