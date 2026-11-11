@@ -1,0 +1,6 @@
+{
+  "project": "aquathanhxuan.com",
+  "scope": "product_cat Yoast and chuyen-huong-link WordPress edit UI",
+  "read_only": true,
+  "reason": "Find existing SEO and redirect fields before targeted CMS updates"
+}
