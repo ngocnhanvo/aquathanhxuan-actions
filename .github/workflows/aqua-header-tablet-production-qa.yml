@@ -1,0 +1,33 @@
+name: Aqua header tablet production layout QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'qa-requests/aqua-header-tablet-prod-20261111.json'
+permissions:
+  contents: read
+jobs:
+  visual-layout:
+    if: github.repository == 'ngocnhanvo/aquathanhxuan-actions'
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Validate browser script
+        run: node --check scripts/aqua-header-tablet-layout-qa.cjs
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Verify desktop and tablet signed-in header
+        run: node scripts/aqua-header-tablet-layout-qa.cjs
+      - name: Save viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-header-tablet-production-qa
+          path: artifacts/aqua-header-tablet-layout/
+          if-no-files-found: ignore
+          retention-days: 7
