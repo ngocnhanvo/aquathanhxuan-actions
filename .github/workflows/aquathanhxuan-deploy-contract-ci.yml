@@ -8,7 +8,7 @@ on:
       - '.github/workflows/aquathanhxuan-deploy-contract-ci.yml'
       - 'scripts/aquathanhxuan-*-delta-package.py'
       - 'scripts/aquathanhxuan-remote-unzip.py'
-      - 'scripts/aquathanhxuan-resumable-ftp.sh'
+      - 'scripts/aquathanhxuan-resumable-ftps.py'
       - 'scripts/aquathanhxuan-php-live-release.py'
       - 'tests/aquathanhxuan-*.test.py'
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           command -v php
-          bash -n scripts/aquathanhxuan-resumable-ftp.sh
+          python3 -m py_compile scripts/aquathanhxuan-resumable-ftps.py
           for test in tests/aquathanhxuan-*.test.py; do
             python3 "$test" -v
           done
