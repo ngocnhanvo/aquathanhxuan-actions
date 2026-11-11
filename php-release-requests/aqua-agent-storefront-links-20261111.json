@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "3f8ba5ddda213ad43efac79a4fa24ecdcd7e5981",
+  "scope": "fix_agent_astro_storefront_links_and_block_unverified_urls",
+  "reason": "Canonical Astro taxonomy/product links and evidence-backed links across chat skills; predeploy PHP fixtures required",
+  "source_qa_request_commit": "d7de8bc06e2a55f4b935629374a0650719db8863",
+  "no_astro_build": true,
+  "no_orders": true
+}
