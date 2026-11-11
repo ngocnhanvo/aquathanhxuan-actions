@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "10b6e584c6f7afd59702bee1b4cb438dd1e81fda",
+  "scope": "aqua_storefront_agent_planner_synthesis_company_products_contact",
+  "reason": "Publish WooCommerce-grounded Aqua Thanh Xuan agent advice and remove old B2B/manufacturing assumptions",
+  "source_qa_run": 42946287879,
+  "no_astro_build": true,
+  "no_orders": true
+}
