@@ -99,6 +99,9 @@ jobs:
           php -l source-php/wp-content/mu-plugins/esc-seo-files.php
           php -l source-php/wp-content/mu-plugins/esc-aqua-cart-promotion.php
           php -l source-php/wp-content/mu-plugins/esc-agent/src/Core/Agent.php
+          php -l source-php/wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php
+          php -l source-php/wp-content/mu-plugins/esc-agent/src/Skills/ProductDetailSkill.php
+          php -l source-php/wp-content/mu-plugins/esc-agent/src/Skills/PromotionSkill.php
           php source-php/tests/aqua-agent-advice.test.php
           php source-php/tests/aqua-auto-cart-promotion.test.php
           php -l source-php/wp-content/themes/vibe-code-theme/inc/cart/cart_endpoint.php
