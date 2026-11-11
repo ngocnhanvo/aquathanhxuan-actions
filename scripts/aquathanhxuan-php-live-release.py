@@ -24,6 +24,12 @@ FILES = (
     "wp-content/mu-plugins/esc-github-trigger-config.php",
     "wp-content/mu-plugins/esc-seo-files.php",
     "wp-content/mu-plugins/esc-aqua-cart-promotion.php",
+    # Storefront agent prompts and product/company/contact skills (same signed FTPS rollback).
+    "wp-content/mu-plugins/esc-agent/src/Core/Planner.php",
+    "wp-content/mu-plugins/esc-agent/src/Core/AgentSynthesisPrompt.php",
+    "wp-content/mu-plugins/esc-agent/src/Skills/CompanySkill.php",
+    "wp-content/mu-plugins/esc-agent/src/Skills/ProductSkill.php",
+    "wp-content/mu-plugins/esc-agent/src/Skills/ContactSkill.php",
     "wp-content/themes/vibe-code-theme/inc/cart/cart_endpoint.php",
     "wp-content/themes/vibe-code-theme/inc/checkout/checkout_endpoint.php",
     "wp-content/themes/vibe-code-theme/inc/checkout/index.php",
