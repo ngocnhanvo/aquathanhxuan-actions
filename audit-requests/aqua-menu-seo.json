@@ -1,0 +1,19 @@
+{
+  "project": "aquathanhxuan.com",
+  "date": "2026-11-11",
+  "environment": "production",
+  "scope": "all_original_menu_category_pages",
+  "mode": "READ_ONLY",
+  "source_origin": "https://aquathanhxuan.com",
+  "target_origin": "https://aquathanhxuan.io.vn",
+  "check": [
+    "source_html_title",
+    "source_meta_description",
+    "new_html_title",
+    "new_meta_description",
+    "legacy_path_redirect_status",
+    "old_domain_status",
+    "WordPress_Header_menu"
+  ],
+  "no_writes": true
+}
