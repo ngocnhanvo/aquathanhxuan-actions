@@ -36,7 +36,7 @@ class StaticDeltaContract(unittest.TestCase):
             finally:
                 os.chdir(previous)
 
-    def test_public_provenance_marker_requires_full_static_zip(self):
+    def test_public_provenance_marker_stays_in_zip_while_static_reuses(self):
         previous = os.getcwd()
         with tempfile.TemporaryDirectory() as tmp:
             os.chdir(tmp)
@@ -50,9 +50,12 @@ class StaticDeltaContract(unittest.TestCase):
                     json.dumps({"static": {"app.js": meta(b"stable-js")}})
                 )
                 MOD["main"]()
-                self.assertFalse(Path("deploy/aquathanhxuan-static-delta.json").exists())
-                self.assertEqual((root / "app.js").read_bytes(), b"stable-js")
+                marker = json.loads(Path("deploy/aquathanhxuan-static-delta.json").read_text())
+                self.assertEqual(marker["reuse"], ["app.js"])
+                self.assertEqual(list(marker["files"]), ["app.js"])
+                self.assertFalse((root / "app.js").exists())
                 self.assertTrue((root / "aquathanhxuan-staging-build.json").is_file())
+                self.assertTrue((root / "index.html").is_file())
             finally:
                 os.chdir(previous)
 
