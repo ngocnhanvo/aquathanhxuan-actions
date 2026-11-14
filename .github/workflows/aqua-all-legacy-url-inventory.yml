@@ -1,0 +1,35 @@
+name: Aqua all legacy URLs inventory (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/aqua-all-legacy-url-inventory.cjs'
+      - '.github/workflows/aqua-all-legacy-url-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: aqua-all-legacy-inventory
+  cancel-in-progress: false
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check inventory
+        run: node --check scripts/aqua-all-legacy-url-inventory.cjs
+      - name: Audit public source URLs and redirect destinations without writes
+        run: node scripts/aqua-all-legacy-url-inventory.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-all-legacy-url-inventory
+          path: artifacts/aqua-all-legacy-url-inventory
+          retention-days: 30
+          if-no-files-found: warn
