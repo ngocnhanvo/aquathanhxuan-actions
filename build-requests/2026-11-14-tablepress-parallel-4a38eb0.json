@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "4a38eb0a8da9ce3cf3f54388a1ffb6deb46679be",
+  "scope": "parallel_tablepress_log_fetch_with_independent_wordpress_api",
+  "source_qa_run": 43591423650,
+  "reason": "Deploy tested parallel TablePress log fetching without changing cache provenance or signed production workflow",
+  "no_orders": true
+}
