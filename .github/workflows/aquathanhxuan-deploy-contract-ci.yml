@@ -43,6 +43,7 @@ jobs:
             src/lib/wordpress/pages/index.parallel.test.ts \
             src/lib/wordpress/redirects/index.parallel.test.ts \
             src/lib/wordpress/tablepress/processedCache.test.ts \
+            src/lib/wordpress/tablepress/index.parallel.test.ts \
             src/lib/wordpress/pages/ssrActionAudit.test.ts \
             src/lib/wordpress/pages/publishedPageAudit.test.ts \
             src/lib/wordpress/pages/homepageContentAudit.test.ts
