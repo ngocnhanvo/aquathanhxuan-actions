@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "8014734556d833eaa2ef3206fb918a133c3458b5",
+  "scope": "astro_build_wordpress_api_parallel_and_tablepress_dependency_cache",
+  "source_qa_run": 43590179040,
+  "reason": "Publish verified faster WordPress build audits and per-source TablePress cache with existing signed deploy and rollback",
+  "no_orders": true
+}
