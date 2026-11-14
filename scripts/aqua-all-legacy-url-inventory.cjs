@@ -278,7 +278,8 @@ async function audit() {
     const expected=oldCategory && saved?.type==='301' ? String(saved.to) :
       (oldCategory && categories.has(slug)?'/san-pham/'+encodeURIComponent(slug):'');
     let r=await request(NEW+path,{method:'HEAD'});
-    if([0,405,501].includes(r.status))r=await request(NEW+path,{method:'GET'});
+    // Verify failures with real GET: some SSR servers respond differently to HEAD.
+    if(r.status===0||r.status>=400)r=await request(NEW+path,{method:'GET'});
     let destination='',target_status=0;
     if(r.location){try{destination=new URL(r.location,NEW).toString()}catch{destination='INVALID'};}
     const redirected=[301,302,307,308].includes(r.status);
