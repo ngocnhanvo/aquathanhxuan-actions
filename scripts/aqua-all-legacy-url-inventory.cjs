@@ -201,7 +201,7 @@ async function discoverHtml() {
       if(seen.has(item))continue;
       if(seen.size>=maxArchive){result.discovery.archive_limit_hit=true;break;}
       seen.add(item);
-      const response=await request(OLD+item,{accept:'text/html',timeout:21000});
+      const response=await request(OLD+item,{accept:'text/html',timeout:21000,follow:true});
       if(response.status!==200||!response.body.includes('<a')) {
         if(response.status!==404)result.discovery.html_errors.push({path:item,status:response.status,error:response.error||''});
         continue;
@@ -272,8 +272,11 @@ async function audit() {
     const originalSources=[...found.get(path)];
     const oldCategory=path.startsWith('/danh-muc/');
     const slug=decodeURIComponent(path.split('/').pop()||'');
-    const expected=oldCategory && categories.has(slug)?'/san-pham/'+encodeURIComponent(slug):'';
     const saved=savedFrom.get(path);
+    // A verified CMS route may intentionally point to a renamed taxonomy slug.
+    // Prefer the published exact mapping over naive last-segment replacement.
+    const expected=oldCategory && saved?.type==='301' ? String(saved.to) :
+      (oldCategory && categories.has(slug)?'/san-pham/'+encodeURIComponent(slug):'');
     let r=await request(NEW+path,{method:'HEAD'});
     if([0,405,501].includes(r.status))r=await request(NEW+path,{method:'GET'});
     let destination='',target_status=0;
