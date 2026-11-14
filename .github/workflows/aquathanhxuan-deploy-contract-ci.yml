@@ -15,6 +15,39 @@ on:
 permissions:
   contents: read
 jobs:
+  astro-optimization-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout current Aqua Astro production source (NO DEPLOY)
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Verify Page and redirect concurrency plus TablePress dependency cache
+        run: |
+          pnpm exec vitest run \
+            src/lib/wordpress/pages/index.parallel.test.ts \
+            src/lib/wordpress/redirects/index.parallel.test.ts \
+            src/lib/wordpress/tablepress/processedCache.test.ts \
+            src/lib/wordpress/pages/ssrActionAudit.test.ts \
+            src/lib/wordpress/pages/publishedPageAudit.test.ts \
+            src/lib/wordpress/pages/homepageContentAudit.test.ts
+      - name: Identify tested Astro source SHA
+        run: git rev-parse HEAD
   offline-contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 8
