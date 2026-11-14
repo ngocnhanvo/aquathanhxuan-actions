@@ -129,6 +129,51 @@ async function discoverRest() {
     },5);
   },3);
 }
+async function discoverStoreApi() {
+  // WooCommerce Store API enumerates published storefront products even when
+  // Yoast sitemap is disabled. Track its server-advertised total separately.
+  const endpoints=[
+    {base:OLD+'/wp-json/wc/store/v1/products',name:'store_products',max:400},
+    {base:OLD+'/wp-json/wc/store/v1/products/categories',name:'store_categories',max:50},
+  ];
+  for(const endpoint of endpoints) {
+    const base=endpoint.base;
+    let page=1,total=0,pages=0;
+    let expected=null,broken=false;
+    while(page<=endpoint.max) {
+      const response=await request(base+'?per_page=100&page='+page,{accept:'application/json',timeout:26000});
+      let items;try{items=JSON.parse(response.body)}catch{}
+      if(response.status===400 && page>1 && total>0)break;
+      if(response.status!==200||!Array.isArray(items)) {
+        result.errors.push('Store API '+endpoint.name+' HTTP '+response.status+' page '+page);
+        broken=true;break;
+      }
+      if(page===1) {
+        const raw=response.headers.get('x-wp-total');
+        expected=raw===null?null:Number(raw);
+      }
+      for(const item of items) {
+        const url=String(item.permalink||item.link||'');
+        if(url) add(url,endpoint.name);
+        else if(endpoint.name==='store_products' && item.slug) {
+          // WordPress legacy permalink was /san-pham/{product-slug}.
+          add(OLD+'/san-pham/'+encodeURIComponent(item.slug),endpoint.name+'-slug');
+        }
+      }
+      total+=items.length;pages++;
+      if(page%10===0)console.log('AQUA_ALL_LEGACY_STORE_PROGRESS='+JSON.stringify({endpoint:endpoint.name,page,items:total,expected}));
+      const maxPages=Number(response.headers.get('x-wp-totalpages')||0);
+      if((maxPages&&page>=maxPages)||items.length<100)break;
+      page++;
+    }
+    if(page>endpoint.max) {
+      result.errors.push('Store API '+endpoint.name+' exceeded page cap '+endpoint.max);
+      broken=true;
+    }
+    result.rest[endpoint.name]={count:total,pages,reported_total:expected,complete:!broken&&(expected===null||total>=expected)};
+  }
+}
+
 function links(html) {
   const values=[];const re=/<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1/gi;
   for(const m of html.matchAll(re)){
@@ -274,7 +319,7 @@ async function audit() {
     link_urls:[...found].filter(([,v])=>v.has('html-link')).length,
     expected_category_301:rows.filter(x=>x.expected).length,
     cms_redirect_sources:savedFrom.size,
-    discoveries_complete:!result.discovery.archive_limit_hit&&!result.errors.some(s=>s.includes('exceeded'))
+    discoveries_complete:!result.discovery.archive_limit_hit&&!result.errors.some(s=>s.includes('exceeded')) && result.rest.store_products?.complete===true
   };
   result.status='AUDIT_COMPLETE';
   result.finished_at=new Date().toISOString();
@@ -286,6 +331,7 @@ async function audit() {
   await discoverSitemaps();
   console.log('AQUA_ALL_LEGACY_SITEMAPS='+JSON.stringify({good:result.sitemap.successful.length,urls:found.size}));
   await discoverRest();
+  await discoverStoreApi();
   await discoverHtml();
   await audit();
 }catch(e){result.status='FAILED';result.errors.push(String(e.stack||e).slice(0,1600));save();console.error('AQUA_ALL_LEGACY_FATAL='+String(e.message||e));process.exitCode=1;}})();
