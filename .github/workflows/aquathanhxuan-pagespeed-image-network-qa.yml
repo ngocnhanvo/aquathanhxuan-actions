@@ -1,0 +1,30 @@
+name: Aqua PageSpeed image timeout network diagnostics (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-pagespeed-image-network-qa.yml'
+      - 'scripts/aqua-pagespeed-image-network-qa.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Browser plus HTTP asset probes
+        run: node scripts/aqua-pagespeed-image-network-qa.mjs
+      - name: Publish read-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-pagespeed-image-network-diagnostics
+          path: artifacts/pagespeed-image-network/report.json
+          if-no-files-found: warn
+          retention-days: 7
