@@ -1,0 +1,30 @@
+name: Aqua WordPress automatic sitemap source regression (NO DEPLOY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-wordpress-auto-sitemap-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+          path: source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify automatic sitemap JavaScript and business rules
+        working-directory: source
+        run: |
+          node --check scripts/sync-seo-files.mjs
+          node --check scripts/wordpress-auto-sitemap.mjs
+          node --test scripts/wordpress-auto-sitemap.test.mjs
+          git rev-parse HEAD
