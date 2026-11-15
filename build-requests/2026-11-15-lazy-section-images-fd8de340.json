@@ -1,0 +1,6 @@
+{
+  "source_sha": "fd8de34059bde6e34401d7035c16f9862e550385",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "reason": "Defer hidden agent avatars and lower priority below-fold section images"
+}
