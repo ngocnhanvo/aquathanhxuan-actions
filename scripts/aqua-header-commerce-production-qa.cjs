@@ -93,6 +93,14 @@ async function main() {
     await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:45000});
     const accountButton = page.locator('#header-brandbar .js-user-account-container .js-account-toggle').first();
     await accountButton.waitFor({state:'visible',timeout:15000});
+    assert(await accountButton.locator('.js-account-online').isVisible(), 'Verified session must show the green dot');
+    assert.equal((await accountButton.locator('.js-account-label').innerText()).trim(),'Tài khoản','Header label must remain unchanged after login');
+    assert.equal(await accountButton.getByText(fakeName).count(),0,'Profile name must not appear beside the icon');
+    const circleStyle = await accountButton.locator('span.relative').first().evaluate(el => ({
+      shape: getComputedStyle(el).borderRadius,
+      width: Math.round(el.getBoundingClientRect().width),
+    }));
+    assert(circleStyle.shape === '50%' && circleStyle.width >= 44, 'Account icon must use a circular control');
     await accountButton.click();
     const dropdown = page.locator('#header-brandbar .js-user-account-container .js-account-dropdown').first();
     await dropdown.waitFor({state:'visible'});
@@ -116,7 +124,27 @@ async function main() {
     await verifyCart(mobilePage,'mobile');
     await mobilePage.locator('#header-brandbar .js-user-account-container .js-account-guest:visible').first().waitFor({state:'visible'});
     await mobilePage.screenshot({path:evidence+'/mobile-home.png',fullPage:false});
-    console.log('MOBILE_ACCOUNT_AND_CART_PASS');
+
+    // Route the signed-user fixture only inside Playwright. No real login/order mutation.
+    await mobilePage.route('**/api/user/info', route => route.fulfill({
+      status:200, contentType:'application/json',
+      body:JSON.stringify({id:142,name:'QA Buyer',email:'qa@example.invalid'})
+    }));
+    await mobilePage.reload({waitUntil:'domcontentloaded',timeout:45000});
+    const mobileSigned = mobilePage.locator('#header-brandbar .js-account-toggle:visible').first();
+    await mobileSigned.waitFor({state:'visible',timeout:15000});
+    assert(await mobileSigned.locator('.js-account-online').isVisible(), 'Mobile signed-in icon must show green dot');
+    await mobileSigned.click();
+    const mobileDropdown = mobilePage.locator('#header-brandbar .js-account-dropdown:visible').first();
+    await mobileDropdown.waitFor({state:'visible'});
+    const bounds = await mobileDropdown.evaluate(el => {
+      const box = el.getBoundingClientRect();
+      return {left:box.left,right:box.right,width:box.width,viewport:window.innerWidth};
+    });
+    assert(bounds.left >= 6 && bounds.right <= bounds.viewport-6,
+      'Mobile account dropdown must fit the viewport: '+JSON.stringify(bounds));
+    await mobilePage.screenshot({path:evidence+'/mobile-signed-dropdown.png',fullPage:false});
+    console.log('MOBILE_ACCOUNT_AND_CART_PASS '+JSON.stringify(bounds));
     await mobile.close();
     console.log('AQUA_HEADER_COMMERCE_PRODUCTION_QA_PASS - NO ORDERS NO PAYMENTS NO CMS WRITES');
   } finally {
