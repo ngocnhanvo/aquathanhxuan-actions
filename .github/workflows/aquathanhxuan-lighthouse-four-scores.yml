@@ -1,0 +1,68 @@
+name: Aqua Lighthouse four-score production snapshot (read-only)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aquathanhxuan-lighthouse-four-scores.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      TARGET_URL: https://aquathanhxuan.io.vn/
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Lighthouse CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund lighthouse@13.5.0
+          mkdir -p lighthouse-reports
+      - name: Audit mobile and desktop
+        shell: bash
+        run: |
+          set -euo pipefail
+          for device in mobile desktop; do
+            echo "::group::Lighthouse $device"
+            flags=()
+            if [ "$device" = desktop ]; then flags+=(--preset=desktop); fi
+            ./node_modules/.bin/lighthouse "$TARGET_URL" \
+              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+              "${flags[@]}" \
+              --only-categories=performance,accessibility,best-practices,seo \
+              --output=json \
+              --output-path="lighthouse-reports/$device.json" \
+              --quiet \
+              --max-wait-for-load=60000
+            DEVICE="$device" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const device=process.env.DEVICE;
+          const report=JSON.parse(fs.readFileSync('lighthouse-reports/'+device+'.json','utf8'));
+          const score=Object.fromEntries(['performance','accessibility','best-practices','seo'].map(k=>[k,report.categories?.[k]?.score==null?null:Math.round(100*report.categories[k].score)]));
+          const metrics=Object.fromEntries(['first-contentful-paint','largest-contentful-paint','speed-index','total-blocking-time','cumulative-layout-shift'].map(k=>[k,{value:report.audits?.[k]?.numericValue??null,display:report.audits?.[k]?.displayValue??null}]));
+          const failingAudits=Object.entries(report.audits||{}).filter(([id,a])=>a.score!==null&&a.score!==undefined&&a.score<0.9&&a.scoreDisplayMode==='binary').map(([id,a])=>({id,title:a.title,score:a.score})).slice(0,20);
+          const summary={device,at:new Date().toISOString(),url:report.finalDisplayedUrl||report.finalUrl,scores:score,metrics,failingAudits,runtimeError:report.runtimeError||null,lighthouseVersion:report.lighthouseVersion};
+          console.log('LIGHTHOUSE_FOUR_SCORES '+JSON.stringify(summary));
+          fs.writeFileSync('lighthouse-reports/'+device+'-summary.json',JSON.stringify(summary,null,2)+'\n');
+          if(report.runtimeError)process.exitCode=1;
+          NODE
+            echo "::endgroup::"
+          done
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aquathanhxuan-lighthouse-four-scores
+          path: lighthouse-reports/
+          retention-days: 7
+          if-no-files-found: warn
