@@ -100,7 +100,8 @@ async function main() {
       shape: getComputedStyle(el).borderRadius,
       width: Math.round(el.getBoundingClientRect().width),
     }));
-    assert(circleStyle.shape === '50%' && circleStyle.width >= 44, 'Account icon must use a circular control');
+    assert((circleStyle.shape === '50%' || parseFloat(circleStyle.shape) >= circleStyle.width / 2) && circleStyle.width >= 44,
+      'Account icon must use a circular control: '+JSON.stringify(circleStyle));
     await accountButton.click();
     const dropdown = page.locator('#header-brandbar .js-user-account-container .js-account-dropdown').first();
     await dropdown.waitFor({state:'visible'});
