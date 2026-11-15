@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "1d2a42dcd4b2b3333fd7bb2c510fb6187e64830a",
+  "scope": "mobile_account_dropdown_viewport_fix",
+  "source_qa_run": 43680514503,
+  "reason": "Fix signed-in account dropdown overflow on mobile, validated by source QA",
+  "no_orders": true
+}
