@@ -20,6 +20,7 @@ for(const device of ['desktop','mobile']){
   let navError=null,status=null;
   try{
    const nav=await page.goto(ORIGIN+'/?network_qa='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});status=nav?.status();
+   const initial = await page.evaluate(() => Array.from(document.images).map((img,i)=>({i,src:img.currentSrc||img.src,loading:img.loading,fetchPriority:img.fetchPriority,top:Math.round(img.getBoundingClientRect().top),complete:img.complete,naturalWidth:img.naturalWidth,section:img.closest('section')?.getAttribute('data-esc-source-table')||img.closest('section')?.getAttribute('data-aqua-home-sale')||'',visible:img.getBoundingClientRect().bottom>0&&img.getBoundingClientRect().top<innerHeight})));console.log('INITIAL_IMAGES '+JSON.stringify({device,pass,images:initial}));
    const pageHeight=await page.evaluate(()=>document.documentElement.scrollHeight);
    const step=device==='mobile'?650:800;
    for(let y=0;y<Math.min(pageHeight,8000);y+=step){await page.evaluate(y=>window.scrollTo(0,y),y);await page.waitForTimeout(160);}
