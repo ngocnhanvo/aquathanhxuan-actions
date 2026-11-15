@@ -1,0 +1,63 @@
+name: Aqua deferred images production browser QA (READ ONLY)
+on:
+  workflow_run:
+    workflows:
+      - Aqua Thanh Xuân Astro deployment (WordPress Build Website only)
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  browser:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    steps:
+      - name: Install matching Playwright driver
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Verify deferred images, LCP banner, agent interactions and layout
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          import assert from 'node:assert/strict';
+          const origin='https://aquathanhxuan.io.vn';
+          const marker=await fetch(origin+'/aquathanhxuan-staging-build.json?lazyqa='+Date.now()).then(r=>r.json());
+          assert(/^[a-f0-9]{40}$/.test(marker.commit),'Missing production revision marker');
+          console.log('PRODUCTION_SHA='+marker.commit);
+          const browser=await chromium.launch({headless:true});
+          try {
+            for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
+              const page=await browser.newPage({viewport});
+              const agentRequests=[];
+              page.on('request',r=>{if(r.url().includes('/tool/avatar-agent.webp'))agentRequests.push(r.url())});
+              await page.goto(origin+'/?lazy_qa='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+              const before=await page.evaluate(()=>{
+                const hero=[...document.querySelectorAll('[data-aqua-home-hero] img')].find(img=>img.loading==='eager'&&img.fetchPriority==='high'&&img.currentSrc.startsWith('https'));
+                const deferred=[...document.querySelectorAll('img[data-agent-src]')];
+                const sections=[...document.querySelectorAll('[data-esc-source-table="home_02"],[data-esc-source-table="home_03"],[data-esc-source-table="home_06"],[data-esc-source-table="home_07"]')];
+                const images=sections.flatMap(section=>[...section.querySelectorAll('img')].filter(img=>img.hasAttribute('src')&&!img.closest('template')));
+                const combo=[...document.querySelectorAll('[data-esc-source-table="home_03"] .aqua-hot-combo__product-image img')];
+                return {hero:!!hero,agentCount:deferred.length,agentPixel:deferred.every(img=>img.getAttribute('src')?.startsWith('data:image/gif')),imageCount:images.length,lowPriority:images.filter(img=>img.loading==='lazy'&&img.fetchPriority==='low').length,comboResponsive:combo.every(img=>img.sizes.includes('180px')),horizontalOverflow:Math.max(document.body.scrollWidth,document.documentElement.scrollWidth)-innerWidth};
+              });
+              assert(before.hero,'First viewport hero must retain eager high-priority LCP');
+              assert.equal(before.agentCount,2,'Hidden agent avatar images must not fetch at page entry');
+              assert(before.agentPixel,'Hidden agent avatar image must be deferred pixel');
+              assert.equal(agentRequests.length,0,'Agent avatar requested before user intent');
+              assert(before.imageCount>0 && before.lowPriority===before.imageCount,'Below fold images must be lazy and low priority');
+              assert(before.comboResponsive,'Combo product thumbnails must use sizes');
+              assert(before.horizontalOverflow<=2,'Horizontal overflow regression');
+              await page.locator('#ai-agent-btn').click();
+              await page.waitForFunction(()=>[...document.querySelectorAll('#consultation-menu img')].every(img=>img.getAttribute('src')?.includes('/tool/avatar-agent.webp')),{timeout:12000});
+              const after=await page.evaluate(()=>({menu:document.querySelector('#consultation-menu')?.getAttribute('aria-hidden'),avatarSrcs:[...document.querySelectorAll('img[data-agent-src]')].length}));
+              assert.equal(after.menu,'false','Consultation panel must open');
+              assert.equal(after.avatarSrcs,0,'All avatar pixels must hydrate after user intent');
+              await page.locator('#open-agent-from-consultation').click();
+              await page.waitForFunction(()=>document.querySelector('#ai-chat-box')?.classList.contains('scale-100')===true,null,{timeout:15000});
+              console.log('LAZY_PRODUCTION_PASS '+JSON.stringify({viewport,revision:marker.commit,...before,requestsAfterInteraction:agentRequests.length}));
+              await page.close();
+            }
+          }finally {await browser.close();}
+          NODE
