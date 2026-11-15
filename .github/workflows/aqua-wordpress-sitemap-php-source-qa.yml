@@ -1,0 +1,25 @@
+name: Aqua WordPress sitemap PHP source regression (NO DEPLOY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-wordpress-sitemap-php-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-php
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          persist-credentials: false
+          path: source
+      - name: Verify WordPress sitemap syntax and URL selection
+        run: |
+          php -l source/wp-content/mu-plugins/esc-seo-files.php
+          php source/tests/aqua-seo-sitemap-urls.test.php
+          git -C source rev-parse HEAD
