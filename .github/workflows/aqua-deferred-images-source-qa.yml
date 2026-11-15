@@ -60,7 +60,7 @@ jobs:
           assert.equal((contact.match(/data-agent-src=\{agentAvatar\}/g)||[]).length,2,'Both hidden agent avatars must be deferred');
           assert(contact.includes('if (open) hydrateAgentAvatars()'),'Opening consultation must hydrate avatar');
           assert(contact.includes('async function openAgentChat() {\n        hydrateAgentAvatars()'),'Opening chat must hydrate avatar');
-          assert(!contact.includes('src={agentAvatar}'),'Hidden avatar must not fetch on initial render');
+          assert(!/\\ssrc=\\{agentAvatar\\}/.test(contact),'Hidden avatar must not fetch on initial render');
           const hero=data[paths[1]];
           assert(hero.includes('loading={firstForViewport ? "eager" : "lazy"}'),'Keep LCP banner eagerly loaded');
           assert(hero.includes('fetchpriority={firstForViewport ? "high" : "auto"}'),'Keep LCP banner high priority');
