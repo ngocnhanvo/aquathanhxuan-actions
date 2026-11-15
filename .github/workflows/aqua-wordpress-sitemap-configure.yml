@@ -1,0 +1,29 @@
+name: Aqua configure WordPress sitemap and robots (CMS scoped)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cms-requests/aqua-sitemap-cms-2026-11-15.json'
+permissions:
+  contents: read
+concurrency:
+  group: aqua-wordpress-seo-files-settings
+  cancel-in-progress: false
+jobs:
+  configure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      WP_ADMIN_USERNAME: ${{ secrets.WP_ADMIN_USERNAME }}
+      WP_ADMIN_PASSWORD: ${{ secrets.WP_ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --check scripts/aqua-wordpress-sitemap-configure.cjs
+      - run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright@1.64.0
+      - name: Configure only WordPress SEO Files sitemap and public robots
+        run: node scripts/aqua-wordpress-sitemap-configure.cjs
