@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "php_source_repo": "ngocnhanvo/aquathanhxuan-php",
+  "source_branch": "master",
+  "source_sha": "ccc45100638d7773ceb469cdf5b303a344975626",
+  "reason": "WordPress auto sitemap preview and default robots"
+}
