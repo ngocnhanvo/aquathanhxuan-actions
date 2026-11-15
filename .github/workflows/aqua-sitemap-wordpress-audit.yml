@@ -1,0 +1,29 @@
+name: Aqua sitemap WordPress-to-Astro production read-only audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-sitemap-wordpress-audit.yml'
+      - 'scripts/aqua-sitemap-wordpress-audit.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check scripts/aqua-sitemap-wordpress-audit.cjs
+      - name: Compare WordPress source against public frontend sitemap and robots
+        run: node scripts/aqua-sitemap-wordpress-audit.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aqua-sitemap-readonly-audit
+          path: artifacts/aqua-sitemap/audit.json
+          if-no-files-found: ignore
+          retention-days: 7
