@@ -64,7 +64,7 @@ jobs:
           assert(u.includes('/api/user/info') && u.includes('/api/user/logout') && u.includes('textContent = name'),'Account must read signed session, logout and safely render profile');
           assert(u.includes('js-account-online') && u.includes('bg-[#16A34A]'),'Signed-in account must expose green status dot');
           assert(!u.includes('labelNode.textContent = name'),'Signed-in identity must not replace account header label');
-          assert(u.includes('w-[min(400px,calc(100vw-24px))]') && u.includes('js-account-email'),'Account dropdown must stay responsive and show profile email inside');
+          assert(u.includes('w-[min(400px,calc(100vw-24px))]') && u.includes('js-account-email') && u.includes('-right-12') && u.includes('min-[900px]:right-0'),'Account dropdown must fit mobile width and show profile only inside dropdown');
           assert(c.includes('js-cart-icon-circle') && c.includes('data-base-href'),'Cart must retain working route and circular icon');
           assert(h.includes('mobile-cart-icon flex h-11 w-11'),'Mobile cart control must fit the circular icon');
           const api=read('src/pages/api/user/order.ts');
