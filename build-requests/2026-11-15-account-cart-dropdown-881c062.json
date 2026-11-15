@@ -1,0 +1,12 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "source_repo": "ngocnhanvo/aquathanhxuan-astro",
+  "source_branch": "master",
+  "source_sha": "881c06273a7dfc42240ca34ea3b14853e0e3d66e",
+  "scope": "header_account_cart_circular_controls_login_indicator",
+  "source_qa_run": 43679930058,
+  "reason": "Deploy redesigned account dropdown and circular cart/account icons with signed-in green dot",
+  "no_orders": true
+}
