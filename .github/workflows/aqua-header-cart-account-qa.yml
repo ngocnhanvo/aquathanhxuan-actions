@@ -62,6 +62,11 @@ jobs:
           assert(c.includes('data-base-href') && c.includes('cart:updated') && c.includes('searchParams.delete("cart_key")'),'Cart must sync badge/key and clear stale key');
           assert(c.includes('showLabel') && c.includes('js-cart-badge'),'Cart icon and text must share one live link');
           assert(u.includes('/api/user/info') && u.includes('/api/user/logout') && u.includes('textContent = name'),'Account must read signed session, logout and safely render profile');
+          assert(u.includes('js-account-online') && u.includes('bg-[#16A34A]'),'Signed-in account must expose green status dot');
+          assert(!u.includes('labelNode.textContent = name'),'Signed-in identity must not replace account header label');
+          assert(u.includes('w-[min(400px,calc(100vw-24px))]') && u.includes('js-account-email'),'Account dropdown must stay responsive and show profile email inside');
+          assert(c.includes('js-cart-icon-circle') && c.includes('data-base-href'),'Cart must retain working route and circular icon');
+          assert(h.includes('mobile-cart-icon flex h-11 w-11'),'Mobile cart control must fit the circular icon');
           const api=read('src/pages/api/user/order.ts');
           const user=read('src/lib/utils/user.ts');
           assert(api.includes('customerId') && !api.includes('&search='),'Private orders must be customer scoped');
