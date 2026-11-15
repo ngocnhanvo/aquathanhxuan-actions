@@ -1,0 +1,8 @@
+{
+  "project": "aquathanhxuan.com",
+  "environment": "production",
+  "frontend_host": "aquathanhxuan.io.vn",
+  "wp_origin": "https://admin.aquathanhxuan.io.vn",
+  "target_mode": "auto",
+  "purpose": "Publish full WordPress-managed sitemap and fix stale robots/llms host"
+}
