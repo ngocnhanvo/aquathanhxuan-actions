@@ -1,0 +1,73 @@
+name: Aqua deferred below-fold images source QA (NO DEPLOY)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aqua-deferred-images-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Aqua Astro master
+        uses: actions/checkout@v4
+        with:
+          repository: ngocnhanvo/aquathanhxuan-astro
+          ref: master
+          token: ${{ secrets.SOURCE_REPO_PAT }}
+          path: source
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+      - name: Install locked dependencies
+        working-directory: source
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Compile affected Astro components and verify deferred image contract
+        working-directory: source
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import { transform } from '@astrojs/compiler';
+          const paths=[
+            'src/astro/components/Tool/ContactWidget.astro',
+            'src/astro/tablepress/Home_00.astro',
+            'src/astro/tablepress/Home_02.astro',
+            'src/astro/tablepress/Home_03.astro',
+            'src/astro/tablepress/Home_04.astro'
+          ];
+          const data={};
+          for(const path of paths){
+            const source=fs.readFileSync(path,'utf8');
+            const compiled=await transform(source,{filename:path});
+            assert(compiled.code,'Missing Astro compiler output: '+path);
+            data[path]=source;
+            console.log('ASTRO_COMPILE_PASS '+path);
+          }
+          const contact=data[paths[0]];
+          assert.equal((contact.match(/data-agent-src=\{agentAvatar\}/g)||[]).length,2,'Both hidden agent avatars must be deferred');
+          assert(contact.includes('if (open) hydrateAgentAvatars()'),'Opening consultation must hydrate avatar');
+          assert(contact.includes('async function openAgentChat() {\n        hydrateAgentAvatars()'),'Opening chat must hydrate avatar');
+          assert(!contact.includes('src={agentAvatar}'),'Hidden avatar must not fetch on initial render');
+          const hero=data[paths[1]];
+          assert(hero.includes('loading={firstForViewport ? "eager" : "lazy"}'),'Keep LCP banner eagerly loaded');
+          assert(hero.includes('fetchpriority={firstForViewport ? "high" : "auto"}'),'Keep LCP banner high priority');
+          for(const path of paths.slice(2)){
+            const src=data[path];
+            assert(src.includes('loading="lazy"'),'Below-fold section must use native lazy loading');
+            assert(src.includes('fetchpriority="low"'),'Below-fold images should have low fetch priority');
+          }
+          assert(data[paths[3]].includes('sizes="(max-width: 767px) 44vw, (max-width: 1024px) 25vw, 180px"'),'Combo cards must choose responsive thumbnails');
+          console.log('AQUA_LAZY_SECTION_SOURCE_PASS all=5');
+          NODE
+          git rev-parse HEAD
